@@ -164,9 +164,54 @@
   .divider.new i{background:var(--code);opacity:.5}
   .showcase{margin-bottom:10px}
   @media (max-width:620px){ .grid.small{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))} .grid.small .badge{width:56px} }
+
+  /* CLAY ICONS START — chunky matte clay tiles (claymorphism) */
+  .badge{position:relative;border-radius:26%;
+    --c:#888;background-color:var(--c);
+    background-image:radial-gradient(120% 90% at 28% 18%,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),
+      radial-gradient(110% 100% at 80% 100%,rgba(30,20,50,.30),rgba(30,20,50,0) 60%);
+    box-shadow:
+      inset 3px 4px 6px rgba(255,255,255,.45),
+      inset -5px -7px 12px rgba(25,15,45,.32),
+      inset 0 0 0 1px rgba(255,255,255,.12),
+      0 7px 0 var(--c-deep,rgba(0,0,0,.35)),
+      0 9px 0 rgba(15,10,30,.35),
+      0 16px 22px rgba(8,6,20,.55)}
+  .badge::before{content:"";position:absolute;inset:9%;border-radius:22%;
+    background:rgba(20,12,40,.10);
+    box-shadow:inset 3px 4px 7px rgba(20,12,40,.30),inset -2px -3px 5px rgba(255,255,255,.28);pointer-events:none}
+  .badge svg{position:relative;filter:url(#clay)}
+  .grid.big .badge{border-radius:0;box-shadow:inset 0 -10px 18px rgba(25,15,45,.28),inset 0 6px 10px rgba(255,255,255,.30)}
+  .grid.big .badge::before{inset:10% 22%;border-radius:22%}
+  .b-island{--c:#2bb894;--c-deep:#17795f} .b-code{--c:#f0c364;--c-deep:#b0862c}
+  .b-cyber{--c:#9d8ff0;--c-deep:#6656b8} .b-startup{--c:#e9a165;--c-deep:#a8662f}
+  .b-career{--c:#6aa7ee;--c-deep:#3a6db0} .b-pixel{--c:#ec6d70;--c-deep:#a8393d}
+  .b-builder{--c:#2bb894;--c-deep:#17795f} .b-rover{--c:#e9a165;--c-deep:#a8662f}
+  .b-desk{--c:#cfab3c;--c-deep:#8d711c}
+  .grid.small .badge{margin-bottom:8px}
+  @media (prefers-reduced-motion:reduce){.badge svg{filter:url(#clay)}}
+  /* CLAY ICONS END */
 </style>
 </head>
 <body>
+<!-- CLAY FILTER START --><svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<filter id="clay" x="-15%" y="-15%" width="140%" height="145%" color-interpolation-filters="sRGB">
+  <feComponentTransfer in="SourceGraphic" result="darkcol"><feFuncR type="linear" slope="0.5"/><feFuncG type="linear" slope="0.48"/><feFuncB type="linear" slope="0.58"/></feComponentTransfer>
+  <feOffset in="darkcol" dx="0.5" dy="0.8" result="e1"/><feOffset in="darkcol" dx="1" dy="1.6" result="e2"/>
+  <feOffset in="darkcol" dx="1.5" dy="2.4" result="e3"/><feOffset in="darkcol" dx="2" dy="3.2" result="e4"/>
+  <feMerge result="extShade"><feMergeNode in="e4"/><feMergeNode in="e3"/><feMergeNode in="e2"/><feMergeNode in="e1"/></feMerge>
+  <feOffset in="SourceAlpha" dx="2" dy="3.2" result="ext"/>
+  <feGaussianBlur in="ext" stdDeviation="1.8" result="soft"/><feOffset in="soft" dx="1" dy="2" result="softOff"/>
+  <feFlood flood-color="#0b0718" flood-opacity="0.38"/><feComposite in2="softOff" operator="in" result="contact"/>
+  <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="bump"/>
+  <feDiffuseLighting in="bump" surfaceScale="3.6" diffuseConstant="1.2" lighting-color="#fff8ee" result="light"><feDistantLight azimuth="235" elevation="56"/></feDiffuseLighting>
+  <feComposite in="SourceGraphic" in2="light" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="lit"/>
+  <feComposite in="lit" in2="SourceAlpha" operator="in" result="litIn"/>
+  <feOffset in="SourceAlpha" dx="-0.7" dy="-0.9" result="io"/><feComposite in="SourceAlpha" in2="io" operator="out" result="rim"/>
+  <feGaussianBlur in="rim" stdDeviation="0.6" result="rimB"/><feFlood flood-color="#1a1230" flood-opacity="0.35"/>
+  <feComposite in2="rimB" operator="in" result="rimShade"/><feComposite in="rimShade" in2="SourceAlpha" operator="in" result="innerShadow"/>
+  <feMerge><feMergeNode in="contact"/><feMergeNode in="extShade"/><feMergeNode in="litIn"/><feMergeNode in="innerShadow"/></feMerge>
+</filter></defs></svg><!-- CLAY FILTER END -->
 <div class="sky" id="sky" aria-hidden="true"></div>
 <div class="wrap">
 
