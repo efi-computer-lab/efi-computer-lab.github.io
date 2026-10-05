@@ -17,6 +17,7 @@ window.GAME_CONTENT = {
   winText: 'The Bug Queen is defeated and every computer in the school is safe! {{playerName}} zooms home through the network cable and pops out of the USB port at full size. Mission complete, cyber hero!',
 
   weapons: {
+    sword: { name: 'Byte Blade', desc: 'Your sword: no ammo needed! Get close and swing (click). Hits up to 3 bugs at once.' },
     zapper: { name: 'Bug Zapper', desc: 'Your starter tool. Fast, accurate, 12 shots per load.' },
     scatter: { name: 'Scatter Zapper', desc: 'Fires 5 zaps at once. Great up close, slow to reload.' },
     turbo: { name: 'Turbo Zapper', desc: 'Super fast fire, 30 shots per load. Hold the mouse down!' },
@@ -39,7 +40,7 @@ window.GAME_CONTENT = {
       'Walk with W A S D, look with the mouse, and press E to use things. The round map shows where to go.',
       'Take my BUG ZAPPER, the yellow tool floating behind me. CLICK to zap (hold the mouse button to keep zapping).',
       'Your zapper has LIMITED AMMO: the numbers at the bottom show the shots in it and your spare shots. Press R to reload. Grab yellow AMMO BOXES when you see them!',
-      'Every bug you zap gives you COINS 🪙. Spend them in the UPGRADE SHOP (the glowing yellow kiosk) on new tools, ammo, health and shields. Press 1 to 5 to switch tools.',
+      'Every bug you zap gives you COINS 🪙. Spend them in the UPGRADE SHOP (the glowing yellow kiosk) on new tools, ammo, health and shields. Press 1 to 6 to switch tools: 1 is your Byte Blade sword (no ammo needed).',
       'Glowing orbs are POWER-UPS: speed, shield, freeze, heal, double points and RAPID FIRE. Walk into one to use it.',
       'Bugs, dust bunnies, sparks, laser gates, crushers, spike rollers and goo hurt you. If your health runs out, you go back to the last checkpoint pad and lose points.',
       'Brown LOOT CRATES have coins inside: zap them open!',
@@ -555,6 +556,17 @@ window.GAME_CONTENT = {
   };
 })(window.GAME_CONTENT);
 
+/* ---------- characters (title screen) ---------- */
+(function (C) {
+  C.characters = {
+    title: 'Choose your character',
+    leo: 'Leo', leoText: 'Blue hoodie',
+    kai: 'Kai', kaiText: 'Green jacket',
+    mia: 'Mia', miaText: 'Pink top',
+    zara: 'Zara', zaraText: 'Purple outfit',
+  };
+})(window.GAME_CONTENT);
+
 </script>
 <script>/* game.js */
 /* SHRUNK! Escape From Inside the Computer — Grade 6–7, first person, three acts (scenes):
@@ -649,9 +661,11 @@ window.GAME = {
   player: { health: 100, respawnOnDeath: true },
   vars: { playerName: 'Agent', fpylons: 0, fpylons2: 0, plugs: 0, pylons: 0, pylons2: 0 },
   arsenal: {
-    requires: { has: 'zapper' }, start: 'zapper', objectiveCoins: 15, dropChance: 0.35, coinsName: 'coins', shopTitle: 'content:shop.title',
+    requires: { has: 'zapper' }, start: 'sword', objectiveCoins: 15, dropChance: 0.35, coinsName: 'coins', shopTitle: 'content:shop.title',
     weapons: [
-      Object.assign(W('zapper'), { id: 'zapper', icon: '⚡', model: 'zapper', color: '#4cc9f0', damage: 1, cooldown: 0.22, speed: 32, range: 45, mag: 12, reserve: 60, maxReserve: 120, reload: 1.1, ammoPack: 24, ammoPrice: 20 }),
+      Object.assign(W('sword'), { id: 'sword', icon: '⚔', model: 'sword', look: { glow: '#4cc9f0' }, color: '#4cc9f0', melee: true, owned: true, always: true,
+        damage: 2, cooldown: 0.42, reach: 2.7, arc: 100, maxTargets: 3, swing: 0.38, price: 0 }),
+      Object.assign(W('zapper'), { id: 'zapper', owned: true, icon: '⚡', model: 'zapper', color: '#4cc9f0', damage: 1, cooldown: 0.22, speed: 32, range: 45, mag: 12, reserve: 60, maxReserve: 120, reload: 1.1, ammoPack: 24, ammoPrice: 20 }),
       Object.assign(W('scatter'), { id: 'scatter', icon: '💥', model: 'scatterGun', color: '#ff7a1a', damage: 1, pellets: 5, spread: 0.07, cooldown: 0.65, speed: 28, range: 24, mag: 6, reserve: 24, maxReserve: 48, reload: 1.6, price: 150, ammoPack: 12, ammoPrice: 25 }),
       Object.assign(W('turbo'), { id: 'turbo', icon: '🌀', model: 'rapidGun', color: '#2ecc71', damage: 1, cooldown: 0.09, speed: 34, range: 40, mag: 30, reserve: 90, maxReserve: 180, reload: 1.5, price: 250, ammoPack: 60, ammoPrice: 30, boltSize: 0.09 }),
       Object.assign(W('lance'), { id: 'lance', icon: '🎯', model: 'beamRifle', color: '#ff2d55', damage: 4, pierce: true, cooldown: 0.85, speed: 70, range: 60, mag: 5, reserve: 20, maxReserve: 40, reload: 1.8, price: 350, ammoPack: 10, ammoPrice: 35, boltSize: 0.09 }),
@@ -686,6 +700,13 @@ window.GAME = {
 
   // Save on this computer as each act starts: a closed browser or a shutdown loses at most the current act.
   resume: true,
+  // who you play: 2 boys, 2 girls (chosen on the title screen; seen in third person, and as your arms in first person)
+  characters: { default: 'leo', title: 'content:characters.title', choices: [
+    { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
+    { id: 'kai', label: 'content:characters.kai', text: 'content:characters.kaiText', look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#27ae60', pants: '#34495e', shoes: '#e74c3c', accent: '#4cc9f0' } },
+    { id: 'mia', label: 'content:characters.mia', text: 'content:characters.miaText', look: { body: 'f', skin: '#e0ac69', hair: '#6b3e26', hairStyle: 'long', shirt: '#e84393', pants: '#2c3e50', shoes: '#f5f6fa', accent: '#4cc9f0' } },
+    { id: 'zara', label: 'content:characters.zara', text: 'content:characters.zaraText', look: { body: 'f', skin: '#c68642', hair: '#d9a441', hairStyle: 'ponytail', shirt: '#8e44ad', pants: '#1e272e', shoes: '#f1c40f', accent: '#4cc9f0', skirt: true } },
+  ] },
   // EASY = half the ordinary enemies (and "defeat N" steps need half), bosses take 3x damage and bring half the minions.
   // HARD = the full game, unchanged. Chosen on the title screen; HARD is preselected.
   difficulty: { default: 'hard', title: 'content:difficulty.title', choices: [
@@ -1208,7 +1229,7 @@ window.GAME = {
   timer: { limit: null },
   scoring: { hint: 10, wrongAnswer: 10, respawn: 30, timeBonus: { par: 3600, perSecond: 0.3, max: 800 }, stars: [6500, 8200, 9800] },
   winText: 'content:winText',
-  ui: { accent: '#4cc9f0', labelRange: 12, controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Click / Q', 'Zap'], ['E', 'Use'], ['Shift', 'Sprint'], ['Space', 'Jump'], ['H', 'Hint'], ['Esc', 'Pause']],  askName: true, leaderboard: true, minimap: true, vignette: true, menuUrl: '../../index.html', menuLabel: 'All games' },
+  ui: { accent: '#4cc9f0', labelRange: 12, controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Click / Q', 'Zap / swing'], ['1-6', 'Tools'], ['E', 'Use'], ['V', 'Camera'], ['Shift', 'Sprint'], ['Space', 'Jump'], ['H', 'Hint'], ['Esc', 'Pause']],  askName: true, leaderboard: true, minimap: true, vignette: true, menuUrl: '../../index.html', menuLabel: 'All games' },
 };
 
 </script>
@@ -1419,6 +1440,17 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-name .gk-input { width: 240px; font-size: 18px; text-align: center; }
 .gk-name .gk-input.need { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.35); }
 .gk-lead-title { margin: 14px 0 6px; font-weight: 800; color: var(--gk-accent); }
+.gk-chars { margin: 10px auto 4px; max-width: 640px; }
+.gk-chars-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.gk-char { width: 128px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; opacity: .78; }
+.gk-char:hover { opacity: 1; }
+.gk-char.on { opacity: 1; border-color: var(--gk-accent); background: rgba(255,255,255,.15); box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
+.gk-char b { font-size: 15px; } .gk-char span { font-size: 12px; opacity: .85; }
+.gk-avatar { width: 64px; height: 64px; }
+.gk-views { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin: 10px auto 2px; }
+.gk-view { padding: 6px 12px; border-radius: 10px; border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; opacity: .78; }
+.gk-view.on { opacity: 1; border-color: var(--gk-accent); background: rgba(255,255,255,.15); }
 .gk-diff { margin: 10px auto 4px; max-width: 520px; }
 .gk-diff-title { font-weight: 700; margin-bottom: 6px; }
 .gk-diff-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -1503,7 +1535,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/pc-inside/world","worlds/network/world","worlds/core-arena/world","worlds/phone-inside/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/weapons/weapons"],"local":[],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","hazards","powerups","weapons"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/pc-inside/world","worlds/network/world","worlds/core-arena/world","worlds/phone-inside/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/weapons/weapons"],"local":[],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","hazards","powerups","weapons"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1513,7 +1545,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
      spatial: true if the type has a map (worlds, player body, spatial-only mechanics) */
 window.GK_LIBRARY = window.GK_LIBRARY || {};
 GK_LIBRARY.shared = {
-  _spatial: ['_spatial/geometry', '../assets/models/lowpoly', '../assets/models/circuit', '../assets/models/combat', '_spatial/physics', '_spatial/body', '_spatial/world', '../worlds/_parts', '_spatial/spatial'],
+  _spatial: ['_spatial/geometry', '../assets/models/lowpoly', '../assets/models/circuit', '../assets/models/combat', '../assets/models/people', '_spatial/physics', '_spatial/body', '_spatial/world', '../worlds/_parts', '_spatial/spatial'],
 };
 GK_LIBRARY.types = {
   'first-person-3d': { label: 'First-person 3D', spatial: true, uses: ['_spatial'], files: ['first-person-3d/renderer', 'first-person-3d/type'] },
@@ -1669,10 +1701,19 @@ GK_LIBRARY.worlds = {
       return out;
     },
     /** translate(pos) · rotateY(yaw) · rotateX(−pitch) · scale(s). pitch > 0 tilts a model's front (+z) upwards. */
-    model(out, pos, yaw, s, pitch) {
+    /** Model matrix: turn by yaw (around y), tilt the front up by pitch, and (optional) roll around the front axis. */
+    model(out, pos, yaw, s, pitch, roll) {
       const c = Math.cos(yaw), n = Math.sin(yaw);
       out.fill(0);
-      if (pitch) {
+      if (roll) {
+        const ca = Math.cos(-(pitch || 0)), sa = Math.sin(-(pitch || 0)), cr = Math.cos(roll), sr = Math.sin(roll);
+        const X = [c, 0, -n], Y = [n * sa, ca, c * sa], Z = [n * ca, -sa, c * ca];
+        for (let i = 0; i < 3; i++) {
+          out[i] = (cr * X[i] + sr * Y[i]) * s[0];
+          out[4 + i] = (-sr * X[i] + cr * Y[i]) * s[1];
+          out[8 + i] = Z[i] * s[2];
+        }
+      } else if (pitch) {
         const ca = Math.cos(-pitch), sa = Math.sin(-pitch);
         out[0] = c * s[0]; out[2] = -n * s[0];
         out[4] = n * sa * s[1]; out[5] = ca * s[1]; out[6] = c * sa * s[1];
@@ -1996,6 +2037,8 @@ GK_LIBRARY.worlds = {
     lose: { wave: 'triangle', notes: [392, 330, 262, 196], dur: 0.18, vol: 0.22 },
     tick: { wave: 'sine', notes: [1000], dur: 0.03, vol: 0.08 },
     zap: { wave: 'square', notes: [1400, 700], dur: 0.04, vol: 0.07 },
+    swing: { wave: 'sawtooth', notes: [420, 220, 140], dur: 0.05, vol: 0.05 },
+    slash: { wave: 'square', notes: [900, 520, 300], dur: 0.04, vol: 0.1 },
     hit: { wave: 'square', notes: [600, 900], dur: 0.04, vol: 0.1 },
     boom: { wave: 'sawtooth', notes: [220, 120, 60], dur: 0.07, vol: 0.18 },
     blocked: { wave: 'triangle', notes: [1200, 1200], dur: 0.03, vol: 0.08 },
@@ -2211,7 +2254,7 @@ GK_LIBRARY.worlds = {
     /** The weapon panel: {name, icon, color, mag, magMax, res, reload (0..1 | null), rapid, slots: [{n, icon, owned, active}]} or null. */
     setWeapon(w) {
       const W = this.$.weapon;
-      const key = w ? [w.name, w.mag, w.res, w.reload == null ? '' : Math.floor(w.reload * 20), w.rapid, w.slots.map(x => (x.owned ? 1 : 0) + (x.active ? 2 : 0)).join('')].join('|') : '';
+      const key = w ? [w.name, w.mag, w.res, w.reload == null ? '' : Math.floor(w.reload * 20), w.rapid, w.melee, w.slots.map(x => (x.owned ? 1 : 0) + (x.active ? 2 : 0)).join('')].join('|') : '';
       if (this.cache.weapon === key) return;
       this.cache.weapon = key;
       W.classList.toggle('show', !!w);
@@ -2219,13 +2262,13 @@ GK_LIBRARY.worlds = {
       W.style.setProperty('--wc', U.css(w.color || '#4cc9f0'));
       W.querySelector('.gk-w-name').textContent = (w.icon ? w.icon + ' ' : '') + w.name;
       const am = W.querySelector('.gk-w-ammo');
-      am.innerHTML = w.rapid ? '<b>∞</b>' : '<b>' + w.mag + '</b> / ' + w.res;
-      W.classList.toggle('empty', !w.rapid && w.mag === 0);
-      W.classList.toggle('low', !w.rapid && w.mag > 0 && w.mag <= Math.max(1, Math.floor(w.magMax / 4)));
+      am.innerHTML = w.rapid || w.melee ? '<b>∞</b>' : '<b>' + w.mag + '</b> / ' + w.res;
+      W.classList.toggle('empty', !w.rapid && !w.melee && w.mag === 0);
+      W.classList.toggle('low', !w.rapid && !w.melee && w.mag > 0 && w.mag <= Math.max(1, Math.floor(w.magMax / 4)));
       const rl = W.querySelector('.gk-w-reload');
       rl.style.visibility = w.reload == null ? 'hidden' : 'visible';
       rl.querySelector('b').style.width = (w.reload == null ? 0 : w.reload * 100) + '%';
-      W.querySelector('.gk-w-hint').textContent = w.reload != null ? 'RELOADING…' : w.rapid ? 'RAPID FIRE: free ammo!' : w.mag === 0 ? (w.res > 0 ? 'Press R to reload' : 'OUT OF AMMO') : '';
+      W.querySelector('.gk-w-hint').textContent = w.melee ? 'Get close and click to swing' : w.reload != null ? 'RELOADING…' : w.rapid ? 'RAPID FIRE: free ammo!' : w.mag === 0 ? (w.res > 0 ? 'Press R to reload' : 'OUT OF AMMO') : '';
       const slots = W.querySelector('.gk-w-slots');
       slots.innerHTML = '';
       if (w.slots && w.slots.length > 1) for (const x of w.slots) slots.appendChild(el('span', 'gk-w-slot' + (x.owned ? ' owned' : '') + (x.active ? ' active' : ''), x.n + ' ' + (x.owned ? x.icon || '•' : '🔒')));
@@ -2425,6 +2468,14 @@ GK_LIBRARY.worlds = {
       const ask = !!cfg.ui.askName, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
       // difficulty (config.difficulty): one button per choice; the chosen one is highlighted
       const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
+      // characters (config.characters) and the camera (ui.views, kept per computer in GK.Settings 'view')
+      const chars = this.game.characterChoices(), clabels = (cfg.characters && cfg.characters.choices) || chars;
+      const who = chars ? '<div class="gk-chars"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
+        clabels.map(c => '<button type="button" class="gk-char' + (c.id === this.game.character ? ' on' : '') + '" data-char="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.character) + '">' +
+          this.avatar(c.look || {}) + '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
+      const views = cfg.ui.views, view = GK.Settings.get('view', views && views[0] ? views[0][0] : null);
+      const cam = views && views.length > 1 ? '<div class="gk-views"><span class="gk-diff-title">Camera</span>' +
+        views.map(v => '<button type="button" class="gk-view' + (v[0] === view ? ' on' : '') + '" data-view="' + U.esc(v[0]) + '" aria-pressed="' + (v[0] === view) + '">' + U.esc(v[1]) + '</button>').join('') + '</div>' : '';
       const diff = choices ? '<div class="gk-diff"><div class="gk-diff-title">' + U.esc((cfg.difficulty && cfg.difficulty.title) || 'Difficulty') + '</div><div class="gk-diff-row">' +
         dlabels.map(c => '<button type="button" class="gk-diff-btn d-' + U.esc(c.id) + (c.id === this.game.difficulty ? ' on' : '') + '" data-diff="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.difficulty) + '">' +
           '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
@@ -2432,7 +2483,7 @@ GK_LIBRARY.worlds = {
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
         (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
-        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + diff +
+        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + who + diff + cam +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
         (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
@@ -2445,6 +2496,18 @@ GK_LIBRARY.worlds = {
       }
       const rb = s.querySelector('[data-a=resume]');
       if (rb) rb.onclick = resume.onResume;
+      s.querySelectorAll('[data-char]').forEach(b => {
+        b.onclick = () => {
+          this.game.setCharacter(b.getAttribute('data-char'));
+          s.querySelectorAll('[data-char]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+        };
+      });
+      s.querySelectorAll('[data-view]').forEach(b => {
+        b.onclick = () => {
+          GK.Settings.set('view', b.getAttribute('data-view'));
+          s.querySelectorAll('[data-view]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+        };
+      });
       s.querySelectorAll('[data-diff]').forEach(b => {
         b.onclick = () => {
           this.game.setDifficulty(b.getAttribute('data-diff'));
@@ -2460,6 +2523,20 @@ GK_LIBRARY.worlds = {
           onPlay(Number(b.getAttribute('data-level')));
         };
       });
+    }
+    /** A small SVG portrait from a character look: skin, hair + hairStyle (short / spiky / long / ponytail), shirt, accent. */
+    avatar(o) {
+      const skin = U.css(o.skin || '#e0ac69'), hair = U.css(o.hair || '#3b2a1a'), shirt = U.css(o.shirt || '#2f80ed'), acc = U.css(o.accent || '#4cc9f0'), hs = o.hairStyle || 'short';
+      let back = '', front = '';
+      if (hs === 'long') back = '<path d="M17 24 Q16 46 20 50 L44 50 Q48 46 47 24 Z" fill="' + hair + '"/>';
+      if (hs === 'ponytail') back = '<path d="M44 20 Q56 24 52 42 Q50 34 44 30 Z" fill="' + hair + '"/>';
+      if (hs === 'spiky') front = '<path d="M18 22 L20 11 L25 18 L28 8 L32 17 L36 8 L39 18 L44 11 L46 22 Z" fill="' + hair + '"/>';
+      else front = '<path d="M18 25 Q17 11 32 11 Q47 11 46 25 Q40 18 32 19 Q24 18 18 25 Z" fill="' + hair + '"/>';
+      return '<svg class="gk-avatar" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="' + acc + '" opacity=".25"/>' + back +
+        '<path d="M12 64 Q12 46 32 46 Q52 46 52 64 Z" fill="' + shirt + '"/><rect x="28" y="38" width="8" height="9" fill="' + skin + '"/>' +
+        '<rect x="19" y="16" width="26" height="25" rx="7" fill="' + skin + '"/>' + front +
+        '<circle cx="27" cy="29" r="2.2" fill="#1e1e24"/><circle cx="37" cy="29" r="2.2" fill="#1e1e24"/><path d="M28 35 Q32 38 36 35" stroke="#9e4a3c" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+        '<rect x="36" y="52" width="5" height="5" rx="1" fill="' + acc + '"/></svg>';
     }
     /** ' · Easy' for a saved game's difficulty ('' without the setting). */
     diffName(id) {
@@ -2608,7 +2685,7 @@ GK_LIBRARY.worlds = {
   'use strict';
   const U = GK.util;
   const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts',
-    'content', 'levels', 'scenes', 'startScene', 'resume', 'difficulty', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
+    'content', 'levels', 'scenes', 'startScene', 'resume', 'difficulty', 'characters', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
     'locations', 'spawns', 'routes', 'spawn', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
     'scoring', 'hints', 'win', 'lose', 'ui', 'audio', 'controls', 'hooks', 'triggers', 'vars', 'flags', 'intro',
     'winText', 'loseText', 'teacher', 'quiz'];
@@ -2786,6 +2863,7 @@ GK_LIBRARY.worlds = {
     teacher: { pin: null },
     resume: false,  // scene games: save on THIS computer as each scene (act) starts; the title screen offers "Continue"
     difficulty: null,  // {default: 'hard', choices: [{id, label, text, …options}]}: the title screen asks; mechanics read game.difficultyOpts()
+    characters: null,  // {default, title, choices: [{id, label, text, look}]}: who you play; views read game.characterLook()
     controls: {},
     hooks: {},      // setup(game) start(game) update(game, dt) win(game) lose(game)
   };
@@ -2814,6 +2892,7 @@ GK_LIBRARY.worlds = {
       this.teacher = new GK.Teacher(this);
 
       this.difficulty = this.validDifficulty(this.options.difficulty || (location.search.match(/[?&]difficulty=(\w+)/) || [])[1]);
+      this.character = this.validCharacter(this.options.character || (location.search.match(/[?&]character=(\w+)/) || [])[1]);
       const first = this.options.level != null ? this.options.level : this.sceneMode ? Math.max(0, this.stageIndex(config.startScene || 0)) : 0;
       this.configure(first);
       this.setup();
@@ -2883,6 +2962,7 @@ GK_LIBRARY.worlds = {
       for (const f of U.list(cfg.flags)) this.state.flags[f] = true;
       if (this.playerName) this.state.vars.playerName = this.playerName;   // typed on the title screen; kept on restart
       if (this.difficulty) this.state.vars.difficulty = this.difficulty;   // chosen on the title screen; kept on restart
+      if (this.character) this.state.vars.character = this.character;
       this.builtFor = this.difficulty;   // the scene was built for this difficulty (a new choice rebuilds it)
       this.scoring = new GK.Scoring(this, cfg.scoring);
       this.ui.clearLayer();
@@ -2933,6 +3013,18 @@ GK_LIBRARY.worlds = {
     setDifficulty(id) { this.difficulty = this.validDifficulty(id); if (this.state) this.state.vars.difficulty = this.difficulty; }
     /** Options of the chosen difficulty (e.g. {enemies: 0.5}); {} for a game without the setting. */
     difficultyOpts() { const list = this.difficultyChoices(); return (list && list.find(c => c.id === this.difficulty)) || {}; }
+    // ================= characters (config.characters) =================
+    characterChoices() { const d = this.base.characters; return d && Array.isArray(d.choices) && d.choices.length ? d.choices : null; }
+    validCharacter(id) {
+      const list = this.characterChoices();
+      if (!list) return null;
+      if (list.some(c => c.id === id)) return id;
+      const d = this.base.characters.default;
+      return list.some(c => c.id === d) ? d : list[0].id;
+    }
+    setCharacter(id) { this.character = this.validCharacter(id); if (this.state) this.state.vars.character = this.character; this.emit('character', { id: this.character }); }
+    /** The chosen character's look (skin, hair, shirt…), or null for a game without characters. */
+    characterLook() { const list = this.characterChoices(); const c = list && list.find(x => x.id === this.character); return c ? Object.assign({}, c.look) : null; }
     /** Best results on this computer (ui.leaderboard): [{name, score, time, stars, at}], best first. */
     leaders() { return this.store.get('leaders', []); }
     /** Restart: a level restarts itself; a scene-based game restarts from its first scene. A restart is a new game,
@@ -2962,7 +3054,7 @@ GK_LIBRARY.worlds = {
       this.store.set('resume', {
         v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null,
         part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
-        name: this.playerName || '', difficulty: this.difficulty, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
+        name: this.playerName || '', difficulty: this.difficulty, character: this.character, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
       });
     }
     /** The resume point on this computer, or null (none, another game's, or damaged). */
@@ -2979,6 +3071,7 @@ GK_LIBRARY.worlds = {
         this.ui.hideScreens();
         if (r.name) this.setPlayerName(r.name);
         this.difficulty = this.validDifficulty(r.difficulty || (r.snap.state && r.snap.state.vars && r.snap.state.vars.difficulty));
+        this.character = this.validCharacter(r.character || (r.snap.state && r.snap.state.vars && r.snap.state.vars.character));
         this.sceneMemory = {};
         this.restore(r.snap);   // mode is 'title' here, so nothing starts yet
         this.state.inZone = {};
@@ -4204,6 +4297,139 @@ GK_LIBRARY.worlds = {
 })();
 
 </script>
+<script>/* game-types/../assets/models/people.js */
+/* Game Kit · assets/models/people.js
+   Player characters and the things they hold.
+     'hero'      a whole character standing still (previews, NPCs): look = a character look (below)
+     'heroPart'  one moving part, built around its joint so a view can swing it:
+                 look.part = 'torso' (origin at the feet) | 'head' (origin at the neck) | 'armL' / 'armR' (at the shoulder) |
+                 'legL' / 'legR' (at the hip). Arms and legs hang straight down (−y) from the joint.
+     'fpArms'    first-person sleeves and hands in WEAPON space (drawn with the weapon's own transform):
+                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt)
+     'sword'     a sword pointing UP (+y) from the hilt at the origin: look.color blade, look.glow edge, look.guard, look.grip
+   A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail',
+                       shirt, pants, shoes, accent (a small glowing badge), skirt: true }
+   Joint heights (metres, feet at y = 0): HERO.hip, HERO.shoulder, HERO.neck; arms hang HERO.arm long. */
+(function () {
+  'use strict';
+  const M = GK.Models, G = () => new GK.Geo(), U = GK.util, V = GK.vec;
+  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
+  const HERO = { hip: 0.86, shoulder: 1.38, neck: 1.42, arm: 0.68, height: 1.8 };
+  GK.HERO = HERO;
+  const D = { body: 'm', skin: '#e0ac69', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' };
+  const L = o => Object.assign({}, D, o);
+  const shoulderX = o => (o.body === 'f' ? 0.255 : 0.285);
+
+  /** A box from a to b (any direction), w wide and t thick: for limbs at an angle. */
+  function segment(g, a, b, w, t, col, o) {
+    const d = V.sub(b, a), len = V.len(d), z = V.norm(d);
+    const up = Math.abs(z[1]) > 0.95 ? [1, 0, 0] : [0, 1, 0];
+    const x = V.norm(V.cross(up, z)), y = V.cross(z, x);
+    const s = G().box(0, -t / 2, len / 2, w, t, len, col, o);
+    const to = p => [a[0] + x[0] * p[0] + y[0] * p[1] + z[0] * p[2], a[1] + x[1] * p[0] + y[1] * p[1] + z[1] * p[2], a[2] + x[2] * p[0] + y[2] * p[1] + z[2] * p[2]];
+    s.map(to, n => [x[0] * n[0] + y[0] * n[1] + z[0] * n[2], x[1] * n[0] + y[1] * n[1] + z[1] * n[2], x[2] * n[0] + y[2] * n[1] + z[2] * n[2]]);
+    return g.add(s);
+  }
+
+  function torso(o) {
+    const g = G(), f = o.body === 'f', w = f ? 0.4 : 0.46, top = HERO.shoulder + 0.04;
+    g.box(0, HERO.hip, 0, w, top - HERO.hip, 0.25, o.shirt, { top: dk(o.shirt, 1.1) });
+    if (f) g.box(0, HERO.hip + 0.34, 0.005, w + 0.02, 0.1, 0.255, dk(o.shirt, 0.9));             // a little shape at the chest
+    g.box(0, HERO.hip, 0, w + 0.01, 0.06, 0.26, dk(o.pants, 0.8));                                 // belt
+    g.box(0, HERO.hip + 0.08, 0.126, w * 0.7, 0.12, 0.01, dk(o.shirt, 0.82));                     // hoodie pocket
+    g.box(f ? 0.08 : 0.1, HERO.hip + 0.34, 0.128, 0.07, 0.07, 0.01, o.accent, { glow: 1 });      // glowing badge
+    if (o.skirt) g.box(0, HERO.hip - 0.26, 0, w + 0.08, 0.3, 0.3, dk(o.pants, 1.15));
+    return g;
+  }
+  function head(o) {
+    const g = G(), hs = o.hairStyle, h = o.hair, s = o.skin;
+    g.box(0, -0.02, 0, 0.13, 0.08, 0.13, dk(s, 0.92));                                               // neck
+    g.box(0, 0.06, 0, 0.32, 0.32, 0.3, s);                                                           // head
+    g.box(-0.165, 0.17, 0, 0.03, 0.08, 0.07, dk(s, 0.9)).box(0.165, 0.17, 0, 0.03, 0.08, 0.07, dk(s, 0.9));   // ears
+    for (const x of [-0.075, 0.075]) {
+      g.box(x, 0.2, 0.151, 0.07, 0.06, 0.01, '#ffffff').box(x, 0.205, 0.157, 0.035, 0.045, 0.01, '#1e1e24');  // eyes
+      g.box(x, 0.27, 0.152, 0.08, 0.018, 0.01, dk(h, 0.9));                                                       // eyebrows
+    }
+    g.box(0, 0.115, 0.152, 0.09, 0.022, 0.01, '#9e4a3c');                                            // mouth
+    if (o.body === 'f') g.box(-0.11, 0.15, 0.151, 0.04, 0.02, 0.01, '#f08a8a').box(0.11, 0.15, 0.151, 0.04, 0.02, 0.01, '#f08a8a');
+    // hair
+    g.box(0, 0.34, -0.01, 0.345, 0.085, 0.33, h, { top: dk(h, 1.15) });                             // cap
+    g.box(0, 0.12, -0.16, 0.345, 0.25, 0.04, h);                                                     // back
+    g.box(0, 0.3, 0.145, 0.345, 0.055, 0.03, h);                                                     // fringe
+    g.box(-0.168, 0.2, 0.02, 0.025, 0.17, 0.25, h).box(0.168, 0.2, 0.02, 0.025, 0.17, 0.25, h);     // sides
+    if (hs === 'spiky') {
+      for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; g.cone(Math.cos(a) * 0.1, 0.4, Math.sin(a) * 0.1, 0.06, 0.12, h); }
+      g.cone(0, 0.41, 0, 0.07, 0.15, h);
+    } else if (hs === 'long') {
+      g.box(0, -0.2, -0.165, 0.37, 0.56, 0.06, h);                                                  // down the back to the shoulders
+      g.box(-0.172, -0.08, 0.04, 0.035, 0.4, 0.2, h).box(0.172, -0.08, 0.04, 0.035, 0.4, 0.2, h);  // locks at the sides
+    } else if (hs === 'ponytail') {
+      g.box(0, 0.24, -0.19, 0.1, 0.07, 0.05, dk(o.accent, 0.9));                                     // hair band
+      segment(g, [0, 0.27, -0.2], [0, -0.1, -0.27], 0.1, 0.09, h);                                  // the tail
+    }
+    return g;
+  }
+  function arm(o, right) {
+    const g = G(), s = o.shirt;
+    g.box(0, -0.36, 0, 0.13, 0.38, 0.14, s, { top: dk(s, 1.1) });                                    // sleeve
+    g.box(0, -0.58, 0, 0.115, 0.24, 0.125, o.body === 'f' && !right ? s : dk(s, 0.92));             // forearm
+    g.box(0, -0.6, 0, 0.12, 0.03, 0.13, dk(s, 0.75));                                                // cuff
+    return g.box(0, -HERO.arm, 0, 0.11, 0.1, 0.12, o.skin);                                          // hand
+  }
+  function leg(o) {
+    const g = G();
+    g.box(0, -(HERO.hip - 0.08), 0, 0.165, HERO.hip - 0.08, 0.19, o.pants, { top: dk(o.pants, 1.1) });
+    return g.box(0, -HERO.hip, 0.035, 0.17, 0.1, 0.27, o.shoes, { top: dk(o.shoes, 1.08) });
+  }
+  function part(name, o) {
+    if (name === 'torso') return torso(o);
+    if (name === 'head') return head(o);
+    if (name === 'armL') return arm(o, false);
+    if (name === 'armR') return arm(o, true);
+    return leg(o);
+  }
+
+  M.add('heroPart', look => { const o = L(look); return part(o.part || 'torso', o); });
+  M.add('hero', look => {
+    const o = L(look), g = torso(o), sx = shoulderX(o);
+    g.add(head(o).move(0, HERO.neck, 0));
+    g.add(arm(o, false).move(sx, HERO.shoulder, 0)).add(arm(o, true).move(-sx, HERO.shoulder, 0));   // facing +z, its right is −x
+    g.add(leg(o).move(-0.105, HERO.hip, 0)).add(leg(o).move(0.105, HERO.hip, 0));
+    return g;
+  });
+  GK.heroShoulderX = o => shoulderX(L(o));
+
+  /* First-person arms in weapon space: the weapon's front is +z, +y is up, and the camera is behind it (−z),
+     with the player's RIGHT at −x (the view turns the weapon half a turn to face forward). */
+  M.add('fpArms', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    const arm = (hand, elbow, back) => {
+      segment(g, back, elbow, 0.135, 0.13, sl);
+      segment(g, elbow, hand, 0.115, 0.11, dk(sl, 0.92));
+      g.add(G().box(0, -0.06, 0, 0.12, 0.12, 0.13, sk, { top: dk(sk, 1.08) }).move(hand[0], hand[1], hand[2]));
+    };
+    if (o.pose === 'sword') arm([0, -0.02, 0], [-0.09, -0.2, -0.2], [-0.16, -0.4, -0.5]);
+    else {
+      arm([-0.05, -0.07, -0.11], [-0.11, -0.2, -0.26], [-0.17, -0.34, -0.42]);   // right hand round the grip
+      arm([0.05, -0.06, 0.07], [0.13, -0.17, -0.08], [0.22, -0.3, -0.26]);       // left hand under the barrel
+    }
+    return g;
+  });
+
+  /* Swords: hilt at the origin, blade up. */
+  M.add('sword', o => {
+    const blade = o.color || '#aeb8c4', glow = o.glow || '#4cc9f0', guard = o.guard || '#f5b700', grip = o.grip || '#6d4c41', g = G();
+    g.sphere(0, -0.17, 0, 0.035, dk(guard, 0.9));                                                    // pommel
+    g.box(0, -0.15, 0, 0.045, 0.15, 0.045, grip);                                                    // grip
+    g.box(0, 0, 0, 0.24, 0.035, 0.06, guard, { top: dk(guard, 1.15) });                              // cross-guard
+    g.box(0, 0.035, 0, 0.065, 0.66, 0.018, blade);                                                   // blade
+    g.box(0, 0.06, 0.011, 0.008, 0.58, 0.004, glow, { glow: 0.55 });                                  // glowing core
+    g.box(0, 0.06, -0.011, 0.008, 0.58, 0.004, glow, { glow: 0.55 });
+    return g.cone(0, 0.695, 0, 0.034, 0.1, blade, { seg: 4 });                                      // tip
+  });
+})();
+
+</script>
 <script>/* game-types/_spatial/physics.js */
 /* Game Kit · game-types/_spatial/physics.js
    Axis-aligned box collision: the player is a box, the world is a list of boxes {min, max}.
@@ -5196,7 +5422,7 @@ GK_LIBRARY.worlds = {
       M4.lookAt(this.view, eye, V.add(eye, forward), [0, 1, 0]);
       M4.multiply(this.vp, this.proj, this.view);
     }
-    /** items: [{mesh, pos, yaw, pitch, scale, tint, glow, hi, alpha, front, grid}] — `front` items (a tool held in the
+    /** items: [{mesh, pos, yaw, pitch, roll, scale, tint, glow, hi, alpha, front, grid}] — `front` items (a tool held in the
         player's hand) are drawn last over everything, so they never sink into a wall; `grid` items get floor detail. */
     render(items) {
       const gl = this.gl, u = this.u, e = this.env;
@@ -5236,7 +5462,7 @@ GK_LIBRARY.worlds = {
       const gl = this.gl, u = this.u, m = it.mesh, a = this.a;
       if (!m || !m.count) return;
       const s = it.scale == null ? [1, 1, 1] : typeof it.scale === 'number' ? [it.scale, it.scale, it.scale] : it.scale;
-      M4.model(this.tmp, it.pos || [0, 0, 0], it.yaw || 0, s, it.pitch);
+      M4.model(this.tmp, it.pos || [0, 0, 0], it.yaw || 0, s, it.pitch, it.roll);
       gl.uniformMatrix4fv(u.uM, false, this.tmp);
       gl.uniform3fv(u.uTint, it.tint ? U.color(it.tint) : [1, 1, 1]);
       gl.uniform1f(u.uGlow, it.glow || 0);
@@ -5335,6 +5561,10 @@ GK_LIBRARY.worlds = {
    Graphics: coloured point lights are gathered every frame (neon light strips, entities with `light`, bolts, power-ups,
    portals, bosses, flashes; the nearest 8 are used), round shadows under things, health bars over hurt enemies,
    floor detail on the level mesh and bloom. The teacher's "low graphics" uses fewer pixels and lights and no bloom.
+   The held tool is drawn with the player's arms (sleeves and hands in the chosen character's colours: game.characterLook()).
+   Camera: first person, or THIRD PERSON (ui.views; the title screen and the V key switch it, kept per computer in
+   GK.Settings 'view'): the camera sits behind the right shoulder (pulled in by walls) and the character is drawn
+   walking, aiming the gun or swinging the sword. Aiming, shooting and E still work from the player's eyes.
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
@@ -5347,7 +5577,8 @@ GK_LIBRARY.worlds = {
       player: { steering: 'camera' },
       environment: { sky: ['#7fb8f0', '#d9ecfb'], fog: [30, 90], sun: { dir: [0.5, 1, 0.3], color: '#fff3dd', intensity: 0.5 }, ambient: { sky: '#8494aa', ground: '#4a433d' } },
       render: { pixelRatio: 1, antialias: true, far: 150 },
-      ui: { crosshair: true, lockHint: true, controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Space', 'Jump'], ['Shift', 'Sprint'], ['E', 'Interact'], ['H', 'Hint'], ['Esc', 'Pause']] },
+      ui: { crosshair: true, lockHint: true, views: [['first', '👁 First person'], ['third', '🎥 Third person']],
+        controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Space', 'Jump'], ['Shift', 'Sprint'], ['E', 'Interact'], ['V', 'Camera'], ['H', 'Hint'], ['Esc', 'Pause']] },
     },
     create: game => new FirstPersonView(game),
   });
@@ -5441,6 +5672,11 @@ GK_LIBRARY.worlds = {
       c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(9, 0); c.lineTo(-6, -6); c.lineTo(-3, 0); c.lineTo(-6, 6); c.closePath(); c.fill();
       c.restore();
     }
+    /** 'first' or 'third' (GK.Settings 'view', when the game offers ui.views). */
+    viewMode() {
+      const views = this.game.cfg.ui.views, v = GK.Settings.get('view', 'first');
+      return views && views.some(x => x[0] === v) ? v : 'first';
+    }
     begin() { this.game.input.lock(); }
     onModal(open) { if (open) this.game.input.unlock(); else this.game.input.lock(); }
     update(dt, mode) {
@@ -5453,6 +5689,12 @@ GK_LIBRARY.worlds = {
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
       if (this.flashes.length) { for (const f of this.flashes) f.t -= dt; this.flashes = this.flashes.filter(f => f.t > 0); }
+      if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) {
+        const next = this.viewMode() === 'third' ? 'first' : 'third';
+        GK.Settings.set('view', next);
+        g.ui.toast(next === 'third' ? '🎥 Third-person camera · press V for first person' : '👁 First-person view · press V for third person');
+        g.emit('view', { view: next });
+      }
       if (mode === 'playing' && g.setFocus) {
         const hit = g.world.raycast(g.player.eye(), g.player.forward(), g.player.cfg.reach);
         g.setFocus(hit.entity && hit.entity.currentInteraction() ? hit.entity : null);
@@ -5466,7 +5708,11 @@ GK_LIBRARY.worlds = {
         const a = g.shakeAmp * Math.min(1, g.shakeT * 4);
         eye = [eye[0] + (Math.random() - 0.5) * a, eye[1] + (Math.random() - 0.5) * a, eye[2] + (Math.random() - 0.5) * a];
       }
-      r.setCamera(eye, g.player.forward(), g.player.cfg.fov);
+      const third = this.viewMode() === 'third';
+      let look = g.player.forward();
+      if (third) { const c = this.thirdCamera(eye); eye = c.pos; look = c.dir; }
+      this.camPos = eye;
+      r.setCamera(eye, look, g.player.cfg.fov);
       const items = [{ mesh: this.worldMesh, pos: [0, 0, 0], grid: true }];
       r.setLights(this.gatherLights(eye));
       for (const z of g.world.visibleZones()) {
@@ -5501,20 +5747,85 @@ GK_LIBRARY.worlds = {
         }
       }
       const vm = g.viewModel;
-      if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) {
-        const p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
-        const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
-        const k = vm.kick || 0, sway = p.moving ? Math.sin((p.bobT || 0) * 2) * 0.012 : 0;
-        const along = 0.44 - k * 0.1, side = 0.19, down = -0.18 + sway - k * 0.02 - (vm.lower || 0) * 0.22;
-        const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
-        const key = 'vm:' + vm.model + JSON.stringify(vm.look || {});
-        const mesh = r.cached(key, () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
-        items.push({ mesh, pos, yaw: yaw + Math.PI, pitch: p.pitch + k * 0.15 - (vm.lower || 0) * 0.6, scale: vm.scale || 0.75, front: true, hi: vm.glow || 0 });
-      }
+      if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
+      else if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) this.drawHeld(items, vm, eye);
       r.render(items);
 
       g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => { const s = r.project(l.pos); return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null; }).filter(Boolean));
       if (this.mini) this.drawMinimap();
+    }
+    /** The chosen character's look (a default one for games without characters). */
+    heroLook() { const l = this.game.characterLook ? this.game.characterLook() : null; return l || {}; }
+    /** First person: the tool in the hand, with the player's sleeves and hands. Guns kick back; swords swing. */
+    drawHeld(items, vm, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const sway = p.moving ? Math.sin((p.bobT || 0) * 2) * 0.012 : 0, look = this.heroLook();
+      let along, side, down, pitch, yo = 0;
+      let roll = 0;
+      if (vm.melee) {
+        // sword: rest with the blade up at the right; a swing winds up, slashes across and down to the left, then recovers
+        const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t), mix = (a, b, t) => a + (b - a) * t;
+        let ang = -0.3, sideK = 0;
+        roll = 0.15;
+        if (k > 0 && k < 0.2) { const t = ease(k / 0.2); ang = mix(-0.3, 0.1, t); roll = mix(0.15, 0.7, t); }
+        else if (k >= 0.2 && k < 0.6) { const t = ease((k - 0.2) / 0.4); ang = mix(0.1, -0.8, t); roll = mix(0.7, -1.55, t); sideK = t; }
+        else if (k >= 0.6) { const t = ease((k - 0.6) / 0.4); ang = mix(-0.8, -0.3, t); roll = mix(-1.55, 0.15, t); sideK = 1 - t; }
+        along = 0.4; side = 0.25 - sideK * 0.24; down = -0.21 + sway - sideK * 0.04 - (vm.lower || 0) * 0.22;
+        pitch = p.pitch + ang;
+      } else {
+        const k = vm.kick || 0;
+        along = 0.44 - k * 0.1; side = 0.19; down = -0.18 + sway - k * 0.02 - (vm.lower || 0) * 0.22;
+        pitch = p.pitch + k * 0.15 - (vm.lower || 0) * 0.6;
+      }
+      const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
+      const it = { pos, yaw: yaw + Math.PI + yo, pitch, roll, scale: vm.scale || (vm.melee ? 0.55 : 0.75), front: true };
+      items.push(Object.assign({ mesh, hi: vm.glow || 0 }, it));
+      if (GK.Models.has && !GK.Models.has('fpArms')) return;
+      const arms = Object.assign({ pose: vm.melee ? 'sword' : 'gun' }, look);
+      items.push(Object.assign({ mesh: r.cached('fpArms' + JSON.stringify(arms), () => GK.Models.shape('fpArms', arms, 'arms').geo) }, it));
+    }
+    /** Third person: the camera behind the right shoulder, looking where the player aims; walls pull it in. */
+    thirdCamera(eye) {
+      const p = this.game.player, f = p.forward(), yaw = p.yaw, right = [Math.cos(yaw), 0, -Math.sin(yaw)];
+      const head = [p.pos[0], p.pos[1] + p.cfg.eyeHeight - 0.05, p.pos[2]];
+      const want = [head[0] - f[0] * 3.1 + right[0] * 0.6, head[1] - f[1] * 3.1 + 0.45, head[2] - f[2] * 3.1 + right[2] * 0.6];
+      const d = V.sub(want, head), L = V.len(d), u = V.scale(d, 1 / L);
+      const hit = this.game.world.raycast(head, u, L + 0.3);
+      const t = hit.hit ? Math.max(0.3, Math.min(L, hit.t - 0.3)) : L;
+      const pos = V.add(head, V.scale(u, t));
+      return { pos, dir: V.norm(V.sub(V.add(eye, V.scale(f, 14)), pos)) };
+    }
+    /** Third person: the character, walking (legs and arms swing), holding and using the tool. */
+    drawHero(items, vm) {
+      const g = this.game, r = this.renderer, p = g.player, look = this.heroLook(), H = GK.HERO;
+      if (!H) return;
+      const lk = JSON.stringify(look), part = name => r.cached('hero:' + name + lk, () => GK.Models.shape('heroPart', Object.assign({ part: name }, look), 'hero').geo);
+      const Y = p.yaw + Math.PI, c = Math.cos(Y), n = Math.sin(Y);
+      const at = (x, y, z) => [p.pos[0] + x * c + z * n, p.pos[1] + y, p.pos[2] - x * n + z * c];
+      this.walkK = (this.walkK || 0) + ((p.moving ? 1 : 0) - (this.walkK || 0)) * 0.2;
+      const sw = Math.sin((p.bobT || 0) * 2) * 0.6 * this.walkK, air = p.grounded ? 0 : 0.35;
+      const sx = GK.heroShoulderX(look), lerp = (a, b, t) => a + (b - a) * t;
+      let armR = -sw * 0.8 + air, armL = sw * 0.8 + air;
+      if (vm && vm.melee) {
+        const k = vm.swing || 0;
+        armR = k <= 0 ? 0.95 : k < 0.2 ? lerp(0.95, 2.8, k / 0.2) : k < 0.6 ? lerp(2.8, 0.45, (k - 0.2) / 0.4) : lerp(0.45, 0.95, (k - 0.6) / 0.4);
+      } else if (vm) { armR = Math.PI / 2 + p.pitch - (vm.kick || 0) * 0.2 - (vm.lower || 0) * 0.9; armL = armR - 0.12; }
+      items.push({ mesh: part('torso'), pos: at(0, 0, 0), yaw: Y });
+      items.push({ mesh: part('head'), pos: at(0, H.neck, 0), yaw: Y, pitch: U.clamp(p.pitch * 0.5, -0.45, 0.45) });
+      items.push({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: sw + air });
+      items.push({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -sw + air * 0.4 });
+      items.push({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y, pitch: armL });
+      items.push({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: armR });
+      if (vm) {
+        const sh = at(-sx, H.shoulder, 0), L = H.arm - 0.04;
+        const hand = [sh[0] + Math.sin(armR) * n * L, sh[1] - Math.cos(armR) * L, sh[2] + Math.sin(armR) * c * L];
+        const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
+        items.push({ mesh, pos: hand, yaw: Y, pitch: vm.melee ? armR + Math.PI + 1.0 : armR - Math.PI / 2, scale: vm.melee ? 1 : 0.95, hi: vm.glow || 0 });
+      }
+      const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
+      items.push({ mesh: blob, pos: [p.pos[0], p.pos[1] + 0.02, p.pos[2]], scale: [0.45, 1, 0.45], alpha: 0.34 });
     }
     /** Point lights for this frame, nearest first. */
     gatherLights(eye) {
@@ -7595,12 +7906,18 @@ GK.Worlds.add('pc-inside', {
                    pellets: 1, spread: 0,                                  // several bolts at once (scatter)
                    splash: 0,                                              // explodes: hurts every enemy this close
                    pierce: false,                                          // goes through enemies
-                   price: 0, ammoPrice: 20, ammoPack: 24 }, …],            // shop: buy it, buy a pack of ammo
+                   price: 0, ammoPrice: 20, ammoPack: 24,                  // shop: buy it, buy a pack of ammo
+                   melee: true, reach: 2.6, arc: 90, maxTargets: 3, swing: 0.3, // a sword: no ammo, hits what is in front
+                   owned: true, always: true }, …],                        // owned from the start; usable before `requires`
        start: 'zapper', requires: {has: 'zapper'},                         // owned at the start; usable once true
        coins: 0, objectiveCoins: 15, dropChance: 0.35,                     // coins for each objective; ammo drops
        extras: [{ id, name, icon, desc, price, actions }] }                // other things to buy (heal, shield…)
      weapon: {…}  — the old single-weapon form still works (one weapon, owned from the start).
-   Controls: click / hold the mouse / hold Q = fire · R = reload · 1-5 or the mouse wheel = switch weapon.
+   Controls: click / hold the mouse / hold Q = fire (or swing) · R = reload · 1-9 or the mouse wheel = switch weapon.
+   A melee weapon (melee: true) needs no ammo: a swing hits up to maxTargets enemies (with hp) within `reach` metres
+   inside an `arc` (degrees) in front of the player, not through walls. `always: true` weapons work before the arsenal's
+   `requires` is met (e.g. a sword before the zapper is found); when `requires` becomes true while a melee weapon is in
+   the hand, the first owned gun is drawn. game.viewModel gets {melee, swing: 0..1} so views can animate the swing.
    An empty magazine reloads by itself if there is spare ammo. Coins come from defeated enemies (their `coins`, or
    points ÷ 4), objectives, coin pickups and loot crates; spend them at a shop: { interact: { type: 'shop' } }.
    Pickups: { type: 'pickup', kind: 'ammo' | 'coins' | 'health', amount, respawn }. Enemies sometimes drop ammo.
@@ -7662,7 +7979,14 @@ GK.Worlds.add('pc-inside', {
     A.objectiveCoins = A.objectiveCoins == null ? 15 : A.objectiveCoins;
     A.dropChance = A.dropChance == null ? 0.35 : A.dropChance;
     A.extras = U.list(A.extras);
+    A.gun0 = A.weapons.find(w => !w.melee) || A.weapons[0];   // the respawn top-up goes to the first gun
     return A;
+  }
+  /** Starting arsenal: the start weapon plus every weapon marked owned: true. */
+  function fresh(A) {
+    const owned = {};
+    for (const w of A.weapons) if (w.id === A.start || w.owned) owned[w.id] = { mag: w.mag, res: w.reserve };
+    return { cur: A.start, owned, coins: A.coins || 0 };
   }
 
   GK.Interactions.add('shop', { prompt: 'Open the', run(g, ent, def, done) { g.openShop(def, () => done(true)); } });
@@ -7677,10 +8001,8 @@ GK.Worlds.add('pc-inside', {
     configKeys: ['weapon', 'arsenal'],
     setup(game) {
       const A = game.arsenalCfg = config(game);
-      if (!game.state.arsenal) {
-        const w = A.byId[A.start];
-        game.state.arsenal = { cur: A.start, owned: { [A.start]: { mag: w.mag, res: w.reserve } }, coins: A.coins || 0 };
-      }
+      if (!game.state.arsenal) game.state.arsenal = fresh(A);
+      game.gunsWere = undefined;   // set on the first update (after a restore), so travel never switches weapons
       const M = game.input.map;
       if (!M.fire) M.fire = ['KeyQ'];
       if (!M.reload) M.reload = ['KeyR'];
@@ -7695,11 +8017,14 @@ GK.Worlds.add('pc-inside', {
         sparks: add('spark', POOL.spark, 'spark', { color: '#ffffff' }),
         loot: add('loot', POOL.loot, 'ammoBox', {}, 'pickup'),
       };
-      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0;
+      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3;
       game.ui.setWeapon(null);
       const st = () => game.state.arsenal;
-      game.armed = () => A.requires === undefined || GK.test(game, A.requires);
-      game.weaponState = () => { const s = st(), w = A.byId[s.cur]; return { def: w, id: s.cur, mag: s.owned[s.cur].mag, res: s.owned[s.cur].res, reloading: game.reloadT > 0 }; };
+      const gunsReady = () => A.requires === undefined || GK.test(game, A.requires);
+      const usable = w => !!w && (w.always || gunsReady());
+      game.usable = id => usable(A.byId[id]);
+      game.armed = () => usable(A.byId[st().cur]);
+      game.weaponState = () => { const s = st(), w = A.byId[s.cur]; return { def: w, id: s.cur, mag: s.owned[s.cur].mag, res: s.owned[s.cur].res, reloading: game.reloadT > 0, melee: !!w.melee }; };
       game.coins = () => st().coins;
       game.addCoins = (n, at) => {
         if (!n) return;
@@ -7719,11 +8044,11 @@ GK.Worlds.add('pc-inside', {
       /** Ammo for every weapon you own: `packs` packs each (default half a pack). */
       game.addAmmo = packs => {
         const k = packs == null ? 0.5 : packs;
-        for (const id in st().owned) { const w = A.byId[id], o = st().owned[id]; o.res = Math.min(w.maxReserve, o.res + Math.max(1, Math.round(w.ammoPack * k))); }
+        for (const id in st().owned) { const w = A.byId[id], o = st().owned[id]; if (w.melee) continue; o.res = Math.min(w.maxReserve, o.res + Math.max(1, Math.round(w.ammoPack * k))); }
       };
       game.selectWeapon = ref => {
         const id = typeof ref === 'number' ? (A.weapons[ref - 1] || {}).id : ref;
-        if (!id || !st().owned[id] || id === st().cur) return false;
+        if (!id || !st().owned[id] || id === st().cur || !usable(A.byId[id])) return false;
         st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 1;
         game.audio.play('click');
         game.emit('weapon:switch', { id });
@@ -7731,7 +8056,7 @@ GK.Worlds.add('pc-inside', {
       };
       game.reload = instant => {
         const s = st(), w = A.byId[s.cur], o = s.owned[s.cur];
-        if (o.mag >= w.mag || o.res <= 0 || (game.reloadT > 0 && !instant)) return false;
+        if (w.melee || o.mag >= w.mag || o.res <= 0 || (game.reloadT > 0 && !instant)) return false;
         if (instant) { const n = Math.min(w.mag - o.mag, o.res); o.mag += n; o.res -= n; game.reloadT = 0; return true; }
         game.reloadT = w.reload; game.reloadMax = w.reload;
         game.audio.play('reload');
@@ -7765,6 +8090,7 @@ GK.Worlds.add('pc-inside', {
       game.fire = () => {
         if (!game.armed() || game.state.mode !== 'playing' || game.cool > 0 || game.reloadT > 0) return false;
         const s = st(), w = A.byId[s.cur], o = s.owned[s.cur], rapid = game.hasPower && game.hasPower('rapid');
+        if (w.melee) return swing(w, rapid);
         if (!rapid && o.mag < 1) {
           if (o.res > 0) game.reload();
           else { game.audio.play('empty'); game.cool = 0.35; if (game.emptyT <= 0) { game.ui.toast('Out of ammo! Find an ammo box or buy ammo at a shop.', 'bad'); game.emptyT = 3; } }
@@ -7793,6 +8119,36 @@ GK.Worlds.add('pc-inside', {
         if (game.lightFlash) game.lightFlash(start, w.color, 4, 0.07);
         game.audio.play(w.splash ? 'boom' : w.pellets > 1 ? 'hit' : 'zap');
         game.emit('weapon:fire', { id: s.cur });
+        return true;
+      };
+      /** A melee swing: hits up to maxTargets enemies in reach, in front, not behind a wall. */
+      const swing = (w, rapid) => {
+        const s = st();
+        game.cool = w.cooldown * (rapid ? 0.6 : 1);
+        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1;
+        const p = game.player, eye = p.eye(), f = p.forward(), fl = Math.hypot(f[0], f[2]) || 1, fh = [f[0] / fl, 0, f[2] / fl];
+        const reach = w.reach || 2.6, cosArc = Math.cos((w.arc || 90) * Math.PI / 360), hits = [];
+        for (const e of game.world.entities) {
+          if (e.type !== 'hazard' || !e.active || e.state.dead || !e.def.hp) continue;
+          const b = e.pickBox(), cp = [U.clamp(eye[0], b.min[0], b.max[0]), U.clamp(eye[1], b.min[1], b.max[1]), U.clamp(eye[2], b.min[2], b.max[2])];
+          const d = V.dist(eye, cp);
+          if (d > reach) continue;
+          const c = e.center(), tl = Math.hypot(c[0] - eye[0], c[2] - eye[2]) || 1;
+          if (d > 0.5 && ((c[0] - eye[0]) * fh[0] + (c[2] - eye[2]) * fh[2]) / tl < cosArc) continue;   // not in front
+          if (d > 0.3 && wallAt(game, eye, V.norm(V.sub(cp, eye)), d - 0.15) < Infinity) continue;       // behind a wall
+          hits.push({ e, d, cp });
+        }
+        hits.sort((a, b) => a.d - b.d);
+        for (const h of hits.slice(0, w.maxTargets || 3)) {
+          const r = game.hitHazard ? game.hitHazard(h.e, w.damage) : 'blocked';
+          game.ui.hitMarker(r === 'blocked' ? 'blocked' : 'hit');
+          if (r !== 'defeated') game.burst(h.cp, r === 'blocked' ? '#4cc9f0' : w.color, 6);
+          game.emit('weapon:hit', { id: h.e.id, melee: true });
+        }
+        if (game.lightFlash) game.lightFlash(V.add(eye, V.scale(f, 0.9)), w.color, 3, 0.1);
+        if (hits.length && game.shake) game.shake(0.12, 0.05);
+        game.audio.play(hits.length ? 'slash' : 'swing');
+        game.emit('weapon:fire', { id: s.cur, melee: true, hits: hits.length });
         return true;
       };
       const explode = (pos, w) => {
@@ -7838,7 +8194,7 @@ GK.Worlds.add('pc-inside', {
         if (e.def.drop !== false && !e.def.boss && Math.random() < (e.def.dropChance != null ? e.def.dropChance : A.dropChance)) game.dropLoot(e.pos, 'ammo', 1);
       });
       game.on('objective:complete', ({ id }) => { const o = game.missions && game.missions.get(id); if (o && !o.optional && A.objectiveCoins) game.addCoins(A.objectiveCoins); });
-      game.on('player:respawn', () => { const w = A.byId[A.start], o = st().owned[A.start]; if (o && o.mag + o.res < w.mag * 2) o.res = w.mag * 2 - o.mag; });
+      game.on('player:respawn', () => { const w = A.gun0, o = st().owned[w.id]; if (o && !w.melee && o.mag + o.res < w.mag * 2) o.res = w.mag * 2 - o.mag; });
 
       /** The shop panel: every weapon (buy it, or buy ammo for it) and the extras. */
       game.openShop = (def, done) => {
@@ -7856,12 +8212,12 @@ GK.Worlds.add('pc-inside', {
             const card = U.el('div', 'gk-shop-card' + (owned ? ' owned' : '') + (s.cur === w.id ? ' active' : ''));
             card.innerHTML = '<div class="gk-shop-icon" style="--c:' + U.css(w.color) + '">' + U.esc(w.icon || '⚡') + '</div>' +
               '<b>' + U.esc(w.name) + '</b><small>' + U.esc(w.desc || '') + '</small>' +
-              bar('Power', (w.damage * (w.pellets || 1) + (w.splash ? 3 : 0)) / 8) + bar('Speed', 0.09 / Math.max(0.09, w.cooldown)) + bar('Ammo', w.mag / 30);
-            const btn = U.el('button', 'gk-btn' + (owned ? '' : ' primary'), owned ? 'Ammo +' + w.ammoPack + ' · 🪙 ' + price : (price ? 'Buy · 🪙 ' + price : 'Free'));
-            btn.disabled = s.coins < price || (owned && owned.res >= w.maxReserve);
+              bar('Power', (w.damage * (w.pellets || 1) + (w.splash ? 3 : 0)) / 8) + bar('Speed', 0.09 / Math.max(0.09, w.cooldown)) + (w.melee ? bar('Reach', (w.reach || 2.6) / 4) : bar('Ammo', w.mag / 30));
+            const btn = U.el('button', 'gk-btn' + (owned ? '' : ' primary'), w.melee && owned ? '✔ No ammo needed' : owned ? 'Ammo +' + w.ammoPack + ' · 🪙 ' + price : (price ? 'Buy · 🪙 ' + price : 'Free'));
+            btn.disabled = (w.melee && owned) || s.coins < price || (owned && owned.res >= w.maxReserve);
             btn.onclick = () => { game.buy(w.id); draw(); };
             card.appendChild(btn);
-            if (owned && s.cur !== w.id) { const eq = U.el('button', 'gk-btn small', 'Equip'); eq.onclick = () => { game.selectWeapon(w.id); draw(); }; card.appendChild(eq); }
+            if (owned && s.cur !== w.id && usable(w)) { const eq = U.el('button', 'gk-btn small', 'Equip'); eq.onclick = () => { game.selectWeapon(w.id); draw(); }; card.appendChild(eq); }
             grid.appendChild(card);
           }
           for (const x of A.extras) {
@@ -7884,7 +8240,7 @@ GK.Worlds.add('pc-inside', {
         const s = st(), w = A.byId[id], x = A.extras.find(e => e.id === id);
         if (w) {
           const owned = s.owned[id], price = owned ? w.ammoPrice : w.price;
-          if (s.coins < price || (owned && owned.res >= w.maxReserve)) { game.audio.play('deny'); return false; }
+          if ((w.melee && owned) || s.coins < price || (owned && owned.res >= w.maxReserve)) { game.audio.play('deny'); return false; }
           s.coins -= price;
           if (owned) owned.res = Math.min(w.maxReserve, owned.res + w.ammoPack);
           else game.giveWeapon(id);
@@ -7902,12 +8258,19 @@ GK.Worlds.add('pc-inside', {
     },
     update(game, dt) {
       const A = game.arsenalCfg, fx = game.fx, inp = game.input, s = game.state.arsenal;
+      // the gun becomes usable (e.g. the zapper was found) while the sword is in the hand: draw the gun
+      const ready = A.requires === undefined || GK.test(game, A.requires);
+      if (game.gunsWere === false && ready && A.byId[s.cur] && A.byId[s.cur].melee) {
+        const gun = A.weapons.find(w => !w.melee && s.owned[w.id]);
+        if (gun) game.selectWeapon(gun.id);
+      }
+      game.gunsWere = ready;
       const armed = game.armed();
       if (armed) {
         // switch: 1-5 or the mouse wheel
         for (let i = 1; i <= A.weapons.length && i <= 9; i++) if (inp.hits.has('Digit' + i) || inp.hits.has('Numpad' + i)) game.selectWeapon(i);
         if (inp.wheel) {
-          const owned = A.weapons.filter(w => s.owned[w.id]), i = owned.findIndex(w => w.id === s.cur);
+          const owned = A.weapons.filter(w => s.owned[w.id] && game.usable(w.id)), i = owned.findIndex(w => w.id === s.cur);
           if (owned.length > 1) game.selectWeapon(owned[(i + (inp.wheel > 0 ? 1 : -1) + owned.length) % owned.length].id);
         }
         if (inp.pressed('reload')) game.reload();
@@ -7920,13 +8283,15 @@ GK.Worlds.add('pc-inside', {
       if (game.emptyT > 0) game.emptyT -= dt;
       if (game.reloadT > 0) { game.reloadT -= dt; if (game.reloadT <= 0) { game.reloadT = 0; game.reload(true); game.audio.play('click'); } }
       game.kick = Math.max(0, game.kick - dt * 7);
+      if (game.swingT > 0) game.swingT = Math.max(0, game.swingT - dt);
       const w = A.byId[s.cur], o = s.owned[s.cur];
       const lower = game.reloadT > 0 ? Math.sin(Math.PI * (1 - game.reloadT / (game.reloadMax || 1))) : 0;
-      game.viewModel = armed ? { model: w.model, look: w.look, kick: game.kick, glow: game.kick * 0.25, lower } : null;
+      game.viewModel = armed ? { model: w.model, look: w.look, kick: w.melee ? 0 : game.kick, glow: game.kick * 0.25, lower, melee: !!w.melee,
+        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0 } : null;
       game.ui.setWeapon(armed ? {
-        name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')),
+        name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')), melee: !!w.melee,
         reload: game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null,
-        slots: A.weapons.map((x, i) => ({ n: i + 1, icon: x.icon, owned: !!s.owned[x.id], active: x.id === s.cur })),
+        slots: A.weapons.map((x, i) => ({ n: i + 1, icon: x.icon, owned: !!s.owned[x.id] && game.usable(x.id), active: x.id === s.cur })),
       } : null);
       game.ui.setCoins(armed || s.coins ? s.coins : null);
 
@@ -7994,8 +8359,8 @@ GK.Worlds.add('pc-inside', {
       for (const L of fx.loot) if (L.visible && L.loot) { L.lootT -= dt; if (L.lootT <= 0) L.hide(); }
     },
     restore(game) {
-      if (!game.state.arsenal) { const A = game.arsenalCfg, w = A.byId[A.start]; game.state.arsenal = { cur: A.start, owned: { [A.start]: { mag: w.mag, res: w.reserve } }, coins: 0 }; }
-      game.reloadT = 0;
+      if (!game.state.arsenal) { game.state.arsenal = fresh(game.arsenalCfg); game.state.arsenal.coins = 0; }
+      game.reloadT = 0; game.swingT = 0; game.gunsWere = undefined;
       if (game.fx) for (const k in game.fx) if (Array.isArray(game.fx[k])) for (const e of game.fx[k]) e.hide();
     },
     answers(game) {
