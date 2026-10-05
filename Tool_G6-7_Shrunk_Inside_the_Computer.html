@@ -546,6 +546,15 @@ window.GAME_CONTENT = {
   });
 })(window.GAME_CONTENT);
 
+/* ---------- difficulty (title screen) ---------- */
+(function (C) {
+  C.difficulty = {
+    title: 'Choose your difficulty',
+    easy: '🙂 EASY', easyShort: 'Easy', easyText: 'Half the bugs. Bosses go down fast.',
+    hard: '🔥 HARD', hardShort: 'Hard', hardText: 'The full challenge: every enemy and tough bosses.',
+  };
+})(window.GAME_CONTENT);
+
 </script>
 <script>/* game.js */
 /* SHRUNK! Escape From Inside the Computer — Grade 6–7, first person, three acts (scenes):
@@ -677,6 +686,12 @@ window.GAME = {
 
   // Save on this computer as each act starts: a closed browser or a shutdown loses at most the current act.
   resume: true,
+  // EASY = half the ordinary enemies (and "defeat N" steps need half), bosses take 3x damage and bring half the minions.
+  // HARD = the full game, unchanged. Chosen on the title screen; HARD is preselected.
+  difficulty: { default: 'hard', title: 'content:difficulty.title', choices: [
+    { id: 'easy', label: 'content:difficulty.easy', short: 'content:difficulty.easyShort', text: 'content:difficulty.easyText', enemies: 0.5, bossDamage: 3, summons: 0.5 },
+    { id: 'hard', label: 'content:difficulty.hard', short: 'content:difficulty.hardShort', text: 'content:difficulty.hardText' },
+  ] },
 
   scenes: [
     // ================= ACT 1: inside the computer =================
@@ -1404,6 +1419,20 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-name .gk-input { width: 240px; font-size: 18px; text-align: center; }
 .gk-name .gk-input.need { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.35); }
 .gk-lead-title { margin: 14px 0 6px; font-weight: 800; color: var(--gk-accent); }
+.gk-diff { margin: 10px auto 4px; max-width: 520px; }
+.gk-diff-title { font-weight: 700; margin-bottom: 6px; }
+.gk-diff-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.gk-diff-btn { flex: 1 1 200px; max-width: 250px; display: flex; flex-direction: column; gap: 3px; align-items: center; padding: 10px 12px; border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; opacity: .75; }
+.gk-diff-btn b { font-size: 18px; }
+.gk-diff-btn span { font-size: 13px; line-height: 1.3; }
+.gk-diff-btn:hover { opacity: 1; }
+.gk-diff-btn.on { opacity: 1; border-color: var(--gk-accent); background: rgba(255,255,255,.14); box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
+.gk-diff-btn.d-easy.on { border-color: #2ecc71; }
+.gk-diff-btn.d-hard.on { border-color: #ff6b4a; }
+.gk-diff-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-left: 4px; vertical-align: 1px; background: rgba(255,255,255,.15); }
+.gk-diff-tag.d-easy { background: #1e7d46; color: #fff; }
+.gk-diff-tag.d-hard { background: #b8432a; color: #fff; }
 .gk-resume { margin: 12px auto 6px; padding: 4px 16px 10px; max-width: 460px; border: 2px solid var(--gk-accent); border-radius: 12px; background: rgba(255,255,255,.06); }
 .gk-resume p { margin: 6px 0; }
 .gk-resume .gk-lead-title { margin-top: 8px; }
@@ -2241,8 +2270,12 @@ GK_LIBRARY.worlds = {
     /** Leaderboard table (ui.leaderboard): rows [{name, score, time}], highlight = rank to mark (1-based). */
     leaderTable(rows, highlight, max) {
       if (!rows || !rows.length) return '';
+      const list = (this.game.cfg.difficulty && this.game.cfg.difficulty.choices) || this.game.difficultyChoices(), tag = id => {
+        const c = list && id && list.find(x => x.id === id);
+        return c ? ' <span class="gk-diff-tag d-' + U.esc(c.id) + '">' + U.esc(c.short || c.label || c.id) + '</span>' : '';
+      };
       return '<table class="gk-leaders"><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th></tr>' +
-        rows.slice(0, max || 5).map((r, i) => '<tr' + (i + 1 === highlight ? ' class="me"' : '') + '><td>' + (i + 1) + '</td><td>' + U.esc(r.name) + '</td><td>' + r.score + '</td><td>' + U.time(r.time) + '</td></tr>').join('') + '</table>';
+        rows.slice(0, max || 5).map((r, i) => '<tr' + (i + 1 === highlight ? ' class="me"' : '') + '><td>' + (i + 1) + '</td><td>' + U.esc(r.name) + tag(r.difficulty) + '</td><td>' + r.score + '</td><td>' + U.time(r.time) + '</td></tr>').join('') + '</table>';
     }
     floatScore(points) {
       const f = el('div', 'gk-float ' + (points < 0 ? 'neg' : ''), (points > 0 ? '+' : '') + points);
@@ -2381,7 +2414,7 @@ GK_LIBRARY.worlds = {
         const day = isNaN(when) ? '' : when.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
         cont = '<div class="gk-resume"><div class="gk-lead-title">💾 Saved game on this computer</div>' +
           '<p>' + U.esc(r.title || ('Part ' + r.part)) + (r.parts ? ' (' + r.part + ' of ' + r.parts + ')' : '') +
-          (r.name ? ' · <b>' + U.esc(r.name) + '</b>' : '') + ' · ' + (r.score || 0) + ' points' + (day ? '<br><span class="gk-muted">Saved ' + U.esc(day) + '</span>' : '') + '</p>' +
+          (r.name ? ' · <b>' + U.esc(r.name) + '</b>' : '') + this.diffName(r.difficulty) + ' · ' + (r.score || 0) + ' points' + (day ? '<br><span class="gk-muted">Saved ' + U.esc(day) + '</span>' : '') + '</p>' +
           '<button class="gk-btn primary big" data-a="resume">▶ Continue' + (r.name ? ' as ' + U.esc(r.name) : '') + '</button>' +
           '<p class="gk-muted">Not you? Type your name below and start a new game.</p></div>';
       }
@@ -2390,11 +2423,16 @@ GK_LIBRARY.worlds = {
         pick = '<div class="gk-levels">' + levels.names.map((n, i) => '<button class="gk-btn' + (i === levels.unlocked - 1 ? ' primary' : '') + '" data-level="' + i + '"' + (i >= levels.unlocked ? ' disabled' : '') + '>' + (i >= levels.unlocked ? '🔒 ' : '') + U.esc(n) + '</button>').join('') + '</div>';
       }
       const ask = !!cfg.ui.askName, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
+      // difficulty (config.difficulty): one button per choice; the chosen one is highlighted
+      const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
+      const diff = choices ? '<div class="gk-diff"><div class="gk-diff-title">' + U.esc((cfg.difficulty && cfg.difficulty.title) || 'Difficulty') + '</div><div class="gk-diff-row">' +
+        dlabels.map(c => '<button type="button" class="gk-diff-btn d-' + U.esc(c.id) + (c.id === this.game.difficulty ? ' on' : '') + '" data-diff="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.difficulty) + '">' +
+          '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
       const s = this.screen('gk-title-screen',
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
         (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
-        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') +
+        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + diff +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
         (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
@@ -2407,6 +2445,12 @@ GK_LIBRARY.worlds = {
       }
       const rb = s.querySelector('[data-a=resume]');
       if (rb) rb.onclick = resume.onResume;
+      s.querySelectorAll('[data-diff]').forEach(b => {
+        b.onclick = () => {
+          this.game.setDifficulty(b.getAttribute('data-diff'));
+          s.querySelectorAll('[data-diff]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+        };
+      });
       s.querySelectorAll('[data-level]').forEach(b => {
         b.onclick = () => {
           if (nameBox) {
@@ -2416,6 +2460,12 @@ GK_LIBRARY.worlds = {
           onPlay(Number(b.getAttribute('data-level')));
         };
       });
+    }
+    /** ' · Easy' for a saved game's difficulty ('' without the setting). */
+    diffName(id) {
+      const list = this.game.difficultyChoices(), c = list && id && list.find(x => x.id === id);
+      const lab = c && ((this.game.cfg.difficulty && (this.game.cfg.difficulty.choices.find(x => x.id === id) || {}).label) || c.label || c.id);
+      return lab ? ' · ' + U.esc(lab) : '';
     }
     showPause(cfg, h) {
       const s = this.screen('gk-pause-screen',
@@ -2558,7 +2608,7 @@ GK_LIBRARY.worlds = {
   'use strict';
   const U = GK.util;
   const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts',
-    'content', 'levels', 'scenes', 'startScene', 'resume', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
+    'content', 'levels', 'scenes', 'startScene', 'resume', 'difficulty', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
     'locations', 'spawns', 'routes', 'spawn', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
     'scoring', 'hints', 'win', 'lose', 'ui', 'audio', 'controls', 'hooks', 'triggers', 'vars', 'flags', 'intro',
     'winText', 'loseText', 'teacher', 'quiz'];
@@ -2735,6 +2785,7 @@ GK_LIBRARY.worlds = {
     audio: { muted: false, volume: 0.7, sounds: {} },
     teacher: { pin: null },
     resume: false,  // scene games: save on THIS computer as each scene (act) starts; the title screen offers "Continue"
+    difficulty: null,  // {default: 'hard', choices: [{id, label, text, …options}]}: the title screen asks; mechanics read game.difficultyOpts()
     controls: {},
     hooks: {},      // setup(game) start(game) update(game, dt) win(game) lose(game)
   };
@@ -2762,6 +2813,7 @@ GK_LIBRARY.worlds = {
       window.addEventListener('blur', this.onBlur);
       this.teacher = new GK.Teacher(this);
 
+      this.difficulty = this.validDifficulty(this.options.difficulty || (location.search.match(/[?&]difficulty=(\w+)/) || [])[1]);
       const first = this.options.level != null ? this.options.level : this.sceneMode ? Math.max(0, this.stageIndex(config.startScene || 0)) : 0;
       this.configure(first);
       this.setup();
@@ -2830,6 +2882,8 @@ GK_LIBRARY.worlds = {
       this.state = { mode: 'title', time: 0, timeLimit: cfg.timer.limit || null, flags: {}, vars: U.merge(cfg.vars), events: {} };
       for (const f of U.list(cfg.flags)) this.state.flags[f] = true;
       if (this.playerName) this.state.vars.playerName = this.playerName;   // typed on the title screen; kept on restart
+      if (this.difficulty) this.state.vars.difficulty = this.difficulty;   // chosen on the title screen; kept on restart
+      this.builtFor = this.difficulty;   // the scene was built for this difficulty (a new choice rebuilds it)
       this.scoring = new GK.Scoring(this, cfg.scoring);
       this.ui.clearLayer();
       this.view.setup();
@@ -2865,6 +2919,20 @@ GK_LIBRARY.worlds = {
       this.playerName = String(name || '').trim().slice(0, 18) || 'Player';
       this.state.vars.playerName = this.playerName;
     }
+    // ================= difficulty (config.difficulty) =================
+    /** The choices ({id, label, text, …options}) or null when the game has no difficulty setting. */
+    difficultyChoices() { const d = this.base.difficulty; return d && Array.isArray(d.choices) && d.choices.length ? d.choices : null; }
+    /** A known choice id, else the game's default (else the last choice), else null. */
+    validDifficulty(id) {
+      const list = this.difficultyChoices();
+      if (!list) return null;
+      if (list.some(c => c.id === id)) return id;
+      const d = this.base.difficulty.default;
+      return list.some(c => c.id === d) ? d : list[list.length - 1].id;
+    }
+    setDifficulty(id) { this.difficulty = this.validDifficulty(id); if (this.state) this.state.vars.difficulty = this.difficulty; }
+    /** Options of the chosen difficulty (e.g. {enemies: 0.5}); {} for a game without the setting. */
+    difficultyOpts() { const list = this.difficultyChoices(); return (list && list.find(c => c.id === this.difficulty)) || {}; }
     /** Best results on this computer (ui.leaderboard): [{name, score, time, stars, at}], best first. */
     leaders() { return this.store.get('leaders', []); }
     /** Restart: a level restarts itself; a scene-based game restarts from its first scene. A restart is a new game,
@@ -2880,7 +2948,7 @@ GK_LIBRARY.worlds = {
       this.ui.showTitle(this.cfg, i => {
         this.audio.unlock();
         this.store.remove('resume');   // a new game replaces the old resume point
-        if (i !== this.levelIndex) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); }
+        if (i !== this.levelIndex || this.builtFor !== this.difficulty) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); }
       }, levels ? { count: this.levelCount, unlocked: this.unlockedLevels(), names: this.stages.map((l, k) => l.title || ('Level ' + (k + 1))) } : null,
       saved ? { info: saved, onResume: () => { this.audio.unlock(); this.resumeSaved(saved); } } : null);
     }
@@ -2894,7 +2962,7 @@ GK_LIBRARY.worlds = {
       this.store.set('resume', {
         v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null,
         part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
-        name: this.playerName || '', score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
+        name: this.playerName || '', difficulty: this.difficulty, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
       });
     }
     /** The resume point on this computer, or null (none, another game's, or damaged). */
@@ -2910,6 +2978,7 @@ GK_LIBRARY.worlds = {
       try {
         this.ui.hideScreens();
         if (r.name) this.setPlayerName(r.name);
+        this.difficulty = this.validDifficulty(r.difficulty || (r.snap.state && r.snap.state.vars && r.snap.state.vars.difficulty));
         this.sceneMemory = {};
         this.restore(r.snap);   // mode is 'title' here, so nothing starts yet
         this.state.inZone = {};
@@ -3021,6 +3090,7 @@ GK_LIBRARY.worlds = {
       this.store.set('history', hist.slice(-50));
       if (won && this.cfg.ui.leaderboard) {
         const entry = { name: this.playerName || this.state.vars.playerName || 'Player', score: res.total, time: Math.round(this.state.time), stars: res.stars || 0, at: new Date().toISOString() };
+        if (this.difficulty) entry.difficulty = this.difficulty;
         const list = this.leaders().concat([entry]).sort((a, b) => b.score - a.score || a.time - b.time).slice(0, 10);
         this.store.set('leaders', list);
         res.leaders = list;
@@ -6244,7 +6314,7 @@ GK.Worlds.add('pc-inside', {
     }
     get(id) { return this.list.find(o => o.id === id) || null; }
     isDone(id) { const o = this.get(id); return !!o && o.status === 'done'; }
-    need(o) { const t = O.has(o.type) && O.get(o.type); return t && t.need ? t.need(o) : 1; }   // unknown types: reported by validate()
+    need(o) { const t = O.has(o.type) && O.get(o.type); return t && t.need ? t.need(o, this.game) : 1; }   // unknown types: reported by validate()
     required() { return this.list.filter(o => !o.optional); }
     doneCount() { return this.required().filter(o => o.status === 'done').length; }
     allDone() { return this.required().every(o => o.status === 'done'); }
@@ -7114,10 +7184,17 @@ GK.Worlds.add('pc-inside', {
    With the powerups mechanic: a shield blocks damage (and squashes `squash` hazards); freeze stops every hazard.
    Adds game.hurtPlayer(amount, sourceEntity), game.hitHazard(entity, damage), game.defeatHazard(entity) and the
    condition {hp: {id, lte}}.
-   Disable or remove one ({do:'disable'} / {do:'remove'}) to make it safe. */
+   Disable or remove one ({do:'disable'} / {do:'remove'}) to make it safe.
+   Difficulty (config.difficulty, the chosen choice's options):
+     enemies: 0.5     keep this share of the ordinary enemies (shootable, harmful, not bosses / minions / crates) in
+                      each scene: every other one starts removed (hidden waves too). A tag that a 'defeat' objective
+                      counts keeps at least that share of its enemies (rounded up), and the objective needs that share.
+     bossDamage: 3    shots do this many times their damage to bosses (phase thresholds keep working)
+     summons: 0.5     bosses keep at most this share of their minions alive (at least 1)
+   Without these options (or with the value 1) nothing changes. */
 (function () {
   'use strict';
-  const P = GK.Prefabs, V = GK.vec, Ph = GK.Physics, FROZEN = '#9fd8ff';
+  const P = GK.Prefabs, V = GK.vec, Ph = GK.Physics, U = GK.util, FROZEN = '#9fd8ff';
 
   /** Everything that blocks enemies and their line of sight this frame (walls, closed doors, solid props). */
   function solidsOf(g) {
@@ -7169,6 +7246,44 @@ GK.Worlds.add('pc-inside', {
     if (d.onDefeat) GK.run(g, d.onDefeat, { entity: ent });
     if (g.missions) g.missions.check();
   }
+  /** Which ordinary enemies a difficulty leaves out, worked out once from the whole config (every scene), so a
+      scene, a restore and a resume always agree: {drop: {id: true}, ratio: {tag: kept / total}}. */
+  function thinPlan(game) {
+    const share = Number(game.difficultyOpts ? game.difficultyOpts().enemies : 1);
+    const key = game.difficulty + ':' + share;
+    if (game.hzPlan && game.hzPlan.key === key) return game.hzPlan;
+    const plan = { key, drop: {}, ratio: {} };
+    game.hzPlan = plan;
+    if (!(share > 0 && share < 1)) return plan;
+    const base = game.base, tpls = base.templates || {}, defs = P.get('hazard').defaults;
+    const stages = base.scenes || base.levels || [];
+    const lists = [base.entities].concat(stages.map(s => s.entities));
+    const counted = {};   // tags that 'defeat' objectives count (other than the catch-all 'enemy')
+    for (const o of U.list(base.objectives).concat(...stages.map(s => U.list(s.objectives)))) if (o && o.type === 'defeat' && o.tag !== 'enemy') counted[o.tag] = true;
+    const all = [], byTag = {};
+    for (const list of lists) {
+      let i = 0;
+      for (const raw of U.list(list)) {
+        if (!raw || typeof raw !== 'object') continue;
+        const e = Object.assign({}, defs, raw.use ? tpls[raw.use] : null, raw);
+        if (e.type !== 'hazard' || !(e.hp > 0) || e.boss || e.minion || e.solid || !(e.damage > 0 || e.shoots)) continue;
+        // keep ceil(n · share) in each scene, spread out: the 1st, 3rd, 5th… for a half
+        const m = { id: e.id, tags: U.list(e.tags), keep: !e.id || Math.ceil((i + 1) * share) > Math.ceil(i * share) };
+        i++;
+        all.push(m);
+        for (const t of m.tags) (byTag[t] = byTag[t] || []).push(m);
+      }
+    }
+    // a counted group never drops below its share, so its objective stays possible
+    for (const t in counted) {
+      const ms = byTag[t] || [], want = Math.ceil(ms.length * share);
+      let kept = ms.filter(m => m.keep).length;
+      for (const m of ms) { if (kept >= want) break; if (!m.keep) { m.keep = true; kept++; } }
+    }
+    for (const m of all) if (!m.keep) plan.drop[m.id] = true;
+    for (const t in byTag) plan.ratio[t] = byTag[t].filter(m => m.keep).length / byTag[t].length;
+    return plan;
+  }
   function revive(ent, at) {
     if (ent.removed) return;
     ent.state.dead = false;
@@ -7210,6 +7325,7 @@ GK.Worlds.add('pc-inside', {
       ent.summonT = d.summon ? (d.summon.first != null ? d.summon.first : d.summon.every || 8) : 0;
       if (d.pulse) { ent.state.off = false; ent.pulseT = d.pulse[0] - (d.phase || 0); }
       ent.onTouch = g => contact(ent, g);
+      if (thinPlan(game).drop[ent.id]) ent.removed = true;   // an easier difficulty: fewer enemies
       if (d.solid) {   // a solid hazard (a loot crate, a barrier): it blocks the player, but shots treat it as a target
         const base = GK.Entity.prototype.collider;
         ent.collider = function () { const b = base.call(this); b.hazard = true; return b; };
@@ -7299,7 +7415,9 @@ GK.Worlds.add('pc-inside', {
           const mins = (d.summon.ids || []).map(id => g.world.get(id)).filter(Boolean);
           const alive = mins.filter(m => m.active && !m.state.dead).length;
           const free = mins.find(m => !m.removed && (!m.active || m.state.dead));
-          if (free && alive < (d.summon.max || 3)) {
+          const share = Number(g.difficultyOpts ? g.difficultyOpts().summons : 1);
+          const max = share > 0 && share < 1 ? Math.max(1, Math.ceil((d.summon.max || 3) * share)) : (d.summon.max || 3);
+          if (free && alive < max) {
             const a = Math.random() * Math.PI * 2, r = d.summon.radius || 2.5;
             revive(free, [ent.pos[0] + Math.cos(a) * r, free.home[1], ent.pos[2] + Math.sin(a) * r]);
             free.enabled = true; free.chasing = !!free.def.chase;
@@ -7316,7 +7434,10 @@ GK.Worlds.add('pc-inside', {
 
   // {type:'defeat', tag:'bug', count:5} — counts defeated enemies with that tag; the marker points at the nearest one
   GK.Objectives.add('defeat', {
-    need: o => o.count || 1,
+    need(o, g) {
+      const n = o.count || 1, r = g ? thinPlan(g).ratio[o.tag] : undefined;
+      return r !== undefined && r < 1 ? Math.max(1, Math.ceil(n * r)) : n;
+    },
     progress: (o, g) => g.state.events['defeated:' + o.tag] || 0,
     target(o, g, from) {
       if (!g.world) return null;
@@ -7359,7 +7480,8 @@ GK.Worlds.add('pc-inside', {
         if (!ent.active || ent.state.dead) return 'miss';
         if (d.boss) ent.state.engaged = true;
         if (!d.hp || (d.armor !== undefined && GK.test(game, d.armor))) { ent.hi = 0.35; game.audio.play('blocked'); return 'blocked'; }
-        ent.state.hp -= damage || 1;
+        const mul = d.boss ? Number(game.difficultyOpts ? game.difficultyOpts().bossDamage : 1) : 1;
+        ent.state.hp -= (damage || 1) * (mul > 0 ? mul : 1);
         ent.hi = 0.9;
         if (d.chase) ent.chasing = true;
         if (d.boss) ent.state.engaged = true;
