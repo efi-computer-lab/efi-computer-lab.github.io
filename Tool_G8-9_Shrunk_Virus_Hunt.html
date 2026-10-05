@@ -5649,6 +5649,9 @@ GK_LIBRARY.worlds = {
       g.shakeT = 0; g.shakeAmp = 0;
       g.shake = (seconds, strength) => { g.shakeT = Math.max(g.shakeT, seconds || 0.25); g.shakeAmp = Math.max(strength || 0.08, g.shakeT > 0 ? g.shakeAmp : 0); };
       g.viewModel = null;
+      g.muzzlePoint = target => this.muzzlePoint(target);   // third person: shots leave the gun's muzzle
+      g.aimRay = () => this.aimRay();                       // third person: aim along the crosshair (the camera's line)
+      this.aimT = 0;
       this.worldMesh = this.renderer.mesh(g.world.geo);
       if (cfg.ui.vignette && !this.vignette) this.vignette = this.canvas.insertAdjacentElement('afterend', U.el('div', 'gk-vignette'));
       if (cfg.ui.minimap) this.buildMinimap();
@@ -5740,6 +5743,7 @@ GK_LIBRARY.worlds = {
       }
       GK.Spatial.update(g, dt, g.input);
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
+      if (this.aimT > 0) this.aimT -= dt;
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
       if (this.flashes.length) { for (const f of this.flashes) f.t -= dt; this.flashes = this.flashes.filter(f => f.t > 0); }
       if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) this.toggleView();
@@ -5864,46 +5868,91 @@ GK_LIBRARY.worlds = {
       }
       return { pos, dist: t, dir: V.norm(V.sub(V.add(eye, V.scale(f, 14)), pos)) };
     }
+    /** Third person: where the arms and the tool are this frame. A gun is carried at the right hip, angled out (so the
+        over-the-shoulder camera sees it); for a moment after each shot it is raised and points at the crosshair, and its
+        muzzle (game.muzzlePoint) is where the shot leaves. Arm pitch: 0 = hanging, PI/2 = forward; arm yaw: + = toward the
+        character's left. */
+    heroPose(vm) {
+      const g = this.game, p = g.player, look = this.heroLook(), H = GK.HERO;
+      const Y = p.yaw + Math.PI, c = Math.cos(Y), n = Math.sin(Y);
+      const at = (x, y, z) => [p.pos[0] + x * c + z * n, p.pos[1] + y, p.pos[2] - x * n + z * c];
+      this.walkK = this.walkK || 0;
+      const sw = Math.sin((p.bobT || 0) * 2) * 0.6 * this.walkK, air = p.grounded ? 0 : 0.35;
+      const sx = GK.heroShoulderX(look), L = H.arm - 0.04, lerp = (a, b, t) => a + (b - a) * t;
+      const shR = at(-sx, H.shoulder, 0), shL = at(sx, H.shoulder, 0);
+      /** pitch and yaw that point an arm from its shoulder along the direction d */
+      const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
+      const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
+      const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (!vm) return out;
+      if (vm.melee) {
+        const k = vm.swing || 0;
+        out.armR = k <= 0 ? 0.95 : k < 0.2 ? lerp(0.95, 2.8, k / 0.2) : k < 0.6 ? lerp(2.8, 0.45, (k - 0.2) / 0.4) : lerp(0.45, 0.95, (k - 0.6) / 0.4);
+        out.tool = { pos: handOf(shR, out.armR, 0), yaw: Y, pitch: out.armR + Math.PI + 1.0, scale: 1.1 };
+        return out;
+      }
+      const s = 2.0, b = GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').bounds, front = b.max[2];
+      let gy, gp, hand;
+      if (this.aimT > 0 && this.aimAt) {
+        // aiming: the right arm and the gun point at the crosshair target; the left hand comes up to the gun
+        const a = toward(V.sub(this.aimAt, shR));
+        out.armR = a.pitch - (vm.kick || 0) * 0.12; out.yawR = a.yaw;
+        hand = handOf(shR, out.armR, out.yawR);
+        const d = V.norm(V.sub(this.aimAt, hand));
+        gy = Math.atan2(d[0], d[2]); gp = Math.asin(U.clamp(d[1], -1, 1)) + (vm.kick || 0) * 0.15;
+        const l = toward(V.sub(V.add(hand, V.scale(d, 0.25)), shL));
+        out.armL = l.pitch; out.yawL = l.yaw;
+      } else {
+        const aim = p.pitch - (vm.lower || 0) * 0.9;
+        out.armR = 0.95 + aim * 0.35; out.yawR = -0.38;
+        out.armL = 0.35 + sw * 0.4; out.yawL = -0.25;
+        hand = handOf(shR, out.armR, out.yawR);
+        gy = Y + out.yawR * 0.8; gp = aim * 0.6 - 0.08;
+      }
+      // the grip (about 0.1 below and 0.11 behind the model's centre) sits in the hand; the muzzle is the model's front
+      const ng = Math.sin(gy), cg = Math.cos(gy), ca = Math.cos(gp), sa = Math.sin(gp);
+      const Z = [ng * ca, sa, cg * ca], Up = [-ng * sa, ca, -cg * sa];
+      const pos = [0, 1, 2].map(i => hand[i] + (0.1 * Up[i] + 0.11 * Z[i]) * s);
+      out.tool = { pos, yaw: gy, pitch: gp, scale: s, muzzle: [0, 1, 2].map(i => pos[i] + Z[i] * front * s), dir: Z };
+      return out;
+    }
+    /** The third-person camera right now (null in first person, or when a wall leaves no room for it). */
+    thirdNow() {
+      if (this.viewMode() !== 'third' || !GK.HERO || !this.game.world) return null;
+      const c = this.thirdCamera(this.game.player.eye());
+      return c.dist < 1.1 ? null : c;
+    }
+    /** Third person only (null in first person): where a shot toward `target` leaves the gun. Raises the gun for a moment. */
+    muzzlePoint(target) {
+      const g = this.game, vm = g.viewModel;
+      if (!vm || vm.melee || !this.thirdNow()) return null;
+      this.aimAt = target.slice(); this.aimT = 0.7;
+      const pose = this.heroPose(vm);
+      return pose.tool && pose.tool.muzzle ? pose.tool.muzzle : null;
+    }
+    /** Third person only: the crosshair's line (from the camera through the screen centre), starting level with the player. */
+    aimRay() {
+      const c = this.thirdNow();   // worked out now, so a turn since the last frame counts
+      if (!c) return null;
+      const eye = this.game.player.eye(), d = c.dir, t0 = Math.max(0, V.dot(V.sub(eye, c.pos), d));
+      return { o: V.add(c.pos, V.scale(d, t0)), d };
+    }
     /** Third person: the character, walking (legs and arms swing), holding and using the tool. */
     drawHero(items, vm) {
       const g = this.game, r = this.renderer, p = g.player, look = this.heroLook(), H = GK.HERO;
       if (!H) return;
       const lk = JSON.stringify(look), part = name => r.cached('hero:' + name + lk, () => GK.Models.shape('heroPart', Object.assign({ part: name }, look), 'hero').geo);
-      const Y = p.yaw + Math.PI, c = Math.cos(Y), n = Math.sin(Y);
-      const at = (x, y, z) => [p.pos[0] + x * c + z * n, p.pos[1] + y, p.pos[2] - x * n + z * c];
       this.walkK = (this.walkK || 0) + ((p.moving ? 1 : 0) - (this.walkK || 0)) * 0.2;
-      const sw = Math.sin((p.bobT || 0) * 2) * 0.6 * this.walkK, air = p.grounded ? 0 : 0.35;
-      const sx = GK.heroShoulderX(look), lerp = (a, b, t) => a + (b - a) * t;
-      // arm pitch: 0 = hanging, PI/2 = pointing forward. Arm yaw (turn at the shoulder): + turns toward the character's left.
-      let armR = -sw * 0.8 + air, armL = sw * 0.8 + air, yawR = 0, yawL = 0;
-      const gun = vm && !vm.melee, aim = gun ? p.pitch - (vm.kick || 0) * 0.2 - (vm.lower || 0) * 0.9 : 0;
-      if (vm && vm.melee) {
-        const k = vm.swing || 0;
-        armR = k <= 0 ? 0.95 : k < 0.2 ? lerp(0.95, 2.8, k / 0.2) : k < 0.6 ? lerp(2.8, 0.45, (k - 0.2) / 0.4) : lerp(0.45, 0.95, (k - 0.6) / 0.4);
-      } else if (gun) {
-        // held at the right hip, out to the side where the over-the-shoulder camera sees it; it still points where you aim
-        armR = 0.95 + aim * 0.35; yawR = -0.38;
-        armL = 0.35 + sw * 0.4; yawL = -0.25;
-      }
+      const P = this.heroPose(vm), Y = P.Y, at = P.at;
       items.push({ mesh: part('torso'), pos: at(0, 0, 0), yaw: Y });
       items.push({ mesh: part('head'), pos: at(0, H.neck, 0), yaw: Y, pitch: U.clamp(p.pitch * 0.5, -0.45, 0.45) });
-      items.push({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: sw + air });
-      items.push({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -sw + air * 0.4 });
-      items.push({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y + yawL, pitch: armL });
-      items.push({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y + yawR, pitch: armR });
-      if (vm) {
-        const sh = at(-sx, H.shoulder, 0), L = H.arm - 0.04, nr = Math.sin(Y + yawR), cr = Math.cos(Y + yawR);
-        const hand = [sh[0] + Math.sin(armR) * nr * L, sh[1] - Math.cos(armR) * L, sh[2] + Math.sin(armR) * cr * L];
+      items.push({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: P.sw + P.air });
+      items.push({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -P.sw + P.air * 0.4 });
+      items.push({ mesh: part('armL'), pos: at(P.sx, H.shoulder, 0), yaw: Y + P.yawL, pitch: P.armL });
+      items.push({ mesh: part('armR'), pos: at(-P.sx, H.shoulder, 0), yaw: Y + P.yawR, pitch: P.armR });
+      if (vm && P.tool) {
         const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
-        if (vm.melee) items.push({ mesh, pos: hand, yaw: Y + yawR, pitch: armR + Math.PI + 1.0, scale: 1.1, hi: vm.glow || 0 });
-        else {
-          // the gun points where the player aims; its grip (about 0.1 below and 0.11 behind its centre) sits in the hand
-          // angled a little outward like a relaxed hip carry, so the over-the-shoulder camera sees its side
-          const s = 2.0, gy = Y + yawR * 0.8, gp = aim * 0.6 - 0.08, ng = Math.sin(gy), cg = Math.cos(gy), ca = Math.cos(gp), sa = Math.sin(gp);
-          const Z = [ng * ca, sa, cg * ca], Up = [-ng * sa, ca, -cg * sa];
-          const pos = [0, 1, 2].map(i => hand[i] + (0.1 * Up[i] + 0.11 * Z[i]) * s);
-          items.push({ mesh, pos, yaw: gy, pitch: gp, scale: s, hi: vm.glow || 0 });
-        }
+        items.push({ mesh, pos: P.tool.pos, yaw: P.tool.yaw, pitch: P.tool.pitch, scale: P.tool.scale, hi: vm.glow || 0 });
       }
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
       items.push({ mesh: blob, pos: [p.pos[0], p.pos[1] + 0.02, p.pos[2]], scale: [0.45, 1, 0.45], alpha: 0.34 });
@@ -8191,13 +8240,17 @@ GK.Worlds.add('server-inside', {
         if (!rapid) o.mag -= 1;
         game.cool = w.cooldown * (rapid ? 0.5 : 1);
         const p = game.player, eye = p.eye(), f = p.forward(), yaw = p.yaw;
-        // aim where the crosshair points, start at the tip of the tool
-        const tWall = wallAt(game, eye, f, w.range), tEnemy = enemyAt(game, eye, f, w.range).t;
-        const aim = V.add(eye, V.scale(f, Math.min(tWall, tEnemy, w.range)));
-        let start = [eye[0] + f[0] * 0.55 + Math.cos(yaw) * 0.16, eye[1] + f[1] * 0.55 - 0.13, eye[2] + f[2] * 0.55 - Math.sin(yaw) * 0.16];
+        // aim where the crosshair points (in third person: along the camera's line), start at the tip of the tool
+        const ray = (game.aimRay && game.aimRay()) || { o: eye, d: f };
+        const tWall = wallAt(game, ray.o, ray.d, w.range), tEnemy = enemyAt(game, ray.o, ray.d, w.range).t;
+        const aim = V.add(ray.o, V.scale(ray.d, Math.min(tWall, tEnemy, w.range)));
+        const muzzle = game.muzzlePoint ? game.muzzlePoint(aim) : null;   // third person: the gun's muzzle
+        let start = muzzle || [eye[0] + f[0] * 0.55 + Math.cos(yaw) * 0.16, eye[1] + f[1] * 0.55 - 0.13, eye[2] + f[2] * 0.55 - Math.sin(yaw) * 0.16];
         let dir = V.norm(V.sub(aim, start));
         // the tip sits beside the eye: if scenery is in its way but not in the crosshair's, shoot along the crosshair
-        if (wallAt(game, start, dir, V.dist(start, aim) - 0.3) < Infinity) { start = V.add(eye, V.scale(f, 0.4)); dir = f; }
+        if (wallAt(game, start, dir, V.dist(start, aim) - 0.3) < Infinity || (muzzle && wallAt(game, eye, V.norm(V.sub(muzzle, eye)), V.dist(eye, muzzle)) < Infinity)) {
+          start = V.add(eye, V.scale(f, 0.4)); dir = V.norm(V.sub(aim, start));
+        }
         for (let i = 0; i < (w.pellets || 1); i++) {
           const b = take(fx.bolts);
           if (!b) break;
