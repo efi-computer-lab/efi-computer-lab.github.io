@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does saving work on this computer?</title>
+<style>
+  :root{
+    --night:#12162b; --panel:#1c2140; --panel-2:#2b3157;
+    --bone:#e6e9f5; --mint:#5ad6a5; --coral:#e4746c; --amber:#f2a65a; --dim:#8b92b8;
+    --mono: ui-monospace,"Cascadia Mono","Consolas","Courier New",monospace;
+    --sans: "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--night);color:var(--bone);font-family:var(--sans);font-size:16px;
+    padding:34px 20px 70px;-webkit-font-smoothing:antialiased;line-height:1.55}
+  .wrap{max-width:660px;margin:0 auto}
+  h1{font-family:var(--mono);font-size:25px;margin:0 0 6px;line-height:1.15}
+  .sub{color:var(--dim);font-size:15px;margin:0 0 26px}
+  .verdict{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:22px 24px;margin-bottom:18px}
+  .verdict.good{box-shadow:0 0 0 3px var(--mint)}
+  .verdict.bad{box-shadow:0 0 0 3px var(--coral)}
+  .verdict.wait{box-shadow:0 0 0 3px var(--amber)}
+  .verdict h2{font-family:var(--mono);font-size:17px;margin:0 0 10px}
+  .verdict.good h2{color:var(--mint)}
+  .verdict.bad h2{color:var(--coral)}
+  .verdict.wait h2{color:var(--amber)}
+  .verdict p{margin:0 0 10px;font-size:14.5px}
+  .verdict p:last-child{margin-bottom:0}
+  .steps{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:20px 24px;margin-bottom:18px}
+  .steps h3{font-family:var(--mono);font-size:12.5px;letter-spacing:.4px;color:var(--dim);margin:0 0 12px}
+  .steps ol{margin:0;padding-left:20px}
+  .steps li{margin-bottom:9px;font-size:14.5px}
+  .steps li:last-child{margin-bottom:0}
+  code{font-family:var(--mono);background:var(--night);padding:2px 6px;font-size:13px}
+  button{font-family:var(--mono);font-size:14px;font-weight:700;background:var(--mint);color:#0d2b21;
+    border:0;padding:12px 20px;cursor:pointer;margin-right:9px}
+  button.quiet{background:var(--panel-2);color:var(--bone)}
+  button:hover{filter:brightness(1.12)}
+  .tech{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:24px;
+    border-top:2px solid var(--panel-2);padding-top:14px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Does saving work on this computer?</h1>
+  <p class="sub">The tools save a student's work automatically so a crash or an accidental close does not lose it.
+     That only works if this computer's browser lets a page store anything. This page checks it, for real,
+     in about ten seconds.</p>
+
+  <div class="verdict wait" id="verdict">
+    <h2>Checking...</h2>
+    <p id="vtext">One moment.</p>
+  </div>
+
+  <div class="steps" id="steps">
+    <h3>HOW TO RUN THE CHECK</h3>
+    <ol>
+      <li>Press <b>Write a test value</b> below.</li>
+      <li><b>Close this tab completely</b>, then open this same file again by double-clicking it.</li>
+      <li>This page will tell you whether the value survived. That is the same thing the tools rely on.</li>
+    </ol>
+    <p style="margin:14px 0 0"><button id="write" type="button">Write a test value</button><button class="quiet" id="reset" type="button">Clear the test</button></p>
+  </div>
+
+  <div class="tech" id="tech"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = 'practicum.savecheck';
+  var verdict = document.getElementById('verdict');
+  var vtext = document.getElementById('vtext');
+  var tech = document.getElementById('tech');
+
+  function show(kind, title, msg){
+    verdict.className = 'verdict ' + kind;
+    verdict.querySelector('h2').textContent = title;
+    vtext.innerHTML = msg;
+  }
+
+  var canStore = true, err = '';
+  try {
+    window.localStorage.setItem(KEY + '.probe', '1');
+    window.localStorage.removeItem(KEY + '.probe');
+  } catch (e) { canStore = false; err = e.name + ': ' + e.message; }
+
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+  function report(){
+    if (!canStore){
+      show('bad', 'No. This computer will not let a page save anything.',
+        'The tools will still run, but nothing will be kept. They will show a <b>red bar</b> saying so, ' +
+        'and students must export or copy their work out before closing the tab.<br><br>' +
+        'Most often this is fixed by opening the tools in <b>Microsoft Edge</b> rather than another program, ' +
+        'or by turning off a setting that blocks site data for local files.');
+      return;
+    }
+    var raw = null;
+    try { raw = window.localStorage.getItem(KEY); } catch (e) {}
+    if (!raw){
+      show('wait', 'Storage is allowed. Now test that it survives a close.',
+        'This browser accepted a test write. Press <b>Write a test value</b>, close the tab, and open this file again.');
+      return;
+    }
+    var d = null;
+    try { d = JSON.parse(raw); } catch (e) {}
+    if (!d || !d.at){
+      show('bad', 'Something was stored but came back damaged.',
+        'Press <b>Clear the test</b> and try once more. If it keeps happening, tell your technician.');
+      return;
+    }
+    var when = new Date(d.at);
+    var mins = Math.round((Date.now() - d.at) / 60000);
+    show('good', 'Yes. Saving works on this computer.',
+      'A value written at <b>' + pad(when.getHours()) + ':' + pad(when.getMinutes()) + '</b>' +
+      (mins >= 1 ? ' (' + mins + ' minute' + (mins === 1 ? '' : 's') + ' ago)' : '') +
+      ' is still here.<br><br>' +
+      'If that was written <b>before you closed and reopened this tab</b>, the autosave in the tools will work ' +
+      'exactly the same way. Students can close a tool by accident and get their work back.');
+  }
+
+  document.getElementById('write').addEventListener('click', function(){
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify({at: Date.now()}));
+      show('wait', 'Written. Now close this tab and open the file again.',
+        'Close the whole tab, then double-click <code>CHECK_SAVING_WORKS.html</code> once more. ' +
+        'If the value is still here, saving works.');
+    } catch (e) {
+      canStore = false;
+      report();
+    }
+    techLine();
+  });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    try { window.localStorage.removeItem(KEY); } catch (e) {}
+    report(); techLine();
+  });
+
+  function techLine(){
+    var stored = 'n/a';
+    try { stored = window.localStorage.getItem(KEY) ? 'present' : 'none'; } catch (e) { stored = 'unreadable'; }
+    tech.textContent =
+      'address type   ' + location.protocol + '\n' +
+      'storage allowed ' + (canStore ? 'yes' : 'no' + (err ? '  (' + err + ')' : '')) + '\n' +
+      'test value      ' + stored;
+  }
+
+  report();
+  techLine();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rover</title>
+<style>
+  :root{
+    --night:#12162b; --panel:#1c2140; --panel-2:#2b3157;
+    --bone:#e6e9f5; --amber:#f2a65a; --mint:#5ad6a5; --coral:#e4746c; --dim:#8b92b8;
+    --mono: ui-monospace,"Cascadia Mono","Consolas","Courier New",monospace;
+    --sans: "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+    --helpac: var(--amber);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--night);color:var(--bone);font-family:var(--sans);font-size:16px;
+    padding:18px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto}
+
+  .navbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .navbar a{font-family:var(--mono);font-size:12.5px;font-weight:700;text-decoration:none;color:var(--dim);
+    box-shadow:inset 0 0 0 2px var(--panel-2);padding:8px 14px;transition:.15s}
+  .navbar a:hover{color:var(--bone);background:var(--panel-2)}
+  .navbar .here{font-family:var(--mono);font-size:12.5px;color:var(--amber)}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+  h1{font-family:var(--mono);font-size:29px;margin:0;font-weight:700;line-height:1}
+  .mission{font-size:15px;color:var(--dim);max-width:56ch;margin:6px 0 0}
+  .mission b{color:var(--amber)}
+  .tag{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
+
+  .cols{display:grid;grid-template-columns:250px 1fr 1fr;gap:16px;align-items:start}
+  @media (max-width:1040px){ .cols{grid-template-columns:1fr} }
+
+  .box{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:16px}
+  .box + .box{margin-top:13px}
+  .zone{display:flex;align-items:center;gap:9px;margin:0 0 12px}
+  .zone i{width:22px;height:22px;background:var(--amber);color:var(--night);display:grid;place-items:center;
+    font-family:var(--mono);font-size:12px;font-weight:700;font-style:normal;flex:0 0 22px}
+  .zone h2{font-family:var(--mono);font-size:12.5px;letter-spacing:.4px;margin:0;font-weight:700}
+
+  .levels{display:flex;flex-direction:column;gap:6px;max-height:474px;overflow:auto}
+  .levels button{width:100%;text-align:left;background:var(--night);color:var(--bone);border:0;
+    box-shadow:inset 0 0 0 2px var(--panel-2);padding:10px 12px;cursor:pointer;font-size:13.5px;
+    font-family:var(--sans);display:flex;gap:9px;align-items:center;transition:background .15s, transform .13s}
+  .levels button:hover{background:#161b36;transform:translateX(3px)}
+  .levels button[aria-pressed="true"]{background:var(--amber);color:var(--night);box-shadow:none;font-weight:700}
+  .levels .num{font-family:var(--mono);font-size:12px;opacity:.8}
+  .levels .tick{margin-left:auto;color:var(--mint);font-size:15px}
+  .levels button[aria-pressed="true"] .tick{color:var(--night)}
+  .levels button.locked{opacity:.42;cursor:not-allowed}
+  .levels button.locked:hover{background:var(--night);transform:none}
+  .levels .lock{margin-left:auto;font-size:13px}
+  .lvprog{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:11px;
+    border-top:2px solid var(--panel-2);padding-top:10px;line-height:1.5}
+  .lvprog b{color:var(--amber)}
+
+  .cmds{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:5px;align-items:start}
+  .cmds button{font-family:var(--mono);font-size:12px;text-align:left;background:var(--night);
+    color:#a8d8b9;border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:8px 9px;cursor:pointer;
+    line-height:1.45;transition:background .14s, transform .13s}
+  .cmds button:hover{background:#161b36;transform:translateX(3px)}
+  .cmds button small{display:block;font-family:var(--sans);color:var(--dim);font-size:10.5px;margin-top:2px}
+  .cmdhint{font-size:11.5px;color:var(--dim);margin:-6px 0 9px;line-height:1.35}
+
+  /* grid */
+  .stage{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:16px}
+  #grid{position:relative;display:grid;gap:3px;background:#0c0f20;padding:3px;width:100%}
+  .cell{background:#1a1f3a;position:relative;display:grid;place-items:center;aspect-ratio:1}
+  .cell.wall{background:#3a2f4a;box-shadow:inset 0 0 0 2px #574766}
+  .cell.goal{background:#123021;box-shadow:inset 0 0 0 2px var(--mint)}
+  .cell .rock{width:44%;height:44%;background:var(--amber);border-radius:50%;
+    box-shadow:0 0 0 2px #a86f2f;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-3px)}}
+  .cell .flag{font-size:clamp(14px,3.2vw,24px);line-height:1;color:var(--mint)}
+  .cell.visited::after{content:'';position:absolute;inset:40%;background:#2b3157;border-radius:50%}
+  /* the dark levels: a square stays blank until the rover has been near it */
+  .cell.fog{background:#0a0d1c;box-shadow:inset 0 0 0 1px #141a33}
+  .cell.fog *{display:none}
+  .foglab{font-family:var(--mono);font-size:11.5px;color:var(--amber);margin-top:9px}
+
+  /* rover: one element, moved by pixel offsets taken from the real cell */
+  #rover{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;
+    transition:left .26s cubic-bezier(.4,1.1,.6,1), top .26s cubic-bezier(.4,1.1,.6,1)}
+  #rover .spin{display:block;width:100%;height:100%;transition:transform .26s cubic-bezier(.4,1.3,.6,1)}
+  #rover .knock{display:block;width:100%;height:100%;padding:11%}
+  #rover svg{width:100%;height:100%;display:block}
+  #rover.bump .knock{animation:bump .32s}
+  @keyframes bump{25%{transform:scale(.84)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+  .runbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  button.big{font-family:var(--mono);font-size:15px;font-weight:700;background:var(--mint);color:#0d2b21;
+    border:0;padding:13px 24px;cursor:pointer;transition:background .15s, transform .12s}
+  button.big:hover{background:#8ae8b8;transform:translateY(-2px)}
+  button.act{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--panel-2);color:var(--bone);
+    border:0;padding:11px 15px;cursor:pointer}
+  button.act:hover{background:#3b4272}
+  button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  select{font-family:var(--mono);font-size:12.5px;background:var(--night);color:var(--bone);border:0;
+    box-shadow:inset 0 0 0 2px var(--panel-2);padding:10px}
+
+  /* editor */
+  #code{width:100%;height:240px;border:0;resize:vertical;display:block;background:#0c0f20;color:#dbe1f5;
+    font-family:var(--mono);font-size:14.5px;line-height:1.7;padding:14px;outline:none;tab-size:4}
+  #code:focus{box-shadow:inset 0 0 0 2px var(--amber)}
+  .panehead{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;
+    background:var(--panel-2);font-family:var(--mono);font-size:12px}
+  .pane{box-shadow:0 0 0 3px var(--panel-2);overflow:hidden}
+
+  .out{background:#0c0f20;box-shadow:inset 0 0 0 2px #262b4d;padding:14px 16px;margin-top:13px;
+    font-family:var(--mono);font-size:13px;line-height:1.7;min-height:110px;white-space:pre-wrap;color:#8b92b8}
+  .out.good{color:#8ce8b6}
+  .out.bad{color:#ff9a92}
+
+  .brief{font-size:14.5px;line-height:1.6}
+  .brief b{color:var(--amber)}
+  .par{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin-top:12px;
+    border-top:2px solid var(--panel-2);padding-top:11px}
+  .par b{color:var(--bone)}
+
+  /* hints */
+  .hintwrap{margin-top:13px;border-top:2px solid var(--panel-2);padding-top:12px}
+  .hintbtn{font-family:var(--mono);font-size:12.5px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:10px 13px;cursor:pointer;width:100%;text-align:left;line-height:1.35}
+  .hintbtn:hover:not(:disabled){background:#3b4272}
+  .hintbtn:disabled{opacity:.45;cursor:default}
+  .hintbtn:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  .hint{background:var(--night);border-left:3px solid var(--amber);padding:11px 13px;margin-top:9px;
+    font-size:13.5px;line-height:1.55;animation:hintIn .3s ease-out}
+  .hint b{color:var(--amber)}
+  .hint .hn{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.6px;
+    color:var(--dim);margin-bottom:5px}
+  @keyframes hintIn{from{opacity:0;transform:translateY(-6px)}}
+
+  /* dialog */
+  .ov{position:fixed;inset:0;background:rgba(6,8,20,.87);display:none;z-index:99;padding:26px 18px;overflow:auto}
+  .ov.on{display:block}
+  .ovbox{max-width:620px;margin:0 auto;background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);
+    padding:26px 28px 24px;animation:rise .3s ease-out}
+  @keyframes rise{from{transform:translateY(14px);opacity:0}}
+  .ovbox h2{font-family:var(--mono);font-size:24px;margin:0 0 8px;color:var(--helpac)}
+  .ovbox .ovsub{font-size:15.5px;color:var(--dim);margin:0 0 18px;line-height:1.6}
+  .ovbox ol{margin:0 0 18px;padding-left:0;list-style:none;counter-reset:h}
+  .ovbox ol li{counter-increment:h;position:relative;padding-left:38px;margin-bottom:13px;font-size:15.5px;line-height:1.55}
+  .ovbox ol li::before{content:counter(h);position:absolute;left:0;top:1px;width:25px;height:25px;
+    background:var(--helpac);color:var(--night);font-family:var(--mono);font-size:12.5px;font-weight:700;
+    display:grid;place-items:center}
+  .ovbox ol li b, .ovtip b{color:var(--helpac)}
+  .ovtip{background:var(--night);padding:14px 17px;font-size:14.5px;line-height:1.6;margin-bottom:20px}
+  .ovbox button{font-family:var(--mono);font-size:14.5px;font-weight:700;background:var(--helpac);
+    color:var(--night);border:0;padding:12px 24px;cursor:pointer}
+  .helpbtn{font-family:var(--mono);font-size:12.5px;font-weight:700;background:transparent;color:var(--dim);
+    border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:9px 15px;cursor:pointer}
+  .helpbtn:hover{color:var(--bone);background:var(--panel-2)}
+
+  /* autosave bar */
+  .saver{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);
+    box-shadow:0 0 0 3px var(--panel-2);padding:10px 14px;margin-bottom:14px;
+    font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.45}
+  .saver .dotx{width:9px;height:9px;border-radius:50%;background:var(--mint);flex:0 0 9px}
+  .saver b{color:var(--bone)}
+  .saver.warn{box-shadow:0 0 0 3px var(--coral)}
+  .saver.warn .dotx{background:var(--coral)}
+  .saver.back .dotx{background:var(--gold, var(--mint))}
+  .saverbtn{font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:7px 11px;cursor:pointer;margin-left:auto;white-space:nowrap}
+  .saverbtn:hover{filter:brightness(1.3)}
+  .saverbtn:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="navbar">
+    <a href="START_HERE_Computer_Lab.html">← Lab home</a>
+    <span class="here">Rover</span>
+  </div>
+
+  <header>
+    <div>
+      <h1>Rover</h1>
+      <p class="mission"><b>Mission:</b> write real Python to drive a rover across the surface, collect every rock, and reach the landing pad. The computer does exactly what you wrote — nothing else.</p>
+    </div>
+    <div class="tag">Problem solving with code</div>
+  </header>
+
+  <div class="saver" id="saver">
+    <span class="dotx" aria-hidden="true"></span>
+    <span id="savertext">Checking whether this computer can save your work...</span>
+    <button class="saverbtn" id="saverfresh" type="button" hidden>Start fresh</button>
+  </div>
+
+  <div class="cols">
+
+    <div>
+      <div class="box">
+        <div class="zone"><i>1</i><h2>PICK A LEVEL</h2></div>
+        <div class="levels" id="levels"></div>
+        <div class="lvprog" id="lvprog"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="box">
+        <div class="zone"><i>4</i><h2>THE SURFACE</h2></div>
+        <div id="grid"></div>
+        <div class="runbar">
+          <button class="big" id="run">▶ RUN</button>
+          <button class="act" id="reset">Reset</button>
+          <select id="speed" aria-label="Speed">
+            <option value="420">slow</option>
+            <option value="240" selected>normal</option>
+            <option value="90">fast</option>
+          </select>
+        </div>
+        <div class="out" id="out">Write your program, then press RUN.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pane">
+        <div class="panehead"><span>2 · your program</span><span id="lc">0 lines</span></div>
+        <textarea id="code" spellcheck="false" aria-label="Your Python program"></textarea>
+      </div>
+      <div class="box" style="margin-top:13px">
+        <div class="zone"><i>3</i><h2>COMMANDS</h2></div>
+        <p class="cmdhint">Click one to drop it straight into your program above.</p>
+        <div class="cmds" id="cmds"></div>
+      </div>
+      <div class="box" style="margin-top:13px">
+        <div class="zone"><i>5</i><h2>THE BRIEF</h2></div>
+        <div class="brief" id="brief"></div>
+        <div class="par" id="par"></div>
+        <div class="hintwrap">
+          <button class="hintbtn" id="hintbtn"></button>
+          <div id="hintbox"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovh">
+  <div class="ovbox">
+    <h2 id="ovh">How Rover works</h2>
+    <p class="ovsub">This is real Python. Same words, same brackets, same indentation as the programs you write in class — it just drives a rover instead of printing text.</p>
+    <ol>
+      <li>Pick a level. Read the brief on the right.</li>
+      <li>Write your program in the box. Click a <b>command</b> underneath it to drop it in.</li>
+      <li>Press <b>RUN</b> and watch. The rover does exactly what you wrote, in order, from the top.</li>
+      <li>Crash into a wall? That is not a punishment — it tells you which line was wrong.</li>
+      <li>Every level has a <b>target number of lines</b>. Beating it usually means using a loop instead of copying and pasting.</li>
+      <li>Landing a level <b>unlocks the next one</b>. Every level is built on the one before it.</li>
+      <li>The rover can be asked five questions: <code>wall_ahead()</code>, <code>wall_left()</code>, <code>wall_right()</code>, <code>on_rock()</code> and <code>at_goal()</code>. Later levels are unsolvable without them.</li>
+      <li><code>def</code> gives a name to a group of lines, and <code>elif</code> chains a second question onto an <code>if</code>. Both are ordinary Python and both turn up near the end.</li>
+    </ol>
+    <div class="ovtip"><b>Indentation is not decoration.</b> Lines inside a <code>for</code> or an <code>if</code> must be pushed in with four spaces. Get that wrong and Python stops — exactly as it does in your real programs.</div>
+    <button id="ovgo">Start driving</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var ROVER_SVG = '<svg viewBox="0 0 40 40"><g><rect x="8" y="10" width="24" height="20" rx="3" fill="#f2a65a" stroke="#a86f2f" stroke-width="2"/><rect x="14" y="4" width="12" height="8" rx="2" fill="#5ad6a5" stroke="#2b8a68" stroke-width="2"/><circle cx="13" cy="31" r="4" fill="#2b3157" stroke="#0c0f20" stroke-width="1.5"/><circle cx="27" cy="31" r="4" fill="#2b3157" stroke="#0c0f20" stroke-width="1.5"/><circle cx="20" cy="20" r="3.5" fill="#0c0f20"/></g></svg>';
+
+  // # = wall, . = sand, o = rock, G = landing pad, R = rover start (facing up)
+  var LEVELS = [
+    { name:'First drive', par:2,
+      hints:['Count the squares between the rover and the landing pad. That is how many times <b>forward()</b> has to appear, one on each line.'],
+      brief:'Straight ahead. Drive to the landing pad. <b>forward()</b> moves one square in the direction you are facing.',
+      teach:'Every command needs its brackets. forward() works, forward does not.',
+      map:['.....','.....','..G..','.....','..R..'] },
+
+    { name:'Turn the corner', par:5,
+      hints:['Do not turn first. Drive forward until you are level with the pad, <b>then</b> turn, then drive again. If you turn the wrong way the rover tells you straight away, and that costs you nothing.'],
+      brief:'The landing pad is not straight ahead, and there is a wall in the way if you keep going. <b>turn_left()</b> and <b>turn_right()</b> turn on the spot without moving you.',
+      teach:'Turning does not move you. It only changes which way forward() will take you.',
+      map:['.....','...#.','.G...','.....','...R.'] },
+
+    { name:'Pick it up', par:6,
+      hints:['<b>collect()</b> is not a move. Drive onto the rock square first, put collect() on the next line, then carry on with forward(). Two rocks means two collect() lines.'],
+      brief:'Two rocks sit on your path. Drive onto each one and <b>collect()</b> it. The landing pad will not count until every rock is gone.',
+      teach:'collect() only works when you are standing on a rock. Standing next to one is not the same thing.',
+      map:['..G..','..o..','.....','..o..','..R..'] },
+
+    { name:'Too much typing', par:3,
+      hints:['The number inside <b>range()</b> is how many times the line underneath runs. Count the squares to the pad and put that number in the brackets. The line under it must be pushed in four spaces.'],
+      brief:'A long straight run. You <i>could</i> write forward() eight times — but there is a better way.<br><br><b>for i in range(8):</b><br>&nbsp;&nbsp;&nbsp;&nbsp;forward()',
+      teach:'A loop is not a shortcut for lazy people. It turns eight moves into one idea.',
+      map:['..G..','.....','.....','.....','.....','.....','.....','.....','..R..'] },
+
+    { name:'Feel your way', par:6,
+      hints:['Do not try to work out the path yourself. The brief has already given you the whole program. Your only job is to type it with the indentation exactly right.',
+             'Three depths, and nothing else. <b>while</b> at the far left, <b>if</b> and <b>else</b> four spaces in, turn_right() and forward() eight spaces in.'],
+      brief:'Walls block the straight path. Instead of counting every turn, let the rover <b>decide as it goes</b>:<br><br><b>while not at_goal():</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b>if wall_ahead():</b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;turn_right()<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>else:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forward()',
+      teach:'That program does not know this map. It would work on a different one too. That is the difference between solving a puzzle and writing a program.',
+      map:['..G..','.###.','.....','.###.','..R..'] },
+
+    { name:'The long haul', par:15,
+      hints:['Do not write the whole thing before you run it. Get to the first rock, collect it, and press RUN. Only then start thinking about the next corner.',
+             'Every leg of the trip is the same shape: <b>one turn, then a loop of forward()</b>. Write one leg, count the squares along that edge, then repeat the shape for each side.'],
+      brief:'Two rocks in opposite corners, walls in between, and a long way round. Use everything you have: a loop to travel, a turn to steer, and collect() when you are standing on a rock.',
+      teach:'Break it into pieces. Get to the first rock. Then worry about the second.',
+      map:['o...G','.###.','.....','.###.','R...o'] },
+
+    { name:'Sweep the line', par:5,
+      hints:['<b>on_rock()</b> does not move you and does not pick anything up. It only answers yes or no about the square you are standing on right now.',
+             'Inside the while, the <b>if</b> comes first and <b>forward()</b> comes after it, at the same indentation as the if and not inside it. That way the rover moves every time round, whether or not there was a rock.'],
+      brief:'Rocks on the way up, and this time do not count them. <b>on_rock()</b> asks the ground a question: am I standing on one?<br><br><b>while not at_goal():</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b>if on_rock():</b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;collect()<br>&nbsp;&nbsp;&nbsp;&nbsp;forward()',
+      teach:'You never counted the rocks. The rover checked the ground itself, so that program still works if somebody moves every one of them.',
+      map:['..G..','.....','..o..','..o..','.....','..o..','..R..'] },
+
+    { name:'Sweep and steer', par:8,
+      hints:['You have already written both halves of this. Level 7 gave you the rock check and level 5 gave you the wall check. This level is those two halves inside <b>one</b> while.',
+             'They are two separate <b>if</b> statements, one after the other, both four spaces inside the while. Only the wall one needs an <b>else</b>.'],
+      brief:'Both problems at once: rocks you cannot see coming, and walls that block the way. Two questions inside one loop. Ask about the ground first, then about the wall.',
+      teach:'Two ifs inside one while. That is what most real programs are: a loop that keeps going, and decisions taken fresh every time round.',
+      map:['..G..','.###.','o....','.###.','..R.o'] },
+
+    { name:'The staircase', par:5,
+      hints:['Type it out the long way first, all sixteen lines, and land it. Then read back what you typed: the same four lines appear four times over.',
+             'The block that repeats is <b>forward, turn, forward, turn back</b>. Wrap those four lines in <b>for i in range(4):</b> and push all four in by four spaces.'],
+      brief:'A narrow staircase cut through solid rock, and one wrong move ends the run. Typed out in full it is sixteen lines. Look at the shape of it, find the four lines that repeat, and wrap them in a loop.',
+      teach:'Spotting the repeat is the whole skill. The loop is only how you write it down once you have seen it.',
+      map:['#G.####','##..###','###..##','####..#','#####R#'] },
+
+    { name:'Every last rock', par:16,
+      hints:['Drive to one corner rock and collect it before you plan anything else. Then notice that getting from one corner to the next is always the same job: one turn, a fixed number of forward() moves, then collect().',
+             'Put the travelling loop <b>inside</b> the corner loop. The outer <b>for</b> counts how many corners are left, the inner <b>for</b> counts the squares along one edge, and the outer one never needs to know how long an edge is.'],
+      brief:'Four rocks, one in each corner, and the pad walled into the middle with a single way in. Driving round the outside is the easy part. Doing it without writing the same three lines out three times is the real job.',
+      teach:'A loop inside a loop. The outer one counts corners, the inner one counts squares, and neither needs to know anything about the other.',
+      map:['o.....o','.......','..###..','..#G#..','..#.#..','.......','o..R..o'] },
+
+    { name:'Hug the wall', par:8,
+      hints:['Your old program only ever asked <b>wall_ahead()</b>. That is exactly why it gets stuck here - it never notices the opening on its left and drives straight past it. There is a new question for that.',
+             'Keep your left hand on the wall and walk. In code: if there is <b>no wall on the left</b>, turn left and go. Otherwise if nothing is ahead, go forward. Otherwise turn right and try again.'],
+      brief:'Your wall-follower from earlier goes round and round in here forever. It only ever asks what is in front of it.<br><br>Two new questions: <b>wall_left()</b> and <b>wall_right()</b>. They look at the square beside the rover without turning it.',
+      teach:'Keeping one hand on the wall gets you out of almost any maze. You did not solve this map - you wrote something that solves maps.',
+      map:['#####G#','#####.#','#..#..#','#.##.##','#....##','###.###','###R###'] },
+
+    { name:'The maze', par:8,
+      hints:['Do not study the maze. That is the whole point of this level - the program that gets through it never knew what the map looked like.',
+             'It is the same eight lines as the level before, unchanged. If yours gets stuck, check the order it asks in: <b>left first</b>, then ahead, and turning right only as a last resort.'],
+      brief:'A real maze this time, with dead ends that go nowhere. Counting your way through it is possible and it will take you twenty minutes.<br><br>The program you wrote on the last level already solves this one. Try it before you write anything new.',
+      teach:'You just ran the same program on a map you had never seen and it worked. That is the whole reason anybody writes a loop with a question in it instead of a list of moves.',
+      map:['#####G#','#.....#','#.###.#','#.#...#','#.#.###','#...#.#','###R#.#'] },
+
+    { name:'Say it once', par:15,
+      hints:['Three arms, and the rover does the identical thing on every one of them: drive out, collect, turn round, drive back. Write that sequence <b>once</b> and give it a name using <b>def</b>.',
+             'A def block is a named list of lines: <b>def arm():</b> and then the moves pushed in four spaces underneath. After that, writing <b>arm()</b> on a line of its own runs the whole lot. Finish the block facing the next arm and you can call it three times in a row.'],
+      brief:'Three arms, three rocks, and the pad in the middle. The rover does the same thing on every arm.<br><br>New word: <b>def</b>. It lets you give a name to a group of lines and then run them by name.<br><br><b>def arm():</b><br>&nbsp;&nbsp;&nbsp;&nbsp;forward()<br>&nbsp;&nbsp;&nbsp;&nbsp;collect()<br><br>Then <b>arm()</b> runs both lines.',
+      teach:'Naming a group of lines is how programs stop being long. Write the awkward part once, get it right once, then use the name and never think about it again.',
+      map:['###o###','###.###','###.###','o..G..o','###.###','###.###','###R###'] },
+
+    { name:'One shape, four times', par:14,
+      hints:['Same idea as the last level, except the name now goes <b>inside a loop</b>. Work out the one step-in-collect-step-out shape that happens at every alcove, and put nothing else in it.',
+             'Two parts. A <b>def</b> that steps into an alcove, collects, and comes back out facing the way it was going. Then <b>for i in range(4):</b> with the driving and the call to your def inside it.'],
+      brief:'Four rocks, each tucked into a side alcove off one long corridor. Written out in full this is nearly forty lines.<br><br>You already have both tools. A <b>def</b> for the bit that repeats, and a <b>for</b> loop to run it four times.',
+      teach:'A name inside a loop. The loop says how many times, the name says what - and neither one has to know anything about the other.',
+      map:['#G#','#.#','o.#','#.#','o.#','#.#','o.#','#.#','o.#','#.#','#R#'] },
+
+    { name:'It does not know the map', par:10,
+      hints:['You have both halves already. Level 7 taught the rover to ask the ground with <b>on_rock()</b>, and Hug the wall taught it to feel for the wall on its left. Put them inside the same while loop.',
+             'Ask about the rock <b>first</b>, right at the top of the loop, before any turning or moving. Then do the wall-following underneath. That way every square the rover stands on gets checked exactly once.'],
+      brief:'A maze with rocks in it, and some of them are not on the obvious route.<br><br>Your wall-follower will walk the whole maze if it has to. Give it something to do on every square it stands on.',
+      teach:'Notice what you never did: you never counted a rock or looked up where one was. The rover asked the ground, every square, the whole way round.',
+      map:['#####G#','#o..o.#','#.###.#','#.#.#.#','#o#.#.#','#...#.#','###R#.#'] },
+
+    { name:'Every last corner', par:10,
+      hints:['Count nothing. Measure nothing. This map is big enough that plotting a route by hand will take longer than the lesson, and the program that solves it does not care how big it is.',
+             'It is the program from the level before with not one character changed. Some rocks sit down dead ends - wall-following walks into a dead end and back out again all by itself, which is exactly why it finds them.'],
+      brief:'The biggest map in the tool, four rocks, and two of them down dead ends that lead nowhere.<br><br>Nothing new to learn here. If the program you wrote last time is the right kind of program, it already works. Paste it in and press RUN.',
+      teach:'That is the whole idea, finished. Ten lines that never knew the map, never counted a square and never looked up where a rock was - and they cleared the biggest maze in the tool.',
+      map:['#########','#o..#...#','#.#.#.#.#','#.#..o#.#','#.#####.#','#...#..o#','###.#.#.#','#o....#.#','####R##G#'] },
+
+    { name:'Lights out', par:8, fog:true,
+      hints:['Nothing has changed except what you can see. The rover still feels walls with <b>wall_left()</b> and <b>wall_ahead()</b>, and those two never needed your eyes in the first place.',
+             'Paste in the wall-follower you already have. If it worked on a map you could see, it works on one you cannot - that is the only thing this level is here to prove.'],
+      brief:'The lights are off.<br><br>You cannot see the walls, the pad, or anything else until the rover has driven near it. Counting squares is not difficult here. It is <b>impossible</b>.<br><br>Your wall-follower never looked at the map anyway.',
+      teach:'You just solved a maze you could not see. Every program you have written since Hug the wall could have done this - you simply had no reason to believe it until now.',
+      map:['#G#####','#.#####','#...#.#','###.#.#','#...#.#','#.###.#','#..R#.#'] },
+
+    { name:'Lights out, rocks too', par:10, fog:true,
+      hints:['Same dark maze idea, except now there are rocks in it and you have no way of knowing where. Good news: you never knew where they were on the lit levels either.',
+             'The rock question goes at the top of the loop, before any turning or moving, exactly as before. The rover asks the ground about every square it stands on, and the dark makes no difference to the ground.'],
+      brief:'Dark, and there are rocks somewhere in it.<br><br>You cannot see them and you cannot count them. <b>Do not try.</b> Ask the ground on every square, the way you already know how.',
+      teach:'Three rocks, none of which you could see, all of them collected. A program that asks does not need to be told.',
+      map:['#####G#','#...o.#','#.###.#','#o#.#.#','#.#.#.#','#...#.#','#o#R#.#'] },
+
+    { name:'The dark maze', par:10, fog:true,
+      hints:['This is the last one, and there is genuinely nothing new in it. The biggest dark maze in the tool, four rocks, and the same ten lines you finished the last level with.',
+             'If you have started sketching the maze on paper, stop. The whole point is that the program does not need the sketch and neither do you. Paste it in and press RUN.'],
+      brief:'The last level. The biggest maze in the tool, four rocks hidden in it, and the lights are off.<br><br>You have written this program already. Paste it in and watch it work on a map that nobody, including you, has ever seen.',
+      teach:'Ten lines. No map, no lights, no counting, nothing memorised. That is what it means to write a program instead of solving a puzzle - and it is the whole point of everything you just did.',
+      map:['#########','#.#..o..#','#.#.###.#','#...#.#.#','#o###.#.#','#.#...#o#','#.#.###.#','#o..#..G#','###R#####'] }
+  ];
+  var lvIndex = 0, level = LEVELS[0], solved = {};
+  var state = null, running = false;
+  // bumped whenever a run starts or is stopped; anything left over from an
+  // older run checks this and quietly gives up
+  var runId = 0;
+
+
+  /* ---------- autosave ----------
+     Students lose work to crashes and to closing the tab by accident. This
+     writes the whole state to this computer a moment after every change, and
+     puts it back when the page opens again. If the browser refuses to store
+     anything, the bar says so in red rather than pretending. */
+  var SAVE_KEY = 'practicum.rover.v1';
+  var saveOn = (function(){
+    try {
+      window.localStorage.setItem('practicum.probe', '1');
+      window.localStorage.removeItem('practicum.probe');
+      return true;
+    } catch (e) { return false; }
+  })();
+  var saveTimer = null, unsaved = false, restoredAt = 0;
+  var saverEl = document.getElementById('saver');
+  var saverText = document.getElementById('savertext');
+  var saverFresh = document.getElementById('saverfresh');
+
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function clockOf(ms){ var d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+  function grabState(){
+    return { v:1, at:Date.now(), code:document.getElementById('code').value,
+             lv:lvIndex, solved:solved, hints:hintsOut };
+  }
+  function applyState(d){
+    solved = d.solved || {};
+    hintsOut = d.hints || {};
+    var i = d.lv || 0;
+    if (i < 0 || i >= LEVELS.length) i = 0;
+    while (i > 0 && solved[LEVELS[i-1].name] === undefined) i--;   // never land on a locked level
+    lvIndex = i; level = LEVELS[i];
+    if (typeof d.code === 'string') document.getElementById('code').value = d.code;
+  }
+
+  function sayIdle(){
+    if (!saveOn) return;
+    saverEl.className = 'saver';
+    saverText.innerHTML = 'Your work saves itself on this computer. Close this by accident and it comes back.';
+    saverFresh.hidden = true;
+  }
+  function sayNoStore(){
+    saveOn = false;
+    saverEl.className = 'saver warn';
+    saverText.innerHTML = '<b>This computer will not let the page save anything.</b> Nothing is being kept, so save or export your work yourself before you close the tab.';
+    saverFresh.hidden = true;
+  }
+  function saveNow(){
+    if (!saveOn) return;
+    try {
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(grabState()));
+      unsaved = false;
+      saverEl.className = 'saver';
+      saverText.innerHTML = 'Saved at <b>' + clockOf(Date.now()) + '</b>. It will still be here if this closes.';
+      saverFresh.hidden = false;
+    } catch (e) { sayNoStore(); }
+  }
+  function touch(){
+    unsaved = true;
+    if (!saveOn) return;
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 800);
+  }
+  function clearSave(){
+    try { window.localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  }
+  function restoreSave(){
+    if (!saveOn){ sayNoStore(); return false; }
+    var raw = null;
+    try { raw = window.localStorage.getItem(SAVE_KEY); } catch (e) { sayNoStore(); return false; }
+    if (!raw){ sayIdle(); return false; }
+    var d = null;
+    try { d = JSON.parse(raw); } catch (e) { d = null; }
+    if (!d || d.v !== 1){ clearSave(); sayIdle(); return false; }
+    try { applyState(d); } catch (e) { clearSave(); sayIdle(); return false; }
+    restoredAt = d.at || 0;
+    return true;
+  }
+  function sayRestored(){
+    saverEl.className = 'saver back';
+    saverText.innerHTML = '<b>Your work from ' + clockOf(restoredAt) + ' has been put back.</b> Carry on from where you were.';
+    saverFresh.hidden = false;
+  }
+  saverFresh.addEventListener('click', function(){
+    if (!window.confirm('Throw away the work on screen and start over?\n\nThis cannot be undone.')) return;
+    clearSave();
+    unsaved = false;
+    window.location.reload();
+  });
+  // if nothing could be stored, at least stop an accidental close from being silent
+  window.addEventListener('beforeunload', function(e){
+    if (!unsaved) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
+
+  var COMMANDS = [
+    {t:'forward()', d:'move one square ahead'},
+    {t:'turn_left()', d:'turn 90° left, stay put'},
+    {t:'turn_right()', d:'turn 90° right, stay put'},
+    {t:'collect()', d:'pick up a rock you stand on'},
+    {t:'for i in range(4):\n    forward()', d:'repeat something 4 times'},
+    {t:'if wall_ahead():\n    turn_right()', d:'decide while you drive'},
+    {t:'if on_rock():\n    collect()', d:'pick it up only if there is one'},
+    {t:'while not at_goal():\n    forward()', d:'keep going until you arrive'},
+    {t:'if not wall_left():\n    turn_left()\n    forward()', d:'follow the wall on your left'},
+    {t:'elif not wall_ahead():\n    forward()', d:'otherwise, if this instead'},
+    {t:'def job():\n    forward()\n    collect()', d:'name a group of lines'},
+    {t:'job()', d:'run a group you named'}
+  ];
+
+  /* ---------------- parsing ---------------- */
+  function parse(src){
+    var raw = src.split('\n');
+    var lines = [];
+    for (var i=0;i<raw.length;i++){
+      var text = raw[i].replace(/#.*$/, '');
+      if (!text.trim()) continue;
+      var indent = text.match(/^ */)[0].length;
+      if (/\t/.test(text.match(/^[\s]*/)[0])) throw {line:i+1, msg:'TabError: use spaces, not tabs, at the start of a line.'};
+      lines.push({n:i+1, indent:indent, code:text.trim()});
+    }
+    var pos = 0;
+    function block(minIndent){
+      var out = [];
+      while (pos < lines.length && lines[pos].indent >= minIndent){
+        var L = lines[pos];
+        if (L.indent > minIndent && out.length === 0)
+          throw {line:L.n, msg:'IndentationError: unexpected indent. This line is pushed in further than the one above it for no reason.'};
+        if (L.indent > minIndent) break;
+        pos++;
+        var m;
+        if ((m = L.code.match(/^for\s+\w+\s+in\s+range\(\s*(\d+)\s*\)\s*:$/))){
+          var body = requireBody(L, minIndent);
+          out.push({k:'for', n:parseInt(m[1],10), body:body, line:L.n});
+        } else if ((m = L.code.match(/^while\s+(not\s+)?(\w+)\(\)\s*:$/))){
+          out.push({k:'while', neg:!!m[1], fn:m[2], body:requireBody(L, minIndent), line:L.n});
+        } else if ((m = L.code.match(/^if\s+(not\s+)?(\w+)\(\)\s*:$/))){
+          out.push(ifNode(L, minIndent, m));
+        } else if ((m = L.code.match(/^def\s+(\w+)\s*\(\s*\)\s*:$/))){
+          out.push({k:'def', name:m[1], body:requireBody(L, minIndent), line:L.n});
+        } else if (/^elif\b/.test(L.code)){
+          throw {line:L.n, msg:'SyntaxError: an elif has to follow an if at the same indentation. This one has no if above it.'};
+        } else if ((m = L.code.match(/^(\w+)\(\)$/))){
+          out.push({k:'call', fn:m[1], line:L.n});
+        } else if (/:$/.test(L.code)){
+          throw {line:L.n, msg:'SyntaxError: this line ends in a colon but Rover does not understand it. Use for, while, if, elif, else or def.'};
+        } else if (/^\w+$/.test(L.code)){
+          throw {line:L.n, msg:'SyntaxError: "' + L.code + '" is missing its brackets. Write ' + L.code + '() instead.'};
+        } else {
+          throw {line:L.n, msg:'SyntaxError: Rover does not understand "' + L.code + '".'};
+        }
+      }
+      return out;
+    }
+    function ifNode(L, minIndent, m){
+      var node = {k:'if', neg:!!m[1], fn:m[2], body:requireBody(L, minIndent), line:L.n, els:null};
+      if (pos < lines.length && lines[pos].indent === minIndent){
+        var nx = lines[pos], em = nx.code.match(/^elif\s+(not\s+)?(\w+)\(\)\s*:$/);
+        if (em){                       // elif is just an else holding another if
+          pos++;
+          node.els = [ifNode(nx, minIndent, em)];
+          return node;
+        }
+        if (/^else\s*:$/.test(nx.code)){
+          pos++;
+          node.els = requireBody(nx, minIndent);
+        }
+      }
+      return node;
+    }
+    function requireBody(head, minIndent){
+      if (pos >= lines.length || lines[pos].indent <= minIndent)
+        throw {line:head.n, msg:'IndentationError: expected an indented block. Line ' + head.n + ' ends in a colon, so the next line must be pushed in four spaces.'};
+      return block(lines[pos].indent);
+    }
+    var prog = block(0);
+    if (pos < lines.length) throw {line:lines[pos].n, msg:'IndentationError: this line is indented but nothing above it opened a block.'};
+    return prog;
+  }
+
+  /* ---------------- world ---------------- */
+  function loadLevel(){
+    var rows = level.map;
+    var H = rows.length, W = rows[0].length;
+    state = {W:W, H:H, walls:[], rocks:[], goal:null, x:0, y:0, dir:0, visited:{}, seen:{}, steps:0};
+    for (var y=0;y<H;y++) for (var x=0;x<W;x++){
+      var c = rows[y][x];
+      if (c === '#') state.walls.push(x+','+y);
+      if (c === 'o') state.rocks.push(x+','+y);
+      if (c === 'G') state.goal = x+','+y;
+      if (c === 'R'){ state.x = x; state.y = y; state.dir = 0; }
+    }
+    reveal();
+    buildGrid();
+  }
+
+  var gridEl = document.getElementById('grid');
+  var roverEl = null;
+
+  // build the cells and the rover ONCE per level
+  function buildGrid(){
+    gridEl.style.gridTemplateColumns = 'repeat(' + state.W + ', 1fr)';
+    // a tall map (like the long straight run) would otherwise push off the screen
+    gridEl.style.maxWidth = state.H > state.W ? Math.round(state.W / state.H * 470) + 'px' : '';
+    gridEl.style.margin = '0 auto';
+    gridEl.innerHTML = '';
+    for (var y=0;y<state.H;y++) for (var x=0;x<state.W;x++){
+      var d = document.createElement('div');
+      d.className = 'cell';
+      d.id = 'c'+x+'_'+y;
+      gridEl.appendChild(d);
+    }
+    roverEl = document.createElement('div');
+    roverEl.id = 'rover';
+    roverEl.innerHTML = '<span class="spin"><span class="knock">' + ROVER_SVG + '</span></span>';
+    gridEl.appendChild(roverEl);
+    paintGrid();
+    // wait for layout, then put the rover exactly on its cell
+    requestAnimationFrame(function(){ placeRover(false, true); });
+  }
+
+  // on a dark level the rover only knows the square it is on and the four it
+  // can feel from there - exactly what its sensors can reach
+  function reveal(){
+    var d = [[0,0],[0,-1],[1,0],[0,1],[-1,0]];
+    for (var i=0;i<d.length;i++) state.seen[(state.x+d[i][0])+','+(state.y+d[i][1])] = 1;
+  }
+
+  // repaint only what changes: rocks, goal, visited trail
+  function paintGrid(){
+    for (var y=0;y<state.H;y++) for (var x=0;x<state.W;x++){
+      var key = x+','+y;
+      var d = document.getElementById('c'+x+'_'+y);
+      if (!d) continue;
+      if (level.fog && !state.seen[key]){ d.className = 'cell fog'; d.innerHTML = ''; continue; }
+      var cls = 'cell';
+      if (state.walls.indexOf(key) >= 0) cls += ' wall';
+      if (state.goal === key) cls += ' goal';
+      if (state.visited[key]) cls += ' visited';
+      d.className = cls;
+      var html = '';
+      if (state.goal === key) html = '<span class="flag">⚑</span>';
+      if (state.rocks.indexOf(key) >= 0) html = '<span class="rock"></span>';
+      if (d.innerHTML !== html) d.innerHTML = html;
+    }
+  }
+
+  // position from the cell's real offset inside the grid — always aligned
+  function placeRover(bump, instant){
+    if (!roverEl) return;
+    var cell = document.getElementById('c'+state.x+'_'+state.y);
+    if (!cell || !cell.offsetWidth) return;
+    if (instant) roverEl.style.transition = 'none';
+    roverEl.style.left   = cell.offsetLeft + 'px';
+    roverEl.style.top    = cell.offsetTop + 'px';
+    roverEl.style.width  = cell.offsetWidth + 'px';
+    roverEl.style.height = cell.offsetHeight + 'px';
+    var spin = roverEl.querySelector('.spin');
+    if (spin) spin.style.transform = 'rotate(' + (state.dir * 90) + 'deg)';
+    if (instant){
+      void roverEl.offsetWidth;
+      roverEl.style.transition = '';
+    }
+    if (bump && !REDUCED){
+      roverEl.classList.remove('bump'); void roverEl.offsetWidth; roverEl.classList.add('bump');
+    }
+  }
+
+  var resizeTick = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTick);
+    resizeTick = setTimeout(function(){ if (state) placeRover(false, true); }, 80);
+  });
+
+  var DX = [0,1,0,-1], DY = [-1,0,1,0];
+  function ahead(){ return {x: state.x + DX[state.dir], y: state.y + DY[state.dir]}; }
+  // turn is 1 for the rover's right, 3 for its left - the square it would step
+  // onto if it turned that way, without actually turning
+  function beside(turn){
+    var d = (state.dir + turn) % 4;
+    return {x: state.x + DX[d], y: state.y + DY[d]};
+  }
+  function blocked(p){
+    return p.x<0 || p.y<0 || p.x>=state.W || p.y>=state.H || state.walls.indexOf(p.x+','+p.y)>=0;
+  }
+
+  /* ---------------- run ---------------- */
+  function say(msg, cls){
+    var o = document.getElementById('out');
+    o.className = 'out' + (cls ? ' ' + cls : '');
+    o.textContent = msg;
+  }
+
+  document.getElementById('run').addEventListener('click', function(){
+    if (running) return;
+    var src = document.getElementById('code').value;
+    var prog;
+    try { prog = parse(src); }
+    catch(err){ return say('Line ' + err.line + '\n\n' + err.msg, 'bad'); }
+    if (!prog.length) return say('Your program is empty. Write something first.', 'bad');
+
+    loadLevel();
+    running = true;
+    var myRun = ++runId;
+    document.getElementById('run').disabled = true;
+
+    var guard = 0;
+    var speed = parseInt(document.getElementById('speed').value, 10);
+    // def blocks: names the student made up, and the lines that go with them
+    var procs = {};
+    prog.forEach(function(n){ if (n.k === 'def') procs[n.name] = n.body; });
+
+    function exec(list, cb, depth){
+      var i = 0;
+      function next(){
+        if (myRun !== runId) return;
+        if (guard++ > 600){ finish('Your program ran 600 steps without finishing.\n\nThat usually means a while loop that never becomes false.', 'bad'); return; }
+        if (i >= list.length) return cb();
+        var node = list[i++];
+        if (node.k === 'def'){ procs[node.name] = node.body; return next(); }
+        if (node.k === 'call') return doCall(node, next, depth);
+        if (node.k === 'for'){
+          var reps = node.n, r = 0;
+          (function loop(){
+            if (myRun !== runId) return;
+            if (r++ >= reps) return next();
+            exec(node.body, loop, depth+1);
+          })();
+          return;
+        }
+        if (node.k === 'if'){
+          var v = test(node.fn, node.line);
+          if (v === null) return;
+          if (node.neg) v = !v;
+          return exec(v ? node.body : (node.els || []), next, depth+1);
+        }
+        if (node.k === 'while'){
+          (function loop(){
+            if (myRun !== runId) return;
+            if (guard++ > 600){ finish('Your program ran 600 steps without finishing.\n\nThat usually means a while loop that never becomes false.', 'bad'); return; }
+            var v = test(node.fn, node.line);
+            if (v === null) return;
+            if (node.neg) v = !v;
+            if (!v) return next();
+            exec(node.body, loop, depth+1);
+          })();
+          return;
+        }
+        next();
+      }
+      next();
+    }
+
+    function test(fn, line){
+      if (fn === 'wall_ahead') return blocked(ahead());
+      if (fn === 'wall_left') return blocked(beside(3));
+      if (fn === 'wall_right') return blocked(beside(1));
+      if (fn === 'at_goal') return (state.x+','+state.y) === state.goal;
+      if (fn === 'on_rock') return state.rocks.indexOf(state.x+','+state.y) >= 0;
+      finish('Line ' + line + '\n\nNameError: Rover does not know a question called ' + fn + '().\n\nIt knows wall_ahead(), wall_left(), wall_right(), at_goal() and on_rock().', 'bad');
+      return null;
+    }
+
+    function doCall(node, next, depth){
+      var fn = node.fn;
+      if (procs[fn]){
+        if ((depth||0) > 20){
+          return finish('Line ' + node.line + '\n\nYour ' + fn + '() keeps calling itself, and it never stops.\n\nA def can call other defs, but something has to end the chain.', 'bad');
+        }
+        return exec(procs[fn], next, (depth||0) + 1);
+      }
+      state.visited[state.x+','+state.y] = 1;
+      if (fn === 'forward'){
+        var p = ahead();
+        if (blocked(p)){
+          placeRover(true);
+          return finish('Line ' + node.line + '\n\nCRASH. The rover drove into a wall.\n\nIt did exactly what you told it to. Count your moves again from the start.', 'bad');
+        }
+        state.x = p.x; state.y = p.y; state.steps++;
+      } else if (fn === 'turn_left'){ state.dir = (state.dir+3) % 4; }
+      else if (fn === 'turn_right'){ state.dir = (state.dir+1) % 4; }
+      else if (fn === 'collect'){
+        var k = state.x+','+state.y;
+        var at = state.rocks.indexOf(k);
+        if (at < 0) return finish('Line ' + node.line + '\n\nThere is no rock here.\n\ncollect() only works when the rover is standing ON a rock, not beside one.', 'bad');
+        state.rocks.splice(at,1);
+      } else {
+        return finish('Line ' + node.line + '\n\nNameError: Rover does not know a command called ' + fn + '().\n\nIt knows forward(), turn_left(), turn_right() and collect() - and any name you made yourself with def.', 'bad');
+      }
+      reveal();
+      paintGrid();
+      placeRover();
+      setTimeout(function(){ if (myRun === runId) next(); }, REDUCED ? 0 : speed);
+    }
+
+    function finish(msg, cls){
+      running = false;
+      document.getElementById('run').disabled = false;
+      if (msg) say(msg, cls);
+    }
+
+    exec(prog, function(){
+      if (myRun !== runId) return;
+      running = false;
+      document.getElementById('run').disabled = false;
+      var atGoal = (state.x+','+state.y) === state.goal;
+      var lines = src.split('\n').filter(function(l){ return l.trim() && !/^\s*#/.test(l); }).length;
+      if (state.rocks.length){
+        return say('The program finished, but ' + state.rocks.length + ' rock' +
+          (state.rocks.length>1?'s are':' is') + ' still out there.\n\nDrive onto each rock and call collect().', 'bad');
+      }
+      if (!atGoal){
+        return say('The program finished, but the rover is not on the landing pad.\n\nIt stopped at column ' + (state.x+1) + ', row ' + (state.y+1) + '. Trace your program one line at a time and work out where it went wrong.', 'bad');
+      }
+      var first = solved[level.name] === undefined;
+      solved[level.name] = lines;
+      drawLevels();
+      var msg = 'LANDED.\n\nRocks collected. Rover on the pad.\n\nYou used ' + lines + ' lines. Target was ' + level.par + '.';
+      if (lines <= level.par) msg += '\n\nUnder target. ' + level.teach;
+      else msg += '\n\nIt works — but see if a loop can get you under ' + level.par + '.';
+      if (first && lvIndex + 1 < LEVELS.length)
+        msg += '\n\nLEVEL ' + (lvIndex + 2) + ' UNLOCKED: ' + LEVELS[lvIndex + 1].name + '.';
+      else if (first)
+        msg += '\n\nThat was the last level on the list.';
+      say(msg, 'good');
+    }, 0);
+  });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    var wasRunning = running;
+    runId++;                 // anything still running stops here
+    running = false;
+    document.getElementById('run').disabled = false;
+    loadLevel();
+    say(wasRunning
+      ? 'Stopped. Rover back at the start. If you had to stop it yourself, your program was never going to finish — look again at the line that says while.'
+      : 'Rover back at the start.', '');
+  });
+
+  /* ---------------- hints ---------------- */
+  var hintsOut = {};
+  var hintBtn = document.getElementById('hintbtn'), hintBox = document.getElementById('hintbox');
+
+  function drawHints(){
+    var list = level.hints || [], n = hintsOut[level.name] || 0;
+    hintBox.innerHTML = '';
+    for (var i = 0; i < n; i++){
+      var d = document.createElement('div');
+      d.className = 'hint';
+      d.innerHTML = '<span class="hn">HINT ' + (i+1) + ' OF ' + list.length + '</span>' + list[i];
+      hintBox.appendChild(d);
+    }
+    if (!list.length){ hintBtn.style.display = 'none'; return; }
+    hintBtn.style.display = '';
+    hintBtn.disabled = n >= list.length;
+    hintBtn.textContent =
+      n === 0 ? (list.length === 1 ? 'Stuck? Show a hint' : 'Stuck? Show a hint · ' + list.length + ' for this level')
+    : n < list.length ? 'Still stuck? Show hint ' + (n+1) + ' of ' + list.length
+    : 'That is every hint for this level';
+  }
+  hintBtn.addEventListener('click', function(){
+    var list = level.hints || [], n = hintsOut[level.name] || 0;
+    if (n < list.length){ hintsOut[level.name] = n + 1; drawHints(); }
+  });
+
+  /* ---------------- ui ---------------- */
+  var lvHost = document.getElementById('levels');
+
+  // the first level is always open; after that a level opens once the one
+  // above it has been landed
+  function lvOpen(i){
+    return i === 0 || solved[LEVELS[i-1].name] !== undefined;
+  }
+  function landed(){
+    var n = 0;
+    for (var i = 0; i < LEVELS.length; i++) if (solved[LEVELS[i].name] !== undefined) n++;
+    return n;
+  }
+
+  function drawLevels(){
+    lvHost.innerHTML = '';
+    LEVELS.forEach(function(L, i){
+      var b = document.createElement('button');
+      var open = lvOpen(i);
+      b.type = 'button';
+      if (!open) b.className = 'locked';
+      b.setAttribute('aria-pressed', i===lvIndex ? 'true':'false');
+      b.innerHTML = '<span class="num">' + (i+1) + '</span><span>' + L.name + '</span>' +
+                    (solved[L.name] !== undefined ? '<span class="tick">✔</span>'
+                     : !open ? '<span class="lock">🔒</span>' : '');
+      b.addEventListener('click', function(){
+        if (!lvOpen(i)){
+          say('Level ' + (i+1) + ' is locked.\n\nLand the rover on level ' + i +
+              ' first - "' + LEVELS[i-1].name + '".\n\nEvery level is built on the one before it. Skipping ahead only means being stuck for longer.', 'bad');
+          return;
+        }
+        runId++;                 // stop anything still running
+        running = false;
+        document.getElementById('run').disabled = false;
+        lvIndex = i; level = LEVELS[i];
+        loadLevel(); drawLevels(); showBrief(); drawHints();
+        say('Level loaded. Write your program, then press RUN.', '');
+      });
+      lvHost.appendChild(b);
+    });
+    var done = landed(), all = LEVELS.length;
+    document.getElementById('lvprog').innerHTML =
+      '<b>' + done + ' of ' + all + '</b> levels landed.' +
+      (done < all ? '<br>Landing a level unlocks the next one.' : '<br>Every level landed. That is the whole tool.');
+  }
+
+  function showBrief(){
+    document.getElementById('brief').innerHTML = level.brief +
+      (level.fog ? '<div class="foglab">■ THE LIGHTS ARE OFF. You can only see where the rover has already been.</div>' : '');
+    document.getElementById('par').innerHTML = 'Target: <b>' + level.par + ' lines or fewer</b>' +
+      (solved[level.name] !== undefined ? ' · your best: <b>' + solved[level.name] + '</b>' : '');
+  }
+
+  var cmdHost = document.getElementById('cmds');
+  COMMANDS.forEach(function(c){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = c.t.replace(/\n/g,'<br>').replace(/    /g,'&nbsp;&nbsp;&nbsp;&nbsp;') + '<small>' + c.d + '</small>';
+    b.addEventListener('click', function(){
+      var ta = document.getElementById('code');
+      var pos = ta.selectionStart;
+      var before = ta.value.slice(0,pos), after = ta.value.slice(pos);
+      var pad = before && !/\n$/.test(before) ? '\n' : '';
+      ta.value = before + pad + c.t + '\n' + after;
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = (before + pad + c.t + '\n').length;
+      countLines();
+    });
+    cmdHost.appendChild(b);
+  });
+
+  var ta = document.getElementById('code');
+  function countLines(){
+    touch();
+    document.getElementById('lc').textContent = ta.value.split('\n').length + ' lines';
+  }
+  ta.addEventListener('input', countLines);
+  ta.addEventListener('keydown', function(e){
+    if (e.key === 'Tab'){
+      e.preventDefault();
+      var s = ta.selectionStart;
+      ta.value = ta.value.slice(0,s) + '    ' + ta.value.slice(ta.selectionEnd);
+      ta.selectionStart = ta.selectionEnd = s + 4;
+      countLines();
+    }
+  });
+
+  var ov = document.getElementById('ov');
+  document.getElementById('ovgo').addEventListener('click', function(){ ov.classList.remove('on'); });
+  ov.addEventListener('click', function(e){ if (e.target===ov) ov.classList.remove('on'); });
+  document.addEventListener('keydown', function(e){ if (e.key==='Escape') ov.classList.remove('on'); });
+  var hb = document.createElement('button');
+  hb.className='helpbtn'; hb.type='button'; hb.textContent='How to use this';
+  hb.addEventListener('click', function(){ ov.classList.add('on'); });
+  document.querySelector('header').appendChild(hb);
+  ov.classList.add('on');
+
+  ta.value = 'forward()\nforward()\n';
+  var came_back = restoreSave();
+  countLines();
+  loadLevel(); drawLevels(); showBrief(); drawHints();
+  if (came_back) sayRestored();
+})();
+</script>
+</body>
+</html>

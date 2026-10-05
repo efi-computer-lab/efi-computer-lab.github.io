@@ -1,0 +1,2782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website Rescue Agency · Computer Lab</title>
+<link rel="icon" href="data:,">
+<style>
+/* ===== LAB BASE START ===== */
+/* Computer Lab shared design system. Identical in every tool so each folder works on its own. */
+:root {
+  --ink: #172033;
+  --ink-2: #3d4863;
+  --muted: #5d6883;
+  --bg: #f2f4f9;
+  --surface: #ffffff;
+  --surface-2: #f7f8fc;
+  --line: #dde2ec;
+  --line-strong: #c3cad9;
+  --good: #146c43;
+  --good-soft: #e2f4ea;
+  --bad: #b42318;
+  --bad-soft: #fdecea;
+  --warn: #8a5100;
+  --warn-soft: #fff3d6;
+  --focus: #f59e0b;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgba(23, 32, 51, .06), 0 4px 16px rgba(23, 32, 51, .06);
+  --shadow-lg: 0 16px 48px rgba(23, 32, 51, .22);
+  --font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: Consolas, "Cascadia Mono", "Lucida Console", "Courier New", monospace;
+  --accent: #0b7a6c;
+  --accent-strong: #0b7a6c;
+  --accent-dark: #075a50;
+  --accent-soft: #e0f3f0;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { font-size: 17px; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .5em; color: var(--ink); }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0 0 .8em; }
+a { color: var(--accent-dark); }
+img, svg { max-width: 100%; }
+code, kbd, pre { font-family: var(--mono); }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+
+.skip-link {
+  position: absolute; left: 8px; top: -60px; z-index: 1000;
+  background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none;
+}
+.skip-link:focus { top: 8px; }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(23, 32, 51, .02);
+}
+.app-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.app-logo {
+  flex: none; width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--accent-strong); color: #fff;
+}
+.app-logo svg { width: 28px; height: 28px; }
+.app-title { font-size: 1.2rem; font-weight: 700; margin: 0; white-space: nowrap; }
+.app-sub { font-size: .82rem; color: var(--muted); margin: 0; white-space: nowrap; }
+.app-header .spacer { flex: 1; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 9px 18px;
+  font: inherit; font-weight: 600; font-size: .95rem; line-height: 1.2;
+  color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm);
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--muted); }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn-primary { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.btn-danger { background: var(--surface); border-color: #e3a29b; color: var(--bad); }
+.btn-danger:hover { background: var(--bad-soft); border-color: var(--bad); }
+.btn-danger-solid { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn-danger-solid:hover { background: #8f1b12; border-color: #8f1b12; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: var(--accent-soft); border-color: transparent; }
+.btn-lg { min-height: 54px; padding: 12px 26px; font-size: 1.08rem; border-radius: 12px; }
+.btn-sm { min-height: 36px; padding: 6px 12px; font-size: .88rem; }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* ---------- Cards, chips, notices ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.card-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: .8rem; font-weight: 600;
+  background: var(--accent-soft); color: var(--accent-dark);
+  white-space: nowrap;
+}
+.chip-neutral { background: #e8ebf2; color: var(--ink-2); }
+.chip-good { background: var(--good-soft); color: var(--good); }
+.chip-bad { background: var(--bad-soft); color: var(--bad); }
+.chip-warn { background: var(--warn-soft); color: var(--warn); }
+
+.notice {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1px solid var(--line);
+}
+.notice-icon { flex: none; font-weight: 800; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: .9rem; color: #fff; background: var(--muted); }
+.notice-good { background: var(--good-soft); border-color: #a9d9bf; }
+.notice-good .notice-icon { background: var(--good); }
+.notice-bad { background: var(--bad-soft); border-color: #f0b3ac; }
+.notice-bad .notice-icon { background: var(--bad); }
+.notice-warn { background: var(--warn-soft); border-color: #ecc77a; }
+.notice-warn .notice-icon { background: var(--warn); }
+.notice-info { background: var(--accent-soft); border-color: transparent; }
+.notice-info .notice-icon { background: var(--accent-strong); }
+
+.progress-bar { height: 12px; background: #e3e7f0; border-radius: 999px; overflow: hidden; }
+.progress-bar > span { display: block; height: 100%; background: var(--accent-strong); border-radius: 999px; transition: width .3s; }
+
+/* ---------- Forms ---------- */
+label { font-weight: 600; }
+input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select, textarea {
+  font: inherit; color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong); border-radius: 8px;
+  padding: 8px 10px; min-height: 42px;
+}
+textarea { min-height: 90px; resize: vertical; line-height: 1.45; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent-strong); }
+input[type="range"] { accent-color: var(--accent-strong); }
+
+/* ---------- Layout helpers ---------- */
+.screen { animation: lab-fade .2s ease-out; }
+@keyframes lab-fade { from { opacity: 0; } to { opacity: 1; } }
+.container { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.stack > * + * { margin-top: 14px; }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+.hero {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+  padding: 32px; box-shadow: var(--shadow);
+}
+.hero h1 { font-size: 2.3rem; }
+.hero-art svg { width: 100%; height: auto; display: block; }
+.hero-lead { font-size: 1.12rem; color: var(--ink-2); }
+@media (max-width: 820px) { .hero { grid-template-columns: 1fr; } }
+.checklist { list-style: none; padding: 0; margin: 0; }
+.checklist li { position: relative; padding-left: 30px; margin: 6px 0; }
+.checklist li::before {
+  content: "\2713"; position: absolute; left: 0; top: 1px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-dark);
+  font-size: .75rem; font-weight: 800; display: grid; place-items: center;
+}
+.table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.table th, .table td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.table th { background: var(--surface-2); font-weight: 700; color: var(--ink-2); }
+.table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(15, 22, 38, .55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: lab-fade .15s ease-out;
+}
+.modal {
+  background: var(--surface); border-radius: 18px; box-shadow: var(--shadow-lg);
+  width: min(560px, 100%); max-height: calc(100vh - 40px); overflow: auto;
+  padding: 26px 28px 22px;
+}
+.modal.modal-wide { width: min(820px, 100%); }
+.modal h2 { margin-bottom: 12px; }
+.modal-body { color: var(--ink-2); }
+.modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; z-index: 600;
+  transform: translateX(-50%);
+  background: var(--ink); color: #fff;
+  padding: 12px 20px; border-radius: 12px; box-shadow: var(--shadow-lg);
+  font-weight: 600; max-width: calc(100% - 40px);
+}
+
+.no-storage-note { font-size: .85rem; color: var(--warn); }
+
+/* ---------- Fun layer: motion and game feel ---------- */
+.app-header::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  background: linear-gradient(90deg, var(--accent-strong), #f5b700, var(--accent), var(--accent-strong));
+  background-size: 300% 100%; animation: lab-sheen 9s linear infinite;
+}
+@keyframes lab-sheen { to { background-position: 300% 0; } }
+
+.btn { transition: background-color .15s, border-color .15s, box-shadow .15s, transform .12s; }
+.btn:hover:not([disabled]) { transform: translateY(-1px); }
+.btn:active:not([disabled]) { transform: translateY(1px) scale(.98); }
+.btn-primary { box-shadow: 0 3px 0 var(--accent-dark), 0 6px 14px rgba(23, 32, 51, .14); }
+.btn-primary:hover:not([disabled]) { box-shadow: 0 4px 0 var(--accent-dark), 0 8px 18px rgba(23, 32, 51, .18); }
+.btn-primary:active:not([disabled]) { box-shadow: 0 1px 0 var(--accent-dark); transform: translateY(2px); }
+.btn-lg.btn-primary { box-shadow: 0 4px 0 var(--accent-dark), 0 8px 18px rgba(23, 32, 51, .16); }
+
+.screen { animation: lab-enter .38s cubic-bezier(.2, .7, .3, 1); }
+@keyframes lab-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.modal { animation: lab-pop .32s cubic-bezier(.2, .9, .3, 1.25); }
+@keyframes lab-pop { from { opacity: 0; transform: scale(.88) translateY(10px); } to { opacity: 1; transform: none; } }
+.toast { animation: lab-toast .3s cubic-bezier(.2, .9, .3, 1.2); }
+@keyframes lab-toast { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.hero { position: relative; overflow: hidden; }
+.hero > * { position: relative; }
+.hero::before, .hero::after {
+  content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+  background: var(--accent-soft); opacity: .8;
+}
+.hero::before { width: 340px; height: 340px; right: -90px; top: -120px; animation: lab-drift 14s ease-in-out infinite alternate; }
+.hero::after { width: 200px; height: 200px; left: 38%; bottom: -120px; animation: lab-drift 11s ease-in-out infinite alternate-reverse; }
+@keyframes lab-drift { to { transform: translate(-40px, 30px) scale(1.12); } }
+.hero-art svg { animation: lab-float 5.5s ease-in-out infinite; transform-origin: center; }
+@keyframes lab-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(-1deg); } }
+@keyframes lab-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); } 70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); } }
+.pulse { animation: lab-pulse 2s ease-out infinite; }
+
+#fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 900; overflow: hidden; }
+.fx-bit { position: fixed; display: block; border-radius: 2px; will-change: transform, opacity; }
+
+/* Picture tiles and icons */
+.ic { width: 1.25em; height: 1.25em; flex: none; vertical-align: -.22em; }
+.pic-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; }
+.pic-tile {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  padding: 16px 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); transition: transform .18s;
+}
+.pic-tile:hover { transform: translateY(-3px) rotate(-1deg); }
+.pic-badge {
+  width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center;
+  background: var(--tile-bg, var(--accent-soft)); color: var(--tile-ink, var(--accent-dark));
+}
+.pic-badge .ic { width: 36px; height: 36px; }
+.pic-tile:nth-child(5n+2) { --tile-bg: #fff1d6; --tile-ink: #8a5100; }
+.pic-tile:nth-child(5n+3) { --tile-bg: #e7efff; --tile-ink: #1740a8; }
+.pic-tile:nth-child(5n+4) { --tile-bg: #fde8f1; --tile-ink: #8f1146; }
+.pic-tile:nth-child(5n+5) { --tile-bg: #e2f4ea; --tile-ink: #146c43; }
+.pic-cap { font-weight: 700; font-size: .95rem; line-height: 1.2; }
+.pic-num {
+  position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .78rem; font-weight: 800; color: #fff; background: var(--accent-strong);
+}
+.pic-title { font-size: .82rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 22px 0 10px; }
+.tut-pic { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 4px 0 14px; }
+.tut-pic .pic-tile { min-width: 110px; box-shadow: none; }
+.tut-line { text-align: center; font-size: 1.05rem; margin: 0; }
+
+/* Breadcrumbs */
+.crumbs { background: var(--surface); border-bottom: 1px solid var(--line); }
+.crumbs ol { list-style: none; margin: 0 auto; padding: 6px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-size: .88rem; }
+.crumbs li { display: inline-flex; align-items: center; }
+.crumbs li + li::before { content: "›"; color: var(--muted); margin: 0 8px; font-weight: 700; }
+.crumbs a, .crumbs button {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 3px 10px; border-radius: 999px;
+  font: inherit; font-weight: 600; color: var(--accent-dark); background: transparent; border: 0; cursor: pointer; text-decoration: none;
+}
+.crumbs a:hover, .crumbs button:hover { background: var(--accent-soft); }
+.crumbs a svg { width: 16px; height: 16px; }
+.crumbs [aria-current="page"] { font-weight: 800; color: var(--ink); padding: 3px 10px; background: var(--surface-2); border-radius: 999px; }
+.btn-sound[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-strong); color: var(--accent-dark); }
+.btn-save { border-color: var(--good); color: var(--good); }
+.btn-save:hover { background: var(--good-soft); border-color: var(--good); }
+.btn-reset { color: var(--bad); border-color: #e3a29b; }
+.btn-reset:hover { background: var(--bad-soft); border-color: var(--bad); }
+.crumbs { display: flex; align-items: center; flex-wrap: wrap; }
+.crumbs ol { flex: 1; margin: 0; }
+.save-status { padding: 4px 24px; font-size: .82rem; font-weight: 600; color: var(--good); white-space: nowrap; }
+.save-status:not(:empty)::before { content: "\2713  "; }
+@media (max-width: 700px) { .save-status { padding: 2px 12px 6px; } }
+
+/* ---------- Guided tutorial ---------- */
+.coach {
+  position: fixed; left: 20px; bottom: 20px; z-index: 560; width: min(340px, calc(100vw - 32px));
+  background: var(--surface); border: 2px solid var(--accent-strong); border-radius: 16px;
+  box-shadow: var(--shadow-lg); padding: 14px 16px 12px;
+  animation: lab-pop .3s cubic-bezier(.2, .9, .3, 1.25);
+}
+.coach-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.coach-name { font-weight: 800; color: var(--accent-dark); font-size: .95rem; }
+.coach-step { font-size: .78rem; font-weight: 700; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.coach-x { font: inherit; font-size: 1.2rem; line-height: 1; width: 30px; height: 30px; border-radius: 50%; border: 0; cursor: pointer; background: var(--surface-2); color: var(--ink-2); }
+.coach-x:hover { background: var(--bad-soft); color: var(--bad); }
+.coach-bar { height: 8px; border-radius: 999px; background: #e3e7f0; overflow: hidden; margin-bottom: 10px; }
+.coach-bar span { display: block; height: 100%; background: var(--accent-strong); border-radius: 999px; transition: width .3s; }
+.coach-pics:not(:empty) { margin-bottom: 10px; }
+.coach-pics .pic-row { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+.coach-pics .pic-tile { padding: 10px 6px 8px; box-shadow: none; }
+.coach-pics .pic-badge { width: 42px; height: 42px; border-radius: 12px; }
+.coach-pics .pic-badge .ic { width: 24px; height: 24px; }
+.coach-pics .pic-cap { font-size: .78rem; }
+.coach-text { margin: 0 0 12px; font-size: 1rem; line-height: 1.45; color: var(--ink); }
+.coach-text code, .coach-text strong { font-weight: 800; }
+.coach-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.coach.is-done { border-color: var(--good); }
+.coach.is-done .coach-text::after { content: "  \2713 done"; color: var(--good); font-weight: 800; }
+.coach.coach-right { left: auto; right: 20px; }
+@media (max-width: 700px) { .coach, .coach.coach-right { left: 8px; right: 8px; bottom: 8px; width: auto; } }
+
+.coach-halo {
+  position: relative; z-index: 1;
+  outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 10px;
+  animation: coach-ring 1.6s ease-out infinite;
+}
+@keyframes coach-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); }
+  60% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 700px) {
+  html { font-size: 16px; }
+  .app-header { padding: 8px 12px; flex-wrap: wrap; }
+  .app-sub { display: none; }
+  .container { padding: 18px 12px 40px; }
+}
+@media print {
+  .app-header, .crumbs, #fx-layer, .no-print, .modal-backdrop, .toast, .skip-link, .coach { display: none !important; }
+  .hero::before, .hero::after { display: none; }
+  body { background: #fff; }
+  .card { box-shadow: none; border-color: #bbb; }
+}
+/* ===== LAB BASE END ===== */
+
+/* ===== Website Rescue Agency ===== */
+:root {
+  --accent: #3a56d4;
+  --accent-strong: #3a56d4;
+  --accent-dark: #2a3fa3;
+  --accent-soft: #e6ebff;
+  --ed-bg: #1e1e2e;
+  --ed-line: 22px;
+  --ed-font: 15px;
+}
+body { background: #eef0f7; }
+.name-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.name-row input { width: min(280px, 100%); }
+
+/* Job board */
+.board-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin: 30px 0 12px; }
+.board-head h2 { margin: 0; }
+.jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.job {
+  display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; text-align: left; font: inherit; color: var(--ink);
+  background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; cursor: pointer; box-shadow: var(--shadow);
+  transition: transform .15s, box-shadow .15s;
+}
+.job:hover:not([disabled]) { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.job[disabled] { cursor: not-allowed; opacity: .55; filter: grayscale(.7); }
+.job.next { outline: 3px solid var(--focus); outline-offset: 3px; }
+.job.rescue { border-color: #f0b3ac; background: linear-gradient(180deg, #fff 70%, #fff4f2); }
+.avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .95rem; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+.job .num { font-family: var(--mono); font-size: .78rem; font-weight: 800; color: var(--muted); letter-spacing: .08em; }
+.job .ttl { display: block; font-weight: 800; font-size: 1.05rem; line-height: 1.2; margin: 2px 0 6px; }
+.job .skill { display: inline-block; font-size: .78rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-dark); }
+.job.rescue .skill { background: var(--bad-soft); color: var(--bad); }
+.job .state { display: block; margin-top: 8px; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.stars { color: #f5b700; letter-spacing: 2px; }
+.stars .off { color: #d4d8e2; }
+
+/* Studio */
+.studio { display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(290px, 330px) minmax(0, 1.05fr) minmax(0, 1fr); height: calc(100vh - 112px); min-height: 520px; }
+.brief { overflow-y: auto; background: #fff; border-right: 1px solid var(--line); padding: 16px 16px 26px; }
+.client-head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.client-head .avatar { width: 52px; height: 52px; flex: none; }
+.client-head .job-num { font-family: var(--mono); font-size: .76rem; font-weight: 800; letter-spacing: .08em; color: var(--muted); margin: 0; }
+.client-head h2 { font-size: 1.25rem; margin: 0; }
+.client-head .who { font-size: .88rem; color: var(--ink-2); font-weight: 600; margin: 0; }
+.bubble { position: relative; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px 16px 16px 16px; padding: 12px 14px; font-size: .98rem; line-height: 1.55; }
+.brief h3 { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); margin: 16px 0 8px; }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task { display: grid; grid-template-columns: 28px 1fr; gap: 10px; background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.task .tn { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .85rem; background: #e8ebf2; color: var(--ink-2); }
+.task.done { border-color: #a9d9bf; background: #f4fbf7; }
+.task.done .tn { background: var(--good); color: #fff; }
+.task.current { border-color: var(--accent-strong); box-shadow: 0 0 0 3px var(--accent-soft); }
+.task.current .tn { background: var(--accent-strong); color: #fff; }
+.task p { margin: 0; font-size: .95rem; }
+.task code, .bubble code, .modal code { background: #eef1fb; border-radius: 5px; padding: 1px 5px; font-size: .88em; color: #2a3fa3; font-weight: 700; white-space: pre-wrap; }
+.task-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.task-tools .btn { min-height: 34px; padding: 5px 10px; font-size: .84rem; }
+.hintbox { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: var(--warn-soft); font-size: .9rem; color: #5a3a00; white-space: pre-wrap; }
+.answerbox { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--ed-bg); color: #e6e6f0; font-family: var(--mono); font-size: .85rem; white-space: pre; overflow-x: auto; }
+.feedback { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-size: .9rem; background: var(--bad-soft); color: var(--bad); }
+.deliver { margin-top: 16px; padding: 14px; border-radius: 14px; background: #172033; color: #fff; }
+.deliver p { margin: 0 0 10px; }
+.deliver.waiting { background: #e8ebf2; color: var(--muted); }
+.delivered { margin-top: 16px; padding: 14px; border-radius: 14px; background: var(--good-soft); border: 1px solid #a9d9bf; }
+.delivered .quote { font-style: italic; margin: 6px 0 8px; }
+.delivered .stars { font-size: 1.5rem; }
+
+/* Editor */
+.editor { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; background: var(--ed-bg); }
+.ed-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #181825; border-bottom: 1px solid #2c2c40; }
+.ed-bar .file { color: #e6e6f0; font-family: var(--mono); font-size: .88rem; background: var(--ed-bg); padding: 5px 12px; border-radius: 8px 8px 0 0; border-bottom: 2px solid #f5b700; }
+.ed-bar .spacer { flex: 1; }
+.ed-btn { min-height: 32px; padding: 4px 10px; background: #2c2c40; color: #e6e6f0; border-color: #3c3c55; font-size: .84rem; }
+.ed-btn:hover { background: #3c3c55; border-color: #5a5a7a; }
+.ed-body { flex: 1; min-height: 0; display: flex; position: relative; overflow: hidden; }
+.gutter { flex: none; width: 46px; padding: 12px 0; overflow: hidden; background: #181825; color: #6b6b88; font-family: var(--mono); font-size: var(--ed-font); line-height: var(--ed-line); text-align: right; user-select: none; }
+.gutter div { padding-right: 10px; height: var(--ed-line); }
+.gutter div.bad { color: #ff8b8b; background: rgba(255, 90, 90, .14); font-weight: 700; }
+.gutter div.cur { color: #e6e6f0; }
+.ed-area { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+.hl, #code {
+  position: absolute; inset: 0; margin: 0; padding: 12px 14px; border: 0; border-radius: 0;
+  font-family: var(--mono); font-size: var(--ed-font); line-height: var(--ed-line); tab-size: 2;
+  white-space: pre; overflow-wrap: normal; word-break: normal; letter-spacing: 0;
+}
+.hl { color: #e6e6f0; overflow: hidden; pointer-events: none; background: transparent; }
+#code {
+  width: 100%; height: 100%; min-height: 0; resize: none; overflow: auto; background: transparent;
+  color: transparent; caret-color: #ffd166; outline: none; box-shadow: none;
+}
+#code::selection { background: rgba(130, 170, 255, .35); color: transparent; }
+#code:focus { outline: none; }
+.editor:focus-within .ed-body { box-shadow: inset 0 0 0 2px #f5b70066; }
+.t-br { color: #89ddff; }
+.t-tag { color: #f07178; }
+.t-attr { color: #ffcb6b; }
+.t-str { color: #c3e88d; }
+.t-com { color: #697098; font-style: italic; }
+.t-sel { color: #f78c6c; }
+.t-prop { color: #82aaff; }
+.t-val { color: #c3e88d; }
+.t-doc { color: #c792ea; }
+.doctor { flex: none; max-height: 34%; overflow-y: auto; background: #181825; border-top: 1px solid #2c2c40; color: #e6e6f0; font-size: .9rem; padding: 8px 12px; }
+.doctor .ok { color: #8fe3a8; font-weight: 700; }
+.doctor .title { font-weight: 800; color: #ff8b8b; margin: 0 0 4px; }
+.doctor ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.doctor li button { all: unset; cursor: pointer; display: block; padding: 3px 6px; border-radius: 6px; }
+.doctor li button:hover, .doctor li button:focus-visible { background: #2c2c40; outline: 2px solid #f5b700; }
+.doctor .ln { font-family: var(--mono); color: #ffcb6b; font-weight: 700; margin-right: 6px; }
+
+/* Preview */
+.preview-col { display: flex; min-width: 0; padding: 10px; background: #dfe3ee; }
+.browser { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid #c9cfdd; }
+.br-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px 0; background: #e8ebf2; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 11px; height: 11px; border-radius: 50%; background: #ef4444; display: block; }
+.dots i:nth-child(2) { background: #f5b700; }
+.dots i:nth-child(3) { background: #22c55e; }
+.br-tab { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: #fff; border-radius: 9px 9px 0 0; padding: 6px 12px; font-size: .85rem; font-weight: 600; max-width: 260px; }
+.br-btn { font: inherit; font-size: .78rem; font-weight: 700; border: 1px solid #c3cad9; background: #fff; border-radius: 7px; padding: 3px 8px; cursor: pointer; margin-bottom: 4px; }
+.br-btn[aria-pressed="true"] { background: var(--accent-strong); color: #fff; border-color: var(--accent-strong); }
+.br-url { display: flex; gap: 6px; align-items: center; padding: 5px 12px; font-size: .84rem; color: var(--ink-2); background: #fff; border-bottom: 1px solid var(--line); font-family: var(--mono); }
+.br-view { flex: 1; min-height: 0; display: flex; justify-content: center; background: #f2f4f9; overflow: auto; }
+#preview { flex: 1; width: 100%; height: 100%; border: 0; background: #fff; display: block; }
+.br-view.phone #preview { flex: none; width: 375px; box-shadow: 0 0 0 1px #c3cad9, 0 6px 18px rgba(0,0,0,.15); }
+body.big-preview .preview-col { position: fixed; inset: 0; z-index: 400; padding: 24px; background: rgba(15, 22, 38, .7); }
+
+/* Pictures */
+.pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.pic { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.pic img { width: 64px; height: 64px; }
+.pic code { font-size: .82rem; }
+.cheat { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.cheat td, .cheat th { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.cheat td:first-child { font-family: var(--mono); font-weight: 700; color: var(--accent-dark); white-space: pre; }
+.cheat-wrap { max-height: 62vh; overflow: auto; }
+
+/* Certificate */
+.cert { max-width: 820px; margin: 0 auto; background: #fff; border: 10px double var(--accent-strong); border-radius: 14px; padding: 40px 44px; text-align: center; box-shadow: var(--shadow-lg); }
+.cert h1 { font-size: 2.2rem; margin-bottom: 6px; }
+.cert .who { font-size: 2rem; font-weight: 800; font-family: Georgia, serif; border-bottom: 2px solid var(--line); display: inline-block; padding: 0 30px 6px; margin: 10px 0 14px; }
+.cert-skills { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 16px 0; }
+.cert .cstars { font-size: 1.5rem; color: #f5b700; }
+
+@media (max-width: 1100px) {
+  .studio { grid-template-columns: 1fr 1fr; height: auto; }
+  .brief { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--line); max-height: none; }
+  .editor, .preview-col { height: 75vh; }
+}
+@media (max-width: 700px) {
+  .studio { grid-template-columns: 1fr; }
+}
+@media print {
+  #screen-home, #screen-job { display: none !important; }
+  .cert { box-shadow: none; }
+}
+
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="app-header">
+  <a class="btn btn-ghost btn-sm" href="START_HERE_Computer_Lab.html" aria-label="Back to the Computer Lab home page">&larr; Lab home</a>
+  <div class="app-brand">
+    <div class="app-logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="20" rx="3"/><path d="M3 10h26"/><path d="M12 15l-3 3 3 3M20 15l3 3-3 3M17 14l-2 8"/></svg>
+    </div>
+    <div>
+      <p class="app-title">Website Rescue Agency</p>
+      <p class="app-sub">Grade 8–9 · Build real websites with HTML &amp; CSS</p>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <nav class="header-actions" aria-label="Website Rescue menu">
+    <button type="button" class="btn btn-sm" id="btn-cheat">&lt;/&gt; Code cheat sheet</button>
+    <button type="button" class="btn btn-sm" id="btn-help">How it works</button>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- HOME -->
+  <section id="screen-home" class="screen">
+    <div class="container">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">14 clients are waiting</p>
+          <h1>Website Rescue Agency</h1>
+          <p class="hero-lead">Shops, bands, zoos and bakeries need websites, and some need rescuing. Type real HTML and CSS, watch the page change live, and deliver it to the client.</p>
+          <div class="name-row">
+            <label for="dev-name">Web developer name</label>
+            <input type="text" id="dev-name" maxlength="32" autocomplete="off" placeholder="Type your name">
+          </div>
+          <div class="btn-row" style="margin-top:14px">
+            <button type="button" class="btn btn-primary btn-lg" id="btn-continue">Start job 1 &rarr;</button>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 320 230">
+            <rect x="10" y="20" width="170" height="170" rx="12" fill="#1e1e2e"/>
+            <g font-family="Consolas, monospace" font-size="13">
+              <text x="22" y="48" fill="#89ddff">&lt;<tspan fill="#f07178">h1</tspan>&gt;<tspan fill="#e6e6f0">Pizza</tspan>&lt;/<tspan fill="#f07178">h1</tspan>&gt;</text>
+              <text x="22" y="72" fill="#89ddff">&lt;<tspan fill="#f07178">img</tspan> <tspan fill="#ffcb6b">src</tspan>=<tspan fill="#c3e88d">"…"</tspan>&gt;</text>
+              <text x="22" y="100" fill="#f78c6c">h1 <tspan fill="#e6e6f0">{</tspan></text>
+              <text x="34" y="122" fill="#82aaff">color<tspan fill="#e6e6f0">:</tspan> <tspan fill="#c3e88d">tomato;</tspan></text>
+              <text x="22" y="144" fill="#e6e6f0">}</text>
+            </g>
+            <rect x="130" y="50" width="180" height="150" rx="12" fill="#fff" stroke="#172033" stroke-width="3"/>
+            <rect x="130" y="50" width="180" height="24" rx="12" fill="#e8ebf2"/>
+            <rect x="130" y="62" width="180" height="12" fill="#e8ebf2"/>
+            <circle cx="146" cy="62" r="4" fill="#ef4444"/><circle cx="158" cy="62" r="4" fill="#f5b700"/><circle cx="170" cy="62" r="4" fill="#22c55e"/>
+            <text x="146" y="104" font-family="Segoe UI, Arial" font-weight="800" font-size="22" fill="tomato">Pizza</text>
+            <circle cx="270" cy="140" r="30" fill="#e9a23b"/><circle cx="270" cy="140" r="24" fill="#e4572e"/><circle cx="262" cy="132" r="5" fill="#9b1d20"/><circle cx="278" cy="148" r="5" fill="#9b1d20"/>
+            <rect x="146" y="120" width="80" height="8" rx="4" fill="#c3cad9"/><rect x="146" y="136" width="64" height="8" rx="4" fill="#c3cad9"/>
+            <rect x="146" y="160" width="70" height="24" rx="8" fill="#3a56d4"/><text x="156" y="177" font-family="Segoe UI, Arial" font-weight="700" font-size="12" fill="#fff">Order now</text>
+          </svg>
+        </div>
+      </div>
+      <div class="board-head"><h2>Job board</h2><p class="muted" id="board-sum"></p></div>
+      <div class="jobs" id="jobs"></div>
+    </div>
+  </section>
+
+  <!-- JOB -->
+  <section id="screen-job" class="screen" hidden>
+    <h1 class="sr-only" id="job-h1">Job</h1>
+    <div class="studio">
+      <aside class="brief" id="brief" aria-label="Client brief"></aside>
+      <section class="editor" aria-label="Code editor">
+        <div class="ed-bar">
+          <span class="file">index.html</span>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-sm ed-btn" id="btn-pics">&#128444; Pictures</button>
+          <button type="button" class="btn btn-sm ed-btn" id="btn-restart">&#8635; Start again</button>
+        </div>
+        <div class="ed-body">
+          <div class="gutter" id="gutter" aria-hidden="true"></div>
+          <div class="ed-area">
+            <pre class="hl" id="hl" aria-hidden="true"></pre>
+            <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="HTML and CSS code"></textarea>
+          </div>
+        </div>
+        <div class="doctor" id="doctor" aria-live="polite"></div>
+      </section>
+      <section class="preview-col" aria-label="Live preview">
+        <div class="browser" id="browser">
+          <div class="br-bar">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="br-tab" id="br-tab">Page</span>
+            <button type="button" class="br-btn" id="btn-phone" aria-pressed="false" title="Show the page at phone width">&#128241; Phone</button>
+            <button type="button" class="br-btn" id="btn-big" title="Show the preview almost full screen (Esc to close)">&#9974; Big</button>
+          </div>
+          <div class="br-url"><span aria-hidden="true">&#128274;</span> <span id="br-url">https://</span></div>
+          <div class="br-view" id="br-view"><iframe id="preview" title="Live preview of your website"></iframe></div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- BADGE -->
+  <section id="screen-badge" class="screen" hidden>
+    <div class="container">
+      <div class="cert" id="cert"></div>
+      <div class="btn-row no-print" style="justify-content:center;margin-top:18px">
+        <button type="button" class="btn btn-primary" id="btn-print">Print certificate</button>
+        <button type="button" class="btn" id="btn-badge-home">Back to the job board</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="modal-root"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p style="padding:20px">Website Rescue Agency needs JavaScript to run. Please use Microsoft Edge, Google Chrome or Firefox.</p></noscript>
+
+<script>
+'use strict';
+/* ===== LAB KIT START ===== */
+/* Computer Lab shared helpers. Identical in every tool so each folder works on its own. */
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+function esc(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[ch]);
+}
+
+/* Progress is kept only in this browser on this computer. Nothing is ever sent anywhere. */
+const store = {
+  available: (() => {
+    try {
+      const k = '__lab_test__';
+      window.localStorage.setItem(k, '1');
+      window.localStorage.removeItem(k);
+      return true;
+    } catch (e) { return false; }
+  })(),
+  get(key, fallback) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+  },
+  /* locked stops any last-second writes (for example on page unload) after a reset or a file load. */
+  locked: false,
+  onWrite: null,
+  set(key, value) {
+    if (store.locked) return false;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+      if (typeof store.onWrite === 'function') store.onWrite(key);
+      return true;
+    } catch (e) { return false; }
+  },
+  remove(key) {
+    try { window.localStorage.removeItem(key); } catch (e) { /* storage unavailable */ }
+  }
+};
+
+const Modal = (() => {
+  let root = null;
+  let returnFocus = null;
+  let current = null;
+
+  function close() {
+    if (!root) return;
+    const opts = current;
+    root.innerHTML = '';
+    current = null;
+    document.removeEventListener('keydown', onKey, true);
+    if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
+    if (opts && typeof opts.onClose === 'function') opts.onClose();
+  }
+
+  function onKey(e) {
+    if (!current) return;
+    if (e.key === 'Escape' && current.dismissible !== false) {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const box = $('.modal', root);
+      const items = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', box)
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  /* opts: { title, html, actions: [{label, variant, onClick, keepOpen}], dismissible, wide, onClose, onOpen } */
+  function open(opts) {
+    root = root || document.getElementById('modal-root');
+    if (current) { current = null; root.innerHTML = ''; }
+    else {
+      const active = document.activeElement;
+      returnFocus = active && !root.contains(active) ? active : null;
+    }
+    current = opts;
+    const actions = opts.actions && opts.actions.length ? opts.actions : [{ label: 'Close', variant: 'primary' }];
+    root.innerHTML =
+      '<div class="modal-backdrop">' +
+        '<div class="modal' + (opts.wide ? ' modal-wide' : '') + '" role="dialog" aria-modal="true" aria-labelledby="modal-title">' +
+          '<h2 id="modal-title">' + esc(opts.title || '') + '</h2>' +
+          '<div class="modal-body">' + (opts.html || '') + '</div>' +
+          '<div class="modal-actions">' +
+            actions.map((a, i) => '<button type="button" class="btn ' + (a.variant ? 'btn-' + a.variant : '') + '" data-modal-action="' + i + '">' + esc(a.label) + '</button>').join('') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    const backdrop = $('.modal-backdrop', root);
+    backdrop.addEventListener('click', e => {
+      if (e.target === backdrop && opts.dismissible !== false) close();
+    });
+    $$('[data-modal-action]', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = actions[Number(btn.dataset.modalAction)];
+        if (!action.keepOpen) {
+          const onClose = current && current.onClose;
+          if (current) current.onClose = null;
+          close();
+          if (typeof action.onClick === 'function') action.onClick();
+          else if (typeof onClose === 'function') onClose();
+        } else if (typeof action.onClick === 'function') {
+          action.onClick();
+        }
+      });
+    });
+    document.addEventListener('keydown', onKey, true);
+    if (typeof opts.onOpen === 'function') opts.onOpen($('.modal', root));
+    const focusTarget = $('[data-autofocus]', root) || $('.modal-actions .btn-primary', root) || $('.modal-actions .btn', root);
+    if (focusTarget) focusTarget.focus();
+  }
+
+  return { open, close, isOpen: () => !!current };
+})();
+
+function confirmBox(title, message, confirmLabel, onConfirm, danger) {
+  Modal.open({
+    title,
+    html: '<p>' + message + '</p>',
+    actions: [
+      { label: 'Cancel', variant: 'secondary' },
+      { label: confirmLabel, variant: danger ? 'danger-solid' : 'primary', onClick: onConfirm }
+    ]
+  });
+}
+
+let toastTimer = null;
+function toast(message) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+}
+
+/* If a teacher clears progress in another tab (for example on the launcher page), start fresh here too,
+   so this tab cannot write the old progress back. */
+function reloadWhenCleared(key) {
+  window.addEventListener('storage', e => {
+    if (e.key === null || (e.key === key && e.newValue === null)) window.location.reload();
+  });
+}
+
+function showScreen(id) {
+  $$('.screen').forEach(s => { s.hidden = s.id !== id; });
+  window.scrollTo(0, 0);
+  Nav.render(id);
+  const screen = document.getElementById(id);
+  const heading = screen && $('h1, h2', screen);
+  if (heading) {
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+  }
+}
+
+/* ---------- "You are here" breadcrumbs ----------
+   Nav.setup({ tool: 'Code Island', screens: { 'screen-home': { label, go }, 'screen-map': { label, parent, go } } })
+   A label may be a function, so it can show the current level or case. */
+const Nav = (() => {
+  let cfg = null;
+  let current = null;
+
+  function setup(options) {
+    cfg = options;
+    const header = $('.app-header');
+    if (!header || $('#crumbs')) return;
+    const bar = document.createElement('nav');
+    bar.className = 'crumbs';
+    bar.setAttribute('aria-label', 'You are here');
+    bar.innerHTML = '<ol id="crumbs"></ol>';
+    header.insertAdjacentElement('afterend', bar);
+    bar.addEventListener('click', e => {
+      const b = e.target.closest('[data-crumb]');
+      if (!b) return;
+      const s = cfg.screens[b.dataset.crumb];
+      if (s && typeof s.go === 'function') { Fx.sound('click'); s.go(); }
+    });
+  }
+
+  function label(s) { return typeof s.label === 'function' ? s.label() : s.label; }
+
+  function render(id) {
+    current = id || current;
+    const list = $('#crumbs');
+    if (!cfg || !list) return;
+    const trail = [];
+    let step = current;
+    while (step && cfg.screens[step] && trail.length < 6) {
+      trail.unshift(step);
+      step = cfg.screens[step].parent;
+    }
+    /* Reuse the page's own "Lab home" link so the address is right in every copy of the tools. */
+    const homeLink = $('.app-header a[href]');
+    let html = homeLink
+      ? '<li><a href="' + esc(homeLink.getAttribute('href')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg>Computer Lab</a></li>'
+      : '';
+    trail.forEach((sid, i) => {
+      const s = cfg.screens[sid];
+      const last = i === trail.length - 1;
+      html += '<li>' + (last
+        ? '<span aria-current="page">' + esc(label(s)) + '</span>'
+        : '<button type="button" data-crumb="' + sid + '">' + esc(label(s)) + '</button>') + '</li>';
+    });
+    list.innerHTML = html;
+  }
+
+  return { setup, render: id => render(id), refresh: () => render(null) };
+})();
+
+/* ---------- Picture icons ----------
+   icon('robot') returns an inline SVG. In HTML:
+     <span data-icon="robot"></span>
+     <div class="pic-row" data-pics="robot:Look|blocks:Build|play:Run"></div>   (add class "numbered" for steps) */
+const ICON_PATHS = {
+  robot: '<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="9.5" cy="13" r="1.2"/><circle cx="14.5" cy="13" r="1.2"/><path d="M9.5 16.5h5M3 12v3M21 12v3"/>',
+  blocks: '<rect x="3" y="3" width="11" height="5" rx="1.5"/><rect x="6" y="10" width="13" height="5" rx="1.5"/><rect x="3" y="17" width="9" height="4" rx="1.5"/>',
+  play: '<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5-5.5 3.5z"/>',
+  bug: '<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4 8l3 2M20 8l-3 2M4 19l3-2M20 19l-3-2M12 11v8"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  loop: '<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>',
+  decide: '<path d="M12 3l7 7-7 7-7-7z"/><path d="M12 17v4M9 10h6"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  magnifier: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  warning: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  question: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
+  danger: '<path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16h.01"/>',
+  phone: '<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  badge: '<path d="M12 2l3 3h4v4l3 3-3 3v4h-4l-3 3-3-3H5v-4l-3-3 3-3V5h4z"/><path d="M9.5 12l1.8 1.8L15 10"/>',
+  shop: '<path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M3 9h18"/><rect x="10" y="14" width="4" height="6"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  megaphone: '<path d="M3 10v4h4l8 5V5L7 10z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+  people: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14 20a4.5 4.5 0 0 1 7-3.7"/>',
+  box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  rocket: '<path d="M12 2c4 3 5 8 3 13H9C7 10 8 5 12 2z"/><circle cx="12" cy="9" r="1.8"/><path d="M9 15l-3 4 4-1M15 15l3 4-4-1"/>',
+  chart: '<path d="M4 20V11M10 20V5M16 20v-7M22 20H2"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.7 0-3 .9-3 2s1 1.7 3 2 3 .9 3 2-1.3 2-3 2c-1 0-2-.5-2.5-1.5M12 6v2M12 16v2"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  wrench: '<path d="M14.5 5.5a4 4 0 0 0-5 5L3 17l4 4 6.5-6.5a4 4 0 0 0 5-5l-2.5 2.5-3-1-1-3z"/>',
+  rain: '<path d="M7 15a4 4 0 0 1 .5-8A6 6 0 0 1 19 9a3 3 0 0 1-1 6z"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',
+  party: '<path d="M3 21l5-14 9 9z"/><path d="M14 3l1 2M20 9l-2 1M18 3l-2 3"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+  up: '<path d="M4 17l6-6 4 4 7-7"/><path d="M15 8h6v6"/>',
+  down: '<path d="M4 7l6 6 4-4 7 7"/><path d="M15 16h6v-6"/>',
+  doc: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5M9 12h8M9 16h8M9 8h3"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  idcard: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2.5"/><path d="M4.5 16.5a3.5 3.5 0 0 1 7 0M14 10h5M14 14h4"/>',
+  pen: '<path d="M16 3l5 5L8 21H3v-5z"/><path d="M13 6l5 5"/>',
+  cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4a3 3 0 0 0 4 4M16 6h4a3 3 0 0 1-4 4M12 13v4M8 21h8M10 17h4v4"/>',
+  certificate: '<rect x="3" y="4" width="18" height="13" rx="2"/><circle cx="16" cy="15" r="3"/><path d="M14.5 17.5L14 22l2-1 2 1-.5-4.5M7 9h8M7 12h5"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1 0 2-.8 2-2 0-1-1-1.5-1-2.5S14 15 15 15h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+  printer: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  save: '<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3"/><rect x="8" y="13" width="8" height="6" rx="1"/>',
+  computer: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  map: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
+  flag: '<path d="M5 21V4M5 4h12l-3 4 3 4H5"/>',
+  hand: '<path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10M12 9.5a1.5 1.5 0 0 1 3 0V11M15 10.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.5 14a1.5 1.5 0 0 1 2.5-1.6L9 16"/>',
+  percent: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gift: '<rect x="3" y="8" width="18" height="4"/><path d="M5 12v9h14v-9M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/>',
+  python: '<path d="M12 3c-4 0-4 1.5-4 3v2h4v1H6c-2 0-3 1.5-3 4s1 4 3 4h2v-3c0-1.5 1-2.5 2.5-2.5h3c1.5 0 2.5-1 2.5-2.5V6c0-1.5-1-3-4-3z"/><path d="M12 21c4 0 4-1.5 4-3v-2h-4v-1h6c2 0 3-1.5 3-4s-1-4-3-4h-2v3c0 1.5-1 2.5-2.5 2.5h-3C9 12.5 8 13.5 8 15v3c0 1.5 1 3 4 3z"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
+};
+
+function icon(name, cls) {
+  const p = ICON_PATHS[name] || ICON_PATHS.star;
+  return '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+}
+
+/* A row of picture tiles: "icon:Label|icon:Label". */
+function picRow(spec, numbered) {
+  return String(spec).split('|').map((item, i) => {
+    const at = item.indexOf(':');
+    const name = at === -1 ? item : item.slice(0, at);
+    const label = at === -1 ? '' : item.slice(at + 1);
+    return '<div class="pic-tile">' + (numbered ? '<span class="pic-num" aria-hidden="true">' + (i + 1) + '</span>' : '') +
+      '<span class="pic-badge">' + icon(name.trim()) + '</span><span class="pic-cap">' + esc(label.trim()) + '</span></div>';
+  }).join('');
+}
+
+function fillPictures(root) {
+  $$('[data-icon]', root).forEach(el => { if (!el.firstElementChild) el.innerHTML = icon(el.dataset.icon); });
+  $$('[data-pics]', root).forEach(el => { if (!el.firstElementChild) el.innerHTML = picRow(el.dataset.pics, el.classList.contains('numbered')); });
+}
+fillPictures(document);
+
+/* ---------- Save and Reset buttons ----------
+   SaveBar.setup({ id: 'code-island', key: SAVE_KEY, name: 'Code Island', what: 'your stars and levels', save: fn, note: '' })
+   Progress already saves automatically; these buttons make that visible, and let students carry
+   progress to another computer in a small file (for example on a flash drive). */
+const SaveBar = (() => {
+  let cfg = null;
+  const ICON_SAVE = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3"/><rect x="8" y="13" width="8" height="6" rx="1"/></svg>';
+  const ICON_RESET = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg>';
+
+  const clock = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  function setStatus(text) {
+    const el = $('#save-status');
+    if (el) el.textContent = text;
+  }
+
+  function setup(options) {
+    cfg = options;
+    store.onWrite = key => { if (key === cfg.key) setStatus('Auto-saved at ' + clock()); };
+    if (!store.available) setStatus('Saving is blocked in this browser – use “Save to a file”');
+    const bar = $('.header-actions');
+    if (!bar || $('#btn-save')) return;
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.id = 'btn-save';
+    save.className = 'btn btn-sm btn-save';
+    save.innerHTML = ICON_SAVE + '<span>Save</span>';
+    save.addEventListener('click', saveNow);
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.id = 'btn-reset-all';
+    reset.className = 'btn btn-sm btn-reset';
+    reset.innerHTML = ICON_RESET + '<span>Reset</span>';
+    reset.addEventListener('click', askReset);
+    bar.insertBefore(reset, bar.firstChild);
+    bar.insertBefore(save, bar.firstChild);
+    const crumbs = $('.crumbs');
+    if (crumbs && !$('#save-status')) {
+      const status = document.createElement('span');
+      status.id = 'save-status';
+      status.className = 'save-status';
+      crumbs.appendChild(status);
+    }
+    if (store.available && window.localStorage.getItem(cfg.key)) setStatus('Saved progress found on this computer');
+  }
+
+  function saveNow() {
+    try { cfg.save(); } catch (e) { /* the file option below still works */ }
+    const ok = store.available;
+    if (ok) setStatus('Saved at ' + clock());
+    Fx.sound('good');
+    Modal.open({
+      title: ok ? 'Game saved!' : 'This browser is blocking saving',
+      html: (ok
+        ? '<div class="notice notice-good"><span class="notice-icon" aria-hidden="true">&#10003;</span><div><strong>Your progress is saved on this computer.</strong> Next time, open ' + esc(cfg.name) + ' on this same computer and browser, and you will continue where you stopped.</div></div>'
+        : '<div class="notice notice-warn"><span class="notice-icon" aria-hidden="true">!</span><div>This browser (or a private window) does not allow saving. Use <strong>Save to a file</strong> so you do not lose your work.</div></div>') +
+        (cfg.note ? '<p style="margin-top:12px">' + esc(cfg.note) + '</p>' : '') +
+        '<h3 style="margin:16px 0 6px;font-size:1rem">Using a different computer next time?</h3>' +
+        '<p style="margin:0">Choose <strong>Save to a file</strong>. The browser puts a small progress file in your <strong>Downloads</strong> folder – copy it to your flash drive or school folder. On the other computer, open ' + esc(cfg.name) + ', press <strong>Save</strong>, then <strong>Load from a file</strong>.</p>',
+      actions: [
+        { label: 'Load from a file', variant: 'secondary', onClick: loadFromFile },
+        { label: 'Save to a file', variant: 'secondary', onClick: saveToFile },
+        { label: 'Done', variant: 'primary' }
+      ]
+    });
+  }
+
+  function saveToFile() {
+    try { cfg.save(); } catch (e) { /* use what is stored */ }
+    let data = store.get(cfg.key, null);
+    if (!data) { toast('There is no progress to save yet – play first!'); return; }
+    const today = new Date();
+    const payload = { app: 'computerLab', tool: cfg.id, name: cfg.name, savedAt: today.toISOString(), data };
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = cfg.name.replace(/\s+/g, '-') + '-progress-' + today.toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast('Progress file saved – look in your Downloads folder.');
+  }
+
+  function loadFromFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        let payload = null;
+        try { payload = JSON.parse(String(reader.result)); } catch (e) { payload = null; }
+        if (!payload || payload.app !== 'computerLab' || !payload.data || typeof payload.data !== 'object') {
+          Modal.open({ title: 'That file cannot be loaded', html: '<p>This is not a Computer Lab progress file. Choose a file that was made with <strong>Save to a file</strong>.</p>' });
+          return;
+        }
+        if (payload.tool !== cfg.id) {
+          Modal.open({ title: 'Wrong activity', html: '<p>This progress file belongs to <strong>' + esc(payload.name || 'another activity') + '</strong>, not ' + esc(cfg.name) + '. Open ' + esc(payload.name || 'that activity') + ' and load it there.</p>' });
+          return;
+        }
+        const when = payload.savedAt ? new Date(payload.savedAt).toLocaleString() : 'an earlier date';
+        confirmBox('Load this progress?', 'This replaces the progress on this computer with the progress saved on <strong>' + esc(when) + '</strong>.', 'Load progress', () => {
+          if (!store.set(cfg.key, payload.data)) { toast('This browser is blocking saving, so the file could not be loaded.'); return; }
+          store.locked = true;
+          window.location.reload();
+        });
+      };
+      reader.readAsText(file);
+    });
+    input.click();
+  }
+
+  function askReset() {
+    Modal.open({
+      title: 'Reset ' + cfg.name + '?',
+      html: '<p>This deletes <strong>' + esc(cfg.what) + '</strong> for ' + esc(cfg.name) + ' on this computer and starts again from the beginning. This cannot be undone.</p>' +
+        '<p class="muted">Want to keep a copy? Choose <strong>Save to a file first</strong>.</p>',
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        { label: 'Save to a file first', variant: 'secondary', onClick: saveToFile },
+        { label: 'Reset and start again', variant: 'danger-solid', onClick: () => {
+          store.remove(cfg.key);
+          store.locked = true;
+          window.location.reload();
+        } }
+      ]
+    });
+  }
+
+  return { setup, saveNow, askReset };
+})();
+
+/* ---------- Fun layer: celebrations, small animations and optional sound ----------
+   Everything here is decoration only: the game state never waits for an animation. */
+const Fx = (() => {
+  const SOUND_KEY = 'computerLab.sound';
+  const COLORS = ['#f5b700', '#2a78d6', '#eb6834', '#1baf7a', '#e87ba4', '#7c3aed', '#ffffff'];
+  let audio = null;
+  let soundOn = !!store.get(SOUND_KEY, false);
+
+  const calm = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const canAnimate = () => !calm() && typeof Element !== 'undefined' && !!Element.prototype.animate;
+
+  function layer() {
+    let l = document.getElementById('fx-layer');
+    if (!l) {
+      l = document.createElement('div');
+      l.id = 'fx-layer';
+      l.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(l);
+    }
+    return l;
+  }
+
+  function centerOf(el) {
+    if (!el || !el.getBoundingClientRect) return { x: window.innerWidth / 2, y: window.innerHeight * 0.35 };
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  /* Pieces fly out from a point and fall with gravity. */
+  function particles(x, y, count, power, colors, life) {
+    if (!canAnimate()) return;
+    const l = layer();
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('i');
+      const size = 5 + Math.random() * 8;
+      p.className = 'fx-bit';
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.width = size + 'px';
+      p.style.height = (Math.random() < 0.5 ? size : size * 0.45) + 'px';
+      p.style.background = colors[i % colors.length];
+      if (Math.random() < 0.35) p.style.borderRadius = '50%';
+      l.appendChild(p);
+      const angle = Math.random() * Math.PI * 2;
+      const speed = power * (0.35 + Math.random() * 0.65);
+      const dx = Math.cos(angle) * speed;
+      const dy = Math.sin(angle) * speed - power * 0.45;
+      const spin = (Math.random() - 0.5) * 900;
+      const anim = p.animate([
+        { transform: 'translate(-50%, -50%) rotate(0deg)', opacity: 1 },
+        { transform: 'translate(calc(-50% + ' + dx * 0.7 + 'px), calc(-50% + ' + dy * 0.7 + 'px)) rotate(' + spin * 0.5 + 'deg)', opacity: 1, offset: 0.4 },
+        { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + (dy + power * 1.3) + 'px)) rotate(' + spin + 'deg)', opacity: 0 }
+      ], { duration: life * (0.7 + Math.random() * 0.6), easing: 'cubic-bezier(.15,.7,.35,1)' });
+      anim.onfinish = () => p.remove();
+    }
+  }
+
+  function confetti(el) {
+    const c = el ? centerOf(el) : { x: window.innerWidth / 2, y: window.innerHeight * 0.3 };
+    particles(c.x, c.y, 110, Math.min(window.innerWidth, 900) * 0.55, COLORS, 1900);
+  }
+  function sparkle(el, colors) {
+    const c = centerOf(el);
+    particles(c.x, c.y, 18, 110, colors || ['#f5b700', '#fde68a', '#ffffff'], 800);
+  }
+
+  function run(el, frames, options) {
+    if (!el || !canAnimate()) return null;
+    return el.animate(frames, Object.assign({ duration: 400, easing: 'ease-out' }, options || {}));
+  }
+  const pop = (el, delay) => run(el, [
+    { transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1.18)', opacity: 1, offset: 0.6 }, { transform: 'scale(1)', opacity: 1 }
+  ], { duration: 480, delay: delay || 0, fill: 'backwards', easing: 'cubic-bezier(.2,.8,.3,1.2)' });
+  const shake = el => run(el, [
+    { transform: 'translateX(0)' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(8px)' },
+    { transform: 'translateX(-6px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }
+  ], { duration: 420 });
+  const bounce = el => run(el, [
+    { transform: 'translateY(0)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0)' },
+    { transform: 'translateY(-6px)' }, { transform: 'translateY(0)' }
+  ], { duration: 650, easing: 'ease-in-out' });
+  const glow = el => run(el, [
+    { boxShadow: '0 0 0 0 rgba(245, 158, 11, .75)' }, { boxShadow: '0 0 0 14px rgba(245, 158, 11, 0)' }
+  ], { duration: 900 });
+
+  /* Children slide up one after another. */
+  function stagger(container, selector) {
+    if (!container || !canAnimate()) return;
+    $$(selector || ':scope > *', container).forEach((child, i) => {
+      run(child, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 420, delay: Math.min(i, 16) * 45, fill: 'backwards', easing: 'cubic-bezier(.2,.7,.3,1)' });
+    });
+  }
+
+  /* Numbers roll up to their final value. The final text is always set, even without animation. */
+  function countUp(el, to, format, duration) {
+    if (!el) return;
+    format = format || (v => Math.round(v).toLocaleString('en-US'));
+    if (!canAnimate() || !window.requestAnimationFrame) { el.textContent = format(to); return; }
+    const start = performance.now();
+    const len = duration || 900;
+    const token = {};
+    el._countToken = token;
+    const tick = now => {
+      if (el._countToken !== token) return;
+      const t = Math.min(1, (now - start) / len);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = format(to * eased);
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = format(to);
+    };
+    el.textContent = format(0);
+    requestAnimationFrame(tick);
+  }
+
+  /* Tiny synthesised sound effects (no audio files). Off unless a student turns them on. */
+  const TUNES = {
+    click: [[660, 0.04, 'triangle']],
+    good: [[523, 0.09, 'triangle'], [659, 0.09, 'triangle'], [784, 0.16, 'triangle']],
+    coin: [[988, 0.06, 'square'], [1319, 0.14, 'square']],
+    bad: [[220, 0.12, 'sawtooth'], [165, 0.2, 'sawtooth']],
+    win: [[523, 0.1, 'triangle'], [659, 0.1, 'triangle'], [784, 0.1, 'triangle'], [1047, 0.3, 'triangle']],
+    stamp: [[110, 0.12, 'square'], [80, 0.12, 'square']],
+    cash: [[1319, 0.05, 'square'], [1568, 0.05, 'square'], [2093, 0.12, 'square']]
+  };
+  function sound(name) {
+    if (!soundOn || !TUNES[name]) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audio = audio || new Ctx();
+      let t = audio.currentTime + 0.01;
+      TUNES[name].forEach(([freq, len, type]) => {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+        osc.connect(gain).connect(audio.destination);
+        osc.start(t);
+        osc.stop(t + len + 0.02);
+        t += len * 0.85;
+      });
+    } catch (e) { /* sound is optional */ }
+  }
+
+  function renderToggle(btn) {
+    btn.setAttribute('aria-pressed', String(soundOn));
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/>' +
+      (soundOn ? '<path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>' : '<path d="M16 9l5 6M21 9l-5 6"/>') +
+      '</svg><span>Sound ' + (soundOn ? 'on' : 'off') + '</span>';
+  }
+  function mountSoundToggle() {
+    const bar = $('.header-actions');
+    if (!bar || $('#btn-sound')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'btn-sound';
+    btn.className = 'btn btn-sm btn-sound';
+    renderToggle(btn);
+    btn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      store.set(SOUND_KEY, soundOn);
+      renderToggle(btn);
+      sound('good');
+    });
+    bar.insertBefore(btn, bar.firstChild);
+  }
+
+  return { confetti, sparkle, pop, shake, bounce, glow, stagger, countUp, sound, mountSoundToggle, calm };
+})();
+
+/* ---------- Guided tutorial ----------
+   Coach.start({ name, steps, onDone }) walks a student through one complete piece of work.
+   Each step: { text, pic, target, check, act, done }
+     text   one short instruction
+     pic    optional "icon:Label|icon:Label" picture row
+     target CSS selector of the thing to use; it is outlined and scrolled into view
+     check  function returning true once the student has done it (the step then ticks by itself)
+     act    function that does the step for them ("Show me")
+   The tutorial never blocks the tool: students can press Stop at any time and keep whatever they made. */
+const Coach = (() => {
+  let cfg = null;
+  let index = 0;
+  let timer = null;
+  let lastTarget = null;
+  let advancing = false;
+
+  const panel = () => document.getElementById('coach');
+
+  function mount() {
+    if (panel()) return;
+    const el = document.createElement('div');
+    el.id = 'coach';
+    el.className = 'coach';
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Guided tutorial');
+    el.innerHTML =
+      '<div class="coach-head"><span class="coach-name"></span><span class="coach-step"></span>' +
+      '<button type="button" class="coach-x" data-coach="move" aria-label="Move this box to the other side">&harr;</button>' +
+      '<button type="button" class="coach-x" data-coach="stop" aria-label="Stop the tutorial">&times;</button></div>' +
+      '<div class="coach-bar" aria-hidden="true"><span></span></div>' +
+      '<div class="coach-pics"></div>' +
+      '<p class="coach-text" aria-live="polite"></p>' +
+      '<div class="coach-actions">' +
+        '<button type="button" class="btn btn-sm" data-coach="show">Show me</button>' +
+        '<button type="button" class="btn btn-sm btn-primary" data-coach="next">Next</button>' +
+      '</div>';
+    document.body.appendChild(el);
+    el.addEventListener('click', e => {
+      const b = e.target.closest('[data-coach]');
+      if (!b) return;
+      if (b.dataset.coach === 'stop') stop(true);
+      else if (b.dataset.coach === 'move') el.classList.toggle('coach-right');
+      else if (b.dataset.coach === 'show') showMe();
+      else next();
+    });
+  }
+
+  function clearHalo() {
+    $$('.coach-halo').forEach(el => el.classList.remove('coach-halo'));
+    lastTarget = null;
+  }
+
+  function highlight() {
+    const step = cfg && cfg.steps[index];
+    if (!step || !step.target) { clearHalo(); return; }
+    const el = $(step.target);
+    if (!el) { clearHalo(); return; }
+    if (el === lastTarget) { el.classList.add('coach-halo'); return; }
+    clearHalo();
+    el.classList.add('coach-halo');
+    lastTarget = el;
+    if (el.scrollIntoView) el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: Fx.calm() ? 'auto' : 'smooth' });
+  }
+
+  function render() {
+    mount();
+    const el = panel();
+    const step = cfg.steps[index];
+    const last = index === cfg.steps.length - 1;
+    $('.coach-name', el).textContent = cfg.name || 'Tutorial';
+    $('.coach-step', el).textContent = 'Step ' + (index + 1) + ' of ' + cfg.steps.length;
+    $('.coach-bar span', el).style.width = Math.round(index / cfg.steps.length * 100) + '%';
+    $('.coach-pics', el).innerHTML = step.pic ? '<div class="pic-row">' + picRow(step.pic) + '</div>' : '';
+    $('.coach-text', el).innerHTML = step.text;
+    $('[data-coach="show"]', el).hidden = typeof step.act !== 'function';
+    $('[data-coach="next"]', el).textContent = last ? 'Finish' : 'Next';
+    el.classList.remove('is-done');
+    highlight();
+    clearInterval(timer);
+    timer = setInterval(tick, 300);
+  }
+
+  function tick() {
+    if (!cfg) return;
+    highlight();
+    const step = cfg.steps[index];
+    if (advancing || typeof step.check !== 'function') return;
+    let ok = false;
+    try { ok = !!step.check(); } catch (e) { ok = false; }
+    if (!ok) return;
+    advancing = true;
+    const el = panel();
+    if (el) el.classList.add('is-done');
+    Fx.sound('good');
+    setTimeout(() => { advancing = false; next(); }, 700);
+  }
+
+  function showMe() {
+    const step = cfg && cfg.steps[index];
+    if (!step || typeof step.act !== 'function') return;
+    try { step.act(); } catch (e) { /* the student can still do it themselves */ }
+    if (typeof step.check !== 'function') next();
+  }
+
+  function next() {
+    if (!cfg) return;
+    if (index >= cfg.steps.length - 1) { finish(); return; }
+    index++;
+    render();
+  }
+
+  function finish() {
+    const done = cfg && cfg.onDone;
+    stop(false);
+    if (typeof done === 'function') done();
+  }
+
+  function stop(byStudent) {
+    clearInterval(timer);
+    timer = null;
+    advancing = false;
+    const onStop = cfg && cfg.onStop;
+    cfg = null;
+    clearHalo();
+    const el = panel();
+    if (el) el.remove();
+    if (byStudent && typeof onStop === 'function') onStop();
+  }
+
+  function start(options) {
+    stop(false);
+    cfg = options;
+    index = 0;
+    render();
+  }
+
+  return { start, stop, next, active: () => !!cfg, step: () => index, count: () => (cfg ? cfg.steps.length : 0) };
+})();
+
+/* Every tool gets the sound switch and a soft click on its main buttons. */
+document.addEventListener('DOMContentLoaded', () => Fx.mountSoundToggle());
+if (document.readyState !== 'loading') Fx.mountSoundToggle();
+document.addEventListener('click', e => {
+  if (e.target.closest && e.target.closest('.btn-primary')) Fx.sound('click');
+}, true);
+/* ===== LAB KIT END ===== */
+
+/* ===== MISSIONS START ===== */
+/* Pictures students can use with <img src="name.svg">. They are drawn here, so the tool works offline. */
+const IMAGES = {
+  'pizza.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="#e9a23b"/><circle cx="60" cy="60" r="46" fill="#f6d365"/><circle cx="60" cy="60" r="44" fill="#e4572e" opacity=".85"/><circle cx="42" cy="44" r="8" fill="#9b1d20"/><circle cx="76" cy="40" r="7" fill="#9b1d20"/><circle cx="58" cy="70" r="8" fill="#9b1d20"/><circle cx="82" cy="74" r="6" fill="#9b1d20"/><circle cx="38" cy="78" r="6" fill="#9b1d20"/><path d="M50 50l4 4M70 58l5-3M66 86l3 4" stroke="#2f7d32" stroke-width="4" stroke-linecap="round"/></svg>',
+  'cat.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M28 30l10 26h44l10-26-22 14H50z" fill="#f2a65a"/><ellipse cx="60" cy="72" rx="36" ry="32" fill="#f2a65a"/><circle cx="47" cy="66" r="5" fill="#2b2d42"/><circle cx="73" cy="66" r="5" fill="#2b2d42"/><path d="M56 78h8l-4 5z" fill="#e5636b"/><path d="M30 78h18M30 86h18M72 78h18M72 86h18" stroke="#8d5524" stroke-width="2"/></svg>',
+  'planet.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="16" fill="#1b1a3a"/><circle cx="20" cy="20" r="2" fill="#fff"/><circle cx="100" cy="30" r="1.6" fill="#fff"/><circle cx="90" cy="100" r="2" fill="#fff"/><circle cx="60" cy="60" r="30" fill="#f4a259"/><ellipse cx="60" cy="60" rx="52" ry="12" fill="none" stroke="#ffd166" stroke-width="5"/><path d="M38 54q22-10 44 0" stroke="#e76f51" stroke-width="5" fill="none"/></svg>',
+  'rocket.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 8c22 18 26 46 14 74H46C34 54 38 26 60 8z" fill="#e8eef7" stroke="#334" stroke-width="3"/><circle cx="60" cy="46" r="10" fill="#4cc9f0" stroke="#334" stroke-width="3"/><path d="M46 82l-16 18 20-6M74 82l16 18-20-6" fill="#ef476f"/><path d="M50 84h20l-10 28z" fill="#ffd166"/></svg>',
+  'sneaker.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M10 78c0-14 6-30 14-34l16 10c8 6 22 8 34 10l26 6c8 2 10 10 10 16v6H10z" fill="#ef476f"/><path d="M10 88h100v10H10z" fill="#fff" stroke="#334" stroke-width="3"/><path d="M40 56l8 8M50 60l8 8M60 64l8 6" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="60" r="5" fill="#ffd166"/></svg>',
+  'cap.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M20 74c0-30 18-46 40-46s40 16 40 46z" fill="#118ab2"/><path d="M60 28v46" stroke="#073b4c" stroke-width="3"/><path d="M14 74h66c14 0 26 4 30 12H14z" fill="#073b4c"/><circle cx="60" cy="27" r="5" fill="#ffd166"/></svg>',
+  'cake.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="22" y="56" width="76" height="46" rx="6" fill="#6f4518"/><path d="M22 66q10 10 19 0t19 0 19 0 19 0V56H22z" fill="#f8c8dc"/><rect x="22" y="80" width="76" height="6" fill="#f8c8dc"/><rect x="56" y="34" width="8" height="22" rx="3" fill="#4cc9f0"/><path d="M60 22c6 6 4 12 0 12s-6-6 0-12z" fill="#ffb703"/><circle cx="40" cy="52" r="5" fill="#e63946"/><circle cx="80" cy="52" r="5" fill="#e63946"/></svg>',
+  'guitar.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="16" fill="#111"/><path d="M78 18l14 14-30 30" stroke="#d4a373" stroke-width="8"/><circle cx="46" cy="76" r="24" fill="#39ff14"/><circle cx="60" cy="62" r="14" fill="#39ff14"/><circle cx="48" cy="74" r="7" fill="#111"/><path d="M90 16l8 8" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>',
+  'dumbbell.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="34" y="55" width="52" height="10" rx="4" fill="#8d99ae"/><rect x="14" y="36" width="14" height="48" rx="4" fill="#2b2d42"/><rect x="26" y="42" width="10" height="36" rx="3" fill="#ef233c"/><rect x="92" y="36" width="14" height="48" rx="4" fill="#2b2d42"/><rect x="84" y="42" width="10" height="36" rx="3" fill="#ef233c"/></svg>',
+  'dog.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><ellipse cx="32" cy="50" rx="12" ry="24" fill="#6f4e37"/><ellipse cx="88" cy="50" rx="12" ry="24" fill="#6f4e37"/><circle cx="60" cy="62" r="32" fill="#c69c6d"/><circle cx="48" cy="56" r="5" fill="#222"/><circle cx="72" cy="56" r="5" fill="#222"/><ellipse cx="60" cy="72" rx="9" ry="7" fill="#222"/><path d="M60 79v8M52 88q8 6 16 0" stroke="#222" stroke-width="3" fill="none"/></svg>',
+  'rabbit.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><ellipse cx="46" cy="30" rx="9" ry="26" fill="#eee" stroke="#bbb" stroke-width="2"/><ellipse cx="74" cy="30" rx="9" ry="26" fill="#eee" stroke="#bbb" stroke-width="2"/><ellipse cx="46" cy="32" rx="4" ry="18" fill="#f4acb7"/><ellipse cx="74" cy="32" rx="4" ry="18" fill="#f4acb7"/><circle cx="60" cy="74" r="30" fill="#eee" stroke="#bbb" stroke-width="2"/><circle cx="50" cy="70" r="4" fill="#333"/><circle cx="70" cy="70" r="4" fill="#333"/><path d="M56 80h8l-4 4z" fill="#f4acb7"/></svg>',
+  'icecream.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M38 58h44l-22 56z" fill="#e9c46a" stroke="#b5838d" stroke-width="2"/><path d="M42 66l30 14M48 90l20-14M44 72l24 26" stroke="#c9a227" stroke-width="2"/><circle cx="46" cy="52" r="16" fill="#ffafcc"/><circle cx="74" cy="52" r="16" fill="#a2d2ff"/><circle cx="60" cy="34" r="16" fill="#cdb4db"/><circle cx="60" cy="18" r="5" fill="#e63946"/></svg>',
+  'hotel.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="90" cy="26" r="14" fill="#f9844a"/><rect x="24" y="30" width="56" height="80" fill="#fff8e7" stroke="#c2410c" stroke-width="3"/><g fill="#90e0ef"><rect x="32" y="40" width="12" height="12"/><rect x="60" y="40" width="12" height="12"/><rect x="32" y="62" width="12" height="12"/><rect x="60" y="62" width="12" height="12"/></g><rect x="44" y="86" width="16" height="24" fill="#c2410c"/><path d="M0 110h120" stroke="#2a9d8f" stroke-width="6"/></svg>',
+  'lion.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="46" fill="#bc6c25"/><circle cx="60" cy="62" r="30" fill="#f4a261"/><circle cx="49" cy="56" r="4.5" fill="#222"/><circle cx="71" cy="56" r="4.5" fill="#222"/><path d="M54 68h12l-6 6z" fill="#6b2d0e"/><path d="M60 74v6M52 82q8 5 16 0" stroke="#6b2d0e" stroke-width="3" fill="none"/></svg>',
+  'trophy.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M36 14h48v30a24 24 0 0 1-48 0z" fill="#ffd166" stroke="#b07d00" stroke-width="3"/><path d="M36 22H18q0 24 22 26M84 22h18q0 24-22 26" fill="none" stroke="#b07d00" stroke-width="5"/><rect x="54" y="66" width="12" height="18" fill="#b07d00"/><rect x="38" y="84" width="44" height="14" rx="3" fill="#7c3aed"/><path d="M60 26l4 8 8 1-6 6 2 8-8-4-8 4 2-8-6-6 8-1z" fill="#fff"/></svg>',
+  'ball.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#fff" stroke="#222" stroke-width="3"/><path d="M60 40l18 13-7 21H49l-7-21z" fill="#222"/><path d="M60 40V14M78 53l24-8M71 74l15 20M49 74L34 94M42 53l-24-8" stroke="#222" stroke-width="3"/></svg>'
+};
+const IMAGE_NAMES = Object.keys(IMAGES);
+
+/* Tiny helpers used by the checks. T is built for each preview (see app.js). */
+const near = (rgb, target, tol) => rgb && Math.abs(rgb[0] - target[0]) <= tol && Math.abs(rgb[1] - target[1]) <= tol && Math.abs(rgb[2] - target[2]) <= tol;
+
+const MISSIONS = [
+  {
+    id: 1, title: 'Rosa\'s Pizza', skill: 'Tags & headings', client: 'Grandma Rosa', initials: 'GR', color: '#e4572e', domain: 'rosas-pizza.example',
+    story: 'Grandma Rosa has baked pizza in the same little shop for 40 years, and her customers keep asking for a website. Her grandson started one, typed "My Website", got bored and went to play football. Rosa wants people to see her shop\'s name in big letters, a few words about why her pizza is special, and her opening hours. It is your first job at the agency: tags are like labels that tell the browser what each piece of text is.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>My Website</title>\n</head>\n<body>\n  <h1>My Website</h1>\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Change the big heading <code>&lt;h1&gt;</code> to say <b>Rosa\'s Pizza</b>.',
+        hint: 'Only change the words between <h1> and </h1>. The tags stay the same.',
+        answer: '<h1>Rosa\'s Pizza</h1>',
+        check: T => /rosa/i.test(T.text('h1')) && /pizza/i.test(T.text('h1')) || 'The <h1> should say Rosa\'s Pizza.'
+      },
+      {
+        text: 'Change the <code>&lt;title&gt;</code> too. It is the name on the browser tab (look at the top of the preview).',
+        hint: 'The title is inside <head>. Change "My Website" between <title> and </title>.',
+        answer: '<title>Rosa\'s Pizza</title>',
+        check: T => /rosa/i.test(T.doc.title) || 'The <title> still does not mention Rosa.'
+      },
+      {
+        text: 'Under the heading, add a paragraph <code>&lt;p&gt;</code> of at least <b>8 words</b> about Rosa\'s pizza.',
+        hint: 'Start with <p>, type your sentence, end with </p>. Put it on a new line after </h1>.',
+        answer: '<p>Fresh dough, homemade tomato sauce and lots of love since 1985.</p>',
+        check: T => { const p = T.qa('h1 ~ p').find(el => T.words(el) >= 8); return !!p || 'Add a <p> with at least 8 words after the <h1>.'; }
+      },
+      {
+        text: 'Add a smaller heading <code>&lt;h2&gt;Opening hours&lt;/h2&gt;</code> and a paragraph under it with the days and times.',
+        hint: 'h2 is the second-biggest heading. Then add another <p> below it.',
+        answer: '<h2>Opening hours</h2>\n<p>Tuesday to Sunday, 12:00 to 22:00</p>',
+        check: T => { const h2 = T.qa('h2').find(el => /hour|open/i.test(T.text(el))); if (!h2) return 'Add an <h2> that says Opening hours.'; return T.qa('h2 ~ p').some(p => T.words(p) >= 2) || 'Add a <p> under the <h2> with the opening times.'; }
+      }
+    ],
+    reaction: 'Mamma mia! My shop on the internet! My grandson says you are "a legend". Free pizza for you, any time.'
+  },
+  {
+    id: 2, title: 'The Purrfect Cup', skill: 'Bold, italic, lines', client: 'Mr. Tanaka', initials: 'MT', color: '#f2a65a', domain: 'purrfect-cup.example',
+    story: 'Mr. Tanaka runs a café where twelve cats live among the tables. His page has all the right words, but everything looks the same, so nobody notices the important parts. Visitors miss that the first drink is free, and some still wake the sleeping cats, which makes the cats very grumpy. Make the important words stand out, separate the two parts of the page, and introduce two of the café\'s famous cats.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>The Purrfect Cup</title>\n</head>\n<body>\n  <h1>The Purrfect Cup</h1>\n  <p>Your first hot chocolate is free on your first visit!</p>\n  <p>Cafe rule: Never wake a sleeping cat.</p>\n\n  <h2>Meet the cats</h2>\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Make the word <b>free</b> bold with <code>&lt;strong&gt;</code>.',
+        hint: 'Put <strong> just before the word and </strong> just after it: is <strong>free</strong> on…',
+        answer: 'is <strong>free</strong> on your first visit',
+        check: T => T.qa('strong, b').some(el => /^free$/i.test(T.text(el))) || 'Wrap only the word free in <strong> … </strong>.'
+      },
+      {
+        text: 'Make the rule <b>Never wake a sleeping cat.</b> italic with <code>&lt;em&gt;</code>.',
+        hint: '<em> means "say it with emphasis". Browsers show it in italics.',
+        answer: 'Cafe rule: <em>Never wake a sleeping cat.</em>',
+        check: T => T.qa('em, i').some(el => /never wake a sleeping cat/i.test(T.text(el))) || 'Wrap the rule in <em> … </em>.'
+      },
+      {
+        text: 'Put a dividing line <code>&lt;hr&gt;</code> just before the heading <b>Meet the cats</b>.',
+        hint: '<hr> is a tag on its own: it has no closing tag.',
+        answer: '<hr>\n<h2>Meet the cats</h2>',
+        check: T => { const hr = T.q('hr'); const h2 = T.q('h2'); return (hr && h2 && (hr.compareDocumentPosition(h2) & 4) !== 0) || 'Add <hr> on the line above <h2>Meet the cats</h2>.'; }
+      },
+      {
+        text: 'Under <b>Meet the cats</b>, add two <code>&lt;h3&gt;</code> headings with cat names, each followed by a <code>&lt;p&gt;</code> about that cat.',
+        hint: 'For example <h3>Mochi</h3> and a sentence, then <h3>Biscuit</h3> and a sentence.',
+        answer: '<h3>Mochi</h3>\n<p>Loves sleeping in the window.</p>\n<h3>Biscuit</h3>\n<p>Steals milk foam from cups.</p>',
+        check: T => { const h3 = T.qa('h3').filter(el => T.text(el).length >= 2); if (h3.length < 2) return 'Add two <h3> cat names.'; return T.qa('h3 + p').length >= 2 || 'Put a <p> right after each <h3>.'; }
+      }
+    ],
+    reaction: 'The cats are purring with happiness. Nobody has woken Mochi all week. Thank you!'
+  },
+  {
+    id: 3, title: 'Galaxy Space Club', skill: 'Lists', client: 'Captain Nova', initials: 'CN', color: '#4361ee', domain: 'galaxy-club.example',
+    story: 'The Galaxy Space Club meets every Friday in the school library to learn about planets and build model rockets. Captain Nova, the club leader, wrote everything as one long line, and new members get lost. She wants a bulleted list of the planets they study, numbered steps that explain how to join, and a little list inside the list that shows two of Jupiter\'s moons. Lists make information quick to scan.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Galaxy Space Club</title>\n</head>\n<body>\n  <h1>Galaxy Space Club</h1>\n  <img src="planet.svg" alt="A planet with rings" width="120">\n\n  <h2>Planets we study</h2>\n\n  <h2>How to join</h2>\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Under <b>Planets we study</b>, make a bulleted list <code>&lt;ul&gt;</code> with at least <b>4 planets</b>, each in its own <code>&lt;li&gt;</code>.',
+        hint: '<ul> starts the list, every planet goes in <li>…</li>, and </ul> ends it.',
+        answer: '<ul>\n  <li>Mars</li>\n  <li>Jupiter</li>\n  <li>Saturn</li>\n  <li>Neptune</li>\n</ul>',
+        check: T => { const ul = T.q('ul'); return (ul && ul.querySelectorAll(':scope > li').length >= 4) || 'Make a <ul> with at least 4 <li> items.'; }
+      },
+      {
+        text: 'Under <b>How to join</b>, make a numbered list <code>&lt;ol&gt;</code> with <b>3 steps</b>.',
+        hint: 'Same as <ul>, but <ol> (ordered list) numbers the items for you.',
+        answer: '<ol>\n  <li>Come to the library on Friday</li>\n  <li>Fill in the form</li>\n  <li>Build your first rocket</li>\n</ol>',
+        check: T => { const ol = T.q('ol'); return (ol && ol.querySelectorAll(':scope > li').length >= 3) || 'Make an <ol> with 3 <li> steps.'; }
+      },
+      {
+        text: 'Inside the <b>Jupiter</b> item, add a small list with two of its moons: <b>Io</b> and <b>Europa</b>.',
+        hint: 'A list can live inside an <li>: <li>Jupiter <ul><li>Io</li><li>Europa</li></ul></li>',
+        answer: '<li>Jupiter\n    <ul>\n      <li>Io</li>\n      <li>Europa</li>\n    </ul>\n  </li>',
+        check: T => { const inner = T.qa('li ul li, li ol li').map(el => T.text(el).toLowerCase()); return (inner.some(t => t.indexOf('io') !== -1) && inner.some(t => t.indexOf('europa') !== -1)) || 'Put a <ul> with Io and Europa inside the Jupiter <li>.'; }
+      }
+    ],
+    reaction: 'Twelve new members joined this week and none of them got lost. Houston, we have NO problem!'
+  },
+  {
+    id: 4, title: 'Kickz Sneaker Shop', skill: 'Images & links', client: 'Jayden', initials: 'JK', color: '#ef476f', domain: 'kickz.example',
+    story: 'Jayden is seventeen and sells custom-painted sneakers from his garage. His page only has words, and as Jayden says, "nobody buys shoes they can\'t see". He needs pictures of his best products and a link to his order form. Pictures use the <img> tag with two important parts: src, the picture file, and alt, words that describe the picture for blind visitors and for when the picture cannot load. Open the Pictures box to see the files you can use.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Kickz</title>\n</head>\n<body>\n  <h1>Kickz Custom Sneakers</h1>\n  <p>Hand-painted sneakers. Every pair is one of a kind.</p>\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Add the sneaker picture: <code>&lt;img src="sneaker.svg" alt="..."&gt;</code>, with your own description in <b>alt</b>.',
+        hint: 'The alt text describes the picture, for example alt="Pink sneaker with yellow laces". <img> has no closing tag.',
+        answer: '<img src="sneaker.svg" alt="Pink painted sneaker">',
+        check: T => { const img = T.qa('img').find(i => T.file(i) === 'sneaker.svg'); if (!img) return 'Add an <img> with src="sneaker.svg". Check the spelling and the quotes.'; return (img.getAttribute('alt') || '').trim().length >= 3 || 'Write a description in the alt="" part.'; }
+      },
+      {
+        text: 'Make the sneaker picture <b>200 pixels wide</b> by adding <code>width="200"</code> inside the img tag.',
+        hint: 'Attributes go inside the tag, separated by spaces: <img src="sneaker.svg" alt="…" width="200">',
+        answer: '<img src="sneaker.svg" alt="Pink painted sneaker" width="200">',
+        check: T => { const img = T.qa('img').find(i => T.file(i) === 'sneaker.svg'); return (img && Math.round(img.getBoundingClientRect().width) === 200) || 'The sneaker picture should be exactly 200 pixels wide.'; }
+      },
+      {
+        text: 'Add a second product: the cap picture <b>cap.svg</b>, also with alt text and width 200.',
+        hint: 'Copy the idea of your first <img>, but change the file name and the alt text.',
+        answer: '<img src="cap.svg" alt="Blue cap" width="200">',
+        check: T => { const img = T.qa('img').find(i => T.file(i) === 'cap.svg'); if (!img) return 'Add an <img> with src="cap.svg".'; if ((img.getAttribute('alt') || '').trim().length < 3) return 'The cap picture needs alt text.'; return Math.round(img.getBoundingClientRect().width) === 200 || 'Make the cap 200 pixels wide too.'; }
+      },
+      {
+        text: 'Add a link: <code>&lt;a href="order.html"&gt;Order your pair&lt;/a&gt;</code>. Click it in the preview to test it.',
+        hint: 'href is where the link goes. The words between <a> and </a> are what people click.',
+        answer: '<a href="order.html">Order your pair</a>',
+        check: T => T.qa('a[href]').some(a => a.getAttribute('href').trim() !== '' && T.words(a) >= 2) || 'Add an <a href="…"> link with at least 2 words to click.'
+      }
+    ],
+    reaction: 'I sold five pairs in one day! My mum says I need a bigger garage now.'
+  },
+  {
+    id: 5, title: 'RESCUE: The Broken Bakery', skill: 'Fix HTML bugs', client: 'Mrs. Baker', initials: 'MB', color: '#6f4518', domain: 'sweet-crumbs.example', rescue: true,
+    story: 'Emergency call! Mrs. Baker at Sweet Crumbs tried to update her website herself last night. Now the whole page is one giant heading, the cake photo has disappeared, one menu item has escaped from the menu, and the opening times look strange. Customers think the bakery has closed. The Code Doctor below the editor lists the problems it can find, with line numbers. Your job: find every bug and fix it, without deleting her content.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Sweet Crumbs Bakery</title>\n</head>\n<body>\n  <h1>Sweet Crumbs Bakery\n  <p>Fresh bread and cakes every morning since 1998.</p>\n  <img src="cake.svg alt="Chocolate cake" width="180">\n\n  <h2>Our menu</h2>\n  <ul>\n    <li>Croissant</li>\n    <li>Apple pie<li>\n    <li>Cinnamon roll</li>\n  </ul>\n  <li>Birthday cake</li>\n\n  <p>Open every day from <strong>7 a.m.</p></strong>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'The whole page is a giant heading! Close the <code>&lt;h1&gt;</code> in the right place.',
+        hint: 'Every opening tag needs a closing tag. Where should </h1> go?',
+        answer: '<h1>Sweet Crumbs Bakery</h1>',
+        check: T => T.text('h1') === 'Sweet Crumbs Bakery' || 'The <h1> should hold only "Sweet Crumbs Bakery". Close it with </h1>.'
+      },
+      {
+        text: 'Bring back the cake photo. Look very carefully at the quote marks in the <code>&lt;img&gt;</code> tag.',
+        hint: 'Every value needs a quote at the start AND at the end: src="cake.svg"',
+        answer: '<img src="cake.svg" alt="Chocolate cake" width="180">',
+        check: T => { const img = T.qa('img').find(i => T.file(i) === 'cake.svg'); if (!img) return 'The <img> must load cake.svg. Check the quotes around the file name.'; return /chocolate cake/i.test(img.getAttribute('alt') || '') || 'Keep the alt text "Chocolate cake".'; }
+      },
+      {
+        text: 'Fix the menu: it must be <b>one list with 4 items</b>, and no empty items.',
+        hint: 'One closing tag is written as an opening tag (look at Apple pie), and one <li> is outside the </ul>.',
+        answer: '<ul>\n    <li>Croissant</li>\n    <li>Apple pie</li>\n    <li>Cinnamon roll</li>\n    <li>Birthday cake</li>\n  </ul>',
+        check: T => {
+          const items = T.qa('li');
+          if (items.some(li => !li.closest('ul, ol'))) return 'One <li> is outside the list. Move it inside <ul> … </ul>.';
+          const ul = T.q('ul');
+          const real = ul ? Array.from(ul.querySelectorAll('li')).filter(li => T.text(li) !== '') : [];
+          if (items.some(li => T.text(li) === '')) return 'There is an empty item in the list. Check the tag after Apple pie.';
+          return real.length === 4 || 'The menu needs exactly 4 items.';
+        }
+      },
+      {
+        text: 'Fix the opening-hours line. Tags must close in the reverse order they were opened.',
+        hint: 'Opened: <p> then <strong>. So close </strong> first, then </p>.',
+        answer: '<p>Open every day from <strong>7 a.m.</strong></p>',
+        check: T => {
+          const st = T.qa('p strong').find(s => /7 a\.m\./i.test(T.text(s)));
+          if (!st) return 'Keep "7 a.m." in <strong>, inside the <p>.';
+          return T.lint.length === 0 || 'The Code Doctor still finds a problem. Read its message.';
+        }
+      }
+    ],
+    reaction: 'The phone is ringing again and the croissants are selling out! You saved my bakery.'
+  },
+  {
+    id: 6, title: 'The Pixel Pandas', skill: 'CSS colours', client: 'Zara (lead guitar)', initials: 'PP', color: '#39ff14', domain: 'pixel-pandas.example',
+    story: 'The Pixel Pandas are a school rock band with a big concert next month. Their page works, but it is plain black text on white, and Zara says "we look like a homework sheet, not a rock band". The band\'s colours are a black background, white text and neon-green headings. Colours and fonts are not HTML\'s job: that is CSS. CSS goes inside a <style> tag in the <head>, written as rules like h1 { color: lime; }.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>The Pixel Pandas</title>\n  <style>\n\n  </style>\n</head>\n<body>\n  <h1>The Pixel Pandas</h1>\n  <img src="guitar.svg" alt="Neon guitar" width="140">\n  <h2>Next concert</h2>\n  <p>Friday 8 pm in the school hall. Tickets cost 3 dollars.</p>\n  <h2>Our songs</h2>\n  <p>Loading Screen, Lag Monster and Press Start.</p>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Inside <code>&lt;style&gt;</code>, make the page background black: <code>body { background-color: black; }</code>',
+        hint: 'A CSS rule = selector { property: value; }. The selector body means "the whole page".',
+        answer: 'body {\n  background-color: black;\n}',
+        check: T => { const c = T.rgb('body', 'backgroundColor'); return (c && c[3] > 0.5 && T.lum(c) < 0.2) || 'The body background is not dark yet. Check the spelling of background-color and the ; at the end.'; }
+      },
+      {
+        text: 'Make all the text white by adding <code>color: white;</code> to the body rule.',
+        hint: 'One rule can hold many properties. Put color: white; on a new line inside the same { }.',
+        answer: 'body {\n  background-color: black;\n  color: white;\n}',
+        check: T => T.lum(T.rgb('p', 'color')) > 0.85 || 'The paragraph text is not white yet.'
+      },
+      {
+        text: 'Make the headings neon green: a new rule for <code>h1, h2</code> with <code>color: #39ff14;</code>',
+        hint: 'A comma lets one rule style two things: h1, h2 { color: #39ff14; }. #39ff14 is a colour code.',
+        answer: 'h1, h2 {\n  color: #39ff14;\n}',
+        check: T => { const a = T.rgb('h1', 'color'), b = T.rgb('h2', 'color'); const green = c => c && c[1] > 150 && c[1] > c[0] + 60 && c[1] > c[2] + 60; return (green(a) && green(b)) || 'Both h1 and h2 should be bright green.'; }
+      },
+      {
+        text: 'Give the big heading a rock font: add <code>font-family: Impact, sans-serif;</code> to the h1.',
+        hint: 'You can write a separate rule: h1 { font-family: Impact, sans-serif; }',
+        answer: 'h1 {\n  font-family: Impact, sans-serif;\n}',
+        check: T => T.css('h1', 'fontFamily') !== T.defaultFont || 'The h1 still has the normal browser font.'
+      }
+    ],
+    reaction: 'THIS. IS. AWESOME. We printed the page and stuck it on the band room door.'
+  },
+  {
+    id: 7, title: 'Iron Panda Gym', skill: 'Text size & alignment', client: 'Coach Bruno', initials: 'CB', color: '#ef233c', domain: 'iron-panda.example',
+    story: 'Coach Bruno opened a gym for teenagers, and his website is hard to read on the big screen at the gym entrance. The heading is small and stuck to the left, the paragraphs are tiny and squashed together, and the prices do not stand out. Bruno wants a strong, clear page: a big centred heading, comfortable text, and section titles in capital letters. Use CSS text properties to coach this page into shape.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Iron Panda Gym</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n    }\n  </style>\n</head>\n<body>\n  <h1>Iron Panda Gym</h1>\n  <img src="dumbbell.svg" alt="Dumbbell" width="100">\n  <h2>Prices</h2>\n  <p>Students pay 10 dollars a month. Your first week is free, and a coach shows you every machine.</p>\n  <h2>Classes</h2>\n  <p>Boxing on Monday, climbing on Wednesday and team games on Friday afternoon.</p>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Centre the big heading: <code>h1 { text-align: center; }</code>',
+        hint: 'text-align can be left, center or right. Note the American spelling: center.',
+        answer: 'h1 {\n  text-align: center;\n}',
+        check: T => T.css('h1', 'textAlign') === 'center' || 'The h1 is not centred yet.'
+      },
+      {
+        text: 'Make the heading at least <b>48px</b> tall with <code>font-size</code>.',
+        hint: 'Add font-size: 48px; inside the h1 rule. px means pixels.',
+        answer: 'h1 {\n  text-align: center;\n  font-size: 48px;\n}',
+        check: T => T.px('h1', 'fontSize') >= 47.5 || 'The h1 font-size should be 48px or more.'
+      },
+      {
+        text: 'Make the paragraphs easier to read: <code>font-size: 18px;</code> and <code>line-height: 1.6;</code>',
+        hint: 'Make a rule for p. line-height is the space between lines; 1.6 means 1.6 times the text size.',
+        answer: 'p {\n  font-size: 18px;\n  line-height: 1.6;\n}',
+        check: T => { if (T.px('p', 'fontSize') < 17.5) return 'Paragraphs need font-size: 18px.'; const lh = T.px('p', 'lineHeight') / T.px('p', 'fontSize'); return lh >= 1.45 || 'Add line-height: 1.6; to the p rule.'; }
+      },
+      {
+        text: 'Write the h2 titles in capitals with <code>text-transform: uppercase;</code> (do not retype the words!).',
+        hint: 'text-transform changes how letters look without changing the HTML.',
+        answer: 'h2 {\n  text-transform: uppercase;\n}',
+        check: T => T.css('h2', 'textTransform') === 'uppercase' || 'The h2 needs text-transform: uppercase; (use CSS, do not retype the words).'
+      }
+    ],
+    reaction: 'Now people read the prices from across the street! Fifty new members. Drop and give me twenty… thank-yous!'
+  },
+  {
+    id: 8, title: 'Happy Paws Shelter', skill: 'Classes & ids', client: 'Dr. Amara', initials: 'DA', color: '#2a9d8f', domain: 'happy-paws.example',
+    story: 'Happy Paws finds homes for rescued animals. Some pets on the page are already adopted, but visitors cannot tell which ones are still looking for a family, so they call about pets that have gone. Dr. Amara wants the available pets to glow green, and the special event this Saturday to shout in red. A class is a label you can give to many elements; an id is a name for exactly one element.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Happy Paws Shelter</title>\n  <style>\n    .pet {\n      padding: 10px;\n      margin-bottom: 10px;\n    }\n  </style>\n</head>\n<body>\n  <h1>Happy Paws Shelter</h1>\n  <p>Adoption day is this Saturday from 10 to 4. Bring the whole family!</p>\n\n  <div class="pet">\n    <img src="dog.svg" alt="Luna the dog" width="80">\n    <h3>Luna</h3>\n    <p>A gentle dog who loves long walks.</p>\n  </div>\n  <div class="pet">\n    <img src="cat.svg" alt="Tiger the cat" width="80">\n    <h3>Tiger</h3>\n    <p>Already adopted by the Lopez family.</p>\n  </div>\n  <div class="pet">\n    <img src="rabbit.svg" alt="Snowball the rabbit" width="80">\n    <h3>Snowball</h3>\n    <p>A curious rabbit who eats a lot of carrots.</p>\n  </div>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Luna and Snowball are still available. Give their two divs a second class: <code>class="pet available"</code>.',
+        hint: 'An element can have several classes, separated by a space. Do NOT add it to Tiger.',
+        answer: '<div class="pet available">',
+        check: T => { const av = T.qa('.available').map(el => T.text(el)); if (av.some(t => /tiger/i.test(t))) return 'Tiger is adopted: remove "available" from Tiger.'; return (av.some(t => /luna/i.test(t)) && av.some(t => /snowball/i.test(t)) && av.length === 2) || 'Give the class available to Luna\'s and Snowball\'s divs only.'; }
+      },
+      {
+        text: 'Style the class: <code>.available { background-color: lightgreen; }</code>',
+        hint: 'A class selector starts with a dot: .available',
+        answer: '.available {\n  background-color: lightgreen;\n}',
+        check: T => { const av = T.qa('.available'); if (!av.length) return 'First finish step 1.'; const ok = av.every(el => { const c = T.rgb(el, 'backgroundColor'); return c && c[3] > 0 && c[1] >= c[0]; }); if (!ok) return 'The available pets should have a green background.'; const tiger = T.qa('.pet').find(el => /tiger/i.test(T.text(el))); const tc = tiger && T.rgb(tiger, 'backgroundColor'); return !(tc && tc[3] > 0) || 'Tiger should not be green.'; }
+      },
+      {
+        text: 'Give the adoption-day paragraph the id <code>id="event"</code>, and make it red and bold with <code>#event { color: red; font-weight: bold; }</code>',
+        hint: 'An id selector starts with #. Put id="event" inside the first <p> tag.',
+        answer: '<p id="event">Adoption day is this Saturday…</p>\n\n#event {\n  color: red;\n  font-weight: bold;\n}',
+        check: T => { const el = T.q('#event'); if (!el) return 'Add id="event" to the adoption-day <p>.'; if (!/saturday/i.test(T.text(el))) return 'The id should be on the adoption-day paragraph.'; const c = T.rgb(el, 'color'); if (!(c && c[0] > 150 && c[1] < 90 && c[2] < 90)) return 'The #event text should be red.'; return Number(T.css(el, 'fontWeight')) >= 600 || 'Add font-weight: bold; too.'; }
+      }
+    ],
+    reaction: 'Luna and Snowball both went home with new families on Saturday! Everyone could see who was waiting.'
+  },
+  {
+    id: 9, title: 'Scoops Ice Cream', skill: 'Boxes: border, padding, margin', client: 'Lily & Leo', initials: 'LL', color: '#ff7eb6', domain: 'scoops.example',
+    story: 'Twins Lily and Leo opened an ice cream stand at the beach. Their menu shows three flavours, but the text is squashed together with no space and no shape. They want each flavour on a cute card: a pink border, rounded corners, space inside and space between the cards. In CSS every element is a box: padding is the space inside the border, margin is the space outside it. Build the perfect cards.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Scoops</title>\n  <style>\n    body {\n      font-family: Verdana, sans-serif;\n      background-color: #fff5fa;\n    }\n  </style>\n</head>\n<body>\n  <h1>Scoops Ice Cream</h1>\n  <img src="icecream.svg" alt="Ice cream cone" width="90">\n  <div class="card">\n    <h3>Strawberry Dream</h3>\n    <p>Fresh strawberries and cream. 2 dollars.</p>\n  </div>\n  <div class="card">\n    <h3>Blue Lagoon</h3>\n    <p>Blueberry with white chocolate. 2 dollars.</p>\n  </div>\n  <div class="card">\n    <h3>Midnight Mint</h3>\n    <p>Mint and dark chocolate chips. 3 dollars.</p>\n  </div>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Give every card a border: <code>.card { border: 3px solid hotpink; }</code>',
+        hint: 'border needs three things: thickness, style (solid, dashed, dotted) and colour.',
+        answer: '.card {\n  border: 3px solid hotpink;\n}',
+        check: T => T.border('.card') || 'The .card needs a border (for example 3px solid hotpink).'
+      },
+      {
+        text: 'Add space inside the cards: <code>padding: 15px;</code>',
+        hint: 'Padding pushes the text away from the border.',
+        answer: '.card {\n  border: 3px solid hotpink;\n  padding: 15px;\n}',
+        check: T => T.px('.card', 'paddingLeft') >= 10 || 'Add padding of at least 10px to .card.'
+      },
+      {
+        text: 'Add space between the cards: <code>margin-bottom: 15px;</code>',
+        hint: 'Margin is outside the border, so it pushes the next card away.',
+        answer: '  margin-bottom: 15px;',
+        check: T => T.px('.card', 'marginBottom') >= 10 || 'Add margin-bottom of at least 10px.'
+      },
+      {
+        text: 'Round the corners: <code>border-radius: 15px;</code> and make the cards narrower: <code>width: 300px;</code>',
+        hint: 'border-radius rounds corners; a bigger number = rounder. width sets how wide the box is.',
+        answer: '  border-radius: 15px;\n  width: 300px;',
+        check: T => { if (T.px('.card', 'borderTopLeftRadius') < 8) return 'Add border-radius (at least 8px).'; const w = T.q('.card').getBoundingClientRect().width; return (w >= 200 && w <= 420) || 'Set width: 300px; on .card.'; }
+      }
+    ],
+    reaction: 'The cards look like real menu cards! People take photos of our menu now. Free scoops for the agency!'
+  },
+  {
+    id: 10, title: 'RESCUE: Hotel Sunset', skill: 'Fix CSS bugs', client: 'Mr. Ortega', initials: 'MO', color: '#c2410c', domain: 'hotel-sunset.example', rescue: true,
+    story: 'Mr. Ortega\'s nephew "improved" the CSS of Hotel Sunset and then left on holiday. Now the beautiful Georgia font and the dark text colour are gone, the orange heading is black, the tagline is tiny, the room boxes lost their borders and the paragraphs lost their spacing. The HTML is fine: every bug is inside <style>. One missing character can break everything after it, so read slowly. The Code Doctor will point you to some of the bugs, but not all.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Hotel Sunset</title>\n  <style>\n    body {\n      background-color: #fff8e7;\n      font-family: Georgia, serif\n      color: #333333;\n    }\n    h1 {\n      colr: #c2410c;\n      text-align: center;\n    }\n    .Tagline {\n      font-size: 24px;\n    }\n    .room {\n      border: 2px solid #c2410c;\n      padding: 10px;\n      margin-bottom: 12px;\n\n    p {\n      line-height: 1.6;\n    }\n  </style>\n</head>\n<body>\n  <h1>Hotel Sunset</h1>\n  <p class="tagline">Wake up to the sound of the sea.</p>\n  <img src="hotel.svg" alt="Hotel Sunset by the sea" width="120">\n  <div class="room">\n    <h3>Sea View Room</h3>\n    <p>A big bed, a balcony and the best sunset on the coast.</p>\n  </div>\n  <div class="room">\n    <h3>Family Room</h3>\n    <p>Space for four, with bunk beds the children will love.</p>\n  </div>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Bring back the Georgia font AND the dark text colour. One tiny character is missing in the body rule.',
+        hint: 'Every property ends with a semicolon ;. Without it, the browser reads two lines as one broken line.',
+        answer: '  font-family: Georgia, serif;',
+        check: T => (/georgia/i.test(T.css('body', 'fontFamily')) && near(T.rgb('body', 'color'), [51, 51, 51], 3)) || 'The body should use Georgia and color #333333.'
+      },
+      {
+        text: 'The heading should be orange <b>#c2410c</b>. Find the spelling mistake.',
+        hint: 'CSS only understands exact property names. Compare with the colour property you know.',
+        answer: '  color: #c2410c;',
+        check: T => near(T.rgb('h1', 'color'), [194, 65, 12], 3) || 'The h1 is not orange yet.'
+      },
+      {
+        text: 'The tagline should be <b>24px</b>. The CSS selector does not match the class in the HTML.',
+        hint: 'Class names are case-sensitive: .Tagline and .tagline are different names.',
+        answer: '.tagline {\n  font-size: 24px;\n}',
+        check: T => Math.round(T.px('.tagline', 'fontSize')) === 24 || 'The .tagline text should be 24px.'
+      },
+      {
+        text: 'The rooms lost their borders and the paragraphs lost their spacing. One rule is never closed.',
+        hint: 'Count the { and } in each rule. Which rule has a { but no }?',
+        answer: '    margin-bottom: 12px;\n  }',
+        check: T => { if (!T.border('.room')) return 'The .room boxes still have no border.'; const lh = T.px('p', 'lineHeight') / T.px('p', 'fontSize'); return lh >= 1.5 || 'The p rule (line-height 1.6) is still not working.'; }
+      }
+    ],
+    reaction: 'Bookings are back! My nephew is not allowed to touch the website again. Ever.'
+  },
+  {
+    id: 11, title: 'City Zoo Navigation', skill: 'Nav bar & hover', client: 'Ranger Kofi', initials: 'RK', color: '#2d6a4f', domain: 'city-zoo.example',
+    story: 'The City Zoo website is one very long page, and visitors scroll for ages to find ticket prices. Ranger Kofi wants a navigation bar at the top with buttons that jump straight to each part of the page, and the buttons should light up when the mouse touches them, so visitors know they can be clicked. Links can jump inside a page: href="#tickets" goes to the element with id="tickets". Build a nav bar that would make a lion proud.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>City Zoo</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      margin: 0;\n    }\n    section {\n      padding: 20px;\n      min-height: 300px;\n    }\n  </style>\n</head>\n<body>\n\n  <h1>City Zoo</h1>\n  <section id="animals">\n    <h2>Animals</h2>\n    <img src="lion.svg" alt="Lion" width="100">\n    <p>Meet lions, giraffes, penguins and 200 other animals.</p>\n  </section>\n  <section id="tickets">\n    <h2>Tickets</h2>\n    <p>Children 5 dollars, adults 10 dollars.</p>\n  </section>\n  <section id="map">\n    <h2>Map</h2>\n    <p>The zoo has four areas: Savanna, Jungle, Ice World and Farm.</p>\n  </section>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'At the top of the body, add a <code>&lt;nav&gt;</code> with 3 links to <code>#animals</code>, <code>#tickets</code> and <code>#map</code>.',
+        hint: '<nav>\n  <a href="#animals">Animals</a>\n  …\n</nav>',
+        answer: '<nav>\n  <a href="#animals">Animals</a>\n  <a href="#tickets">Tickets</a>\n  <a href="#map">Map</a>\n</nav>',
+        check: T => { const links = T.qa('nav a[href^="#"]').map(a => a.getAttribute('href').slice(1)); const ok = ['animals', 'tickets', 'map'].every(id => links.indexOf(id) !== -1); return ok || 'The nav needs links to #animals, #tickets and #map.'; }
+      },
+      {
+        text: 'Style the bar: <code>nav { background-color: #2d6a4f; padding: 12px; }</code>',
+        hint: 'Write a rule with the selector nav.',
+        answer: 'nav {\n  background-color: #2d6a4f;\n  padding: 12px;\n}',
+        check: T => { const c = T.rgb('nav', 'backgroundColor'); if (!(c && c[3] > 0)) return 'Give the nav a background-color.'; return T.px('nav', 'paddingTop') >= 6 || 'Add padding to the nav.'; }
+      },
+      {
+        text: 'Make the links look like buttons: <code>nav a { color: white; text-decoration: none; padding: 8px 14px; }</code>',
+        hint: '"nav a" means: links that are inside the nav. text-decoration: none removes the underline.',
+        answer: 'nav a {\n  color: white;\n  text-decoration: none;\n  padding: 8px 14px;\n}',
+        check: T => { const a = T.q('nav a'); if (!a) return 'Finish step 1 first.'; if (T.css(a, 'textDecorationLine') !== 'none') return 'Remove the underline with text-decoration: none;'; if (T.lum(T.rgb(a, 'color')) < 0.8) return 'Make the nav links white.'; return T.px(a, 'paddingLeft') >= 6 || 'Add padding to the nav links.'; }
+      },
+      {
+        text: 'Make the buttons light up: <code>nav a:hover { background-color: #95d5b2; color: black; }</code> Then move the mouse over them!',
+        hint: ':hover means "while the mouse is over it".',
+        answer: 'nav a:hover {\n  background-color: #95d5b2;\n  color: black;\n}',
+        check: T => T.rules().some(r => /a:hover/.test(r.selectorText || '') && (r.style.backgroundColor || r.style.color || r.style.background)) || 'Add a nav a:hover rule with a background-color.'
+      }
+    ],
+    reaction: 'Visitors find the tickets in one click now. Even the penguins are impressed.'
+  },
+  {
+    id: 12, title: 'Pixel Cup Esports', skill: 'Flexbox layout', client: 'Coach Mina', initials: 'CM', color: '#7c3aed', domain: 'pixel-cup.example',
+    story: 'The school esports tournament starts next week, and Coach Mina\'s page shows the four teams in one long column. On a wide screen there is a lot of empty space, and the teams look like a shopping list instead of rivals. She wants the team cards side by side, with space between them, centred, and wrapping onto a new row on small screens. Flexbox is the CSS tool for arranging boxes in a row.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>Pixel Cup Esports</title>\n  <style>\n    body {\n      font-family: "Trebuchet MS", sans-serif;\n      background-color: #1e1b4b;\n      color: white;\n      text-align: center;\n    }\n    .team {\n      background-color: #7c3aed;\n      border-radius: 12px;\n      padding: 12px;\n      width: 150px;\n    }\n  </style>\n</head>\n<body>\n  <h1>Pixel Cup Esports</h1>\n  <img src="trophy.svg" alt="Trophy" width="80">\n  <div class="teams">\n    <div class="team"><h3>Lag Lions</h3><p>Captain: Omar</p></div>\n    <div class="team"><h3>Byte Bears</h3><p>Captain: Sofia</p></div>\n    <div class="team"><h3>Turbo Toads</h3><p>Captain: Liam</p></div>\n    <div class="team"><h3>Pixel Ninjas</h3><p>Captain: Aiko</p></div>\n  </div>\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Put the teams in a row: <code>.teams { display: flex; }</code>',
+        hint: 'display: flex goes on the PARENT box (.teams), not on each team.',
+        answer: '.teams {\n  display: flex;\n}',
+        check: T => T.css('.teams', 'display') === 'flex' || '.teams needs display: flex;'
+      },
+      {
+        text: 'Add space between the cards: <code>gap: 16px;</code>',
+        hint: 'gap goes in the same .teams rule.',
+        answer: '  gap: 16px;',
+        check: T => T.px('.teams', 'columnGap') >= 8 || 'Add a gap of at least 8px to .teams.'
+      },
+      {
+        text: 'Centre the row: <code>justify-content: center;</code>',
+        hint: 'justify-content arranges the boxes along the row: flex-start, center, space-between…',
+        answer: '  justify-content: center;',
+        check: T => T.css('.teams', 'justifyContent') === 'center' || 'Add justify-content: center;'
+      },
+      {
+        text: 'Let cards move to a new row on small screens: <code>flex-wrap: wrap;</code> Then try the phone-size button above the preview.',
+        hint: 'Without wrap, flexbox squeezes all boxes into one row.',
+        answer: '  flex-wrap: wrap;',
+        check: T => T.css('.teams', 'flexWrap') === 'wrap' || 'Add flex-wrap: wrap;'
+      }
+    ],
+    reaction: 'The page looks like a real tournament site! The Lag Lions want you on their team.'
+  },
+  {
+    id: 13, title: 'School League Table', skill: 'Tables', client: 'Ms. Okoro', initials: 'MO', color: '#0e7490', domain: 'league.example',
+    story: 'Ms. Okoro runs the school football league, and every Monday she types the scores as a long paragraph that nobody can follow. Parents keep asking "so who is top?". Tables are made for this kind of information: rows and columns, like a spreadsheet inside a web page. A table is built row by row: <tr> is a table row, <th> is a heading cell and <td> is a normal data cell. Build the league table and give it clear borders.',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>School League</title>\n  <style>\n    body {\n      font-family: Tahoma, sans-serif;\n    }\n  </style>\n</head>\n<body>\n  <h1>School League</h1>\n  <img src="ball.svg" alt="Football" width="70">\n  <p>Eagles played 5, 12 points. Sharks played 5, 10 points. Tigers played 5, 7 points. Wolves played 5, 3 points.</p>\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'Start a <code>&lt;table&gt;</code> with a heading row: <code>&lt;tr&gt;</code> with three <code>&lt;th&gt;</code>: <b>Team</b>, <b>Played</b>, <b>Points</b>.',
+        hint: '<table>\n  <tr>\n    <th>Team</th>\n    <th>Played</th>\n    <th>Points</th>\n  </tr>\n</table>',
+        answer: '<table>\n  <tr>\n    <th>Team</th>\n    <th>Played</th>\n    <th>Points</th>\n  </tr>\n</table>',
+        check: T => { const th = T.qa('table th').map(el => T.text(el).toLowerCase()); return (th.length >= 3 && th.some(t => t.indexOf('team') !== -1) && th.some(t => t.indexOf('point') !== -1)) || 'Add a row of 3 <th> cells: Team, Played, Points.'; }
+      },
+      {
+        text: 'Add <b>4 rows</b> for the four teams, each with three <code>&lt;td&gt;</code> cells. Use the numbers from the paragraph.',
+        hint: 'Each row: <tr><td>Eagles</td><td>5</td><td>12</td></tr>. Put them before </table>.',
+        answer: '<tr>\n  <td>Eagles</td>\n  <td>5</td>\n  <td>12</td>\n</tr>',
+        check: T => { const rows = T.qa('table tr').filter(tr => tr.querySelectorAll('td').length >= 3); if (rows.length < 4) return 'The table needs 4 rows with 3 <td> cells each.'; const eagles = rows.find(tr => /eagles/i.test(T.text(tr))); return (eagles && /12/.test(T.text(eagles))) || 'Check the Eagles row: they have 12 points.'; }
+      },
+      {
+        text: 'Give the cells borders and space: <code>th, td { border: 1px solid #0e7490; padding: 8px; }</code> and <code>table { border-collapse: collapse; }</code>',
+        hint: 'border-collapse: collapse joins the double borders into single lines.',
+        answer: 'table {\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #0e7490;\n  padding: 8px;\n}',
+        check: T => { if (!T.border('td')) return 'The td cells need a border.'; if (T.px('td', 'paddingLeft') < 4) return 'Add padding to th, td.'; return T.css('table', 'borderCollapse') === 'collapse' || 'Add border-collapse: collapse; to table.'; }
+      }
+    ],
+    reaction: 'Parents finally stopped calling me on Mondays. The Eagles printed the table and framed it!'
+  },
+  {
+    id: 14, title: 'Final Job: Your Own Website', skill: 'Everything together', client: 'You!', initials: 'ME', color: '#0b7a6c', domain: 'my-site.example', final: true,
+    story: 'The agency is so proud of you that you get to build your own website, about anything you love: a game, a sport, an animal, your city, a band, a hobby or an invention. Use everything from your earlier jobs. The checklist shows what a professional page needs. Write in your own words, choose a picture from the Pictures box, and make it look great. When every item is ticked, deliver it, and show it to a classmate!',
+    start: '<!DOCTYPE html>\n<html>\n<head>\n  <title>My website</title>\n  <style>\n    /* Your CSS rules go here */\n\n  </style>\n</head>\n<body>\n  <!-- Your website goes here -->\n\n</body>\n</html>\n',
+    tasks: [
+      {
+        text: 'A <code>&lt;title&gt;</code> and an <code>&lt;h1&gt;</code> that both name your topic.',
+        hint: 'Change "My website" in <title>, and add <h1>…</h1> in the body.',
+        answer: '<title>All About Penguins</title> … <h1>All About Penguins</h1>',
+        check: T => { if (!T.q('h1') || T.words(T.q('h1')) < 1) return 'Add an <h1>.'; return !/^my website$/i.test(T.doc.title.trim()) && T.doc.title.trim().length > 2 || 'Change the <title> to your topic.'; }
+      },
+      {
+        text: 'At least <b>2 sections</b>, each an <code>&lt;h2&gt;</code> with a <code>&lt;p&gt;</code>, and <b>40 words</b> or more in your paragraphs.',
+        hint: 'Write about what your topic is, why you like it, fun facts…',
+        answer: '<h2>Why penguins are cool</h2>\n<p>…</p>\n<h2>Fun facts</h2>\n<p>…</p>',
+        check: T => { if (T.qa('h2').length < 2) return 'Add at least two <h2> headings.'; const words = T.qa('p').reduce((n, p) => n + T.words(p), 0); return words >= 40 || 'Your paragraphs have ' + words + ' words. Write at least 40.'; }
+      },
+      {
+        text: 'A list (<code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code>) with at least <b>3 items</b>.',
+        hint: 'Top 3 facts, steps, favourite things…',
+        answer: '<ul>\n  <li>…</li>\n  <li>…</li>\n  <li>…</li>\n</ul>',
+        check: T => T.qa('ul, ol').some(l => l.querySelectorAll('li').length >= 3) || 'Add a list with 3 or more <li>.'
+      },
+      {
+        text: 'A picture from the Pictures box, with good <b>alt</b> text.',
+        hint: '<img src="rocket.svg" alt="A red and white rocket" width="150">',
+        answer: '<img src="rocket.svg" alt="A red and white rocket" width="150">',
+        check: T => T.qa('img').some(i => IMAGE_NAMES.indexOf(T.file(i)) !== -1 && (i.getAttribute('alt') || '').trim().length >= 3) || 'Add an <img> with a picture from the box and alt text.'
+      },
+      {
+        text: 'A <code>&lt;nav&gt;</code> with at least 2 links that jump to your sections (give the sections an <b>id</b>).',
+        hint: '<h2 id="facts">Fun facts</h2> and <a href="#facts">Facts</a> in the nav.',
+        answer: '<nav>\n  <a href="#why">Why</a>\n  <a href="#facts">Facts</a>\n</nav>',
+        check: T => { const links = T.qa('nav a[href^="#"]').filter(a => a.getAttribute('href').length > 1 && T.doc.getElementById(a.getAttribute('href').slice(1))); return links.length >= 2 || 'Add a <nav> with 2 links like href="#facts" that point to real ids.'; }
+      },
+      {
+        text: 'Your own CSS: at least <b>6 different properties</b>, and at least one <b>class</b> selector (like <code>.box</code>).',
+        hint: 'Colours, fonts, sizes, padding, borders, border-radius… Give an element class="box" and style .box.',
+        answer: '.box {\n  background-color: white;\n  padding: 15px;\n  border-radius: 10px;\n}',
+        check: T => { const rules = T.rules(); const props = {}; rules.forEach(r => { for (let i = 0; i < r.style.length; i++) props[r.style[i].replace(/-(top|right|bottom|left)(-.*)?$/, '').replace(/^(border)-.*$/, '$1')] = 1; }); const n = Object.keys(props).length; if (n < 6) return 'You use ' + n + ' different CSS properties. Use at least 6.'; return rules.some(r => /\.[a-z]/i.test(r.selectorText || '') && T.doc.querySelector(r.selectorText.split(',')[0].split(':')[0].trim())) || 'Add a class rule (like .box) that matches an element on your page.'; }
+      },
+      {
+        text: 'One pro touch: a <b>:hover</b> effect OR a <b>flexbox</b> row.',
+        hint: 'nav a:hover { … } or .row { display: flex; gap: 10px; }',
+        answer: 'nav a:hover {\n  background-color: gold;\n}',
+        check: T => T.rules().some(r => /:hover/.test(r.selectorText || '')) || T.qa('body *').some(el => T.css(el, 'display') === 'flex') || 'Add a :hover rule or display: flex.'
+      }
+    ],
+    reaction: 'Your site is live at the agency! Junior Web Developer badge: unlocked.'
+  }
+];
+if (typeof module !== 'undefined' && module.exports) module.exports = { MISSIONS, IMAGES, IMAGE_NAMES };
+/* ===== MISSIONS END ===== */
+
+/* ===== CODE DOCTOR START ===== */
+/* Finds common beginner mistakes in HTML and CSS and explains them in plain words, with a line number. */
+const CodeDoctor = (() => {
+  const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr', '!doctype']);
+  const KNOWN = new Set(('html head body title meta link style script h1 h2 h3 h4 h5 h6 p a img ul ol li div span strong em b i u br hr nav header footer main section article aside ' +
+    'table thead tbody tfoot tr td th caption button input label form figure figcaption blockquote code pre small mark sub sup video audio iframe textarea select option !doctype q s abbr cite time address details summary').split(' '));
+  const CSS_PROPS = ('color background background-color background-image background-size background-position background-repeat font font-family font-size font-weight font-style ' +
+    'text-align text-decoration text-transform text-shadow line-height letter-spacing word-spacing margin margin-top margin-right margin-bottom margin-left ' +
+    'padding padding-top padding-right padding-bottom padding-left border border-top border-right border-bottom border-left border-width border-style border-color ' +
+    'border-radius border-collapse border-spacing width height max-width min-width max-height min-height display flex flex-wrap flex-direction flex-grow flex-shrink flex-basis ' +
+    'justify-content align-items align-content align-self gap row-gap column-gap grid-template-columns grid-template-rows grid-gap box-shadow opacity list-style list-style-type ' +
+    'cursor transition transform position top right bottom left z-index overflow float clear outline vertical-align white-space object-fit animation content filter ' +
+    'box-sizing visibility text-indent order place-items accent-color aspect-ratio').split(' ');
+  const PROP_SET = new Set(CSS_PROPS);
+
+  function lineAt(src, index) {
+    let n = 1;
+    for (let i = 0; i < index && i < src.length; i++) if (src.charCodeAt(i) === 10) n++;
+    return n;
+  }
+
+  function distance(a, b) {
+    const d = [];
+    for (let i = 0; i <= a.length; i++) { d[i] = [i]; }
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      }
+    }
+    return d[a.length][b.length];
+  }
+  function closest(word, list) {
+    let best = null, bestD = 99;
+    list.forEach(w => { const d = distance(word, w); if (d < bestD) { bestD = d; best = w; } });
+    return bestD <= Math.max(2, Math.floor(word.length / 3)) ? best : null;
+  }
+
+  function lintCss(css, offsetLine, out) {
+    let depth = 0;
+    let ruleStart = 0;
+    let ruleLine = 0;
+    let body = '';
+    let bodyStart = 0;
+    const clean = css.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '));
+    for (let i = 0; i < clean.length; i++) {
+      const ch = clean[i];
+      if (ch === '{') {
+        if (depth === 0) {
+          ruleLine = offsetLine + lineAt(clean, i) - 1;
+          bodyStart = i + 1;
+          const sel = clean.slice(ruleStart, i).trim();
+          if (!sel) out.push({ line: ruleLine, msg: 'There is a { without a selector in front of it (like p or .box).' });
+        } else {
+          out.push({ line: offsetLine + lineAt(clean, i) - 1, msg: 'A new { starts before the rule above it was closed. Add } to close the rule on line ' + ruleLine + '.' });
+          checkBody(clean.slice(bodyStart, clean.lastIndexOf('\n', i) > bodyStart ? clean.lastIndexOf('\n', i) : i), offsetLine + lineAt(clean, bodyStart) - 1, out);
+          bodyStart = i + 1;
+          depth--;
+        }
+        depth++;
+      } else if (ch === '}') {
+        if (depth === 0) out.push({ line: offsetLine + lineAt(clean, i) - 1, msg: 'There is an extra } here. Delete it, or add the missing {.' });
+        else {
+          depth--;
+          body = clean.slice(bodyStart, i);
+          checkBody(body, offsetLine + lineAt(clean, bodyStart) - 1, out);
+        }
+        ruleStart = i + 1;
+      }
+    }
+    if (depth > 0) out.push({ line: ruleLine, msg: 'The rule that starts on line ' + ruleLine + ' is never closed. Add } at its end.' });
+  }
+
+  function checkBody(body, firstLine, out) {
+    let pos = 0;
+    body.split(';').forEach(part => {
+      const lead = part.search(/\S/);
+      const start = pos + (lead < 0 ? 0 : lead);
+      pos += part.length + 1;
+      const decl = part.trim();
+      if (!decl) return;
+      const line = firstLine + (body.slice(0, start).match(/\n/g) || []).length;
+      const lines = decl.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length > 1 && lines.filter(l => l.indexOf(':') !== -1).length > 1) {
+        out.push({ line, msg: 'Line ' + line + ' is missing a semicolon ; at the end, so the next line breaks too.' });
+        lines.forEach((l, i) => checkDecl(l, line + i, out));
+        return;
+      }
+      checkDecl(decl.replace(/\s+/g, ' '), line, out);
+    });
+  }
+
+  function checkDecl(decl, line, out) {
+    if (decl.indexOf(':') === -1) { out.push({ line, msg: '"' + decl.slice(0, 30) + '" needs a colon : between the property and the value.' }); return; }
+    const prop = decl.split(':')[0].trim().toLowerCase();
+    if (/^--/.test(prop) || /^-(webkit|moz|ms)-/.test(prop)) return;
+    if (!PROP_SET.has(prop)) {
+      const sug = closest(prop, CSS_PROPS);
+      out.push({ line, msg: '"' + prop + '" is not a CSS property.' + (sug ? ' Did you mean ' + sug + '?' : '') });
+    } else if (!decl.split(':').slice(1).join(':').trim()) {
+      out.push({ line, msg: prop + ' has no value after the colon.' });
+    }
+  }
+
+  function lint(src) {
+    const out = [];
+    const stack = [];
+    const tagRe = /<!--[\s\S]*?(?:-->|$)|<(\/?)(!doctype|[a-zA-Z][a-zA-Z0-9-]*)([^<>]*)(>?)/gi;
+    let m;
+    while ((m = tagRe.exec(src))) {
+      const at = m.index;
+      if (m[0].startsWith('<!--')) {
+        if (!m[0].endsWith('-->')) out.push({ line: lineAt(src, at), msg: 'A comment <!-- is never closed with -->.' });
+        continue;
+      }
+      const closing = m[1] === '/';
+      const name = m[2].toLowerCase();
+      const attrs = m[3] || '';
+      const line = lineAt(src, at);
+      if (!m[4]) { out.push({ line, msg: 'The tag <' + (closing ? '/' : '') + m[2] + ' is missing its closing > sign.' }); }
+      if (!KNOWN.has(name)) {
+        const sug = closest(name, Array.from(KNOWN));
+        out.push({ line, msg: '<' + m[2] + '> is not an HTML tag.' + (sug ? ' Did you mean <' + sug + '>?' : '') });
+      }
+      if (((attrs.match(/"/g) || []).length % 2) === 1) out.push({ line, msg: 'A quote mark " is missing in the <' + name + '> tag. Every value needs one at the start and one at the end.' });
+      else if (((attrs.match(/'/g) || []).length % 2) === 1 && !/"[^"]*'[^"]*"/.test(attrs)) out.push({ line, msg: 'A quote mark \' is missing in the <' + name + '> tag.' });
+      if (closing) {
+        if (VOID.has(name)) { out.push({ line, msg: '<' + name + '> never needs a closing tag. Delete </' + name + '>.' }); continue; }
+        let idx = -1;
+        for (let i = stack.length - 1; i >= 0; i--) if (stack[i].name === name) { idx = i; break; }
+        if (idx === -1) { out.push({ line, msg: 'There is a </' + name + '> but no <' + name + '> was opened before it.' }); continue; }
+        if (idx !== stack.length - 1) {
+          const inner = stack[stack.length - 1];
+          if (inner.line !== line) out.push({ line: inner.line, msg: '<' + inner.name + '> on line ' + inner.line + ' is never closed. Add </' + inner.name + '>.' });
+          else out.push({ line, msg: 'Tags close in the wrong order: <' + inner.name + '> must be closed before </' + name + '>.' });
+        }
+        stack.length = idx;
+        continue;
+      }
+      if (VOID.has(name) || /\/\s*$/.test(attrs)) {
+        if (name === 'img') {
+          if (!/\bsrc\s*=/.test(attrs)) out.push({ line, msg: '<img> needs a src="…" with the picture file.' });
+          if (!/\balt\s*=/.test(attrs)) out.push({ line, msg: '<img> should have alt="…" text that describes the picture.' });
+        }
+        continue;
+      }
+      if (name === 'li') {
+        const parent = stack.length ? stack[stack.length - 1].name : '';
+        if (parent === 'li') {
+          out.push({ line, msg: 'A new <li> starts before the one on line ' + stack[stack.length - 1].line + ' was closed. Did you write <li> instead of </li>?' });
+          stack.pop();
+        } else if (parent !== 'ul' && parent !== 'ol') out.push({ line, msg: 'This <li> is not inside a <ul> or <ol> list.' });
+      }
+      stack.push({ name, line });
+      if (name === 'style' || name === 'script') {
+        const endRe = new RegExp('</' + name + '\\s*>', 'ig');
+        endRe.lastIndex = tagRe.lastIndex;
+        const end = endRe.exec(src);
+        const content = src.slice(tagRe.lastIndex, end ? end.index : src.length);
+        if (name === 'style') lintCss(content, lineAt(src, tagRe.lastIndex), out);
+        if (!end) { out.push({ line, msg: '<' + name + '> is never closed. Add </' + name + '>.' }); stack.pop(); tagRe.lastIndex = src.length; }
+        else { tagRe.lastIndex = end.index + end[0].length; stack.pop(); }
+      }
+    }
+    stack.forEach(t => {
+      if (t.name === 'html' || t.name === 'head' || t.name === 'body') out.push({ line: t.line, msg: '<' + t.name + '> is never closed. Add </' + t.name + '> at the end.' });
+      else if (t.name !== 'li' || !out.some(o => o.line === t.line)) out.push({ line: t.line, msg: '<' + t.name + '> on line ' + t.line + ' is never closed. Add </' + t.name + '>.' });
+    });
+    const seen = {};
+    return out.filter(o => { if (seen[o.msg]) return false; seen[o.msg] = 1; return true; }).sort((a, b) => a.line - b.line);
+  }
+
+  return { lint, CSS_PROPS, KNOWN };
+})();
+if (typeof module !== 'undefined' && module.exports) module.exports = CodeDoctor;
+/* ===== CODE DOCTOR END ===== */
+
+/* ===== WEBSITE RESCUE APP ===== */
+const SAVE_KEY = 'computerLab.webRescue.v1';
+const PARAMS = new URLSearchParams(window.location.search);
+const FAST = PARAMS.has('fast');
+const DATA_URI = {};
+const MISSING_URI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80"><rect x="1" y="1" width="118" height="78" rx="6" fill="#f3f4f8" stroke="#b42318" stroke-width="2" stroke-dasharray="6 4"/><text x="60" y="36" font-family="Arial" font-size="22" text-anchor="middle" fill="#b42318">?</text><text x="60" y="58" font-family="Arial" font-size="11" text-anchor="middle" fill="#b42318">picture not found</text></svg>');
+IMAGE_NAMES.forEach(n => { DATA_URI[n] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(IMAGES[n]); });
+
+/* ---------- Saved progress ---------- */
+function freshData() { return { version: 1, name: '', levels: {}, code: {}, seenHelp: false, last: 0 }; }
+let data = (() => {
+  const d = store.get(SAVE_KEY, null);
+  return d && d.version === 1 && d.levels && typeof d.levels === 'object' ? Object.assign(freshData(), d) : freshData();
+})();
+function save() { store.set(SAVE_KEY, data); }
+let saveTimer = null;
+function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 300); }
+function lvl(id) {
+  if (!data.levels[id]) data.levels[id] = { done: false, stars: 0, shown: {} };
+  if (!data.levels[id].shown) data.levels[id].shown = {};
+  return data.levels[id];
+}
+const unlocked = id => id === 1 || !!(data.levels[id - 1] && data.levels[id - 1].done);
+const totalStars = () => MISSIONS.reduce((s, m) => s + ((data.levels[m.id] && data.levels[m.id].stars) || 0), 0);
+const starText = n => '<span>' + '&#9733;'.repeat(n) + '</span><span class="off">' + '&#9733;'.repeat(3 - n) + '</span>';
+
+/* ---------- State ---------- */
+let cur = null;
+let feedbackFor = {};
+let hintOpen = {};
+let renderTimer = null;
+let lastCopied = '';
+let defaultFont = '';
+
+const codeEl = $('#code');
+const hlEl = $('#hl');
+const gutterEl = $('#gutter');
+const doctorEl = $('#doctor');
+const frame = $('#preview');
+
+/* ---------- Syntax colours ---------- */
+function span(cls, text) { return '<span class="' + cls + '">' + esc(text) + '</span>'; }
+
+function hlAttrs(attrs) {
+  let out = '';
+  let last = 0;
+  const re = /([^\s=]+)(\s*=\s*)?("[^"]*"?|'[^']*'?|[^\s"'>]+)?/g;
+  let m;
+  while ((m = re.exec(attrs))) {
+    if (!m[0]) { re.lastIndex++; continue; }
+    out += esc(attrs.slice(last, m.index));
+    out += span('t-attr', m[1]) + (m[2] ? esc(m[2]) : '') + (m[3] ? span('t-str', m[3]) : '');
+    last = m.index + m[0].length;
+  }
+  return out + esc(attrs.slice(last));
+}
+
+function hlCss(css) {
+  let out = '';
+  let depth = 0;
+  const re = /\/\*[\s\S]*?(?:\*\/|$)|[{}]|[^{}/]+|\//g;
+  let m;
+  while ((m = re.exec(css))) {
+    const t = m[0];
+    if (t.startsWith('/*')) out += span('t-com', t);
+    else if (t === '{') { depth++; out += esc(t); }
+    else if (t === '}') { depth = Math.max(0, depth - 1); out += esc(t); }
+    else if (depth === 0) out += span('t-sel', t);
+    else {
+      let last = 0;
+      const d = /([a-zA-Z-]+)(\s*:)([^;{}]*)/g;
+      let x;
+      while ((x = d.exec(t))) {
+        out += esc(t.slice(last, x.index)) + span('t-prop', x[1]) + esc(x[2]) + span('t-val', x[3]);
+        last = x.index + x[0].length;
+      }
+      out += esc(t.slice(last));
+    }
+  }
+  return out;
+}
+
+function highlight(src) {
+  let out = '';
+  let last = 0;
+  const re = /<!--[\s\S]*?(?:-->|$)|<(\/?)(!doctype|[a-zA-Z][\w-]*)([^<>]*)(>?)/gi;
+  let m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    if (m[0].startsWith('<!--')) out += span('t-com', m[0]);
+    else {
+      const isDoc = m[2].toLowerCase() === '!doctype';
+      out += span('t-br', '<' + m[1]) + span(isDoc ? 't-doc' : 't-tag', m[2]) + hlAttrs(m[3]) + (m[4] ? span('t-br', '>') : '');
+      if (!m[1] && m[2].toLowerCase() === 'style' && m[4]) {
+        const end = src.toLowerCase().indexOf('</style', re.lastIndex);
+        const stop = end === -1 ? src.length : end;
+        out += hlCss(src.slice(re.lastIndex, stop));
+        re.lastIndex = stop;
+      }
+    }
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last)) + '\n ';
+}
+
+/* ---------- Editor ---------- */
+let badLines = {};
+function paintEditor() {
+  const src = codeEl.value;
+  hlEl.innerHTML = highlight(src);
+  const n = src.split('\n').length;
+  const curLine = src.slice(0, codeEl.selectionStart).split('\n').length;
+  let g = '';
+  for (let i = 1; i <= n; i++) g += '<div class="' + (badLines[i] ? 'bad' : '') + (i === curLine ? ' cur' : '') + '">' + i + '</div>';
+  gutterEl.innerHTML = g;
+  syncScroll();
+}
+function syncScroll() {
+  hlEl.scrollTop = codeEl.scrollTop;
+  hlEl.scrollLeft = codeEl.scrollLeft;
+  gutterEl.scrollTop = codeEl.scrollTop;
+}
+function insertText(text) {
+  codeEl.focus();
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, text); } catch (e) { ok = false; }
+  if (!ok) codeEl.setRangeText(text, codeEl.selectionStart, codeEl.selectionEnd, 'end');
+  onCodeChange();
+}
+function onCodeChange() {
+  paintEditor();
+  if (!cur) return;
+  data.code[cur.m.id] = codeEl.value;
+  saveSoon();
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(renderAll, FAST ? 0 : 280);
+}
+
+codeEl.addEventListener('input', onCodeChange);
+codeEl.addEventListener('scroll', syncScroll);
+codeEl.addEventListener('click', paintEditor);
+codeEl.addEventListener('keyup', e => { if (e.key.indexOf('Arrow') === 0 || e.key === 'Home' || e.key === 'End') paintEditor(); });
+codeEl.addEventListener('keydown', e => {
+  if (e.key === 'Tab' && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    insertText('  ');
+  } else if (e.key === 'Enter' && !e.ctrlKey) {
+    e.preventDefault();
+    const before = codeEl.value.slice(0, codeEl.selectionStart);
+    const line = before.slice(before.lastIndexOf('\n') + 1);
+    let indent = (line.match(/^\s*/) || [''])[0];
+    if (/<(div|ul|ol|nav|section|table|tr|head|body|html|style|header|main|footer|article)\b[^>]*>\s*$/i.test(line) || /\{\s*$/.test(line)) indent += '  ';
+    insertText('\n' + indent);
+  } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    save();
+    toast('Saved. Your code also saves by itself while you type.');
+  }
+});
+/* Students type the code themselves; copying inside the editor is fine. */
+['copy', 'cut'].forEach(type => codeEl.addEventListener(type, () => {
+  lastCopied = codeEl.value.slice(codeEl.selectionStart, codeEl.selectionEnd).replace(/\r/g, '');
+}));
+codeEl.addEventListener('paste', e => {
+  const text = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\r/g, '');
+  if (text && text === lastCopied) return;
+  e.preventDefault();
+  toast('Type the code yourself – that is how your brain learns it! (Copying inside your own code is OK.)');
+  Fx.sound('bad');
+});
+codeEl.addEventListener('drop', e => { e.preventDefault(); toast('Type the code yourself – drag and drop is switched off.'); });
+
+function goToLine(n) {
+  const lines = codeEl.value.split('\n');
+  let pos = 0;
+  for (let i = 0; i < n - 1 && i < lines.length; i++) pos += lines[i].length + 1;
+  codeEl.focus();
+  codeEl.setSelectionRange(pos, pos + (lines[n - 1] || '').length);
+  const top = (n - 3) * 22;
+  codeEl.scrollTop = Math.max(0, top);
+  paintEditor();
+}
+
+/* ---------- Preview and checks ---------- */
+function prepare(src) {
+  let out = src.replace(/<script[\s\S]*?(<\/script\s*>|$)/gi, '<!-- scripts are switched off in this lab -->');
+  /* Known pictures become built-in images; any other file shows a "not found" box instead of a network error. */
+  out = out.replace(/(\bsrc\s*=\s*)(?:(["'])([^"']*?)\2|([^\s"'>]+))/gi, (all, a, q, quoted, bare) => {
+    const file = (quoted != null ? quoted : bare).trim();
+    if (/^(data:|https?:)/i.test(file)) return all;
+    const f = file.toLowerCase();
+    return a + '"' + (DATA_URI[f] || MISSING_URI) + '" data-file="' + esc(f) + '"';
+  });
+  out = out.replace(/url\(\s*(["']?)([\w.-]+\.svg)\1\s*\)/gi, (all, q, file) => (DATA_URI[file.toLowerCase()] ? 'url("' + DATA_URI[file.toLowerCase()] + '")' : all));
+  return out;
+}
+
+function makeT(doc, win, src, lint) {
+  const el = x => (typeof x === 'string' ? doc.querySelector(x) : x);
+  const T = {
+    doc, src, lint, defaultFont,
+    q: s => doc.querySelector(s),
+    qa: s => Array.from(doc.querySelectorAll(s)),
+    text: x => { const e = el(x); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; },
+    words: x => T.text(x).split(' ').filter(Boolean).length,
+    css: (x, prop) => { const e = el(x); return e ? win.getComputedStyle(e)[prop] : ''; },
+    px: (x, prop) => parseFloat(T.css(x, prop)) || 0,
+    rgb: (x, prop) => {
+      const m = /rgba?\(([^)]+)\)/.exec(T.css(x, prop) || '');
+      if (!m) return null;
+      const p = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+      return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+    },
+    lum: c => (c ? (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255 : 0),
+    rules: () => {
+      const out = [];
+      Array.from(doc.styleSheets).forEach(sh => {
+        try { Array.from(sh.cssRules).forEach(r => { if (r.style) out.push(r); }); } catch (e) { /* ignore */ }
+      });
+      return out;
+    },
+    border: x => T.css(x, 'borderTopStyle') !== 'none' && T.px(x, 'borderTopWidth') > 0,
+    file: img => (img.getAttribute('data-file') || img.getAttribute('src') || '').toLowerCase()
+  };
+  return T;
+}
+
+function writePreview(src) {
+  const win = frame.contentWindow;
+  const y = win ? win.scrollY : 0;
+  const doc = frame.contentDocument;
+  doc.open();
+  doc.write(prepare(src));
+  doc.close();
+  try { win.scrollTo(0, y); } catch (e) { /* ignore */ }
+  doc.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a');
+    if (!a) return;
+    e.preventDefault();
+    const href = (a.getAttribute('href') || '').trim();
+    if (href[0] === '#' && href.length > 1) {
+      const target = doc.getElementById(href.slice(1));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      else toast('This link jumps to id="' + href.slice(1) + '", but no element has that id yet.');
+    } else if (href) toast('Your link works! On the real internet it would open: ' + href);
+    else toast('This link has no href yet.');
+  });
+  doc.addEventListener('submit', e => { e.preventDefault(); toast('Forms are switched off in this lab.'); });
+  return { doc, win: frame.contentWindow };
+}
+
+function renderAll() {
+  if (!cur) return;
+  const src = codeEl.value;
+  const lint = CodeDoctor.lint(src);
+  badLines = {};
+  lint.forEach(p => { badLines[p.line] = true; });
+  const { doc, win } = writePreview(src);
+  $('#br-tab').textContent = (doc.title || 'Untitled page').trim() || 'Untitled page';
+  const T = makeT(doc, win, src, lint);
+  const prev = cur.states || [];
+  cur.states = cur.m.tasks.map(t => {
+    let r;
+    try { r = t.check(T); } catch (e) { r = 'Keep going – this step is not finished yet.'; }
+    return r === true ? { ok: true } : { ok: false, msg: typeof r === 'string' ? r : 'Not finished yet.' };
+  });
+  const newly = [];
+  cur.states.forEach((s, i) => { if (s.ok) { delete feedbackFor[i]; if (cur.ready && !(prev[i] && prev[i].ok)) newly.push(i); } });
+  renderDoctor(lint);
+  paintEditor();
+  renderBrief();
+  if (newly.length) {
+    Fx.sound('coin');
+    newly.forEach(i => Fx.sparkle($('[data-task="' + i + '"] .tn')));
+    if (cur.states.every(s => s.ok) && !lvl(cur.m.id).done) {
+      const d = $('.deliver');
+      if (d) { d.scrollIntoView({ block: 'nearest', behavior: Fx.calm() ? 'auto' : 'smooth' }); Fx.glow(d); }
+    }
+  }
+  cur.ready = true;
+}
+
+function renderDoctor(lint) {
+  if (!lint.length) {
+    doctorEl.innerHTML = '<span class="ok">&#10003; Code Doctor: no problems found.</span>';
+    return;
+  }
+  doctorEl.innerHTML = '<p class="title">&#129658; Code Doctor found ' + lint.length + ' problem' + (lint.length === 1 ? '' : 's') + ':</p><ul>' +
+    lint.slice(0, 8).map(p => '<li><button type="button" data-line="' + p.line + '"><span class="ln">Line ' + p.line + '</span>' + esc(p.msg) + '</button></li>').join('') + '</ul>';
+}
+doctorEl.addEventListener('click', e => {
+  const b = e.target.closest('[data-line]');
+  if (b) goToLine(Number(b.dataset.line));
+});
+
+/* ---------- Brief (left column) ---------- */
+function renderBrief() {
+  const m = cur.m;
+  const L = lvl(m.id);
+  const states = cur.states || [];
+  const first = states.findIndex(s => !s.ok);
+  let h = '<div class="client-head"><span class="avatar" style="background:' + m.color + '">' + esc(m.initials) + '</span><div>' +
+    '<p class="job-num">JOB ' + m.id + ' OF ' + MISSIONS.length + ' &middot; ' + esc(m.skill.toUpperCase()) + '</p>' +
+    '<h2>' + esc(m.title) + '</h2><p class="who">Client: ' + esc(m.client) + '</p></div></div>' +
+    '<div class="bubble">' + esc(m.story) + '</div><h3>The job</h3><ol class="tasks">';
+  m.tasks.forEach((t, i) => {
+    const ok = states[i] && states[i].ok;
+    const isCur = i === first;
+    h += '<li class="task ' + (ok ? 'done' : isCur ? 'current' : '') + '" data-task="' + i + '"><span class="tn" aria-hidden="true">' + (ok ? '&#10003;' : i + 1) + '</span><div><p>' + t.text + '</p>';
+    if (ok) h += '<span class="sr-only">Done.</span>';
+    if (!ok && isCur) {
+      h += '<div class="task-tools"><button type="button" class="btn btn-sm btn-primary" data-act="check" data-i="' + i + '">Check</button>' +
+        '<button type="button" class="btn btn-sm" data-act="hint" data-i="' + i + '">&#128161; Hint</button>' +
+        (L.shown[i] ? '' : '<button type="button" class="btn btn-sm btn-ghost" data-act="answer" data-i="' + i + '">Show code</button>') + '</div>';
+      if (hintOpen[i]) h += '<div class="hintbox">' + esc(t.hint) + '</div>';
+      if (L.shown[i]) h += '<pre class="answerbox">' + esc(t.answer) + '</pre><p class="muted" style="font-size:.82rem;margin:4px 0 0">Type it into your code yourself.</p>';
+      if (feedbackFor[i]) h += '<div class="feedback" role="alert">' + esc(feedbackFor[i]) + '</div>';
+    }
+    h += '</div></li>';
+  });
+  h += '</ol>';
+  if (L.done) {
+    const next = MISSIONS.find(x => x.id === m.id + 1);
+    h += '<div class="delivered"><strong>&#10003; Delivered to ' + esc(m.client) + '</strong><p class="quote">"' + esc(m.reaction) + '"</p>' +
+      '<div class="stars" aria-label="' + L.stars + ' of 3 stars">' + starText(L.stars) + '</div><div class="btn-row" style="margin-top:8px">' +
+      (next ? '<button type="button" class="btn btn-primary" data-act="next">Next job &rarr;</button>' : '<button type="button" class="btn btn-primary" data-act="badge">&#127942; Get your certificate</button>') +
+      '<button type="button" class="btn" data-act="board">Job board</button></div><p class="muted" style="font-size:.85rem;margin:8px 0 0">You can keep improving this page any time.</p></div>';
+  } else if (first === -1 && states.length) {
+    h += '<div class="deliver"><p><strong>Everything is ticked!</strong> Check the preview one more time, then send it to ' + esc(m.client) + '.</p>' +
+      '<button type="button" class="btn btn-primary btn-lg" data-act="deliver">&#128640; Deliver to client</button></div>';
+  } else {
+    h += '<div class="deliver waiting"><p style="margin:0">Finish every task to deliver the website.</p></div>';
+  }
+  const scroll = $('#brief').scrollTop;
+  $('#brief').innerHTML = h;
+  $('#brief').scrollTop = scroll;
+}
+
+$('#brief').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || !cur) return;
+  const i = Number(b.dataset.i);
+  const a = b.dataset.act;
+  const L = lvl(cur.m.id);
+  if (a === 'check') {
+    renderAll();
+    const st = cur.states[i];
+    if (st.ok) return;
+    feedbackFor[i] = st.msg;
+    renderBrief();
+    Fx.sound('bad');
+    Fx.shake($('[data-task="' + i + '"]'));
+  } else if (a === 'hint') {
+    hintOpen[i] = !hintOpen[i];
+    renderBrief();
+  } else if (a === 'answer') {
+    const reveal = () => { L.shown[i] = true; save(); renderBrief(); };
+    if (L.done) reveal();
+    else confirmBox('Show the code?', 'Each code you reveal costs <strong>one star</strong> on this job (you always keep at least one). Try the Hint first!', 'Show code', reveal);
+  } else if (a === 'deliver') deliver();
+  else if (a === 'next') openJob(cur.m.id + 1);
+  else if (a === 'board') goHome();
+  else if (a === 'badge') showBadge();
+});
+
+function deliver() {
+  const L = lvl(cur.m.id);
+  renderAll();
+  if (!cur.states.every(s => s.ok)) { toast('Some tasks are not ticked any more – check them again.'); return; }
+  const stars = Math.max(1, 3 - Object.keys(L.shown).length);
+  L.done = true;
+  L.stars = Math.max(L.stars || 0, stars);
+  save();
+  Fx.sound('win');
+  Fx.confetti($('#browser'));
+  renderBrief();
+  Modal.open({
+    title: 'Delivered to ' + cur.m.client + '!',
+    html: '<div class="client-head"><span class="avatar" style="background:' + cur.m.color + '">' + esc(cur.m.initials) + '</span><div class="bubble" style="flex:1">"' + esc(cur.m.reaction) + '"</div></div>' +
+      '<p class="stars" style="font-size:2rem;text-align:center;margin:10px 0 0">' + starText(L.stars) + '</p>',
+    actions: [
+      { label: 'Stay on this page', variant: 'secondary' },
+      MISSIONS.find(x => x.id === cur.m.id + 1)
+        ? { label: 'Next job →', variant: 'primary', onClick: () => openJob(cur.m.id + 1) }
+        : { label: 'Get your certificate', variant: 'primary', onClick: showBadge }
+    ]
+  });
+}
+
+/* ---------- Screens ---------- */
+function openJob(id) {
+  const m = MISSIONS.find(x => x.id === id);
+  if (!m) return;
+  if (!unlocked(id) && !FAST) { toast('Deliver the job before it first.'); return; }
+  document.body.classList.remove('big-preview');
+  cur = { m, states: null, ready: false };
+  feedbackFor = {};
+  hintOpen = {};
+  data.last = id;
+  save();
+  showScreen('screen-job');
+  fitStudio();
+  $('#job-h1').textContent = 'Job ' + id + ': ' + m.title;
+  $('#br-url').textContent = 'https://' + m.domain;
+  codeEl.value = typeof data.code[id] === 'string' ? data.code[id] : m.start;
+  codeEl.scrollTop = 0;
+  try { frame.contentWindow.scrollTo(0, 0); } catch (e) { /* ignore */ }
+  $('#brief').scrollTop = 0;
+  paintEditor();
+  renderAll();
+  codeEl.focus();
+  codeEl.setSelectionRange(0, 0);
+}
+
+function goHome() {
+  if (cur) { data.code[cur.m.id] = codeEl.value; save(); }
+  cur = null;
+  document.body.classList.remove('big-preview');
+  renderHome();
+  showScreen('screen-home');
+}
+
+function renderHome() {
+  $('#dev-name').value = data.name || '';
+  const done = MISSIONS.filter(m => data.levels[m.id] && data.levels[m.id].done).length;
+  $('#board-sum').textContent = done + ' of ' + MISSIONS.length + ' jobs delivered · ' + totalStars() + ' of ' + MISSIONS.length * 3 + ' stars';
+  const next = MISSIONS.find(m => !(data.levels[m.id] && data.levels[m.id].done));
+  $('#btn-continue').innerHTML = next ? (done ? 'Continue: job ' + next.id + ' &rarr;' : 'Start job 1 &rarr;') : '&#127942; See your certificate';
+  $('#jobs').innerHTML = MISSIONS.map(m => {
+    const L = data.levels[m.id];
+    const open = unlocked(m.id);
+    return '<button type="button" class="job' + (m.rescue ? ' rescue' : '') + (next && next.id === m.id ? ' next' : '') + '" data-job="' + m.id + '"' + (open ? '' : ' disabled') + '>' +
+      '<span class="avatar" style="background:' + m.color + '" aria-hidden="true">' + esc(m.initials) + '</span><span>' +
+      '<span class="num">JOB ' + String(m.id).padStart(2, '0') + (m.rescue ? ' &middot; RESCUE' : '') + '</span>' +
+      '<span class="ttl">' + esc(m.title.replace(/^RESCUE: /, '')) + '</span><span class="skill">' + esc(m.skill) + '</span>' +
+      (L && L.done ? '<span class="state stars" aria-label="' + L.stars + ' of 3 stars">' + starText(L.stars) + '</span>'
+        : '<span class="state">' + (open ? 'Open job &rarr;' : '&#128274; Deliver job ' + (m.id - 1) + ' first') + '</span>') +
+      '</span></button>';
+  }).join('');
+  Fx.stagger($('#jobs'));
+}
+$('#jobs').addEventListener('click', e => {
+  const b = e.target.closest('[data-job]');
+  if (b && !b.disabled) openJob(Number(b.dataset.job));
+});
+$('#btn-continue').addEventListener('click', () => {
+  const next = MISSIONS.find(m => !(data.levels[m.id] && data.levels[m.id].done));
+  if (next) openJob(next.id); else showBadge();
+});
+$('#dev-name').addEventListener('input', e => { data.name = e.target.value.trim().slice(0, 32); saveSoon(); });
+
+function showBadge() {
+  if (!MISSIONS.every(m => data.levels[m.id] && data.levels[m.id].done)) { toast('Deliver all ' + MISSIONS.length + ' jobs to earn the certificate.'); return; }
+  if (cur) { data.code[cur.m.id] = codeEl.value; save(); }
+  cur = null;
+  $('#cert').innerHTML = '<p class="eyebrow">Website Rescue Agency</p><h1>Junior Web Developer</h1><p>This certifies that</p>' +
+    '<div class="who">' + esc(data.name || 'Web Developer') + '</div><p>built and rescued ' + MISSIONS.length + ' websites with real HTML and CSS:</p><div class="cert-skills">' +
+    ['Tags & headings', 'Bold & italic', 'Lists', 'Images & alt text', 'Links', 'Fixing HTML bugs', 'CSS colours & fonts', 'Text styling', 'Classes & ids', 'Box model', 'Fixing CSS bugs', 'Navigation & :hover', 'Flexbox', 'Tables']
+      .map(s => '<span class="chip">' + esc(s) + '</span>').join('') +
+    '</div><p class="cstars">' + totalStars() + ' of ' + MISSIONS.length * 3 + ' &#9733;</p><p class="muted">' + esc(new Date().toLocaleDateString()) + '</p>';
+  showScreen('screen-badge');
+  Fx.confetti();
+  Fx.sound('win');
+}
+$('#btn-print').addEventListener('click', () => window.print());
+$('#btn-badge-home').addEventListener('click', goHome);
+
+/* The studio fills the window, so only the panels scroll. */
+function fitStudio() {
+  const st = $('.studio');
+  if (!st || $('#screen-job').hidden || window.innerWidth <= 1100) { if (st) st.style.height = ''; return; }
+  const top = st.getBoundingClientRect().top + window.scrollY;
+  st.style.height = Math.max(520, window.innerHeight - top) + 'px';
+}
+window.addEventListener('resize', fitStudio);
+
+/* ---------- Buttons ---------- */
+$('#btn-phone').addEventListener('click', e => {
+  const on = !$('#br-view').classList.contains('phone');
+  $('#br-view').classList.toggle('phone', on);
+  e.currentTarget.setAttribute('aria-pressed', String(on));
+});
+$('#btn-big').addEventListener('click', () => {
+  document.body.classList.toggle('big-preview');
+  $('#btn-big').innerHTML = document.body.classList.contains('big-preview') ? '&#10005; Close' : '&#9974; Big';
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.body.classList.contains('big-preview') && !Modal.isOpen()) {
+    document.body.classList.remove('big-preview');
+    $('#btn-big').innerHTML = '&#9974; Big';
+  }
+});
+$('#btn-restart').addEventListener('click', () => {
+  if (!cur) return;
+  confirmBox('Start this job again?', 'Your code for this job is replaced by the client\'s original code. Stars you earned stay.', 'Start again', () => {
+    codeEl.value = cur.m.start;
+    onCodeChange();
+    renderAll();
+  }, true);
+});
+$('#btn-pics').addEventListener('click', () => {
+  Modal.open({
+    title: 'Pictures you can use',
+    wide: true,
+    html: '<p>Type the file name inside <code>src="…"</code>, for example <code>&lt;img src="pizza.svg" alt="A pizza"&gt;</code>. Remember a good <b>alt</b> text!</p><div class="pics">' +
+      IMAGE_NAMES.map(n => '<div class="pic"><img src="' + DATA_URI[n] + '" alt=""><code>' + esc(n) + '</code></div>').join('') + '</div>'
+  });
+});
+
+function cheatHtml() {
+  const html = [
+    ['<h1>…</h1> to <h6>', 'headings, biggest to smallest'], ['<p>…</p>', 'paragraph'], ['<strong> <em>', 'bold, italic'],
+    ['<br>  <hr>', 'line break, dividing line (no closing tag)'], ['<ul> <ol> <li>', 'bulleted list, numbered list, list item'],
+    ['<img src="x.svg" alt="…">', 'picture (no closing tag)'], ['<a href="#id">…</a>', 'link'], ['<div class="box">', 'a box to group things'],
+    ['<nav>', 'navigation bar'], ['<table> <tr> <th> <td>', 'table, row, heading cell, cell'], ['<!-- … -->', 'a comment (not shown)']
+  ];
+  const css = [
+    ['color', 'text colour: red, #c2410c'], ['background-color', 'background colour'], ['font-family', 'Arial, Georgia, Impact…'], ['font-size', '18px'],
+    ['font-weight', 'bold'], ['text-align', 'left, center, right'], ['text-transform', 'uppercase'], ['line-height', '1.6'],
+    ['border', '3px solid pink'], ['border-radius', '15px (round corners)'], ['padding', 'space inside the border'], ['margin', 'space outside the border'],
+    ['width', '300px'], ['display: flex', 'children in a row'], ['gap', 'space between flex items'], ['justify-content', 'center, space-between'],
+    ['text-decoration', 'none (removes underlines)']
+  ];
+  const sel = [['p { }', 'every <p>'], ['.box { }', 'every element with class="box"'], ['#event { }', 'the element with id="event"'], ['nav a { }', 'links inside the nav'], ['a:hover { }', 'a link while the mouse is over it']];
+  const rows = list => list.map(r => '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('');
+  return '<div class="cheat-wrap"><table class="cheat"><tr><th>HTML</th><th>What it is</th></tr>' + rows(html) +
+    '<tr><th>CSS selector</th><th>Styles…</th></tr>' + rows(sel) + '<tr><th>CSS property</th><th>Example</th></tr>' + rows(css) + '</table></div>';
+}
+$('#btn-cheat').addEventListener('click', () => Modal.open({ title: 'Code cheat sheet', wide: true, html: cheatHtml() }));
+
+function showHelp() {
+  Modal.open({
+    title: 'How the agency works',
+    wide: true,
+    html: '<div class="pic-row">' + picRow('chat:Read the client|code:Type the code|eye:Watch the preview|rocket:Deliver', true) + '</div>' +
+      '<ul class="checklist" style="margin-top:16px">' +
+      '<li>Type HTML and CSS in the dark editor. The preview on the right updates by itself.</li>' +
+      '<li>Tasks tick by themselves when your page does what the client wants.</li>' +
+      '<li>The <strong>Code Doctor</strong> under the editor finds broken tags and CSS. Click a problem to jump to its line.</li>' +
+      '<li>Type the code yourself: pasting from outside is switched off.</li>' +
+      '<li>Hints are free. Each "Show code" costs a star.</li>' +
+      '<li>Your code saves by itself on this computer.</li></ul>',
+    actions: [{ label: 'Open the job board', variant: 'primary' }],
+    onClose: () => { if (!data.seenHelp) { data.seenHelp = true; save(); } }
+  });
+}
+$('#btn-help').addEventListener('click', showHelp);
+
+/* ---------- Start ---------- */
+(function measureDefaultFont() {
+  try {
+    const doc = frame.contentDocument;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><body><h1>x</h1></body></html>');
+    doc.close();
+    defaultFont = frame.contentWindow.getComputedStyle(doc.querySelector('h1')).fontFamily;
+  } catch (e) { defaultFont = ''; }
+})();
+
+Nav.setup({
+  tool: 'Website Rescue',
+  screens: {
+    'screen-home': { label: 'Job board', go: goHome },
+    'screen-job': { label: () => (cur ? 'Job ' + cur.m.id + ': ' + cur.m.title : 'Job'), parent: 'screen-home', go: () => {} },
+    'screen-badge': { label: 'Certificate', parent: 'screen-home', go: () => {} }
+  }
+});
+SaveBar.setup({
+  id: 'web-rescue', key: SAVE_KEY, name: 'Website Rescue', what: 'your delivered jobs, stars and code',
+  save: () => { if (cur) data.code[cur.m.id] = codeEl.value; save(); }
+});
+window.addEventListener('storage', e => { if (e.key === null || (e.key === SAVE_KEY && e.newValue === null)) store.locked = true; });
+reloadWhenCleared(SAVE_KEY);
+window.addEventListener('beforeunload', () => { if (cur) data.code[cur.m.id] = codeEl.value; clearTimeout(saveTimer); save(); });
+
+renderHome();
+showScreen('screen-home');
+if (!data.seenHelp && !FAST) setTimeout(showHelp, 300);
+
+if (FAST) {
+  window.WR = {
+    MISSIONS, data: () => data,
+    open(id) { for (let i = 1; i < id; i++) lvl(i).done = true; openJob(id); },
+    setCode(t) { codeEl.value = t; onCodeChange(); renderAll(); return cur.states.map(s => (s.ok ? true : s.msg)); },
+    states: () => cur.states.map(s => (s.ok ? true : s.msg)),
+    lint: () => CodeDoctor.lint(codeEl.value),
+    deliver, home: goHome, badge: showBadge
+  };
+}
+
+</script>
+<!-- CLASSROOM REMINDER START -->
+<style>
+#ccr-back{position:fixed;inset:0;z-index:2147483000;background:rgba(10,20,40,.72);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"Segoe UI",Arial,sans-serif}
+#ccr-card{background:#fff;color:#1f2937;max-width:520px;width:100%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden;animation:ccr-pop .35s ease-out}
+#ccr-top{background:#1e8e3e;color:#fff;padding:18px 22px;font-size:24px;font-weight:700;line-height:1.25}
+#ccr-top small{display:block;font-size:15px;font-weight:400;opacity:.9;margin-top:4px}
+#ccr-body{padding:18px 22px 6px;font-size:17px;line-height:1.5}
+#ccr-body ol{margin:10px 0 12px;padding-left:24px}
+#ccr-body li{margin:4px 0}
+#ccr-body b{color:#137333}
+#ccr-foot{padding:10px 22px 20px;text-align:right}
+#ccr-ok{font:inherit;font-size:18px;font-weight:700;border:0;border-radius:12px;padding:12px 26px;background:#1e8e3e;color:#fff;cursor:pointer}
+#ccr-ok:disabled{background:#9ca3af;cursor:default}
+@keyframes ccr-pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+<script>
+(function () {
+  var SLOTS = [10, 30, 50];   // minutes past every hour
+  var GRACE = 3;              // still pops up if the tool is opened up to 3 minutes late
+  var WAIT = 5;               // seconds before the OK button works, so it gets read
+  var KEY = 'computerLab.classroomReminder.lastShown';
+  var shownHere = {}, back = null;
+
+  function slotId(d) {
+    var m = d.getMinutes();
+    for (var i = 0; i < SLOTS.length; i++)
+      if (m >= SLOTS[i] && m < SLOTS[i] + GRACE)
+        return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + SLOTS[i];
+    return null;
+  }
+  function seen(id) {
+    if (shownHere[id]) return true;
+    try { return localStorage.getItem(KEY) === id; } catch (e) { return false; }
+  }
+  function mark(id) {
+    shownHere[id] = true;
+    try { localStorage.setItem(KEY, id); } catch (e) {}
+  }
+  function pauseGame() {
+    try { if (document.exitPointerLock) document.exitPointerLock(); } catch (e) {}
+    try {
+      var g = window.GK && window.GK.current;
+      if (g && g.state && g.state.mode === 'playing' && g.pause) g.pause();
+    } catch (e) {}
+  }
+  function keys(e) {
+    if (!back) return;
+    e.stopPropagation();
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); close(); }
+  }
+  function close() {
+    var ok = document.getElementById('ccr-ok');
+    if (!back || !ok || ok.disabled) return;
+    back.parentNode.removeChild(back);
+    back = null;
+  }
+  function show() {
+    if (back || !document.body) return;
+    pauseGame();
+    back = document.createElement('div');
+    back.id = 'ccr-back';
+    back.setAttribute('role', 'alertdialog');
+    back.setAttribute('aria-labelledby', 'ccr-top');
+    back.innerHTML =
+      '<div id="ccr-card">' +
+        '<div id="ccr-top">\uD83D\uDCDA Google Classroom reminder<small>Your teacher posted a quiz for you!</small></div>' +
+        '<div id="ccr-body">Have you <b>joined your Google Classroom</b> yet? There is a <b>QUIZ assignment</b> waiting for you.' +
+          '<ol><li>Open <b>Google Classroom</b> and join your class.</li>' +
+          '<li>Open the <b>quiz assignment</b>.</li>' +
+          '<li>Answer every question, then click <b>Turn in</b>.</li></ol>' +
+          'Keep this tab open, so you can come back and continue here.</div>' +
+        '<div id="ccr-foot"><button id="ccr-ok" type="button" disabled>OK (' + WAIT + ')</button></div>' +
+      '</div>';
+    ['mousedown', 'mouseup', 'click', 'pointerdown', 'wheel', 'contextmenu'].forEach(function (t) {
+      back.addEventListener(t, function (e) { e.stopPropagation(); });
+    });
+    document.body.appendChild(back);
+    var ok = document.getElementById('ccr-ok'), left = WAIT;
+    ok.addEventListener('click', close);
+    var timer = setInterval(function () {
+      left--;
+      if (left > 0) { ok.textContent = 'OK (' + left + ')'; return; }
+      clearInterval(timer);
+      ok.disabled = false;
+      ok.textContent = 'OK, I will do it';
+      try { ok.focus(); } catch (e) {}
+    }, 1000);
+  }
+  function tick() {
+    var id = slotId(new Date());
+    if (id && !seen(id) && !back) { mark(id); show(); }
+  }
+  window.addEventListener('keydown', keys, true);
+  window.addEventListener('keyup', function (e) { if (back) e.stopPropagation(); }, true);
+  window.ClassroomReminder = { show: show };
+  function begin() {
+    if (/[?&]remind=now\b/.test(location.search)) show();
+    tick();
+    setInterval(tick, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', begin); else begin();
+})();
+</script>
+<!-- CLASSROOM REMINDER END -->
+</body>
+</html>

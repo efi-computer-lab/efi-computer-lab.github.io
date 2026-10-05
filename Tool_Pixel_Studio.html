@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Studio</title>
+<style>
+  :root{
+    --night:#1b1a2e; --panel:#2e2a4a; --panel-2:#3a3459;
+    --bone:#f2e9d0; --gold:#ffcb3c; --mint:#5ad6a5; --coral:#ff5d73; --dim:#9d94c4;
+    --mono: ui-monospace,"Cascadia Mono","Consolas","Courier New",monospace;
+    --sans: "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{background:var(--night);color:var(--bone);font-family:var(--sans);font-size:16px;
+    padding:20px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1140px;margin:0 auto}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-family:var(--mono);font-size:30px;margin:0;font-weight:700;line-height:1}
+  .mission{font-size:15px;color:var(--dim);max-width:52ch;margin:6px 0 0}
+  .mission b{color:var(--gold)}
+
+  .studio{display:grid;grid-template-columns:210px 1fr 190px;gap:18px;align-items:start}
+  @media (max-width:900px){ .studio{grid-template-columns:1fr} }
+
+  .box{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:16px}
+  .box h2{font-family:var(--mono);font-size:12px;letter-spacing:.6px;color:var(--dim);
+    margin:0 0 11px;font-weight:700}
+  .box + .box{margin-top:14px}
+
+  /* tools */
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tool{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--night);color:var(--bone);
+    border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:11px 6px;cursor:pointer;text-align:center}
+  .tool:hover{background:#241f3d}
+  .tool[aria-pressed="true"]{background:var(--gold);color:var(--night);box-shadow:inset 0 0 0 2px #a37800}
+  .tool small{display:block;font-weight:400;color:var(--dim);font-size:10px;margin-top:2px}
+  .tool[aria-pressed="true"] small{color:#6b5000}
+
+  /* palette */
+  .pal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .sw{aspect-ratio:1;border:0;padding:0;cursor:pointer;box-shadow:inset 0 0 0 3px var(--panel)}
+  .sw[aria-pressed="true"]{box-shadow:inset 0 0 0 3px var(--bone)}
+  .customrow{display:flex;gap:9px;align-items:center;margin-top:11px}
+  .customrow input[type=color]{width:44px;height:34px;padding:0;border:0;background:none;cursor:pointer}
+  .customrow span{font-size:13px;color:var(--dim)}
+
+  /* canvas */
+  .stage{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:18px;display:flex;
+    flex-direction:column;align-items:center;gap:14px}
+  #paper{image-rendering:pixelated;cursor:crosshair;box-shadow:0 0 0 3px var(--panel-2);touch-action:none}
+  .stagebar{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;width:100%}
+
+  button.act{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:10px 15px;cursor:pointer}
+  button.act:hover{background:#4a4270}
+  button.act:disabled{opacity:.35;cursor:not-allowed}
+  button.go{background:var(--gold);color:var(--night)}
+  button.go:hover{background:#ffd968}
+  button:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+
+  label.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--dim);cursor:pointer}
+  label.chk input{accent-color:var(--mint);width:17px;height:17px}
+
+  select{font-family:var(--mono);font-size:13px;background:var(--night);color:var(--bone);
+    border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:9px 10px}
+
+  /* reference */
+  .refrow{display:flex;gap:8px;margin-bottom:10px}
+  .refrow button{flex:1}
+  .builtins{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px}
+  .builtins button{aspect-ratio:1;padding:0;border:0;background:var(--night);cursor:pointer;
+    box-shadow:inset 0 0 0 2px var(--panel-2);display:grid;place-items:center}
+  .builtins button:hover{box-shadow:inset 0 0 0 2px var(--dim)}
+  .builtins button[aria-pressed="true"]{box-shadow:inset 0 0 0 3px var(--gold)}
+  .builtins canvas{image-rendering:pixelated;width:78%;height:78%}
+
+  /* hints */
+  .hintwrap{margin-top:12px;border-top:2px solid var(--panel-2);padding-top:11px}
+  .hintbtn{font-family:var(--mono);font-size:12px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:10px 12px;cursor:pointer;width:100%;text-align:left;line-height:1.35}
+  .hintbtn:hover:not(:disabled){background:#3b4272}
+  .hintbtn:disabled{opacity:.45;cursor:default}
+  .hintbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .hint{background:var(--night);border-left:3px solid var(--gold);padding:10px 12px;margin-top:8px;
+    font-size:13px;line-height:1.55;animation:hintIn .3s ease-out}
+  .hint b{color:var(--gold)}
+  .hint .hn{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;
+    color:var(--dim);margin-bottom:5px}
+  @keyframes hintIn{from{opacity:0;transform:translateY(-6px)}}
+  .refmode{display:flex;gap:7px;margin-bottom:10px}
+  .refmode button{flex:1;font-family:var(--mono);font-size:12px;font-weight:700;background:var(--night);
+    color:var(--dim);border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:9px 4px;cursor:pointer}
+  .refmode button[aria-pressed="true"]{background:var(--mint);color:#0d2b21;box-shadow:inset 0 0 0 2px #2b8a68}
+  .fade{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--dim)}
+  .fade input[type=range]{flex:1;accent-color:var(--gold)}
+  #refpanel{flex:0 0 250px;display:none}
+  #refpanel.on{display:block}
+  #refpanel img{width:100%;display:block;background:#151327;box-shadow:0 0 0 3px var(--panel-2);
+    image-rendering:pixelated}
+  #refpanel p{font-family:var(--mono);font-size:11px;color:var(--dim);margin:9px 0 0;text-align:center}
+  .stagerow{display:flex;gap:18px;align-items:flex-start;justify-content:center;
+    flex-wrap:wrap;width:100%}
+  #paper{width:min(608px,100%);height:auto}
+
+  /* frames */
+  .frames{display:flex;flex-direction:column;gap:9px}
+  .frame{display:flex;align-items:center;gap:10px;background:var(--night);padding:7px;cursor:pointer;
+    box-shadow:inset 0 0 0 2px var(--night)}
+  .frame[aria-current="true"]{box-shadow:inset 0 0 0 2px var(--gold)}
+  .frame canvas{image-rendering:pixelated;background:#151327;width:44px;height:44px;display:block}
+  .frame span{font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+  .note{font-size:13px;color:var(--dim);line-height:1.5;margin:12px 0 0}
+  .note b{color:var(--coral)}
+
+  footer{margin-top:22px;font-size:13.5px;color:var(--dim);line-height:1.6}
+  footer b{color:var(--gold)}
+  kbd{font-family:var(--mono);font-size:12.5px;background:var(--panel);padding:2px 6px;
+    box-shadow:inset 0 0 0 2px var(--panel-2);color:var(--bone)}
+
+  /* built-in help */
+  .ov{position:fixed;inset:0;background:rgba(8,8,18,.86);display:none;z-index:99;
+    padding:26px 18px;overflow:auto}
+  .ov.on{display:block}
+  .ovbox{max-width:640px;margin:0 auto;background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);
+    padding:28px 30px 26px}
+  .ovbox h2{font-family:var(--mono);font-size:25px;margin:0 0 8px;color:var(--helpac);line-height:1.2}
+  .ovbox .ovsub{font-size:15.5px;color:var(--dim);margin:0 0 20px;line-height:1.6}
+  .ovbox ol{margin:0 0 20px;padding-left:0;list-style:none;counter-reset:h}
+  .ovbox ol li{counter-increment:h;position:relative;padding-left:40px;margin-bottom:14px;
+    font-size:15.5px;line-height:1.55}
+  .ovbox ol li::before{content:counter(h);position:absolute;left:0;top:1px;width:26px;height:26px;
+    background:var(--helpac);color:var(--night);font-family:var(--mono);font-size:13px;font-weight:700;
+    display:grid;place-items:center}
+  .ovbox ol li b{color:var(--helpac)}
+  .ovtip{background:var(--night);padding:15px 18px;font-size:14.5px;line-height:1.6;margin-bottom:22px}
+  .ovtip b{color:var(--helpac)}
+  .ovbox button.ovgo{font-family:var(--mono);font-size:15px;font-weight:700;background:var(--helpac);
+    color:var(--night);border:0;padding:13px 26px;cursor:pointer}
+  .helpbtn{font-family:var(--mono);font-size:12.5px;font-weight:700;background:transparent;
+    color:var(--dim);border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:9px 15px;cursor:pointer}
+  .helpbtn:hover{color:var(--bone);background:var(--panel-2)}
+  .helpbtn:focus-visible,.ovbox button:focus-visible{outline:3px solid var(--bone);outline-offset:2px}
+
+  /* --- shared navigation + motion --- */
+  .navbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .navbar a{font-family:var(--mono);font-size:12.5px;font-weight:700;text-decoration:none;
+    color:var(--dim);box-shadow:inset 0 0 0 2px var(--panel-2);padding:8px 14px;transition:.15s}
+  .navbar a:hover{color:var(--bone);background:var(--panel-2)}
+  .navbar .here{font-family:var(--mono);font-size:12.5px;color:var(--helpac)}
+  @keyframes popIn{0%{transform:scale(.5);opacity:.3}62%{transform:scale(1.22)}100%{transform:scale(1)}}
+  .anim-pop{animation:popIn .34s cubic-bezier(.34,1.6,.64,1)}
+  @keyframes rise{from{transform:translateY(14px);opacity:0}}
+  .ovbox{animation:rise .3s ease-out}
+  button, .pick, .opt, a.card, .missions button{transition:background .15s, transform .13s, color .15s}
+  .opt:hover:not(:disabled), .missions button:hover{transform:translateX(3px)}
+  button.act:active, button.go:active, .ovgo:active{transform:translateY(1px)}
+  .task .dot,.fb .dot{transition:background .2s, box-shadow .2s}
+
+  /* autosave bar */
+  .saver{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);
+    box-shadow:0 0 0 3px var(--panel-2);padding:10px 14px;margin-bottom:14px;
+    font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.45}
+  .saver .dotx{width:9px;height:9px;border-radius:50%;background:var(--mint);flex:0 0 9px}
+  .saver b{color:var(--bone)}
+  .saver.warn{box-shadow:0 0 0 3px var(--coral)}
+  .saver.warn .dotx{background:var(--coral)}
+  .saver.back .dotx{background:var(--gold, var(--mint))}
+  .saverbtn{font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:7px 11px;cursor:pointer;margin-left:auto;white-space:nowrap}
+  .saverbtn:hover{filter:brightness(1.3)}
+  .saverbtn:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .miniov{position:fixed;inset:0;background:rgba(6,6,16,.85);display:none;z-index:120;
+    padding:26px 18px;overflow:auto}
+  .miniov.on{display:block}
+  .minibox{max-width:520px;margin:8vh auto 0;background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);
+    padding:24px 26px}
+  .minibox h3{font-family:var(--mono);font-size:20px;margin:0 0 10px}
+  .minibox p{font-size:15.5px;line-height:1.6;margin:0 0 20px;color:var(--dim)}
+  .minibox .row{display:flex;gap:10px;flex-wrap:wrap}
+  .minibox button{font-family:var(--mono);font-size:14px;font-weight:700;border:0;padding:12px 22px;cursor:pointer}
+  .minibox button.quiet{background:transparent;color:var(--dim);box-shadow:inset 0 0 0 2px var(--panel-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Pixel Studio</h1>
+      <p class="mission"><b>Mission:</b> design a creature that has never existed. Fill the square. Give it an outline, two shades, eyes, and one extra detail.</p>
+    </div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--dim)">Computer practicum</div>
+  </header>
+
+  <div class="saver" id="saver">
+    <span class="dotx" aria-hidden="true"></span>
+    <span id="savertext">Checking whether this computer can save your work...</span>
+    <button class="saverbtn" id="saverfresh" type="button" hidden>Start fresh</button>
+  </div>
+
+  <div class="studio">
+
+    <!-- LEFT -->
+    <div>
+      <div class="box">
+        <h2>TOOLS</h2>
+        <div class="tools" id="tools"></div>
+      </div>
+
+      <div class="box">
+        <h2>COLOURS</h2>
+        <div class="pal" id="pal"></div>
+        <div class="customrow">
+          <input type="color" id="custom" value="#ff5d73" aria-label="Pick your own colour">
+          <span>your own colour</span>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>CANVAS</h2>
+        <select id="size" aria-label="Canvas size">
+          <option value="16">16 × 16</option>
+          <option value="24">24 × 24</option>
+          <option value="32">32 × 32</option>
+        </select>
+        <div style="margin-top:11px">
+          <label class="chk"><input type="checkbox" id="gridtog" checked> show grid</label>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>REFERENCE</h2>
+        <div class="builtins" id="builtins"></div>
+        <div class="refrow">
+          <button class="act" id="loadref">Use a picture</button>
+        </div>
+        <input type="file" id="reffile" accept="image/*" hidden>
+
+        <div id="refcontrols" style="display:none">
+          <div class="refmode">
+            <button id="mbeside" aria-pressed="true">Beside</button>
+            <button id="mbehind" aria-pressed="false">Behind</button>
+          </div>
+          <div class="fade" id="faderow" style="display:none">
+            <span>faint</span>
+            <input type="range" id="refalpha" min="10" max="90" value="45" aria-label="How strong the reference looks">
+            <span>clear</span>
+          </div>
+          <button class="act" id="refoff" style="width:100%;margin-top:10px">Remove reference</button>
+        </div>
+        <p class="note" id="refhelp">Pick a shape to copy, or use a picture from this computer. Nothing is uploaded anywhere.</p>
+        <div class="hintwrap">
+          <button class="hintbtn" id="hintbtn"></button>
+          <div id="hintbox"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTRE -->
+    <div class="stage">
+      <div class="stagerow">
+        <canvas id="paper" width="608" height="608" aria-label="Drawing canvas"></canvas>
+        <div id="refpanel">
+          <img id="refimg" alt="Your reference picture">
+          <p>your reference</p>
+        </div>
+      </div>
+      <div class="stagebar">
+        <button class="act" id="undo" title="Ctrl+Z">Undo</button>
+        <button class="act" id="redo">Redo</button>
+        <button class="act" id="clear">Clear frame</button>
+        <button class="act go" id="png">Save PNG</button>
+        <button class="act" id="sheet">Save all frames</button>
+      </div>
+      <p class="note" style="text-align:center;max-width:56ch">
+        <b>Nothing is saved automatically.</b> Press Save PNG before you close this tab, then move the file into your own folder.
+      </p>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="box">
+        <h2>FRAMES</h2>
+        <div class="frames" id="frames"></div>
+        <div style="display:flex;gap:8px;margin-top:11px">
+          <button class="act" id="addframe" style="flex:1">Add</button>
+          <button class="act" id="dupframe" style="flex:1">Copy</button>
+        </div>
+        <button class="act" id="delframe" style="width:100%;margin-top:8px">Delete frame</button>
+      </div>
+
+      <div class="box">
+        <h2>ANIMATE</h2>
+        <button class="act go" id="play" style="width:100%">Play</button>
+        <div style="margin-top:11px">
+          <select id="fps" aria-label="Speed" style="width:100%">
+            <option value="2">slow · 2 fps</option>
+            <option value="4" selected>normal · 4 fps</option>
+            <option value="8">fast · 8 fps</option>
+          </select>
+        </div>
+        <p class="note">Add a second frame, move one thing, then press Play.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Shortcuts:</b>
+    <kbd>P</kbd> pencil · <kbd>E</kbd> eraser · <kbd>F</kbd> fill · <kbd>I</kbd> pick colour · <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo · <kbd>Ctrl</kbd>+<kbd>Y</kbd> redo<br>
+    Hold the mouse button down and drag to draw a line. The fill tool only fills areas that are completely closed in.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var PALETTE = ['#171528','#3a3459','#5a4a7a','#9d94c4',
+                 '#f2e9d0','#ffffff','#ffcb3c','#ff9b3c',
+                 '#e8834a','#ff5d73','#c23a5a','#c58cf0',
+                 '#5ad6a5','#2b8a68','#6fc9e8','#3a7fc4'];
+
+  var size = 16;
+  var frames = [ blank() ];
+  var cur = 0;
+  var tool = 'pencil';
+  var colour = '#ffcb3c';
+  var showGrid = true;
+  var drawing = false, lastCell = null;
+  var undoStack = [], redoStack = [];
+  var playing = null;
+
+
+  /* ---------- autosave ----------
+     Students lose work to crashes and to closing the tab by accident. This
+     writes the whole state to this computer a moment after every change, and
+     puts it back when the page opens again. If the browser refuses to store
+     anything, the bar says so in red rather than pretending. */
+  var SAVE_KEY = 'practicum.pixel.v1';
+  var saveOn = (function(){
+    try {
+      window.localStorage.setItem('practicum.probe', '1');
+      window.localStorage.removeItem('practicum.probe');
+      return true;
+    } catch (e) { return false; }
+  })();
+  var saveTimer = null, unsaved = false, restoredAt = 0;
+  var saverEl = document.getElementById('saver');
+  var saverText = document.getElementById('savertext');
+  var saverFresh = document.getElementById('saverfresh');
+
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function clockOf(ms){ var d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+  function grabState(){
+    return { v:1, at:Date.now(), size:size, cur:cur, colour:colour, tool:tool,
+             grid:showGrid, frames:frames };
+  }
+  function applyState(d){
+    if (!d.frames || !d.frames.length) throw 'no frames';
+    size = d.size || 16;
+    frames = d.frames;
+    cur = Math.min(d.cur || 0, frames.length - 1);
+    colour = d.colour || colour;
+    showGrid = d.grid !== false;
+    tool = d.tool || 'pencil';
+    var sz = document.getElementById('size'); if (sz) sz.value = String(size);
+    var gt = document.getElementById('gridtog'); if (gt) gt.checked = showGrid;
+  }
+
+  function sayIdle(){
+    if (!saveOn) return;
+    saverEl.className = 'saver';
+    saverText.innerHTML = 'Your work saves itself on this computer. Close this by accident and it comes back.';
+    saverFresh.hidden = true;
+  }
+  function sayNoStore(){
+    saveOn = false;
+    saverEl.className = 'saver warn';
+    saverText.innerHTML = '<b>This computer will not let the page save anything.</b> Nothing is being kept, so save or export your work yourself before you close the tab.';
+    saverFresh.hidden = true;
+  }
+  function saveNow(){
+    if (!saveOn) return;
+    try {
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(grabState()));
+      unsaved = false;
+      saverEl.className = 'saver';
+      saverText.innerHTML = 'Saved at <b>' + clockOf(Date.now()) + '</b>. It will still be here if this closes.';
+      saverFresh.hidden = false;
+    } catch (e) { sayNoStore(); }
+  }
+  function touch(){
+    unsaved = true;
+    if (!saveOn) return;
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 800);
+  }
+  function clearSave(){
+    try { window.localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  }
+  function restoreSave(){
+    if (!saveOn){ sayNoStore(); return false; }
+    var raw = null;
+    try { raw = window.localStorage.getItem(SAVE_KEY); } catch (e) { sayNoStore(); return false; }
+    if (!raw){ sayIdle(); return false; }
+    var d = null;
+    try { d = JSON.parse(raw); } catch (e) { d = null; }
+    if (!d || d.v !== 1){ clearSave(); sayIdle(); return false; }
+    try { applyState(d); } catch (e) { clearSave(); sayIdle(); return false; }
+    restoredAt = d.at || 0;
+    return true;
+  }
+  function sayRestored(){
+    saverEl.className = 'saver back';
+    saverText.innerHTML = '<b>Your work from ' + clockOf(restoredAt) + ' has been put back.</b> Carry on, or start a blank one.';
+    saverFresh.hidden = false;
+  }
+  saverFresh.addEventListener('click', function(){
+    if (!window.confirm('Throw away the work on screen and start over?\n\nThis cannot be undone.')) return;
+    clearSave();
+    unsaved = false;
+    window.location.reload();
+  });
+  // if nothing could be stored, at least stop an accidental close from being silent
+  window.addEventListener('beforeunload', function(e){
+    if (!unsaved) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
+
+  var paper = document.getElementById('paper');
+  var ctx = paper.getContext('2d');
+  var DISPLAY = 608;
+
+  var refImage = null;      // an Image or canvas to show
+  var refMode = 'beside';   // 'beside' | 'behind'
+  var refAlpha = 0.45;
+  var refGrid = null;       // reference sampled down to size x size, for the picker
+
+  /* ---------- built-in references ---------- */
+  var P = {'.':null,'k':'#171528','w':'#f2e9d0','g':'#5ad6a5','c':'#6fc9e8'};
+  var ART = {
+    ghost: ["..kkkk..",".kwwwwk.","kwkwwkwk","kwwwwwwk","kwwwwwwk","kwwwwwwk","kwwwwwwk","k.kk.kk."],
+    slime: ["........","..kkkk..",".kggggk.","kgkggkgk","kggggggk","kggggggk",".kkkkkk.","........"],
+    bot:   ["..kkkk..",".kcccck.","kckwwkck","kcccccck","kckkkkck",".kcccck.","..k..k..","........"]
+  };
+  function artCanvas(rows){
+    var n = rows.length;
+    var cv = document.createElement('canvas'); cv.width = n; cv.height = n;
+    var c = cv.getContext('2d');
+    for (var y=0;y<n;y++) for (var x=0;x<rows[y].length;x++){
+      var col = P[rows[y][x]];
+      if (col){ c.fillStyle = col; c.fillRect(x,y,1,1); }
+    }
+    return cv;
+  }
+  function circleCanvas(shape){
+    var n = 32;
+    var cv = document.createElement('canvas'); cv.width = n; cv.height = n;
+    var c = cv.getContext('2d');
+    c.strokeStyle = '#9d94c4'; c.lineWidth = 1.4;
+    c.beginPath();
+    if (shape === 'circle') c.arc(16,16,12,0,Math.PI*2);
+    else c.ellipse(16,17,10,13,0,0,Math.PI*2);
+    c.stroke();
+    return cv;
+  }
+  var BUILTINS = [
+    {id:'ghost',  make:function(){ return artCanvas(ART.ghost); }},
+    {id:'slime',  make:function(){ return artCanvas(ART.slime); }},
+    {id:'bot',    make:function(){ return artCanvas(ART.bot); }},
+    {id:'circle', make:function(){ return circleCanvas('egg'); }}
+  ];
+
+  function blank(){ return new Array(size*size).fill(null); }
+  function cell(){ return DISPLAY / size; }
+
+  /* ---------- rendering ---------- */
+  function render(){
+    if (typeof touch === 'function') touch();
+    var c = cell();
+    ctx.clearRect(0,0,DISPLAY,DISPLAY);
+
+    // 1. checkerboard behind everything
+    for (var y=0;y<size;y++){
+      for (var x=0;x<size;x++){
+        ctx.fillStyle = ((x+y)%2===0) ? '#221f3a' : '#1a1830';
+        ctx.fillRect(x*c, y*c, c, c);
+      }
+    }
+
+    // 2. the reference, faded, if we are tracing over it
+    if (refImage && refMode === 'behind'){
+      var iw = refImage.width, ih = refImage.height;
+      var s = Math.min(DISPLAY/iw, DISPLAY/ih);
+      var w = iw*s, h = ih*s;
+      ctx.save();
+      ctx.globalAlpha = refAlpha;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(refImage, (DISPLAY-w)/2, (DISPLAY-h)/2, w, h);
+      ctx.restore();
+    }
+
+    // 3. the pixels you have actually drawn
+    for (var y2=0;y2<size;y2++){
+      for (var x2=0;x2<size;x2++){
+        var v = frames[cur][y2*size+x2];
+        if (v){ ctx.fillStyle = v; ctx.fillRect(x2*c, y2*c, c, c); }
+      }
+    }
+    if (showGrid && size <= 32){
+      ctx.strokeStyle = 'rgba(242,233,208,.10)';
+      ctx.lineWidth = 1;
+      for (var i=1;i<size;i++){
+        ctx.beginPath(); ctx.moveTo(i*c,0); ctx.lineTo(i*c,DISPLAY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,i*c); ctx.lineTo(DISPLAY,i*c); ctx.stroke();
+      }
+    }
+    renderFrames();
+  }
+
+  function renderFrames(){
+    var host = document.getElementById('frames');
+    host.innerHTML = '';
+    frames.forEach(function(f, i){
+      var row = document.createElement('div');
+      row.className = 'frame';
+      row.setAttribute('aria-current', i===cur ? 'true' : 'false');
+      var cv = document.createElement('canvas');
+      cv.width = size; cv.height = size;
+      var c2 = cv.getContext('2d');
+      for (var y=0;y<size;y++) for (var x=0;x<size;x++){
+        var v = f[y*size+x];
+        if (v){ c2.fillStyle = v; c2.fillRect(x,y,1,1); }
+      }
+      var lab = document.createElement('span'); lab.textContent = 'Frame ' + (i+1);
+      row.appendChild(cv); row.appendChild(lab);
+      row.addEventListener('click', function(){ cur = i; render(); });
+      host.appendChild(row);
+    });
+    document.getElementById('delframe').disabled = frames.length < 2;
+  }
+
+  /* ---------- history ---------- */
+  function snapshot(){
+    undoStack.push({ f: cur, data: frames[cur].slice() });
+    if (undoStack.length > 50) undoStack.shift();
+    redoStack.length = 0;
+    syncHistory();
+  }
+  function syncHistory(){
+    document.getElementById('undo').disabled = undoStack.length === 0;
+    document.getElementById('redo').disabled = redoStack.length === 0;
+  }
+  function undo(){
+    if (!undoStack.length) return;
+    var s = undoStack.pop();
+    redoStack.push({ f: s.f, data: frames[s.f].slice() });
+    frames[s.f] = s.data; cur = s.f; render(); syncHistory();
+  }
+  function redo(){
+    if (!redoStack.length) return;
+    var s = redoStack.pop();
+    undoStack.push({ f: s.f, data: frames[s.f].slice() });
+    frames[s.f] = s.data; cur = s.f; render(); syncHistory();
+  }
+
+  /* ---------- drawing ---------- */
+  function posFromEvent(e){
+    var r = paper.getBoundingClientRect();
+    var px = (e.clientX - r.left) * (DISPLAY / r.width);
+    var py = (e.clientY - r.top) * (DISPLAY / r.height);
+    var c = cell();
+    var x = Math.floor(px / c), y = Math.floor(py / c);
+    if (x<0||y<0||x>=size||y>=size) return null;
+    return y*size + x;
+  }
+
+  // colour every square on the straight line between two points, so dragging
+  // quickly leaves a solid line instead of a dotted one with holes in it
+  function lineBetween(from, to, paint){
+    var x0 = from % size, y0 = Math.floor(from / size);
+    var x1 = to % size,   y1 = Math.floor(to / size);
+    var dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    var dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    var err = dx + dy;
+    for (;;){
+      paint(y0 * size + x0);
+      if (x0 === x1 && y0 === y1) return;
+      var e2 = 2 * err;
+      if (e2 >= dy){ err += dy; x0 += sx; }
+      if (e2 <= dx){ err += dx; y0 += sy; }
+    }
+  }
+
+  function apply(idx){
+    if (idx === null || idx === lastCell) return;
+    var d = frames[cur];
+    if (tool === 'pencil' || tool === 'eraser'){
+      var paint = (tool === 'pencil')
+        ? function(i){ d[i] = colour; }
+        : function(i){ d[i] = null; };
+      if (lastCell === null) paint(idx);
+      else lineBetween(lastCell, idx, paint);
+    }
+    else if (tool === 'picker'){
+      if (d[idx]){ colour = d[idx]; syncPalette(); }
+      else if (refGrid && refGrid[idx]){ colour = refGrid[idx]; syncPalette(); }
+      setTool('pencil');
+    }
+    else if (tool === 'fill') flood(idx);
+    lastCell = idx;
+    render();
+  }
+
+  function flood(start){
+    var d = frames[cur];
+    var target = d[start];
+    if (target === colour) return;
+    var stack = [start];
+    while (stack.length){
+      var i = stack.pop();
+      if (d[i] !== target) continue;
+      d[i] = colour;
+      var x = i % size, y = Math.floor(i / size);
+      if (x > 0) stack.push(i-1);
+      if (x < size-1) stack.push(i+1);
+      if (y > 0) stack.push(i-size);
+      if (y < size-1) stack.push(i+size);
+    }
+  }
+
+  paper.addEventListener('pointerdown', function(e){
+    if (playing) return;
+    paper.setPointerCapture(e.pointerId);
+    snapshot(); drawing = true; lastCell = null;
+    apply(posFromEvent(e));
+  });
+  paper.addEventListener('pointermove', function(e){
+    if (!drawing || tool === 'fill' || tool === 'picker') return;
+    apply(posFromEvent(e));
+  });
+  window.addEventListener('pointerup', function(){ drawing = false; lastCell = null; });
+
+  /* ---------- tools ---------- */
+  var TOOLS = [
+    {id:'pencil', name:'Pencil', key:'P'},
+    {id:'eraser', name:'Eraser', key:'E'},
+    {id:'fill',   name:'Fill',   key:'F'},
+    {id:'picker', name:'Pick',   key:'I'}
+  ];
+  var toolHost = document.getElementById('tools');
+  TOOLS.forEach(function(t){
+    var b = document.createElement('button');
+    b.className = 'tool'; b.dataset.tool = t.id;
+    b.innerHTML = t.name + '<small>' + t.key + '</small>';
+    b.setAttribute('aria-pressed', t.id === tool ? 'true':'false');
+    b.addEventListener('click', function(){ setTool(t.id); });
+    toolHost.appendChild(b);
+  });
+  function setTool(id){
+    tool = id;
+    Array.prototype.forEach.call(toolHost.children, function(b){
+      b.setAttribute('aria-pressed', b.dataset.tool === id ? 'true':'false');
+    });
+  }
+
+  /* ---------- palette ---------- */
+  var palHost = document.getElementById('pal');
+  PALETTE.forEach(function(c){
+    var b = document.createElement('button');
+    b.className = 'sw'; b.style.background = c; b.dataset.c = c;
+    b.setAttribute('aria-label','Colour ' + c);
+    b.setAttribute('aria-pressed', c === colour ? 'true':'false');
+    b.addEventListener('click', function(){ colour = c; setTool('pencil'); syncPalette(); });
+    palHost.appendChild(b);
+  });
+  function syncPalette(){
+    Array.prototype.forEach.call(palHost.children, function(b){
+      b.setAttribute('aria-pressed', b.dataset.c === colour ? 'true':'false');
+    });
+  }
+  document.getElementById('custom').addEventListener('input', function(e){
+    colour = e.target.value; setTool('pencil'); syncPalette();
+  });
+
+  /* ---------- canvas controls ---------- */
+  document.getElementById('size').addEventListener('change', function(e){
+    var n = parseInt(e.target.value, 10);
+    var used = frames.some(function(f){ return f.some(function(v){ return v; }); });
+    function apply(){
+      size = n; frames = [ blank() ]; cur = 0;
+      undoStack.length = 0; redoStack.length = 0; syncHistory(); sampleReference(); render();
+    }
+    if (!used){ apply(); return; }
+    e.target.value = String(size);
+    window.uiAsk('Change the canvas size?',
+      'This clears everything you have drawn. Save your PNG first if you want to keep it.',
+      function(){ document.getElementById('size').value = String(n); apply(); });
+  });
+  document.getElementById('gridtog').addEventListener('change', function(e){
+    showGrid = e.target.checked; render();
+  });
+  document.getElementById('clear').addEventListener('click', function(){
+    snapshot(); frames[cur] = blank(); render();
+  });
+  document.getElementById('undo').addEventListener('click', undo);
+  document.getElementById('redo').addEventListener('click', redo);
+
+  /* ---------- frames ---------- */
+  document.getElementById('addframe').addEventListener('click', function(){
+    frames.splice(cur+1, 0, blank()); cur++; render();
+  });
+  document.getElementById('dupframe').addEventListener('click', function(){
+    frames.splice(cur+1, 0, frames[cur].slice()); cur++; render();
+  });
+  document.getElementById('delframe').addEventListener('click', function(){
+    if (frames.length < 2) return;
+    frames.splice(cur, 1);
+    if (cur >= frames.length) cur = frames.length - 1;
+    render();
+  });
+
+  /* ---------- animate ---------- */
+  var playBtn = document.getElementById('play');
+  playBtn.addEventListener('click', function(){
+    if (playing){ clearInterval(playing); playing = null; playBtn.textContent = 'Play'; render(); return; }
+    if (frames.length < 2){ window.uiTell('You need two frames', 'Press Add or Copy under Frames, move one thing, then press Play.'); return; }
+    var fps = parseInt(document.getElementById('fps').value, 10);
+    playBtn.textContent = 'Stop';
+    playing = setInterval(function(){
+      cur = (cur + 1) % frames.length; render();
+    }, 1000 / fps);
+  });
+
+  /* ---------- export ---------- */
+  function exportCanvas(cv, name){
+    var a = document.createElement('a');
+    a.download = name; a.href = cv.toDataURL('image/png');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  function frameCanvas(f, scale){
+    var cv = document.createElement('canvas');
+    cv.width = size*scale; cv.height = size*scale;
+    var c = cv.getContext('2d');
+    for (var y=0;y<size;y++) for (var x=0;x<size;x++){
+      var v = f[y*size+x];
+      if (v){ c.fillStyle = v; c.fillRect(x*scale, y*scale, scale, scale); }
+    }
+    return cv;
+  }
+  document.getElementById('png').addEventListener('click', function(){
+    exportCanvas(frameCanvas(frames[cur], 16), 'pixel_frame' + (cur+1) + '.png');
+  });
+  document.getElementById('sheet').addEventListener('click', function(){
+    var scale = 16;
+    var cv = document.createElement('canvas');
+    cv.width = size*scale*frames.length; cv.height = size*scale;
+    var c = cv.getContext('2d');
+    frames.forEach(function(f, i){
+      c.drawImage(frameCanvas(f, scale), i*size*scale, 0);
+    });
+    exportCanvas(cv, 'pixel_all_frames.png');
+  });
+
+  /* ---------- hints ---------- */
+  var HINTS = {
+    none:[
+      'Start with the <b>outline only</b>, in one dark colour, and leave everything inside it empty. Getting the shape right first is far easier than fixing it after you have coloured it in.',
+      'Pick one of the four shapes above to copy, or load a picture of your own. Copying something real teaches you more than inventing from nothing, and you can change it once it is on the grid.'],
+    ghost:[
+      'The ghost is a tall rounded top sitting on a wavy bottom edge. Draw the <b>outline in one colour first</b> - the curve across the top, then the dips along the bottom - before you colour anything in.',
+      'Once the outline closes all the way round, <b>Fill</b> colours the inside in one click. Put the eyes on last, and leave a square of background showing around each one so they do not disappear into the body.'],
+    slime:[
+      'A slime is a wide half circle: flat along the bottom, curving up to the middle. Build the <b>bottom row at full width</b>, then make every row above it a little narrower.',
+      'Two shades are what make it look round. Fill the body in your main colour, then run a <b>lighter</b> shade along the top left and a <b>darker</b> one along the bottom right. Use <b>Pick</b> to steal the exact colours off the reference.'],
+    bot:[
+      'A robot is boxes. Head as a rectangle, a bigger rectangle underneath for the body, then arms and legs as straight lines of squares. <b>Count the squares</b> so both sides come out the same width.',
+      'Work outwards from the middle to keep it symmetrical: whatever you place three squares left of centre, place three squares right of centre too. <b>Hard edges and straight lines</b> are what make something look mechanical.'],
+    circle:[
+      'A circle on a grid is never smooth, and it is not supposed to be. Start with the <b>longest row across the middle</b>, then shorten each row as you go up and down - by one square at first, by more near the very top and bottom.',
+      'Get the <b>top left quarter</b> right, then copy that same pattern of row lengths into the other three quarters. Work the curve out once and reuse it.'],
+    photo:[
+      'Switch the reference to <b>Behind</b> and turn the fade up. Then you are tracing instead of guessing, which is how this is actually done.',
+      'A photograph has thousands of colours and your grid has a few hundred squares. Do not try to copy them all - choose the <b>four or five colours that matter</b> and use <b>Pick</b> to take them straight off the reference.']
+  };
+  var hintTask = 'none', hintsOut = {}, hintDrawn = '';
+  var hintBtn = document.getElementById('hintbtn'), hintBox = document.getElementById('hintbox');
+
+  function drawHints(){
+    var list = HINTS[hintTask] || HINTS.none, n = hintsOut[hintTask] || 0;
+    var sig = hintTask + ':' + n;
+    if (sig === hintDrawn) return;
+    hintDrawn = sig;
+    hintBox.innerHTML = '';
+    for (var i = 0; i < n; i++){
+      var d = document.createElement('div');
+      d.className = 'hint';
+      d.innerHTML = '<span class="hn">HINT ' + (i+1) + ' OF ' + list.length + '</span>' + list[i];
+      hintBox.appendChild(d);
+    }
+    hintBtn.disabled = n >= list.length;
+    hintBtn.textContent =
+      n === 0 ? 'Stuck? Show a hint · ' + list.length + ' for this one'
+    : n < list.length ? 'Still stuck? Show hint ' + (n+1) + ' of ' + list.length
+    : 'That is every hint for this one';
+  }
+  function setHintTask(t){ hintTask = t || 'none'; drawHints(); }
+  hintBtn.addEventListener('click', function(){
+    var list = HINTS[hintTask] || HINTS.none, n = hintsOut[hintTask] || 0;
+    if (n < list.length){ hintsOut[hintTask] = n + 1; drawHints(); }
+  });
+  drawHints();
+
+  /* ---------- reference ---------- */
+  var biHost = document.getElementById('builtins');
+  BUILTINS.forEach(function(b){
+    var btn = document.createElement('button');
+    btn.dataset.id = b.id; btn.setAttribute('aria-pressed','false');
+    btn.setAttribute('aria-label','Use the ' + b.id + ' as a reference');
+    btn.appendChild(b.make());
+    btn.addEventListener('click', function(){
+      setReference(b.make(), b.id);
+    });
+    biHost.appendChild(btn);
+  });
+
+  function sampleReference(){
+    if (!refImage){ refGrid = null; return; }
+    var cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    var c = cv.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    var iw = refImage.width, ih = refImage.height;
+    var s = Math.min(size/iw, size/ih);
+    var w = iw*s, h = ih*s;
+    c.drawImage(refImage, (size-w)/2, (size-h)/2, w, h);
+    var d = c.getImageData(0,0,size,size).data;
+    refGrid = new Array(size*size).fill(null);
+    for (var i=0;i<size*size;i++){
+      var a = d[i*4+3];
+      if (a > 40){
+        refGrid[i] = '#' + [d[i*4],d[i*4+1],d[i*4+2]]
+          .map(function(n){ return ('0'+n.toString(16)).slice(-2); }).join('');
+      }
+    }
+  }
+
+  function setReference(img, id){
+    refImage = img;
+    document.getElementById('refcontrols').style.display = 'block';
+    document.getElementById('refhelp').innerHTML =
+      'Use <b>Pick</b> on an empty square to steal a colour straight from the reference.';
+    Array.prototype.forEach.call(biHost.children, function(b){
+      b.setAttribute('aria-pressed', b.dataset.id === id ? 'true':'false');
+    });
+    setHintTask(id || 'photo');
+    var panel = document.getElementById('refpanel');
+    var el = document.getElementById('refimg');
+    if (img.toDataURL) el.src = img.toDataURL();
+    else el.src = img.src;
+    panel.classList.toggle('on', refMode === 'beside');
+    sampleReference();
+    render();
+  }
+
+  document.getElementById('loadref').addEventListener('click', function(){
+    document.getElementById('reffile').click();
+  });
+  document.getElementById('reffile').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(ev){
+      var im = new Image();
+      im.onload = function(){ setReference(im, null); };
+      im.src = ev.target.result;
+    };
+    r.readAsDataURL(f);
+    e.target.value = '';
+  });
+
+  function setRefMode(m){
+    refMode = m;
+    document.getElementById('mbeside').setAttribute('aria-pressed', m==='beside'?'true':'false');
+    document.getElementById('mbehind').setAttribute('aria-pressed', m==='behind'?'true':'false');
+    document.getElementById('faderow').style.display = (m==='behind') ? 'flex' : 'none';
+    document.getElementById('refpanel').classList.toggle('on', m==='beside' && !!refImage);
+    render();
+  }
+  document.getElementById('mbeside').addEventListener('click', function(){ setRefMode('beside'); });
+  document.getElementById('mbehind').addEventListener('click', function(){ setRefMode('behind'); });
+  document.getElementById('refalpha').addEventListener('input', function(e){
+    refAlpha = parseInt(e.target.value,10)/100; render();
+  });
+  document.getElementById('refoff').addEventListener('click', function(){
+    refImage = null; refGrid = null;
+    document.getElementById('refcontrols').style.display = 'none';
+    document.getElementById('refpanel').classList.remove('on');
+    document.getElementById('refhelp').textContent =
+      'Pick a shape to copy, or use a picture from this computer. Nothing is uploaded anywhere.';
+    Array.prototype.forEach.call(biHost.children, function(b){ b.setAttribute('aria-pressed','false'); });
+    setHintTask('none');
+    render();
+  });
+
+  /* ---------- keyboard ---------- */
+  document.addEventListener('keydown', function(e){
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    var k = e.key.toLowerCase();
+    if ((e.ctrlKey||e.metaKey) && k === 'z'){ e.preventDefault(); undo(); return; }
+    if ((e.ctrlKey||e.metaKey) && k === 'y'){ e.preventDefault(); redo(); return; }
+    if (k === 'p') setTool('pencil');
+    if (k === 'e') setTool('eraser');
+    if (k === 'f') setTool('fill');
+    if (k === 'i') setTool('picker');
+  });
+
+  syncHistory();
+  if (restoreSave()) sayRestored();
+  syncPalette();
+  setTool(tool);
+  renderFrames();
+  render();
+})();
+</script>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovh">
+  <div class="ovbox">
+    <h2 id="ovh">How to use Pixel Studio</h2>
+    <p class="ovsub">You are drawing one square at a time. Everything you need is on this screen — here is what each part does.</p>
+    <ol>
+      <li>Pick a <b>colour</b> on the left, then click squares on the big grid. Hold the mouse down and drag to draw a line.</li>
+      <li><b>Pencil</b> colours a square. <b>Eraser</b> empties it. <b>Fill</b> floods a whole closed shape. <b>Pick</b> steals a colour that is already there.</li>
+      <li>If Fill floods the whole screen, your outline has a gap in it. Press <b>Undo</b> and find the hole.</li>
+      <li>Under <b>Reference</b>, choose a shape to copy or use a picture from this computer. <b>Beside</b> puts it next to you. <b>Behind</b> fades it under the grid so you can draw over the top.</li>
+      <li>Want it to move? Press <b>Add</b> or <b>Copy</b> under Frames, change one small thing, then press <b>Play</b>.</li>
+      <li>When you are happy, press <b>Save PNG</b>. Then move the file into your own folder.</li>
+    </ol>
+    <div class="ovtip"><b>Nothing saves by itself.</b> If you close this tab without pressing Save PNG, your creature is gone. Save early, save often.</div>
+    <button class="ovgo" id="ovgo">Let's go</button>
+  </div>
+</div>
+<style>:root{ --helpac: var(--gold); }</style>
+<script>
+(function(){
+  var ov = document.getElementById('ov');
+  var btn = document.createElement('button');
+  btn.className = 'helpbtn'; btn.type = 'button';
+  btn.textContent = 'How to use this';
+  btn.addEventListener('click', function(){ ov.classList.add('on'); });
+  var head = document.querySelector('header');
+  if (head) head.appendChild(btn);
+  document.getElementById('ovgo').addEventListener('click', function(){ ov.classList.remove('on'); });
+  ov.addEventListener('click', function(e){ if (e.target === ov) ov.classList.remove('on'); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') ov.classList.remove('on'); });
+  ov.classList.add('on');
+})();
+</script>
+
+<script>
+(function(){
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // top navigation
+  var wrap = document.querySelector('.wrap');
+  if (wrap && !document.querySelector('.navbar')){
+    var nav = document.createElement('div');
+    nav.className = 'navbar';
+    nav.innerHTML = '<a href="START_HERE_Computer_Lab.html">\u2190 Lab home</a>' +
+                    '<span class="here">Pixel Studio</span>';
+    wrap.insertBefore(nav, wrap.firstChild);
+  }
+  // pop a checklist item the moment it turns green
+  if (!REDUCED){
+    var watch = document.querySelectorAll('.task li, .fb li, .check li');
+    var obs = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        var el = m.target;
+        if (el.classList.contains('done') || el.classList.contains('ok')){
+          var dot = el.querySelector('.dot');
+          if (dot){ dot.classList.remove('anim-pop'); void dot.offsetWidth; dot.classList.add('anim-pop'); }
+        }
+      });
+    });
+    Array.prototype.forEach.call(watch, function(li){
+      obs.observe(li, {attributes:true, attributeFilter:['class']});
+    });
+  }
+})();
+</script>
+
+<script>
+(function(){
+  var ov = document.createElement('div');
+  ov.className = 'miniov';
+  ov.innerHTML = '<div class="minibox"><h3></h3><p></p><div class="row"></div></div>';
+  document.body.appendChild(ov);
+  var h = ov.querySelector('h3'), p = ov.querySelector('p'), row = ov.querySelector('.row');
+  function close(){ ov.classList.remove('on'); }
+  ov.addEventListener('click', function(e){ if (e.target === ov) close(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+
+  window.uiAsk = function(title, msg, onYes){
+    h.textContent = title; p.textContent = msg; row.innerHTML = '';
+    var yes = document.createElement('button');
+    yes.textContent = 'Yes, do it';
+    yes.style.background = 'var(--gold)'; yes.style.color = 'var(--night)';
+    yes.onclick = function(){ close(); onYes(); };
+    var no = document.createElement('button');
+    no.className = 'quiet'; no.textContent = 'Cancel'; no.onclick = close;
+    row.appendChild(yes); row.appendChild(no);
+    ov.classList.add('on'); yes.focus();
+  };
+  window.uiTell = function(title, msg){
+    h.textContent = title; p.textContent = msg; row.innerHTML = '';
+    var ok = document.createElement('button');
+    ok.textContent = 'Got it';
+    ok.style.background = 'var(--gold)'; ok.style.color = 'var(--night)';
+    ok.onclick = close;
+    row.appendChild(ok); ov.classList.add('on'); ok.focus();
+  };
+})();
+</script>
+</body>
+</html>

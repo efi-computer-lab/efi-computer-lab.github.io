@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email Desk — Grade 12</title>
+<style>
+  :root{
+    --night:#1e2429; --panel:#28313a; --panel-2:#37424e;
+    --bone:#eef1f4; --gold:#c9a227; --mint:#5ad6a5; --coral:#e4746c; --dim:#95a2b0;
+    --mono: ui-monospace,"Cascadia Mono","Consolas","Courier New",monospace;
+    --sans: "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+    --helpac: var(--gold);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--night);color:var(--bone);font-family:var(--sans);font-size:16px;
+    padding:18px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1230px;margin:0 auto}
+
+  .navbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .navbar a{font-family:var(--mono);font-size:12.5px;font-weight:700;text-decoration:none;color:var(--dim);
+    box-shadow:inset 0 0 0 2px var(--panel-2);padding:8px 14px;transition:.15s}
+  .navbar a:hover{color:var(--bone);background:var(--panel-2)}
+  .navbar .here{font-family:var(--mono);font-size:12.5px;color:var(--gold)}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+  h1{font-family:var(--mono);font-size:29px;margin:0;font-weight:700;line-height:1}
+  .mission{font-size:15px;color:var(--dim);max-width:54ch;margin:6px 0 0}
+  .mission b{color:var(--gold)}
+  .tag{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
+
+  /* career bar */
+  .career{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:13px 18px;margin-bottom:16px;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .career .rk{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--gold)}
+  .career .stars{font-size:13.5px;letter-spacing:1px;color:var(--gold);line-height:1.3;
+    max-width:330px;word-break:break-all}
+  .career .track{flex:1;min-width:160px;height:9px;background:var(--night);overflow:hidden}
+  .career .track i{display:block;height:100%;width:0;background:var(--gold);transition:width .5s ease-out}
+  .career .cnt{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+
+  .cols{display:grid;grid-template-columns:294px 1fr 300px;gap:16px;align-items:start}
+  @media (max-width:1080px){ .cols{grid-template-columns:1fr} }
+
+  .box{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:16px}
+  .box + .box{margin-top:13px}
+  .zone{display:flex;align-items:center;gap:9px;margin:0 0 12px}
+  .zone i{width:22px;height:22px;background:var(--gold);color:var(--night);display:grid;place-items:center;
+    font-family:var(--mono);font-size:12px;font-weight:700;font-style:normal;flex:0 0 22px}
+  .zone h2{font-family:var(--mono);font-size:12.5px;letter-spacing:.4px;margin:0;font-weight:700}
+
+  /* missions */
+  .who{display:flex;flex-direction:column;gap:7px}
+  .who button{display:flex;gap:11px;align-items:center;width:100%;text-align:left;background:var(--night);
+    color:var(--bone);border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:10px;cursor:pointer;
+    font-family:var(--sans);font-size:13.5px;transition:background .15s, transform .13s;position:relative}
+  .who button:hover:not(.locked){background:#161c21;transform:translateX(3px)}
+  .who button[aria-pressed="true"]{background:var(--gold);color:var(--night);box-shadow:none}
+  .who button.locked{opacity:.45;cursor:not-allowed;filter:grayscale(.7)}
+  .av{flex:0 0 40px;height:40px;border-radius:50%;display:grid;place-items:center;
+    font-family:var(--mono);font-size:14px;font-weight:700;color:#fff}
+  .who .nm{font-weight:700;display:block}
+  .who .rl{font-size:11.5px;color:var(--dim);display:block}
+  .who button[aria-pressed="true"] .rl{color:#5c4d12}
+  .who .mstars{margin-left:auto;font-size:13px;letter-spacing:1px;color:var(--gold);white-space:nowrap}
+  .who button[aria-pressed="true"] .mstars{color:var(--night)}
+  .who .lock{margin-left:auto;font-size:14px;color:var(--dim)}
+
+  .card{background:var(--night);padding:14px 16px;margin-top:12px;font-size:14px;line-height:1.6}
+  .card .quote{color:var(--dim);font-style:italic}
+  .card b{color:var(--gold)}
+
+  /* objectives */
+  .goals{list-style:none;padding:0;margin:0}
+  .goals li{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;font-size:13.5px;line-height:1.45}
+  .goals .st{flex:0 0 20px;text-align:center;font-size:14px;color:var(--panel-2);transition:color .25s}
+  .goals li.won .st{color:var(--gold)}
+  .goals li.won .gt{color:var(--dim)}
+  /* hints */
+  .hintwrap{margin-top:13px;border-top:2px solid var(--panel-2);padding-top:12px}
+  .hintbtn{font-family:var(--mono);font-size:12.5px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:10px 13px;cursor:pointer;width:100%;text-align:left;line-height:1.35}
+  .hintbtn:hover:not(:disabled){background:#3b4272}
+  .hintbtn:disabled{opacity:.45;cursor:default}
+  .hintbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .hint{background:var(--night);border-left:3px solid var(--gold);padding:11px 13px;margin-top:9px;
+    font-size:13.5px;line-height:1.55;animation:hintIn .3s ease-out}
+  .hint b{color:var(--gold)}
+  .hint .hn{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.6px;
+    color:var(--dim);margin-bottom:5px}
+  @keyframes hintIn{from{opacity:0;transform:translateY(-6px)}}
+  .attempts{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:10px;
+    border-top:2px solid var(--panel-2);padding-top:10px}
+
+  label.f{display:block;margin-bottom:13px}
+  label.f span{display:block;font-size:13.5px;color:var(--dim);margin-bottom:5px}
+  label.f span em{color:var(--gold);font-style:normal}
+  input[type=text], textarea{width:100%;background:var(--night);color:var(--bone);border:0;
+    box-shadow:inset 0 0 0 2px var(--panel-2);padding:10px 12px;font-family:var(--sans);font-size:15px;line-height:1.5}
+  textarea{resize:vertical;min-height:66px}
+  input:focus, textarea:focus{outline:none;box-shadow:inset 0 0 0 2px var(--gold)}
+
+  .chance{text-align:center;margin-bottom:6px}
+  .chance .big{font-family:var(--mono);font-size:44px;font-weight:700;line-height:1;color:var(--coral);transition:color .3s}
+  .chance .lbl{font-size:12.5px;color:var(--dim);margin-top:4px}
+  .chance .rank{font-size:13.5px;font-weight:700;margin-top:8px;min-height:20px}
+  .gauge{height:10px;background:var(--night);margin:12px 0 16px;overflow:hidden}
+  .gauge i{display:block;height:100%;width:0;background:var(--coral);transition:width .4s ease-out, background .3s}
+
+  .fb{list-style:none;padding:0;margin:0}
+  .fb li{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13.5px;line-height:1.45}
+  .fb .dot{flex:0 0 18px;height:18px;margin-top:1px;background:var(--night);
+    box-shadow:inset 0 0 0 2px var(--panel-2);display:grid;place-items:center;
+    font-family:var(--mono);font-size:11px;font-weight:700;color:transparent;transition:background .2s}
+  .fb li.ok .dot{background:var(--mint);box-shadow:inset 0 0 0 2px #2b8a68;color:#0d2b21}
+  .fb li.ok .txt{color:var(--dim)}
+  .fb li.no .dot{color:var(--coral)}
+  .fb li.bonus .dot{box-shadow:inset 0 0 0 2px var(--gold)}
+  .fb li.bonus.ok .dot{background:var(--gold);box-shadow:inset 0 0 0 2px var(--gold);color:var(--night)}
+  .fb .why{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+
+  /* proofreading panel */
+  .proof{margin-top:14px;border-top:2px solid var(--panel-2);padding-top:13px}
+  .proof h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.5px;margin:0 0 8px;
+    color:var(--dim);font-weight:700}
+  .proof .clean{font-size:13px;color:var(--mint);line-height:1.5}
+  .proof .grp{margin-bottom:13px}
+  .proof .grp:last-child{margin-bottom:0}
+  .proof .gh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;
+    font-weight:700;margin-bottom:6px;color:var(--coral)}
+  .proof .gh .n{background:var(--coral);color:var(--night);padding:1px 6px;font-size:10.5px}
+  .proof .item{font-size:12.5px;line-height:1.5;margin-bottom:5px;padding-left:11px;
+    border-left:2px solid var(--panel-2)}
+  .proof .bad{font-family:var(--mono);color:#ffb0a8;background:var(--night);padding:1px 5px}
+  .proof .fix{font-family:var(--mono);color:#8ce8b6;background:var(--night);padding:1px 5px}
+  .proof .note{color:var(--dim)}
+  .proof .foot{font-size:11.5px;color:var(--dim);margin-top:11px;line-height:1.45}
+  .fb li.ok .why{display:none}
+  @keyframes popIn{0%{transform:scale(.5);opacity:.3}62%{transform:scale(1.25)}100%{transform:scale(1)}}
+  .anim-pop{animation:popIn .34s cubic-bezier(.34,1.6,.64,1)}
+
+  .bar{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+  button.act{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--panel-2);color:var(--bone);
+    border:0;padding:11px 16px;cursor:pointer;transition:background .15s, transform .12s}
+  button.act:hover{background:#46525f}
+  button.act:active{transform:translateY(1px)}
+  button.send{background:var(--mint);color:#0d2b21;font-size:15px;padding:13px 26px}
+  button.send:hover{background:#8ae8b8}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  /* simulation */
+  .sim{position:fixed;inset:0;background:rgba(8,12,15,.9);display:none;z-index:100;padding:24px 18px;overflow:auto}
+  .sim.on{display:block}
+  .simbox{max-width:660px;margin:0 auto;animation:rise .3s ease-out}
+  @keyframes rise{from{transform:translateY(16px);opacity:0}}
+  .simstage{background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);padding:22px 24px;margin-bottom:12px}
+  .simstage h3{font-family:var(--mono);font-size:19px;margin:0 0 4px;color:var(--gold)}
+  .simstage p.sub{font-size:14px;color:var(--dim);margin:0 0 16px;line-height:1.55}
+
+  .inbox{background:#fbfbfc;color:#20262c}
+  .inboxhead{background:#e7eaee;padding:10px 14px;font-size:12.5px;font-family:var(--mono);color:#5b6570;
+    display:flex;justify-content:space-between}
+  .mailrow{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid #e2e6ea;font-size:13.5px;
+    align-items:baseline;opacity:0;animation:slideIn .3s ease-out forwards}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  .mailrow .from{flex:0 0 118px;font-weight:700;color:#39424c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mailrow .sub{flex:1;color:#39424c}
+  .mailrow.mine{background:#fff6d9;box-shadow:inset 3px 0 0 var(--gold)}
+  .mailrow.mine .from{color:#7a5e00}
+
+  .verdictline{font-size:14.5px;line-height:1.6;margin-top:14px;padding-top:14px;border-top:2px solid var(--panel-2)}
+  .verdictline b{color:var(--gold)}
+
+  .reply{background:#fbfbfc;color:#20262c}
+  .replyhead{border-bottom:1px solid #dfe3e8;padding:13px 17px;font-size:13.5px;color:#5b6570}
+  .replyhead .rs{color:#20262c;font-weight:700;font-size:15.5px;margin-top:6px}
+  .replybody{padding:17px;font-size:14.5px;line-height:1.65;white-space:pre-wrap;min-height:110px}
+  .silence{padding:30px 20px;text-align:center;color:#8a949e;font-style:italic;font-size:15px;line-height:1.7}
+
+  .earned{display:flex;gap:14px;justify-content:center;margin:18px 0 4px;flex-wrap:wrap}
+  .earned div{text-align:center;min-width:96px}
+  .earned .s{font-size:30px;line-height:1;color:var(--panel-2);transition:color .3s, transform .3s}
+  .earned .s.win{color:var(--gold)}
+  .earned .s.pop{animation:popIn .4s cubic-bezier(.34,1.6,.64,1)}
+  .earned .n{font-size:11.5px;color:var(--dim);margin-top:6px;line-height:1.35}
+
+  .simbtns{display:flex;gap:10px;flex-wrap:wrap}
+  .simbtns button{font-family:var(--mono);font-size:14px;font-weight:700;border:0;padding:12px 22px;cursor:pointer;
+    background:var(--gold);color:var(--night)}
+  .simbtns button.quiet{background:transparent;color:var(--dim);box-shadow:inset 0 0 0 2px var(--panel-2)}
+
+  .report{text-align:center}
+  .report .huge{font-family:var(--mono);font-size:52px;color:var(--gold);line-height:1;margin-bottom:6px}
+  .report table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  .report td{padding:9px 8px;border-bottom:1px solid var(--panel-2);text-align:left}
+  .report td:last-child{text-align:right;color:var(--gold);letter-spacing:2px}
+
+  /* dialogs */
+  .ov{position:fixed;inset:0;background:rgba(8,12,15,.88);display:none;z-index:120;padding:26px 18px;overflow:auto}
+  .ov.on{display:block}
+  .ovbox{max-width:620px;margin:0 auto;background:var(--panel);box-shadow:0 0 0 3px var(--panel-2);
+    padding:26px 28px 24px;animation:rise .3s ease-out}
+  .ovbox h2{font-family:var(--mono);font-size:24px;margin:0 0 8px;color:var(--helpac)}
+  .ovbox .ovsub{font-size:15.5px;color:var(--dim);margin:0 0 18px;line-height:1.6}
+  .ovbox ol{margin:0 0 18px;padding-left:0;list-style:none;counter-reset:h}
+  .ovbox ol li{counter-increment:h;position:relative;padding-left:38px;margin-bottom:13px;font-size:15.5px;line-height:1.55}
+  .ovbox ol li::before{content:counter(h);position:absolute;left:0;top:1px;width:25px;height:25px;
+    background:var(--helpac);color:var(--night);font-family:var(--mono);font-size:12.5px;font-weight:700;
+    display:grid;place-items:center}
+  .ovbox ol li b,.ovtip b{color:var(--helpac)}
+  .ovtip{background:var(--night);padding:14px 17px;font-size:14.5px;line-height:1.6;margin-bottom:20px}
+  .ovbox .btns{display:flex;gap:10px;flex-wrap:wrap}
+  .ovbox button{font-family:var(--mono);font-size:14.5px;font-weight:700;background:var(--helpac);
+    color:var(--night);border:0;padding:12px 24px;cursor:pointer}
+  .ovbox button.no{background:transparent;color:var(--dim);box-shadow:inset 0 0 0 2px var(--panel-2)}
+  .helpbtn{font-family:var(--mono);font-size:12.5px;font-weight:700;background:transparent;color:var(--dim);
+    border:0;box-shadow:inset 0 0 0 2px var(--panel-2);padding:9px 15px;cursor:pointer}
+  .helpbtn:hover{color:var(--bone);background:var(--panel-2)}
+
+  /* autosave bar */
+  .saver{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);
+    box-shadow:0 0 0 3px var(--panel-2);padding:10px 14px;margin-bottom:14px;
+    font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.45}
+  .saver .dotx{width:9px;height:9px;border-radius:50%;background:var(--mint);flex:0 0 9px}
+  .saver b{color:var(--bone)}
+  .saver.warn{box-shadow:0 0 0 3px var(--coral)}
+  .saver.warn .dotx{background:var(--coral)}
+  .saver.back .dotx{background:var(--gold, var(--mint))}
+  .saverbtn{font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--panel-2);
+    color:var(--bone);border:0;padding:7px 11px;cursor:pointer;margin-left:auto;white-space:nowrap}
+  .saverbtn:hover{filter:brightness(1.3)}
+  .saverbtn:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="navbar">
+    <a href="START_HERE_Computer_Lab.html">← Lab home</a>
+    <span class="here">Grade 12 · Email Desk</span>
+  </div>
+
+  <header>
+    <div>
+      <h1>Email Desk</h1>
+      <p class="mission"><b>Fourteen people. Forty-two stars.</b> Write to strangers who are busy and owe you nothing, and see whether they answer.</p>
+    </div>
+    <div class="tag">Grade 12<br>Unit 1: Professional skills</div>
+  </header>
+
+  <div class="saver" id="saver">
+    <span class="dotx" aria-hidden="true"></span>
+    <span id="savertext">Checking whether this computer can save your work...</span>
+    <button class="saverbtn" id="saverfresh" type="button" hidden>Start fresh</button>
+  </div>
+
+  <div class="career">
+    <span class="rk" id="rk">Nobody knows your name</span>
+    <span class="stars" id="cstars"></span>
+    <span class="track"><i id="ctrack"></i></span>
+    <span class="cnt" id="ccnt">0 / 24</span>
+  </div>
+
+  <div class="cols">
+
+    <div>
+      <div class="box">
+        <div class="zone"><i>1</i><h2>YOUR CONTACTS</h2></div>
+        <div class="who" id="who"></div>
+        <div class="card" id="card"></div>
+      </div>
+      <div class="box">
+        <div class="zone"><i>2</i><h2>OBJECTIVES</h2></div>
+        <ul class="goals" id="goals"></ul>
+        <div class="attempts" id="attempts"></div>
+        <div class="hintwrap">
+          <button class="hintbtn" id="hintbtn"></button>
+          <div id="hintbox"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="box">
+        <div class="zone"><i>3</i><h2>WRITE IT</h2></div>
+        <label class="f"><span>Subject line <em>— what is this about?</em></span>
+          <input type="text" id="subject" placeholder="Short and specific"></label>
+        <label class="f"><span>Greeting</span>
+          <input type="text" id="greeting" placeholder="Dear Ms Halvorsen,"></label>
+        <label class="f"><span>Why you are writing <em>— one sentence</em></span>
+          <textarea id="purpose" placeholder="I am applying for..."></textarea></label>
+        <label class="f"><span>The detail they need</span>
+          <textarea id="detail" placeholder="Only what is useful. Remind them who you are."></textarea></label>
+        <label class="f"><span>What you want them to do, and by when</span>
+          <textarea id="ask" placeholder="Could you... before Friday 14 March?"></textarea></label>
+        <label class="f"><span>Sign off and your full name</span>
+          <input type="text" id="signoff" placeholder="Kind regards, Sofia Berg"></label>
+        <label class="f" style="margin-bottom:4px"><span>Attachment file name <em>— leave empty if none</em></span>
+          <input type="text" id="attach" placeholder="Sofia_Berg_CV_2026.pdf"></label>
+        <div class="bar">
+          <button class="act send" id="send">✉ &nbsp;SEND IT</button>
+          <button class="act" id="copy">Copy</button>
+          <button class="act" id="clear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="box">
+        <div class="zone"><i>4</i><h2>WILL THEY REPLY?</h2></div>
+        <div class="chance">
+          <div class="big" id="pct">0%</div>
+          <div class="lbl">chance of getting an answer</div>
+          <div class="rank" id="rank"></div>
+        </div>
+        <div class="gauge"><i id="gauge"></i></div>
+        <ul class="fb" id="fb"></ul>
+        <div class="proof" id="proof"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sim" id="sim"><div class="simbox">
+  <div class="simstage" id="simstage"></div>
+  <div class="simbtns" id="simbtns"></div>
+</div></div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovh">
+  <div class="ovbox">
+    <h2 id="ovh"></h2><div id="ovbody"></div><div class="btns" id="ovbtns"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var STAR='\u2605', HOLLOW='\u2606', LOCK='\uD83D\uDD12';
+
+  /* ---------- dialog ---------- */
+  var ov=document.getElementById('ov'), ovh=document.getElementById('ovh'),
+      ovbody=document.getElementById('ovbody'), ovbtns=document.getElementById('ovbtns');
+  function dialog(title, html, btns){
+    ovh.textContent=title; ovbody.innerHTML=html; ovbtns.innerHTML='';
+    btns.forEach(function(b){
+      var el=document.createElement('button');
+      el.textContent=b.label; if(b.quiet) el.className='no';
+      el.addEventListener('click', function(){ ov.classList.remove('on'); if(b.go) b.go(); });
+      ovbtns.appendChild(el);
+    });
+    ov.classList.add('on');
+    var f=ovbtns.querySelector('button'); if(f) f.focus();
+  }
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('on'); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ ov.classList.remove('on'); document.getElementById('sim').classList.remove('on'); }
+  });
+  function showHelp(){
+    dialog('How Email Desk works',
+      '<p class="ovsub">Fourteen contacts, three stars each. The later ones want two things right at once, and the last two want three. They are busy, they do not know you, and they decide in about six seconds whether to bother.</p>' +
+      '<ol>' +
+      '<li>Start with <b>Ms Halvorsen</b>. The others unlock once someone actually replies to you.</li>' +
+      '<li>Read their card. Each person wants something different, and each has an <b>extra objective</b>.</li>' +
+      '<li>Fill the boxes. Watch the <b>reply chance</b> move as you write.</li>' +
+      '<li>Press <b>SEND IT</b>, watch it land in their inbox, and see whether they answer.</li>' +
+      '<li>Earn all <b>42 stars</b> to finish your career report.</li>' +
+      '<li>The panel on the right also <b>proofreads</b> as you type: spelling, capitals, punctuation, and whether you have actually answered the situation in front of you.</li>' +
+      '</ol>' +
+      '<div class="ovtip"><b>Silence is a real result.</b> If nothing comes back, that is exactly what happens in life. Nobody writes to tell you your email was bad.</div>',
+      [{label:'Open my inbox'}]);
+  }
+
+  /* ---------- contacts ---------- */
+  var PEOPLE = [
+    { id:'ref',
+      scenario:{ t:'Asks for the reference, and says what for', why:'An email that never mentions the reference leaves her guessing what you want.',
+        test:function(v){ return /\b(reference|referee|recommendation|vouch for|write (me|a letter))\b/i.test(v.all); } }, hints:['She taught a lot of people. Before you ask for anything, make sure the email says <b>which class you were in and when</b> - she cannot write about a name she does not place.', 'The second star here is for getting it right <b>first time</b>, so fill in every box before you send. A reference also needs a deadline and the file she is meant to attach it to.'], name:'Ms Halvorsen', role:'Your Grade 11 teacher', init:'HA', col:'#3a6ea5',
+      about:'Teaches <b>200 students</b> and marks at ten at night. She likes you — she just cannot remember which projects were yours.',
+      quote:'"If they remind me what they actually did, I can write something real. Otherwise it is three lines of nothing."',
+      job:'Ask her for a reference for a computing course.',
+      inbox:[['Head of Dept','Timetable changes for next term'],['Parent','Re: Marco absence Tuesday'],
+             ['School Office','Reminder: reports due Friday'],['J. Villamor','Question about the practical exam'],
+             ['Canteen','Menu week 3']],
+      bonusGoal:'Get it right on your first send',
+      bonus:function(v,pct,tries){ return pct>=50 && tries===1; },
+      good:'{N},\n\nOf course — and thank you for reminding me about the sensor project. I had forgotten you built the whole thing yourself.\n\nI will write it this weekend and send it before Friday as you asked. Send me the address it needs to go to.\n\nGood luck with the application.\n\nMs Halvorsen',
+      mid:'Hello,\n\nYes, I can do that. Can you remind me which class you were in and what the deadline is?\n\nMs Halvorsen',
+      bad:'Hi,\n\nSorry — who is this? Please resend with your full name and which class you were in, and tell me what you actually need and by when.\n\nMs Halvorsen' },
+
+    { id:'follow',
+      scenario:{ t:'Says which application, and that you are following it up', why:'He has a pile of applications. He cannot chase up one he cannot identify.',
+        test:function(v){ return /\b(appl(y|ied|ication|ying)|cv|the role|position|vacancy|job)\b/i.test(v.all) && /\b(follow(ing)? up|following it up|chase|checking in|still (interested|keen|available)|any (news|update)|heard (back|anything)|update on|where things)\b/i.test(v.all); } }, hints:['He did not ignore you on purpose. Something with three hundred unread emails happened. Write as though it was <b>missed</b>, not refused.', 'Anything close to "you never replied" makes him defensive. Remind him who you are, say when you applied, and ask one small easy thing - <b>no blame anywhere in the email</b>.'], name:'Mr Bianchi', role:'Shop manager', init:'BI', col:'#a35a3a',
+      about:'Got <b>40 applications</b> this month. Yours is somewhere in the pile. He is not ignoring you — he genuinely has not seen it.',
+      quote:'"If someone follows up politely I usually look them up again. If they sound annoyed, I do not."',
+      job:'Follow up on an application he never answered.',
+      inbox:[['Supplier','Invoice #4471 overdue'],['Head Office','Stock count this weekend'],
+             ['R. Andersson','Shift swap request'],['Head Office','New till system training'],
+             ['Supplier','Delivery delayed to Thursday']],
+      bonusGoal:'Stay warm — no blaming him',
+      liveCheck:{ t:'Nothing that sounds like blame', why:'"You never replied" makes him defensive. Assume it was missed.',
+        test:function(v){ return !/\b(ignor\w*|still waiting|never (replied|answered|got back)|you (never|failed|did ?n.t)|no one|nobody|rude|unfair|disappointed)\b/i.test(v.all); } },
+      bonus:function(v,pct){ return pct>=50 && !/\b(ignor\w*|still waiting|never (replied|answered|got back)|you (never|failed|did ?n.t)|no one|nobody|rude|unfair|disappointed)\b/i.test(v.all); },
+      good:'Hi {N},\n\nThanks for following up — and sorry, your application was buried. I have found it now.\n\nCan you come in Thursday at 4pm for a quick chat? No need to bring anything.\n\nMr Bianchi',
+      mid:'Hi,\n\nI think I have your application somewhere. Send me your name and when you applied and I will look.\n\nMr Bianchi',
+      bad:null },
+
+    { id:'late',
+      scenario:{ t:'Owns up to the work being late', why:'She already knows it is late. An email that dances round it wastes her time.',
+        test:function(v){ return /\b(sorry|apolog\w+|late|overdue|missed|behind|did not (hand|get)|have not (handed|finished))\b/i.test(v.all) && /\b(coursework|assignment|essay|project|work|homework|submission|deadline)\b/i.test(v.all); } }, hints:['You are late. She knows you are late. The apology is one sentence, and then the only thing she actually wants is <b>a date</b>.', 'The second star is for staying <b>under seventy words</b>. Every extra sentence of explanation reads as an excuse, so cut the reason down to almost nothing and name the day you will hand it in.'], name:'Ms Kowalski', role:'Teacher, missed deadline', init:'KO', col:'#7a4a8a',
+      about:'You did not hand it in. She has heard <b>every excuse there is</b>. What she wants is a date, not a story.',
+      quote:'"Do not tell me your printer broke. Tell me when I am getting it."',
+      job:'Apologise, and commit to a date.',
+      inbox:[['Head of Dept','Moderation meeting Monday'],['Parent','Re: progress report'],
+             ['School Office','Exam invigilation rota'],['A. Whitfield','Late submission — Chapter 4'],
+             ['Library','Overdue books']],
+      bonusGoal:'Say it in under 70 words',
+      liveCheck:{ t:'Under 70 words', why:'The longer you explain, the more it sounds like an excuse.',
+        test:function(v){ return v.words > 0 && v.words <= 70; } },
+      bonus:function(v,pct){ return pct>=50 && v.words>0 && v.words<=70; },
+      good:'{N},\n\nThank you for being straight about it. That is rarer than you would think.\n\nWednesday is fine. Put it on my desk before first period and I will mark it with the rest.\n\nMs Kowalski',
+      mid:'Noted. When exactly am I getting it? I need a day, not "soon".\n\nMs Kowalski',
+      bad:'I have read three paragraphs and I still do not know when this work is arriving.\n\nReply with one line: the date.\n\nMs Kowalski' },
+
+    { id:'interview',
+      scenario:{ t:'Refers to the interview he gave you', why:'He saw nine people. Say which conversation this is about.',
+        test:function(v){ return /\b(interview\w*|tuesday|met (you|with you)|our (meeting|conversation)|seeing me|coming in|the apprenticeship|the role)\b/i.test(v.all); } }, hints:['He saw nine people and remembers about three. Your job is to make him <b>picture the right one</b> - you.', 'Thanks on its own gets you nothing. Name something that was actually <b>said or shown on the day</b>, because only the people who were in that room can do it.'], name:'Mr Okafor', role:'Hiring manager', init:'OK', col:'#2f7d5a',
+      about:'He interviewed <b>nine people</b> on Tuesday and can picture about three of them. He decides on Friday morning.',
+      quote:'"The follow-up email is not a formality. It is the last thing I read before I choose."',
+      job:'Follow up after your interview, before he decides.',
+      inbox:[['HR','Interview scores due Friday'],['Supplier','Q3 pricing list'],
+             ['A. Dubois','Re: shift cover Saturday'],['Head Office','Headcount freeze update'],
+             ['IT','Your password expires in 3 days']],
+      bonusGoal:'Mention something you actually discussed',
+      liveCheck:{ t:'Refers to something from the day itself', why:'Anyone can send thanks. Only you were in that room.',
+        test:function(v){ return /\b(interview|tuesday|you (said|asked|mentioned|showed)|we (talked|discussed|spoke)|your question|the workshop|the tour|the floor|the test)\b/i.test(v.all); } },
+      bonus:function(v,pct){ return pct>=50 && /\b(interview|tuesday|you (said|asked|mentioned|showed)|we (talked|discussed|spoke)|your question|the workshop|the tour|the floor|the test)\b/i.test(v.all); },
+      good:'{N},\n\nThank you for this, and for picking up the thread about the soldering. You are the only one who wrote back about anything we actually said on the day.\n\nCome in on Monday and meet the team properly. Nine until one.\n\nMr Okafor',
+      mid:'Thanks for the note.\n\nWe are still deciding. I will be in touch either way by the end of next week.\n\nMr Okafor',
+      bad:null },
+
+    { id:'mistake',
+      scenario:{ t:'Says plainly what went wrong', why:'She cannot fix a mistake she has not been told the shape of.',
+        test:function(v){ return /\b(pric\w+|label\w+|ticket\w+|wrong|error|mistake|mixed up|incorrect)\b/i.test(v.all) && /\b(items?|stock|shelf|shelves|products?|goods|forty|40)\b/i.test(v.all); } }, hints:['She finds out on Monday either way. The only thing still in your control is <b>who tells her</b>, so say what happened in the first sentence.', 'The second star goes if nothing in the email sounds like an excuse. No "nobody showed me", no "I was rushed", <b>nobody else named</b>. Say what went wrong, how many, and what you will do about it.'], name:'Ms Moreau', role:'Your supervisor', init:'MO', col:'#b4543a',
+      about:'She will find out on Monday when the stock count runs. <b>How she finds out is the only part still up to you.</b>',
+      quote:'"I can fix a mistake in ten minutes. What I cannot fix is hearing about it from somebody else three days later."',
+      job:'Tell her you priced forty items wrong, before she finds out.',
+      inbox:[['Head Office','Stock count Monday 06:00'],['Supplier','Delivery rescheduled'],
+             ['R. Osei','Holiday request form'],['Payroll','Timesheets close Thursday'],
+             ['Security','New alarm code']],
+      bonusGoal:'Own it with no excuses',
+      liveCheck:{ t:'No excuses, nobody else blamed', why:'An explanation that starts with someone else reads as an excuse every time.',
+        test:function(v){ return !/\b(not my fault|nobody (told|showed)|no one (told|showed)|never (told|shown|trained)|someone else|they told me|too busy|rushed me|short staffed)\b/i.test(v.all); } },
+      bonus:function(v,pct){ return pct>=50 && !/\b(not my fault|nobody (told|showed)|no one (told|showed)|never (told|shown|trained)|someone else|they told me|too busy|rushed me|short staffed)\b/i.test(v.all); },
+      good:'{N},\n\nThank you for telling me before Monday. That took some nerve, and it saves me a very bad morning.\n\nCome in twenty minutes early tomorrow and we will relabel them together. It stays between us.\n\nMs Moreau',
+      mid:'Right. Which forty items, and when did this happen?\n\nI need the details before Monday, not after.\n\nMs Moreau',
+      bad:'I have read this twice and I still do not know what went wrong or when.\n\nCome and find me in person tomorrow.\n\nMs Moreau' },
+
+    { id:'placement',
+      scenario:{ t:'Asks for the work experience, and for when', why:'A friendly email that never asks for the placement gets a friendly reply and nothing else.',
+        test:function(v){ return /\b(work experience|placement|two weeks|fortnight|shadow\w*|intern\w*|come in and (help|work)|experience (at|with|in) your)\b/i.test(v.all); } }, hints:['There is no HR here and he is not advertising. He has never taken a student, so he is weighing up <b>how much trouble you will be</b>.', 'Everyone tells him what they want out of him. The star is for the other half: say <b>what you will do while you are there</b> - sweeping, tidying, answering the phone, unpaid. Make it cost him as little as possible.'], name:'Mr Haddad', role:'Owns a repair shop', init:'HD', col:'#7a5a9a',
+      about:'A one-man shop. He is not advertising, there is no HR department, and he has <b>never taken a student before</b>.',
+      quote:'"Everyone tells me what they want to get out of me. Nobody says what they are going to do while they are here."',
+      job:'Ask for two weeks of work experience over the holidays.',
+      inbox:[['Parts Direct','Your order has shipped'],['Mrs Fontaine','Is my laptop ready?'],
+             ['Landlord','Rent review'],['Parts Direct','Invoice 8821'],
+             ['J. Vogel','Screen replacement quote?']],
+      bonusGoal:'Say what you bring, not just what you want',
+      liveCheck:{ t:'Offers something, does not only ask', why:'He is doing you a favour. Make it cost him as little as possible.',
+        test:function(v){ return /\b(i can|i could|i will help|help (out|with)|sweep|clean|tidy|carry|answer the phone|unpaid|no pay|free|make myself useful|whatever you need)\b/i.test(v.all); } },
+      bonus:function(v,pct){ return pct>=50 && /\b(i can|i could|i will help|help (out|with)|sweep|clean|tidy|carry|answer the phone|unpaid|no pay|free|make myself useful|whatever you need)\b/i.test(v.all); },
+      good:'Hi {N},\n\nNobody has ever offered to sweep up before. Most of them want to take a laptop apart on day one.\n\nCome in on the 4th at nine. Wear something you do not mind ruining.\n\nMr Haddad',
+      mid:'I might have space. Send me the dates again and what you are hoping to learn.\n\nMr Haddad',
+      bad:null },
+
+    { id:'decline',
+      scenario:{ t:'Actually turns the shifts down', why:'She needs to fill the shift tonight. A maybe is worse than a no.',
+        test:function(v){ return /\b(weekend|saturday|sunday|shifts?)\b/i.test(v.all) && /\b(cannot|can.t|unable|decline|turn (it|them) down|not (be )?able|have to say no|no this time|will not be able|afraid I)\b/i.test(v.all); } }, hints:['She held the shift for four days and needs an answer tonight. Say <b>no clearly</b>, in the first line, so she can give it to somebody else.', 'She hires the summer staff off the same list. The star needs both halves: <b>thank her</b>, and say you would like to be asked <b>another time</b>. No with nothing after it ends the relationship.'], name:'Ms Novak', role:'Offered you weekend work', init:'NO', col:'#3a6ea5',
+      about:'She held the shift open for you for four days. She needs somebody by tonight — and she hires the <b>summer staff</b> from the same list.',
+      quote:'"Say no properly and I will ask you again in June. Go quiet on me and I will not."',
+      job:'Turn the weekend shifts down without closing the door.',
+      inbox:[['Rota','Weekend cover still unfilled'],['Head Office','Summer hiring opens in May'],
+             ['T. Okonjo','Can I swap Sunday?'],['Accounts','Petty cash receipts'],
+             ['Supplier','New stock arriving Friday']],
+      bonusGoal:'Say no, say thank you, leave the door open',
+      liveCheck:{ t:'Thanks her and leaves the door open', why:'No is fine. No with nothing after it ends the relationship.',
+        test:function(v){ return /\b(thank|grateful|appreciate)\b/i.test(v.all) && /\b(later|another time|in future|next time|summer|holidays|keep me in mind|if anything comes up)\b/i.test(v.all); } },
+      bonus:function(v,pct){ return pct>=50 && /\b(thank|grateful|appreciate)\b/i.test(v.all) && /\b(later|another time|in future|next time|summer|holidays|keep me in mind|if anything comes up)\b/i.test(v.all); },
+      good:'{N},\n\nThank you for saying so clearly instead of leaving me guessing. I have given the weekend to someone else, which I could only do because you told me today.\n\nSummer hiring opens in May. I will write to you first.\n\nMs Novak',
+      mid:'Understood, thanks for letting me know.\n\nMs Novak',
+      bad:null },
+
+    { id:'cold',
+      scenario:{ t:'Asks about her work, not about yours', why:'She answers questions about her own work. She does not answer requests for a job.',
+        test:function(v){ return /\b(your (work|job|role|team|career|day|advice|experience|company)|what you do|how you (got|started|ended up)|working (in|at|on)|your field|your industry|you test|your team)\b/i.test(v.all); } }, hints:['She does not know you and owes you nothing. She will answer something that takes her <b>two minutes</b>, and bin anything that looks like homework.', 'The star is for asking <b>exactly one question</b>. Count the question marks in your email - if there is more than one, pick your best question and delete the rest.'], name:'Nadia Petrova', role:'Works in the job you want', init:'NP', col:'#2f7d6a',
+      about:'A stranger. She owes you <b>nothing</b> and gets messages like this most weeks. Saying yes has to take her under two minutes.',
+      quote:'"I answer the ones who clearly looked at what I do and ask me one thing. Not the ones who ask me to describe my whole career."',
+      job:'Ask her one question about her work.',
+      inbox:[['Sprint Bot','12 issues assigned to you'],['Recruiter','Opportunity you may like'],
+             ['Design team','Review needed: onboarding flow'],['Conference','Your talk was accepted'],
+             ['Bank','Your statement is ready']],
+      bonusGoal:'Ask exactly one question',
+      liveCheck:{ t:'Exactly one question mark', why:'Three questions is homework. One question is a favour.',
+        test:function(v){ return (v.all.match(/\?/g)||[]).length === 1; } },
+      bonus:function(v,pct){ return pct>=50 && (v.all.match(/\?/g)||[]).length === 1; },
+      good:'Hi {N},\n\nHappy to answer that one — and good question, most people ask something far too broad.\n\nShort version: start by building something small and finishing it. Finished beats clever, every time.\n\nIf you want, send me the thing you build and I will take a look.\n\nNadia',
+      mid:'Hi,\n\nThanks for writing. I am quite busy but I will try to reply properly next week.\n\nNadia',
+      bad:null },
+
+    { id:'rejected',
+      scenario:{ t:'Asks about the role you were turned down for', why:'She interviews all year. Say which decision this is about and what you want from her.',
+        test:function(v){ return /\b(feedback|advice|improve|work on|next time|what (would|could)|one thing|differently|better prepared|prepare)\b/i.test(v.all) && /\b(role|position|job|application|interview|trainee|decision|outcome|september)\b/i.test(v.all); } }, name:'Ms Lindqvist', role:'Turned you down', init:'LI', col:'#8a5a3a',
+      about:'You did not get it. She has <b>four more of the same job</b> opening in September, and she keeps a list of people worth calling back.',
+      quote:'"Everyone who argues with me about the decision takes themselves off the list. The ones who ask what to fix stay on it."',
+      job:'You were turned down. Ask for feedback without arguing.',
+      inbox:[['HR','September intake - shortlist'],['Finance','Budget sign-off needed'],
+             ['J. Marchetti','Re: start date'],['Head Office','Training days confirmed'],
+             ['IT','Laptop return reminder']],
+      bonusGoal:'Ask what to fix, and let the decision stand',
+      hints:['She has already decided, and nothing you write will change it. The only thing still worth having from this email is <b>information</b> - so ask for that and nothing else.',
+             'Two things have to be true at once. Ask for <b>one specific thing to work on</b> before next time, and do not push back on the decision anywhere in the email. No "but", no "I thought", no asking her to look again.'],
+      liveChecks:[
+        { t:'Asks for something specific to work on', why:'"Any feedback?" is a chore. "What one thing would you fix?" is a two-line reply.',
+          test:function(v){ return /\b(improve|work on|next time|advice|feedback|stronger|better prepared|what would|one thing|differently)\b/i.test(v.all); } },
+        { t:'Lets the decision stand', why:'The moment you argue, you are a problem to manage instead of a person to help.',
+          test:function(v){ return !/\b(unfair|disagree|but i (was|am|had|think)|should have|deserved|reconsider|look again|another chance|wrong decision|surprised)\b/i.test(v.all); } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /\b(improve|work on|next time|advice|feedback|stronger|better prepared|what would|one thing|differently)\b/i.test(v.all) &&
+        !/\b(unfair|disagree|but i (was|am|had|think)|should have|deserved|reconsider|look again|another chance|wrong decision|surprised)\b/i.test(v.all); },
+      good:'{N},\n\nYou are the first person this year to ask me that instead of arguing with me.\n\nHonestly: your answers were fine, your examples were thin. Come with three real things you have built and you will walk it.\n\nThe September roles open on the 1st. I will send you the link myself.\n\nMs Lindqvist',
+      mid:'Thanks for taking it well. I will try to write something up when things quieten down.\n\nMs Lindqvist',
+      bad:'I have read this twice and it reads like an appeal rather than a question.\n\nThe decision is made. If you want feedback, ask me for feedback.\n\nMs Lindqvist' },
+
+    { id:'owed',
+      scenario:{ t:'Asks for the payment, for work you name', why:'He is disorganised, not dishonest. Tell him exactly what he is paying for.',
+        test:function(v){ return /\b(pay|paid|payment|invoice|owed?|owing|money|wages|amount|settle|transfer|fee|rate|outstanding)\b/i.test(v.all) && /\b(saturdays?|march|work(ed)?|days?|hours?|shifts?)\b/i.test(v.all); } }, name:'Mr Ferreira', role:'Has not paid you', init:'FE', col:'#a3763a',
+      about:'You did three Saturdays of work for him in March. It is now May. He is <b>not dodging you</b> - he is disorganised, and nobody has put a number in front of him.',
+      quote:'"If somebody tells me what they are owed and when, I pay it that afternoon. I cannot pay a feeling."',
+      job:'He owes you for three Saturdays. Ask for the money.',
+      inbox:[['Supplier','Statement of account - May'],['Mrs Bergmann','Quote for the extension?'],
+             ['Bank','Your business account summary'],['Council','Waste licence renewal'],
+             ['P. Novotny','Invoice 0442 attached']],
+      bonusGoal:'Give him the number and the date, keep your temper',
+      hints:['He is not refusing to pay. Nobody has ever <b>put the figure in front of him</b>, so it has stayed at the bottom of a list since March.',
+             'Two things at once. Write the <b>exact amount</b> and the dates you worked, and keep every trace of temper out of it - no legal, no threats, no "I am sick of chasing this". Make paying you the easiest thing he does today.'],
+      liveChecks:[
+        { t:'Names the actual amount owed', why:'"The money from March" is something he has to go and work out. A number is something he can pay.',
+          test:function(v){ return /\d{3,}|\d+[.,]\d{2}|\b(dollars?|pounds?|euros?|francs?|kroner)\b/i.test(v.detail+' '+v.ask+' '+v.purpose); } },
+        { t:'No threats, no temper', why:'The angry email is the one that gets forwarded to somebody else and forgotten.',
+          test:function(v){ return !/\b(legal|lawyer|solicitor|police|court|report you|scam|thief|stealing|steal|ridiculous|fed up|sick of|disgrace|unacceptable|chasing you)\b/i.test(v.all); } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /\d{3,}|\d+[.,]\d{2}|\b(dollars?|pounds?|euros?|francs?|kroner)\b/i.test(v.detail+' '+v.ask+' '+v.purpose) &&
+        !/\b(legal|lawyer|solicitor|police|court|report you|scam|thief|stealing|steal|ridiculous|fed up|sick of|disgrace|unacceptable|chasing you)\b/i.test(v.all); },
+      good:'{N},\n\nYou are right and I am embarrassed. It has been sitting in a pile since March because nobody put a figure on it.\n\nPaid this afternoon. I have put your name down for the June job as well, at the proper rate this time.\n\nMr Ferreira',
+      mid:'I think that is about right. Can you send me the dates again and I will check it against the book?\n\nMr Ferreira',
+      bad:'I do not respond well to being spoken to like that.\n\nSend me the dates and the amount and I will look at it next week.\n\nMr Ferreira' },
+
+    { id:'raise',
+      scenario:{ t:'Asks for the extra hours', why:'Eleven people asked her this month. Be the one who actually asked clearly.',
+        test:function(v){ return /\b(hours|shifts?|rota|more (work|days|time)|extra (shifts|hours|days)|additional (hours|shifts)|full.?time)\b/i.test(v.all); } }, name:'Ms Nakamura', role:'Decides the rota', init:'NA', col:'#3a7a6a',
+      about:'She has <b>eleven people</b> asking for more hours and enough shifts for four of them. Every one of them has told her they need the money.',
+      quote:'"Needing it does not make you different. Everybody needs it. Show me what the rota looks like when you are on it."',
+      job:'Ask for more hours - and give her a reason that is not about you.',
+      inbox:[['Rota','Summer availability forms due'],['Payroll','Overtime codes have changed'],
+             ['A. Lindholm','Can I drop Thursdays?'],['Head Office','Cover costs are over budget'],
+             ['Training','First aid refresher list']],
+      bonusGoal:'Argue with evidence, not with need',
+      hints:['Eleven people have already told her they need the money. That argument is used up, and it was never a good one - it says nothing about whether the shop runs better with you in it.',
+             'Two things at once. Point at <b>something you have actually done</b> - shifts covered, a rota you saved, months without a complaint - and keep every mention of rent, bills and being short of money out of the email completely.'],
+      liveChecks:[
+        { t:'Points at something you actually did', why:'A record is a reason. Wanting it is not.',
+          test:function(v){ return /\b(since|last month|every|covered|cover|trained|took on|took over|extra|closed up|opened up|no complaints|on time|never missed|i have been|stepped in|stayed late)\b/i.test(v.detail+' '+v.purpose+' '+v.ask); } },
+        { t:'Never mentions needing the money', why:'Eleven people have already said it. It tells her nothing about the rota.',
+          test:function(v){ return !/\b(need the money|needs the money|cannot afford|can.t afford|rent|bills|expensive|broke|struggling|short of money|my family|save up for)\b/i.test(v.all); } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /\b(since|last month|every|covered|cover|trained|took on|took over|extra|closed up|opened up|no complaints|on time|never missed|i have been|stepped in|stayed late)\b/i.test(v.detail+' '+v.purpose+' '+v.ask) &&
+        !/\b(need the money|needs the money|cannot afford|can.t afford|rent|bills|expensive|broke|struggling|short of money|my family|save up for)\b/i.test(v.all); },
+      good:'{N},\n\nEleven people asked me this month. You are the only one who told me something I did not already know.\n\nThree extra shifts from the 12th, and I am putting you on the key-holder list. Come and see me Thursday.\n\nMs Nakamura',
+      mid:'Noted. I will see what the summer rota looks like once the availability forms are in.\n\nMs Nakamura',
+      bad:'I have eleven of these and they all say the same thing.\n\nIf you want more hours, tell me what you bring to a shift.\n\nMs Nakamura' },
+
+    { id:'correct',
+      scenario:{ t:'Points at the order, and at what to check', why:'He has twenty minutes. Name the order and name the thing that looks wrong.',
+        test:function(v){ return /\b(order|part number|part|catalogue|line|number|7781|4412|supplier)\b/i.test(v.all) && /\b(check|checking|wrong|differs?|different|mismatch|misread|flag|before it goes|confirm|worth a look)\b/i.test(v.all); } }, name:'Mr Larsen', role:'Your manager, and wrong', init:'LA', col:'#6a4a7a',
+      about:'He has sent the supplier the <b>wrong part number</b>. It goes out at five. He has run this shop for nineteen years and you have been here five weeks.',
+      quote:'"I would rather be corrected by a new starter than explain four hundred wrong parts to Head Office. But mind how you do it."',
+      job:'He has made a mistake. Tell him, before five, without embarrassing him.',
+      inbox:[['Parts Direct','Order 7781 - confirm by 17:00'],['Head Office','Stock variance report'],
+             ['R. Keller','Holiday cover - September'],['Accounts','Purchase orders outstanding'],
+             ['Security','Key audit Friday']],
+      bonusGoal:'Correct him without telling him he is wrong',
+      hints:['He is not going to thank you for being right. He is going to thank you for the order not going out wrong. Write about <b>the order</b>, not about him.',
+             'Two things at once. Leave him <b>a way out</b> - "I may have misread this", "worth a check before it goes" - and never write the words that say he made a mistake. Put the correct part number in, and put the five o clock deadline in.'],
+      liveChecks:[
+        { t:'Gives him a way out', why:'Let him fix it as though he spotted it. That is what you are buying.',
+          test:function(v){ return /\b(may have|might have|might be|may be|possibly|perhaps|i may|unless i|could be|in case|worth (a )?check|double.?check|before it goes|i could be wrong|have i|misread|misunderstood)\b/i.test(v.all); } },
+        { t:'Never says he got it wrong', why:'Nineteen years in the job. Being told he is wrong by week five costs you more than the parts.',
+          test:function(v){ return !/\b(you are wrong|you.re wrong|you made a mistake|your mistake|you have made|incorrect|you forgot|you missed|you should have|that is wrong|that.s wrong|you put the wrong|you typed)\b/i.test(v.all); } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /\b(may have|might have|might be|may be|possibly|perhaps|i may|unless i|could be|in case|worth (a )?check|double.?check|before it goes|i could be wrong|have i|misread|misunderstood)\b/i.test(v.all) &&
+        !/\b(you are wrong|you.re wrong|you made a mistake|your mistake|you have made|incorrect|you forgot|you missed|you should have|that is wrong|that.s wrong|you put the wrong|you typed)\b/i.test(v.all); },
+      good:'{N},\n\nCaught it. Order stopped with twenty minutes to spare.\n\nYou have been here five weeks and you managed to tell me I had it wrong without once saying so. That is a harder skill than the part numbers.\n\nYou are on the ordering from Monday.\n\nMr Larsen',
+      mid:'Right - which line are you looking at? Come and find me on the floor.\n\nMr Larsen',
+      bad:'I have been doing this nineteen years.\n\nCome and talk to me in person before you put something like that in writing.\n\nMr Larsen' },
+
+    { id:'nothird',
+      scenario:{ t:'Says no to this shift, clearly', why:'She keeps asking because she keeps getting a maybe. Give her a no she can act on.',
+        test:function(v){ return /\b(saturday|shifts?|cover|covering|weekend)\b/i.test(v.all) && /\b(cannot|can.t|unable|not (be )?able|have to say no|will not be able|no this time|decline|afraid I)\b/i.test(v.all); } }, name:'Ms Rahimi', role:'Wants you to cover again', init:'RA', col:'#a34a5a',
+      about:'This is the <b>third time</b> this month. You have said yes twice and it cost you both weekends. She is not a bully - she is short-staffed, and you are the one who keeps saying yes.',
+      quote:'"I keep asking you because you keep saying yes. Tell me properly and I will stop asking, and I will not think less of you for it."',
+      job:'Say no for the third time, without wrecking the relationship.',
+      inbox:[['Rota','Saturday still uncovered'],['Head Office','Absence figures for the quarter'],
+             ['T. Okonjo','Swap request - declined'],['Payroll','Overtime cut-off Thursday'],
+             ['Training','Manual handling refresher']],
+      bonusGoal:'One reason, one offer, and stop apologising',
+      hints:['Three separate things have to be true here, which is why it is the hardest email in the desk. Say <b>no</b>, give the reason <b>once</b>, and put something useful in front of her instead of just a problem.',
+             'The trap is sorry. One apology is polite, three is grovelling and it makes her feel she has to reassure you. Give a single clear reason, offer a different day or another name, and say sorry <b>at most once</b> in the whole email.'],
+      liveChecks:[
+        { t:'Says no clearly, not maybe', why:'A soft no is heard as a yes she has to chase.',
+          test:function(v){ return /\b(i cannot|i can.t|i am not able|i will not be able|unable to|have to say no|not going to be able|no this time)\b/i.test(v.all); } },
+        { t:'Offers something instead', why:'A no with an alternative is help. A no on its own is a problem handed back.',
+          test:function(v){ return /\b(instead|another (day|time|week|weekend|shift)|i could|i can do|i am free|next (week|month|saturday|sunday)|ask|try|suggest|cover .* on|happy to)\b/i.test(v.all); } },
+        { t:'Apologises at most once', why:'Three sorries and she ends up reassuring you, which is the opposite of what you wanted.',
+          test:function(v){ return (v.all.match(/\b(sorry|apolog\w+|i do apologise)\b/gi)||[]).length <= 1; } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /\b(i cannot|i can.t|i am not able|i will not be able|unable to|have to say no|not going to be able|no this time)\b/i.test(v.all) &&
+        /\b(instead|another (day|time|week|weekend|shift)|i could|i can do|i am free|next (week|month|saturday|sunday)|ask|try|suggest|cover .* on|happy to)\b/i.test(v.all) &&
+        (v.all.match(/\b(sorry|apolog\w+|i do apologise)\b/gi)||[]).length <= 1; },
+      good:'{N},\n\nClear, short, and you gave me a name to ring instead of just a problem. That is the most useful no I have had all month.\n\nI will stop putting you down for Saturdays unless you tell me otherwise. Thank you for being straight with me.\n\nMs Rahimi',
+      mid:'Understood. Can you tell me which weekends you actually are free, so I stop guessing?\n\nMs Rahimi',
+      bad:'I have read this three times and I still cannot tell whether that is a yes or a no.\n\nI need an answer today.\n\nMs Rahimi' },
+
+    { id:'intro',
+      scenario:{ t:'Names Dr Sorensen and asks for the introduction', why:'An introduction he has to guess at is one he will not make.',
+        test:function(v){ return /sorensen/i.test(v.all) && /\b(introduc\w+|put me in touch|connect me|pass (this |my name )?(on|along)|mention me|copy me in|forward|in touch with her)\b/i.test(v.all); } }, name:'Mr Eriksen', role:'Knows someone you want to meet', init:'ER', col:'#2f6a8a',
+      about:'He has worked with <b>Dr Sorensen</b> for nine years. An introduction from him is worth more than fifty applications - and it costs him his own reputation if you turn out to be a waste of her time.',
+      quote:'"I will introduce anybody who makes it easy for me to say no. The ones who leave me no way out are exactly the ones I do not pass on."',
+      job:'Ask him to introduce you to Dr Sorensen. Keep it short.',
+      inbox:[['Dr Sorensen','Re: Thursday seminar'],['Faculty','Grant deadline moved'],
+             ['P. Novotny','Draft chapter attached'],['Admin','Office move - pack by Friday'],
+             ['Conference','Your abstract has been accepted']],
+      bonusGoal:'Name her, make it easy to refuse, under 90 words',
+      hints:['He is not doing you a favour so much as <b>lending you his name</b>. If you waste her time it costs him, so everything in this email has to make that risk look small.',
+             'Three things at once. Say <b>who</b> you want to meet and why her specifically, give him an easy way out - "no problem at all if not" - and keep the whole email <b>under ninety words</b>, because a long ask is a heavy one.'],
+      liveChecks:[
+        { t:'Names her, and why her', why:'"Anyone in the field" means he has to do the thinking for you.',
+          test:function(v){ return /sorensen/i.test(v.all) && /\b(because|her work|her research|she|specific|read|paper|talk|seminar|field|area)\b/i.test(v.all); } },
+        { t:'Gives him an easy way out', why:'An ask he cannot refuse politely is one he just will not answer.',
+          test:function(v){ return /\b(no (problem|worries|trouble)|if not|if you would rather not|only if|no obligation|completely understand|totally fine|do not feel|don.t feel|happy either way|if it is awkward|if that is difficult)\b/i.test(v.all); } },
+        { t:'Under 90 words', why:'A short ask is a light ask. A long one reads as a project.',
+          test:function(v){ return v.words>0 && v.words<=90; } }],
+      bonus:function(v,pct){ return pct>=50 &&
+        /sorensen/i.test(v.all) && /\b(because|her work|her research|she|specific|read|paper|talk|seminar|field|area)\b/i.test(v.all) &&
+        /\b(no (problem|worries|trouble)|if not|if you would rather not|only if|no obligation|completely understand|totally fine|do not feel|don.t feel|happy either way|if it is awkward|if that is difficult)\b/i.test(v.all) &&
+        v.words>0 && v.words<=90; },
+      good:'{N},\n\nShort, specific, and you gave me a way out without needing one. That is rarer than you would think.\n\nI have copied her in. She has read your message and she has twenty minutes on Thursday.\n\nDo not waste them - and you clearly will not.\n\nMr Eriksen',
+      mid:'I might be able to. Remind me what it is you actually want from her and I will see.\n\nMr Eriksen',
+      bad:'This is a long email that asks me for something quite large without ever quite saying what.\n\nHave another go and tell me exactly what you want.\n\nMr Eriksen' }
+  ];
+
+  var MAX_STARS;   // set once PEOPLE exists: three stars per contact
+  // spread across all eight contacts, so the top rank is the last thing earned
+  var RANKS = [
+    [0,'Nobody knows your name'],[6,'Occasionally answered'],[13,'Getting noticed'],
+    [20,'Hard to ignore'],[27,'People make time for you'],[34,'They pass your name on'],
+    [42,'Gets a reply from anyone']
+  ];
+
+  MAX_STARS = PEOPLE.length * 3;
+  var progress = {};
+  PEOPLE.forEach(function(p,i){ progress[p.id] = {stars:[false,false,false], tries:0, best:0, open:i===0}; });
+  var person = PEOPLE[0];
+
+  var F = {};
+  ['subject','greeting','purpose','detail','ask','signoff','attach'].forEach(function(id){
+    F[id] = document.getElementById(id);
+    F[id].addEventListener('input', update);
+  });
+
+  var BASE = [
+    { w:2,   t:'The subject line says what this is about', miss:'your subject line did not say what it was about',
+      why:'Blank or vague subjects get opened last, or never.',
+      test:function(v){ return v.subject.length>=12 && !/^(hi|hello|hey|question|help|urgent|important)\W*$/i.test(v.subject); } },
+    { w:1,   t:'The subject is short enough to read at a glance', miss:'your subject was too long to read at a glance',
+      why:'Over about ten words and the end is cut off on a phone.',
+      test:function(v){ return v.subject.length>0 && v.subject.split(/\s+/).length<=10; } },
+    { w:1,   t:'It opens with a proper greeting', miss:'you never greeted them properly',
+      why:'"Hey" is for friends. Use Dear or Hello and their name.',
+      test:function(v){ return /^(dear|hello|good (morning|afternoon))\b/i.test(v.greeting.trim()) && /[A-Z][a-z]/.test(v.greeting); } },
+    { w:1.5, t:'You say why you are writing in the first line', miss:'you never said clearly why you were writing',
+      why:'They decide in about five seconds whether this concerns them.',
+      test:function(v){ return v.purpose.trim().split(/\s+/).length>=6; } },
+    { w:1,   t:'You remind them who you are', miss:'you never reminded them who you are',
+      why:'They meet hundreds of people. Do not make them guess.',
+      test:function(v){ return /\b(class|grade|year|section|applied|project|student|met|taught)\b/i.test(v.detail+' '+v.purpose); } },
+    { w:2,   t:'You actually ask for something', miss:'you never actually asked for anything',
+      why:'An email with no request leaves them wondering what you want.',
+      test:function(v){ return v.ask.trim().length>=15 && /\?|could you|would you|please|i would be grateful/i.test(v.ask); } },
+    { w:2,   t:'You give a date or a deadline', miss:'you gave them no date to work to',
+      why:'"Soon" is not a deadline. A date lets them plan, and makes a yes easier.',
+      test:function(v){ return /\b(\d{1,2}(st|nd|rd|th)?\s+)?(january|february|march|april|may|june|july|august|september|october|november|december|monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|next week|this week|\d{1,2}\/\d{1,2})\b/i.test(v.ask+' '+v.detail); } },
+    { w:1,   t:'You sign off with your full name', miss:'you never signed your full name',
+      why:'They may not know who ana_c is. Give them a name they can use.',
+      test:function(v){ return /[A-Z][a-z]+\s+[A-Z][a-z]+/.test(v.signoff); } },
+    { w:1,   t:'The whole thing is under 150 words', miss:'it was too long — they postponed it',
+      why:'Long emails get postponed. Short ones get answered today.',
+      test:function(v){ return v.words>0 && v.words<=150; } },
+    { w:1,   t:'Any attachment is named properly and mentioned', miss:'your attachment was badly named or never mentioned',
+      why:'"Document1.pdf" tells a stranger nothing, and unmentioned files get missed.',
+      test:function(v){
+        if(!v.attach.trim()) return true;
+        var named = /\.[a-z]{2,4}$/i.test(v.attach) && !/^(document|untitled|new|img|scan)/i.test(v.attach) && v.attach.length>=10;
+        return named && /attach|enclos|below|included/i.test(v.purpose+' '+v.detail+' '+v.ask); } }
+  ];
+
+  /* ---------- proofreading: spelling, grammar, professional language ---------- */
+
+  // Common slips, not a whole dictionary. Every entry here is a word students
+  // really do type, so nothing gets flagged that is actually spelled correctly.
+  var SPELL = {
+    acheive:'achieve', acomodate:'accommodate', adress:'address', allmost:'almost',
+    alot:'a lot', alredy:'already', alright:'all right', apologise:null,
+    apparant:'apparent', arguement:'argument', assistace:'assistance',
+    atach:'attach', atached:'attached', attatched:'attached', attatch:'attach',
+    availible:'available', avalible:'available', basicly:'basically',
+    becuase:'because', becasue:'because', befor:'before', begining:'beginning',
+    beleive:'believe', belive:'believe', benifit:'benefit', buisness:'business',
+    bussiness:'business', calender:'calendar', carefull:'careful',
+    cieling:'ceiling', collegue:'colleague', collegues:'colleagues',
+    comming:'coming', commited:'committed', commitee:'committee',
+    completly:'completely', concious:'conscious', congratulate:null,
+    curiousity:'curiosity', decison:'decision', desicion:'decision',
+    definately:'definitely', definatly:'definitely', dependant:'dependent',
+    diffrent:'different', dissapoint:'disappoint', dissapointed:'disappointed',
+    embarass:'embarrass', embarassed:'embarrassed', enviroment:'environment',
+    equiptment:'equipment', excelent:'excellent', existance:'existence',
+    experiance:'experience', explaination:'explanation', extreamly:'extremely',
+    familliar:'familiar', febuary:'February', finaly:'finally',
+    foriegn:'foreign', freind:'friend', garantee:'guarantee',
+    gratefull:'grateful', goverment:'government', grammer:'grammar',
+    happend:'happened', hopefull:'hopeful', imediately:'immediately',
+    immediatly:'immediately', independant:'independent', intrested:'interested',
+    interupt:'interrupt', knowlege:'knowledge', lenght:'length',
+    libary:'library', maintainance:'maintenance', managment:'management',
+    neccessary:'necessary', necesary:'necessary', noticable:'noticeable',
+    occassion:'occasion', occured:'occurred', occurence:'occurrence',
+    occurance:'occurrence', oppurtunity:'opportunity', opportunuty:'opportunity',
+    paticularly:'particularly', payed:'paid', peice:'piece',
+    permanant:'permanent', persue:'pursue', pleasent:'pleasant',
+    posible:'possible', prefered:'preferred', priviledge:'privilege',
+    probaly:'probably', probally:'probably', proffesional:'professional',
+    profesional:'professional', recieve:'receive', recieved:'received',
+    recomend:'recommend', recomended:'recommended', refered:'referred',
+    refrence:'reference', reguards:'regards', relevent:'relevant',
+    responsability:'responsibility', rythm:'rhythm', seperate:'separate',
+    seperately:'separately', sincerly:'sincerely', speach:'speech',
+    strenght:'strength', succesful:'successful', succesfully:'successfully',
+    successfull:'successful', suprise:'surprise', tecnical:'technical',
+    tommorow:'tomorrow', tommorrow:'tomorrow', tomorow:'tomorrow',
+    truely:'truly', unfortunatly:'unfortunately', unfortunatley:'unfortunately',
+    untill:'until', usefull:'useful', useing:'using', verry:'very',
+    wich:'which', wheather:'whether', whent:'went', wierd:'weird',
+    writting:'writing', yeild:'yield', thier:'their', theri:'their',
+    recomendation:'recommendation', aplication:'application',
+    aplying:'applying', appliction:'application', qualifcations:'qualifications',
+    qualifications:null, oppertunity:'opportunity', intrest:'interest',
+    curriculem:'curriculum', curriculam:'curriculum', enquirey:'enquiry',
+    anwser:'answer', becoz:'because', teh:'the', adn:'and', wold:'would',
+    coursework:null, timetable:null,
+    intresting:'interesting', sucess:'success', sucessful:'successful',
+    greatfull:'grateful', sincerley:'sincerely', recived:'received',
+    reciept:'receipt', oportunity:'opportunity', comunication:'communication',
+    responsable:'responsible', particuarly:'particularly', convinient:'convenient',
+    enthusiam:'enthusiasm', avaliable:'available', flexable:'flexible',
+    imediate:'immediate', acheiving:'achieving', managable:'manageable',
+    writen:'written', choosen:'chosen', recomending:'recommending',
+    discused:'discussed', oclock:"o'clock", greatful:'grateful',
+    apreciate:'appreciate', appreciatte:'appreciate', arrangment:'arrangement',
+    conatct:'contact', pleae:'please', pleas:'please', shedule:'schedule'
+  };
+
+  // short forms and chat words that do not belong in a professional email
+  var INFORMAL = ['gonna','wanna','gotta','kinda','sorta','dunno','yeah','yep','nope',
+    'hiya','sup','lol','haha','hahaha','omg','plz','pls','thx','ty','cuz','coz',
+    'innit','mate','dude','bro','guys','gimme','lemme','yall','u','ur','k','btw'];
+  // capitals that are genuinely capitals, so they are not read as shouting
+  var OKCAPS = {CV:1,PDF:1,ICT:1,BTEC:1,HR:1,IT:1,UK:1,USA:1,AM:1,PM:1,ASAP:1,NB:1,
+    CC:1,RSVP:1,HTML:1,CSS:1,PHP:1,SSD:1,USB:1,GCSE:1,DDR4:1,DDR5:1,OK:1,ID:1,CEO:1};
+
+  function esc(t){
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  // split into sentences without lookbehind, which older browsers refuse
+  function sentences(t){
+    var out = [], cur = '';
+    for (var i = 0; i < t.length; i++){
+      cur += t.charAt(i);
+      if ('.!?'.indexOf(t.charAt(i)) >= 0 && '.!?'.indexOf(t.charAt(i+1)||'') < 0){
+        out.push(cur); cur = '';
+      }
+    }
+    if (cur.trim()) out.push(cur);
+    return out.map(function(x){ return x.trim(); }).filter(Boolean);
+  }
+
+  // the panel asks for this four times per keystroke; do the work once
+  var proofCache = {key:null, val:null};
+  function proofread(v){
+    var key = v.subject + '|~|' + v.purpose + '|~|' + v.detail + '|~|' + v.ask;
+    if (proofCache.key === key) return proofCache.val;
+    var out = proofreadNow(v);
+    proofCache.key = key; proofCache.val = out;
+    return out;
+  }
+  function proofreadNow(v){
+    var spelling = [], grammar = [], informal = [], seen = {};
+    // the three fields that carry real sentences
+    var FIELDS = [['purpose','Why you are writing'],['detail','The detail'],['ask','Your request']];
+    var prose = FIELDS.map(function(f){ return v[f[0]]; }).join(' ');
+    var everything = v.subject + ' ' + prose;
+
+    /* ---- spelling ---- */
+    (everything.match(/[A-Za-z][A-Za-z']*/g) || []).forEach(function(w){
+      var key = w.toLowerCase().replace(/'s$/,'').replace(/'+$/,'');
+      if (SPELL[key] && !seen['s'+key]){
+        seen['s'+key] = 1;
+        spelling.push({bad:w, fix:SPELL[key]});
+      }
+    });
+
+    /* ---- professional language ---- */
+    INFORMAL.forEach(function(w){
+      var re = new RegExp('(^|[^A-Za-z])' + w + '($|[^A-Za-z])', 'i');
+      if (re.test(everything) && !seen['i'+w]){
+        seen['i'+w] = 1;
+        informal.push({bad:w, note:'chat language - write it out in full'});
+      }
+    });
+    if (/[:;]-?[()D]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/.test(everything))
+      informal.push({bad:'a smiley', note:'leave emoticons out of a professional email'});
+    (everything.match(/\b[A-Z]{4,}\b/g) || []).forEach(function(w){
+      if (!OKCAPS[w] && !seen['c'+w]){ seen['c'+w] = 1;
+        informal.push({bad:w, note:'all capitals reads as shouting'}); }
+    });
+
+    function g(bad, note){
+      var k = 'g' + bad + note;
+      if (!seen[k]){ seen[k] = 1; grammar.push({bad:bad, note:note}); }
+    }
+
+    /* ---- grammar, per field so the advice can point somewhere ---- */
+    FIELDS.forEach(function(f){
+      var t = (v[f[0]] || '').trim();
+      if (!t) return;
+      if (!/[.!?]$/.test(t)) g(f[1], 'this box does not end with a full stop');
+      sentences(t).forEach(function(sn){
+        var first = sn.charAt(0);
+        if (/[a-z]/.test(first)) g(sn.slice(0,26), 'a sentence has to start with a capital letter');
+      });
+    });
+
+    /* ---- grammar, across the whole email ---- */
+    var m;
+    if ((m = prose.match(/\bi\b/))) g('i', 'the word I is always a capital');
+    if ((m = prose.match(/\bi'(m|ve|ll|d)\b/))) g("i'" + m[1], 'the word I is always a capital');
+    if ((m = prose.match(/\b(should|could|would|must)\s+of\b/i))) g(m[0], 'it is "' + m[1] + ' have", never "' + m[1] + ' of"');
+    if ((m = prose.match(/\b(\w+)\s+\1\b/i)) && !/^(had|that|very)$/i.test(m[1])) g(m[0], 'this word is written twice');
+    if ((m = prose.match(/\bi\s+(is|are|has|does)\b/i))) g(m[0], 'it is "I am", "I have" or "I do"');
+    if ((m = prose.match(/\b(he|she)\s+(are|have|do)\b/i))) g(m[0], 'use "is", "has" or "does" after he or she');
+    if ((m = prose.match(/\b(they|we|you)\s+(is|was|has|does)\b/i))) g(m[0], 'use "are", "were", "have" or "do" after ' + m[1].toLowerCase());
+    if ((m = prose.match(/\ba\s+([aeiou]\w+)/i)) && !/^(uni|use|usu|euro|one|ubiq)/i.test(m[1]))
+      g(m[0], 'use "an" before a vowel sound');
+    if ((m = prose.match(/\ban\s+([bcdfgjklmnpqrstvwxyz]\w+)/i)) && !/^(hour|honest|hono)/i.test(m[1]))
+      g(m[0], 'use "a" before a consonant sound');
+    if ((m = prose.match(/\byour\s+(welcome|going|doing|being)\b/i))) g(m[0], 'this one is "you are", so it is "you\u2019re"');
+    if ((m = prose.match(/[!?]{2,}|,{2,}/))) g(m[0], 'one punctuation mark is enough');
+    if ((m = prose.match(/\s+[,.;:!?]/))) g('space before ' + m[0].trim(), 'no space goes before a comma or full stop');
+    if ((m = prose.match(/[,;:][A-Za-z]/))) g(m[0], 'a space goes after a comma');
+
+    return {spelling:spelling, grammar:grammar, informal:informal,
+            clean: !spelling.length && !grammar.length && !informal.length};
+  }
+
+  function drawProof(v){
+    var host = document.getElementById('proof'), p = proofread(v);
+    if (!v.words){
+      host.innerHTML = '<h3>PROOFREADING</h3><p class="clean note">' +
+        'Start writing and this will check your spelling, your grammar and whether you sound professional.</p>';
+      return;
+    }
+    var html = '<h3>PROOFREADING</h3>';
+    if (p.clean){
+      html += '<p class="clean">\u2713 Nothing to fix. Spelling, capitals, punctuation and tone all read properly.</p>';
+    } else {
+      [['spelling','SPELLING', 'fix'], ['grammar','GRAMMAR', 'note'], ['informal','PROFESSIONAL LANGUAGE', 'note']]
+      .forEach(function(grp){
+        var list = p[grp[0]];
+        if (!list.length) return;
+        html += '<div class="grp"><div class="gh"><span class="n">' + list.length + '</span>' + grp[1] + '</div>';
+        list.slice(0,6).forEach(function(it){
+          html += '<div class="item"><span class="bad">' + esc(it.bad) + '</span> ';
+          html += grp[2] === 'fix' ? '\u2192 <span class="fix">' + esc(it.fix) + '</span>'
+                                   : '<span class="note">' + esc(it.note) + '</span>';
+          html += '</div>';
+        });
+        if (list.length > 6) html += '<div class="item note">and ' + (list.length-6) + ' more</div>';
+        html += '</div>';
+      });
+    }
+    html += '<p class="foot">This checks the slips people make most often. It is not a substitute for reading your own email back before you send it.</p>';
+    host.innerHTML = html;
+  }
+
+  function checks(){
+    var list = BASE.slice();
+    // does the email actually deal with the situation it was written for?
+    if (person.scenario){
+      list.push({w:3, t:person.scenario.t, miss:'you never dealt with what this person actually wrote to you about',
+                 why:person.scenario.why, test:person.scenario.test});
+    }
+    list.push({w:1.5, t:'Spelling is right the whole way through',
+      miss:'there were spelling mistakes in it',
+      why:'One misspelled word makes a reader wonder what else you were careless about.',
+      test:function(v){ return !proofread(v).spelling.length; }});
+    list.push({w:1.5, t:'Capitals, punctuation and grammar hold up',
+      miss:'the grammar and punctuation were untidy',
+      why:'Sentences start with a capital and end with a full stop. It is the cheapest way to look competent.',
+      test:function(v){ return !proofread(v).grammar.length; }});
+    list.push({w:1, t:'It reads like a professional, not a text message',
+      miss:'it read like a text message',
+      why:'No chat shortcuts, no emoticons, no shouting in capitals.',
+      test:function(v){ return !proofread(v).informal.length; }});
+    // the later contacts want two things at once, not one
+    var live = person.liveChecks || (person.liveCheck ? [person.liveCheck] : []);
+    live.forEach(function(c){
+      list.push({w:1, t:c.t, miss:c.t.toLowerCase(), why:c.why, test:c.test, bonus:true});
+    });
+    return list;
+  }
+
+
+  /* ---------- who the student said they are ---------- */
+  var SIGNOFFS = /\b(kind regards|best regards|warm regards|kindest regards|regards|best wishes|all the best|sincerely|yours sincerely|yours faithfully|yours truly|many thanks|thank you|thanks|cheers|from|sent by)\b/gi;
+  function studentFirstName(){
+    var raw = (F.signoff.value || '');
+    raw = raw.replace(SIGNOFFS, ' ').replace(/[,.;:!?\-\u2013\u2014_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    var parts = raw.split(' ').filter(function(w){
+      return /^[A-Za-z\u00C0-\u024F'\u2019]{2,}$/.test(w);
+    });
+    if (!parts.length) return '';
+    var n = parts[0];
+    return n.charAt(0).toUpperCase() + n.slice(1);
+  }
+  function personalise(text){
+    if (!text) return text;
+    var n = studentFirstName();
+    if (n) return text.replace(/\{N\}/g, n);
+    // no usable name — fall back to a greeting that still reads properly
+    return text.replace(/^Hi \{N\},/, 'Hello,').replace(/^\{N\},/, 'Hello,').replace(/\{N\}/g, 'there');
+  }
+
+  function body(v){
+    return [v.greeting,v.purpose,v.detail,v.ask,v.signoff]
+      .map(function(s){ return s.trim(); }).filter(Boolean).join('\n\n');
+  }
+  function values(){
+    var v={}; Object.keys(F).forEach(function(k){ v[k]=F[k].value; });
+    v.text = body(v);
+    v.all = v.subject+' '+v.text;
+    v.words = v.text.trim() ? v.text.trim().split(/\s+/).length : 0;
+    return v;
+  }
+
+  /* ---------- contacts list ---------- */
+
+  /* ---------- autosave ----------
+     Students lose work to crashes and to closing the tab by accident. This
+     writes the whole state to this computer a moment after every change, and
+     puts it back when the page opens again. If the browser refuses to store
+     anything, the bar says so in red rather than pretending. */
+  var SAVE_KEY = 'practicum.email.v1';
+  var saveOn = (function(){
+    try {
+      window.localStorage.setItem('practicum.probe', '1');
+      window.localStorage.removeItem('practicum.probe');
+      return true;
+    } catch (e) { return false; }
+  })();
+  var saveTimer = null, unsaved = false, restoredAt = 0;
+  var saverEl = document.getElementById('saver');
+  var saverText = document.getElementById('savertext');
+  var saverFresh = document.getElementById('saverfresh');
+
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function clockOf(ms){ var d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+  function grabState(){
+    var f = {};
+    Object.keys(F).forEach(function(k){ f[k] = F[k].value; });
+    return { v:1, at:Date.now(), fields:f, person:person.id,
+             progress:progress, hints:hintsOut };
+  }
+  function applyState(d){
+    if (d.progress) progress = d.progress;
+    hintsOut = d.hints || {};
+    for (var i = 0; i < PEOPLE.length; i++){
+      if (PEOPLE[i].id === d.person && progress[PEOPLE[i].id] && progress[PEOPLE[i].id].open){
+        person = PEOPLE[i]; break;
+      }
+    }
+    if (d.fields) Object.keys(F).forEach(function(k){
+      if (typeof d.fields[k] === 'string') F[k].value = d.fields[k];
+    });
+  }
+
+  function sayIdle(){
+    if (!saveOn) return;
+    saverEl.className = 'saver';
+    saverText.innerHTML = 'Your work saves itself on this computer. Close this by accident and it comes back.';
+    saverFresh.hidden = true;
+  }
+  function sayNoStore(){
+    saveOn = false;
+    saverEl.className = 'saver warn';
+    saverText.innerHTML = '<b>This computer will not let the page save anything.</b> Nothing is being kept, so save or export your work yourself before you close the tab.';
+    saverFresh.hidden = true;
+  }
+  function saveNow(){
+    if (!saveOn) return;
+    try {
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(grabState()));
+      unsaved = false;
+      saverEl.className = 'saver';
+      saverText.innerHTML = 'Saved at <b>' + clockOf(Date.now()) + '</b>. It will still be here if this closes.';
+      saverFresh.hidden = false;
+    } catch (e) { sayNoStore(); }
+  }
+  function touch(){
+    unsaved = true;
+    if (!saveOn) return;
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 800);
+  }
+  function clearSave(){
+    try { window.localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  }
+  function restoreSave(){
+    if (!saveOn){ sayNoStore(); return false; }
+    var raw = null;
+    try { raw = window.localStorage.getItem(SAVE_KEY); } catch (e) { sayNoStore(); return false; }
+    if (!raw){ sayIdle(); return false; }
+    var d = null;
+    try { d = JSON.parse(raw); } catch (e) { d = null; }
+    if (!d || d.v !== 1){ clearSave(); sayIdle(); return false; }
+    try { applyState(d); } catch (e) { clearSave(); sayIdle(); return false; }
+    restoredAt = d.at || 0;
+    return true;
+  }
+  function sayRestored(){
+    saverEl.className = 'saver back';
+    saverText.innerHTML = '<b>Your work from ' + clockOf(restoredAt) + ' has been put back.</b> Your half-written email is exactly as you left it.';
+    saverFresh.hidden = false;
+  }
+  saverFresh.addEventListener('click', function(){
+    if (!window.confirm('Throw away the work on screen and start over?\n\nThis cannot be undone.')) return;
+    clearSave();
+    unsaved = false;
+    window.location.reload();
+  });
+  // if nothing could be stored, at least stop an accidental close from being silent
+  window.addEventListener('beforeunload', function(e){
+    if (!unsaved) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
+
+  var whoHost = document.getElementById('who');
+  function drawWho(){
+    whoHost.innerHTML = '';
+    PEOPLE.forEach(function(p){
+      var pr = progress[p.id];
+      var b = document.createElement('button');
+      b.dataset.id = p.id;
+      var mark = pr.open
+        ? '<span class="mstars">' + pr.stars.map(function(s){ return s?STAR:HOLLOW; }).join('') + '</span>'
+        : '<span class="lock">' + LOCK + '</span>';
+      b.innerHTML = '<span class="av" style="background:'+p.col+'">'+p.init+'</span>' +
+        '<span><span class="nm">'+p.name+'</span><span class="rl">'+p.role+'</span></span>' + mark;
+      if (!pr.open) b.className = 'locked';
+      b.setAttribute('aria-pressed', p.id===person.id ? 'true':'false');
+      b.addEventListener('click', function(){
+        if (!progress[p.id].open){
+          dialog('Locked', '<p class="ovsub">Get a reply from someone above first. Once one person answers you, the next contact opens up.</p>', [{label:'Alright'}]);
+          return;
+        }
+        person = p; update();
+      });
+      whoHost.appendChild(b);
+    });
+  }
+
+  /* ---------- feedback list ---------- */
+  var fbHost = document.getElementById('fb');
+  function drawChecks(v){
+    var list = checks();
+    var maxw = list.reduce(function(t,c){ return t+c.w; }, 0);
+    var score = 0;
+    if (fbHost.children.length !== list.length) fbHost.innerHTML = '';
+    list.forEach(function(c,i){
+      var li = fbHost.children[i];
+      if (!li){
+        li = document.createElement('li');
+        li.innerHTML = '<span class="dot">\u2713</span><span class="txt"></span>';
+        fbHost.appendChild(li);
+      }
+      li.querySelector('.txt').innerHTML = c.t + '<span class="why">'+c.why+'</span>';
+      var ok=false; try{ ok=c.test(v); }catch(e){}
+      if (ok) score += c.w;
+      var was = li.classList.contains('ok');
+      li.className = (ok?'ok':(v.words>0?'no':'')) + (c.bonus?' bonus':'');
+      if (ok && !was && !REDUCED){
+        var d=li.querySelector('.dot');
+        d.classList.remove('anim-pop'); void d.offsetWidth; d.classList.add('anim-pop');
+      }
+    });
+    return v.words===0 ? 0 : Math.round(score/maxw*100);
+  }
+
+  var lastPct = 0;
+  function update(){
+    touch();
+    drawWho();
+    document.getElementById('card').innerHTML =
+      '<p style="margin:0 0 9px"><b>'+person.job+'</b></p>' +
+      '<p style="margin:0 0 10px">'+person.about+'</p>' +
+      '<p class="quote" style="margin:0">'+person.quote+'</p>';
+
+    var pr = progress[person.id];
+    var goalTexts = ['Get a reply at all', person.bonusGoal, 'Score 90% or more'];
+    var gh = document.getElementById('goals');
+    gh.innerHTML = '';
+    goalTexts.forEach(function(t,i){
+      var li = document.createElement('li');
+      li.className = pr.stars[i] ? 'won' : '';
+      li.innerHTML = '<span class="st">'+(pr.stars[i]?STAR:HOLLOW)+'</span><span class="gt">'+t+'</span>';
+      gh.appendChild(li);
+    });
+    drawHints();
+    document.getElementById('attempts').textContent =
+      'Sent ' + pr.tries + (pr.tries===1?' time':' times') + (pr.best?(' \u00b7 best ' + pr.best + '%'):'');
+
+    var v = values();
+    var pct = drawChecks(v);
+    drawProof(v);
+    lastPct = pct;
+    var col = pct>=80 ? 'var(--mint)' : pct>=50 ? 'var(--gold)' : 'var(--coral)';
+    var el = document.getElementById('pct');
+    el.textContent = pct+'%'; el.style.color = col;
+    var g = document.getElementById('gauge');
+    g.style.width = pct+'%'; g.style.background = col;
+    var rk = document.getElementById('rank');
+    rk.style.color = col;
+    rk.textContent = v.words===0 ? '' :
+      pct>=80 ? 'Answered the same day' : pct>=50 ? 'They will get to it. Probably.' : 'Straight to the bottom of the pile';
+
+    drawCareer();
+  }
+
+  function totalStars(){
+    return PEOPLE.reduce(function(t,p){
+      return t + progress[p.id].stars.filter(Boolean).length; }, 0);
+  }
+  /* ---------- hints ---------- */
+  var hintsOut = {}, hintDrawn = '';
+  var hintBtn = document.getElementById('hintbtn'), hintBox = document.getElementById('hintbox');
+
+  function drawHints(){
+    var list = person.hints || [], n = hintsOut[person.id] || 0;
+    var sig = person.id + ':' + n;
+    if (sig === hintDrawn) return;      // render() runs on every keystroke; do not re-animate
+    hintDrawn = sig;
+    hintBox.innerHTML = '';
+    for (var i = 0; i < n; i++){
+      var d = document.createElement('div');
+      d.className = 'hint';
+      d.innerHTML = '<span class="hn">HINT ' + (i+1) + ' OF ' + list.length + '</span>' + list[i];
+      hintBox.appendChild(d);
+    }
+    if (!list.length){ hintBtn.style.display = 'none'; return; }
+    hintBtn.style.display = '';
+    hintBtn.disabled = n >= list.length;
+    hintBtn.textContent =
+      n === 0 ? (list.length === 1 ? 'Stuck? Show a hint' : 'Stuck? Show a hint · ' + list.length + ' for this contact')
+    : n < list.length ? 'Still stuck? Show hint ' + (n+1) + ' of ' + list.length
+    : 'That is every hint for this contact';
+  }
+  hintBtn.addEventListener('click', function(){
+    var list = person.hints || [], n = hintsOut[person.id] || 0;
+    if (n < list.length){ hintsOut[person.id] = n + 1; drawHints(); }
+  });
+
+  function drawCareer(){
+    var n = totalStars(), r = RANKS[0][1];
+    RANKS.forEach(function(x){ if (n >= x[0]) r = x[1]; });
+    document.getElementById('rk').textContent = r;
+    document.getElementById('cstars').textContent =
+      new Array(n+1).join(STAR) + new Array(MAX_STARS-n+1).join(HOLLOW);
+    document.getElementById('ctrack').style.width = Math.round(n/MAX_STARS*100)+'%';
+    document.getElementById('ccnt').textContent = n + ' / ' + MAX_STARS;
+  }
+
+  /* ---------- simulation ---------- */
+  var sim=document.getElementById('sim'), stage=document.getElementById('simstage'), simbtns=document.getElementById('simbtns');
+  function esc(s){ return s.replace(/[<>&]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c]; }); }
+  function typeInto(el, text, done){
+    if (REDUCED){ el.textContent=text; if(done)done(); return; }
+    el.textContent=''; var i=0;
+    var iv=setInterval(function(){
+      i+=2; el.textContent=text.slice(0,i);
+      if(i>=text.length){ clearInterval(iv); el.textContent=text; if(done)done(); }
+    },14);
+  }
+
+  document.getElementById('send').addEventListener('click', function(){
+    var v = values();
+    if (v.words < 5){
+      dialog('Nothing to send','<p class="ovsub">Write your email first. Even a bad one — you will learn more from sending it than from staring at the boxes.</p>',[{label:'Alright'}]);
+      return;
+    }
+    var pr = progress[person.id];
+    pr.tries++;
+    if (lastPct > pr.best) pr.best = lastPct;
+    sim.classList.add('on');
+    showInbox(v);
+  });
+
+  function showInbox(v){
+    var subj = v.subject.trim();
+    var rows = person.inbox.map(function(m,i){
+      return '<div class="mailrow" style="animation-delay:'+(i*0.07)+'s"><span class="from">'+m[0]+
+             '</span><span class="sub">'+m[1]+'</span></div>';
+    });
+    rows.splice(2,0,'<div class="mailrow mine" style="animation-delay:.42s"><span class="from">You</span>'+
+      '<span class="sub">'+(subj?esc(subj):'<span style="color:#c0392b;font-style:italic">(no subject)</span>')+'</span></div>');
+
+    stage.innerHTML =
+      '<h3>'+person.name+'\u2019s inbox, Tuesday morning</h3>'+
+      '<p class="sub">This is your email sitting next to everything else they have to deal with. Six seconds to decide.</p>'+
+      '<div class="inbox"><div class="inboxhead"><span>Inbox (6)</span><span>08:41</span></div>'+rows.join('')+'</div>'+
+      '<div class="verdictline" id="vline"></div>';
+
+    var line = !subj ? 'No subject line. In a list like that, yours is the one that gets skipped.'
+      : subj.length<12 ? 'Your subject is very short. Next to the others it does not say much.'
+      : lastPct>=80 ? 'Your subject says what this is before they open it. That is why it gets opened.'
+      : 'It is in the pile. Whether they open it depends on that subject line.';
+    setTimeout(function(){ var e=document.getElementById('vline'); if(e) e.innerHTML=line; }, REDUCED?0:900);
+
+    simbtns.innerHTML='';
+    mkBtn('They open it \u2192', function(){ showReply(v); });
+    mkBtn('Back to my email', function(){ sim.classList.remove('on'); }, true);
+  }
+  function mkBtn(label, go, quiet){
+    var b=document.createElement('button');
+    b.textContent=label; if(quiet) b.className='quiet';
+    b.addEventListener('click', go); simbtns.appendChild(b);
+    return b;
+  }
+
+  function showReply(v){
+    var pr = progress[person.id];
+    var tier = lastPct>=80 ? 'good' : lastPct>=50 ? 'mid' : 'bad';
+    var text = personalise(person[tier]);
+
+    // award stars
+    var won = [ lastPct>=50, !!person.bonus(v,lastPct,pr.tries), lastPct>=90 ];
+    var fresh = won.map(function(w,i){ return w && !pr.stars[i]; });
+    won.forEach(function(w,i){ if(w) pr.stars[i]=true; });
+    // getting a reply unlocks the next contact
+    if (won[0]){
+      var idx = PEOPLE.indexOf(person);
+      if (idx+1 < PEOPLE.length) progress[PEOPLE[idx+1].id].open = true;
+    }
+
+    var goalTexts = ['Got a reply', person.bonusGoal, 'Scored 90%+'];
+    var earned = '<div class="earned">' + goalTexts.map(function(t,i){
+        return '<div><div class="s'+(won[i]?' win':'')+'" data-i="'+i+'">'+(won[i]?STAR:HOLLOW)+
+               '</div><div class="n">'+t+'</div></div>'; }).join('') + '</div>';
+
+    if (text === null){
+      stage.innerHTML =
+        '<h3>Three weeks later</h3><p class="sub">You check again. And again.</p>'+
+        '<div class="reply"><div class="silence">Nothing came back.<br><br>'+
+        'No reply is the most common answer in the world, and nobody ever writes to tell you why.<br><br>'+
+        'Your email is still in there, somewhere under sixty others.</div></div>'+
+        earned +
+        '<div class="verdictline"><b>What went wrong:</b> '+weakest(v)+'</div>';
+      popStars(fresh);
+      afterButtons(won[0]);
+    } else {
+      stage.innerHTML =
+        '<h3>'+(tier==='good'?'A reply, the same day':tier==='mid'?'A reply, eventually':'A reply. Of sorts.')+'</h3>'+
+        '<p class="sub">'+(tier==='good'?'This is what a good email buys you.':
+                           tier==='mid'?'They answered — but now you have to write again.':
+                           'They replied, and every line is work you could have saved them.')+'</p>'+
+        '<div class="reply"><div class="replyhead">From: '+person.name+
+        '<div class="rs">Re: '+esc(v.subject.trim()||'(no subject)')+'</div></div>'+
+        '<div class="replybody" id="rbody"></div></div>'+ earned +
+        '<div class="verdictline" id="vline2"></div>';
+      typeInto(document.getElementById('rbody'), text, function(){
+        var e=document.getElementById('vline2');
+        if(e) e.innerHTML = won[0] && won[1] && won[2]
+          ? '<b>All three stars.</b> Nothing left to fix here — try someone harder.'
+          : '<b>Still missing:</b> ' + weakest(v);
+        popStars(fresh);
+      });
+      afterButtons(won[0]);
+    }
+    update();
+  }
+
+  function popStars(fresh){
+    if (REDUCED) return;
+    fresh.forEach(function(f,i){
+      if(!f) return;
+      var el = stage.querySelector('.s[data-i="'+i+'"]');
+      if(!el) return;
+      setTimeout(function(){ el.classList.add('pop'); }, 260 + i*220);
+    });
+  }
+
+  function afterButtons(gotReply){
+    simbtns.innerHTML='';
+    var all = totalStars();
+    if (all === MAX_STARS){ mkBtn('See your career report \u2192', showReport); }
+    else if (gotReply && PEOPLE.indexOf(person)+1 < PEOPLE.length && progress[PEOPLE[PEOPLE.indexOf(person)+1].id].open){
+      mkBtn('Next contact \u2192', function(){
+        person = PEOPLE[PEOPLE.indexOf(person)+1];
+        sim.classList.remove('on'); update(); window.scrollTo(0,0);
+      });
+      mkBtn('Try this one again', function(){ sim.classList.remove('on'); }, true);
+    } else {
+      mkBtn('Fix it and send again', function(){ sim.classList.remove('on'); });
+    }
+  }
+
+  function showReport(){
+    var rows = PEOPLE.map(function(p){
+      var pr=progress[p.id];
+      return '<tr><td>'+p.name+'</td><td style="color:var(--dim)">sent '+pr.tries+
+        ', best '+pr.best+'%</td><td>'+pr.stars.map(function(s){return s?STAR:HOLLOW;}).join('')+'</td></tr>';
+    }).join('');
+    stage.innerHTML =
+      '<div class="report"><div class="huge">'+MAX_STARS+'/'+MAX_STARS+'</div>'+
+      '<h3 style="margin-top:6px">Gets a reply from anyone</h3>'+
+      '<p class="sub">Fourteen busy people, none of whom owed you anything, and all of them answered.</p>'+
+      '<table>'+rows+'</table>'+
+      '<div class="verdictline" style="text-align:left"><b>What you actually learned:</b> a subject line that says something, a request the reader can act on, and a date. Those three carry almost every email you will ever send.</div></div>';
+    simbtns.innerHTML='';
+    mkBtn('Play again', function(){
+      PEOPLE.forEach(function(p,i){ progress[p.id]={stars:[false,false,false],tries:0,best:0,open:i===0}; });
+      person = PEOPLE[0];
+      Object.keys(F).forEach(function(k){ F[k].value=''; });
+      sim.classList.remove('on'); update(); window.scrollTo(0,0);
+    });
+    mkBtn('Close', function(){ sim.classList.remove('on'); }, true);
+  }
+
+  function weakest(v){
+    var missed=[];
+    checks().forEach(function(c){
+      var ok=false; try{ ok=c.test(v); }catch(e){}
+      if(!ok) missed.push({w:c.w, t:c.miss});
+    });
+    missed.sort(function(a,b){ return b.w-a.w; });
+    if(!missed.length) return 'nothing obvious \u2014 this may just be a busy week.';
+    return missed.slice(0,2).map(function(m){ return m.t; }).join(', and ') + '.';
+  }
+
+  sim.addEventListener('click', function(e){ if(e.target===sim) sim.classList.remove('on'); });
+
+  /* ---------- buttons ---------- */
+  document.getElementById('copy').addEventListener('click', function(){
+    var v=values();
+    var out='Subject: '+(v.subject||'(no subject)')+'\n\n'+v.text+
+      (v.attach.trim()?'\n\n[Attached: '+v.attach.trim()+']':'');
+    var ta=document.createElement('textarea'); ta.value=out;
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); this.textContent='Copied'; }
+    catch(e){ this.textContent='Select and copy'; }
+    document.body.removeChild(ta);
+    var b=this; setTimeout(function(){ b.textContent='Copy'; },1600);
+  });
+
+  document.getElementById('clear').addEventListener('click', function(){
+    dialog('Clear everything?','<p class="ovsub">Every box will be emptied. Your stars are safe.</p>',
+      [{label:'Yes, clear it', go:function(){ Object.keys(F).forEach(function(k){F[k].value='';}); update(); }},
+       {label:'Cancel', quiet:true}]);
+  });
+
+  var hb=document.createElement('button');
+  hb.className='helpbtn'; hb.type='button'; hb.textContent='How to use this';
+  hb.addEventListener('click', showHelp);
+  document.querySelector('header').appendChild(hb);
+
+  var came_back = restoreSave();
+  update();
+  if (came_back) sayRestored(); else showHelp();
+})();
+</script>
+</body>
+</html>
