@@ -2296,6 +2296,8 @@ document.addEventListener('click', e => {
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
   const calm = () => FAST || Fx.calm();
   const wait = ms => new Promise(r => setTimeout(r, calm() ? 0 : ms));
+  /* Thrown inside a TEST animation when the student leaves the level (Levels, the menu…) while it plays. */
+  const ABORT_TEST = new Error('test stopped: the student left the level');
 
   function freshState(ph) {
     if (ph.type === 'pick') return { sel: [] };
@@ -2572,7 +2574,7 @@ document.addEventListener('click', e => {
     if (fresh) { delete PROGRESS.fresh; saveProgress(); }
     $('#btn-continue').textContent = done === 0 ? 'Start playing' : done === LEVELS.length ? 'Play any level again' : 'Continue: Level ' + next.n;
   }
-  function goHome() { run = null; renderHome(); showScreen('screen-home'); }
+  function goHome() { run = null; document.body.classList.remove('is-busy'); renderHome(); showScreen('screen-home'); }
 
   /* ---------- screens: play ---------- */
   function startLevel(n) {
@@ -2787,6 +2789,7 @@ document.addEventListener('click', e => {
   }
 
   async function playScene(ph, res, last) {
+    const r0 = run, live = () => { if (run !== r0) throw ABORT_TEST; };   // the student left the level
     const a = ph.scene.actor, extra = new Set();
     let actorAt = a ? a.path[0] : null;
     const draw = marks => { $('#scene').innerHTML = sceneSvg(ph, run.st, { extra: [...extra], actorAt, marks }); };
@@ -2795,25 +2798,25 @@ document.addEventListener('click', e => {
         const it = itemOf(ph, id);
         extra.add('done:' + id);
         const target = it.moveTo || (a && a.follow && it.at ? [it.at[0] - 24, it.at[1] + 8] : null);
-        if (a && target) { await moveActor(actorAt, [target], 300); actorAt = target; }
+        if (a && target) { await moveActor(actorAt, [target], 300); live(); actorAt = target; }
         draw();
         Fx.sound('click');
-        await wait(target ? 110 : 320);
+        await wait(target ? 110 : 320); live();
       }
     } else if (ph.type === 'pick') {
-      for (const el of $$('.item-card.sel')) { Fx.pop(el); await wait(80); }
-    } else await wait(250);
+      for (const el of $$('.item-card.sel')) { Fx.pop(el); await wait(80); live(); }
+    } else await wait(250); live();
     if (res.solved) {
       extra.add('solved');
       draw();
-      if (a && !a.follow && a.path.length > 1) { await moveActor(actorAt, a.path.slice(1), 1300); actorAt = a.path[a.path.length - 1]; }
-      else if (a && a.winAt) { await moveActor(actorAt, [a.winAt], 500); actorAt = a.winAt; }
-      if (a) await actorEffect('cheer');
+      if (a && !a.follow && a.path.length > 1) { await moveActor(actorAt, a.path.slice(1), 1300); live(); actorAt = a.path[a.path.length - 1]; }
+      else if (a && a.winAt) { await moveActor(actorAt, [a.winAt], 500); live(); actorAt = a.winAt; }
+      if (a) await actorEffect('cheer'); live();
       run.view = { extra: [...extra], actorAt, marks: [], res };
       banner('win', last ? '🎉 MISSION COMPLETE!' : '✅ PART COMPLETE!');
       Fx.sound('win');
       Fx.confetti($('#stage'));
-      await wait(600);
+      await wait(600); live();
     } else {
       extra.add('failed');
       const marks = failMarksOf(ph, res);
@@ -2823,25 +2826,26 @@ document.addEventListener('click', e => {
         const f = flagsOf(ph, run.st);
         const act = a.blocks.filter(b => cond(b.when, f)).sort((x, y) => x.i - y.i)[0];
         if (act) {
-          if (act.i > 0) { await moveActor(actorAt, a.path.slice(1, act.i + 1), 300 + 260 * act.i); actorAt = a.path[act.i]; }
+          if (act.i > 0) { await moveActor(actorAt, a.path.slice(1, act.i + 1), 300 + 260 * act.i); live(); actorAt = a.path[act.i]; }
           blockAt = a.path[act.i];
-          await actorEffect(act.anim || 'shake');
-        } else await actorEffect('shake');
+          await actorEffect(act.anim || 'shake'); live();
+        } else await actorEffect('shake'); live();
       } else if (a && a.failPath && !a.onlyWin) {
-        await moveActor(actorAt, a.failPath.slice(1), 1000);
+        await moveActor(actorAt, a.failPath.slice(1), 1000); live();
         actorAt = a.failPath[a.failPath.length - 1];
         blockAt = actorAt;
-        await actorEffect('shake');
-      } else if (a && !a.onlyWin) await actorEffect('shake');
+        await actorEffect('shake'); live();
+      } else if (a && !a.onlyWin) await actorEffect('shake'); live();
       if (blockAt) boom(blockAt[0] + 8, blockAt[1] - 18);
       run.view = { extra: [...extra], actorAt, marks, res, badSteps: badStepsOf(ph, res) };
       banner('lose', '❌ Not solved yet');
       Fx.sound('bad');
-      await wait(750);
+      await wait(750); live();
     }
   }
 
   async function playRoute(ph, res, last) {
+    const r0 = run, live = () => { if (run !== r0) throw ABORT_TEST; };   // the student left the level
     const m = ph._m, path = run.st.path;
     const stopAt = path.findIndex(i => m.restricted.has(i));
     const walk = stopAt >= 0 ? path.slice(0, stopAt + 1) : path;
@@ -2849,7 +2853,7 @@ document.addEventListener('click', e => {
       for (const i of walk) {
         const el = $('#scene [data-cell="' + i + '"]');
         setWalker(el, ph.walker || '🚶');
-        await wait(170);
+        await wait(170); live();
         clearWalker(el);
       }
     }
@@ -2859,7 +2863,7 @@ document.addEventListener('click', e => {
       banner('win', last ? '🎉 MISSION COMPLETE!' : '✅ PART COMPLETE!');
       Fx.sound('win');
       Fx.confetti($('#stage'));
-      await wait(600);
+      await wait(600); live();
     } else {
       const at = stopAt >= 0 ? path[stopAt] : path[path.length - 1];
       const el = $('#scene [data-cell="' + at + '"]');
@@ -2867,23 +2871,26 @@ document.addEventListener('click', e => {
       run.view = { res };
       banner('lose', '❌ Not solved yet');
       Fx.sound('bad');
-      await wait(750);
+      await wait(750); live();
     }
   }
 
   async function onTest() {
     if (!run || run.busy || run.won) return;
-    const ph = curPh();
+    const r = run, ph = curPh();
     if (isEmpty(ph, run.st)) { toast('Build your solution first, then press TEST SOLUTION.'); return; }
     const res = evaluate(ph, run.st);
     const last = run.phase === run.L.phases.length - 1;
-    run.busy = true;
-    run.newId = null;
+    r.busy = true;
+    r.newId = null;
     document.body.classList.add('is-busy');
     $('#feedback').hidden = true;
     try {
       if (ph.type === 'route') await playRoute(ph, res, last); else await playScene(ph, res, last);
-    } finally { run.busy = false; document.body.classList.remove('is-busy'); }
+    } catch (e) {
+      if (e !== ABORT_TEST) throw e;
+    } finally { r.busy = false; if (!run || !run.busy) document.body.classList.remove('is-busy'); }
+    if (run !== r) return;   // the student left this level while the test played: nothing to show here
     if (res.solved) phaseSolved(res); else phaseFailed(res);
   }
 

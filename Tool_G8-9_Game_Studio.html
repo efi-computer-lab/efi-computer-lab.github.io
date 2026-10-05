@@ -2333,6 +2333,8 @@ document.addEventListener('click', e => {
   const uniq = arr => arr.filter((x, k) => arr.indexOf(x) === k);
   const calm = () => FAST || Fx.calm();
   const wait = ms => new Promise(r => setTimeout(r, calm() ? 0 : ms));
+  /* Thrown inside a TEST animation when the student leaves the level (Levels, the menu…) while it plays. */
+  const ABORT_TEST = new Error('test stopped: the student left the level');
 
   /* ---------- home ---------- */
   function renderHome() {
@@ -2564,16 +2566,17 @@ document.addEventListener('click', e => {
   }
 
   async function playTest(ev) {
+    const r0 = run, live = () => { if (run !== r0) throw ABORT_TEST; };   // the student left the level
     const lanes = run.geo.lanes, d = ev.d, h = ev.h;
     if (ev.solved) {
-      await Promise.all(lanes.map((ln, k) => runLane(k, ln, 'goal')));
-      await Promise.all(lanes.map((ln, k) => animate($('#pli' + k), JUMP, 650)));
+      await Promise.all(lanes.map((ln, k) => runLane(k, ln, 'goal'))); live();
+      await Promise.all(lanes.map((ln, k) => animate($('#pli' + k), JUMP, 650))); live();
       lanes.forEach(ln => addSvg(T('✨', ln.gx, ln.gy - 40, 18, 'applied')));
       if (run.L.testers) $('#pv-below').innerHTML = belowHtml(run.L, d, h, model(run.L, d, h, { win: true }), {});
       banner(true, '🎮 LEVEL COMPLETE!');
       Fx.sound('win');
       Fx.confetti($('#stage'));
-      await wait(600);
+      await wait(600); live();
       return;
     }
     const r = ev.fails[0].r;
@@ -2581,29 +2584,31 @@ document.addEventListener('click', e => {
     let at = val(r.at, d, h);
     if (at == null) at = 'goal';
     if (kind === 'unfair' && lanes.length > 1) {
-      await Promise.all([runLane(0, lanes[0], 'goal', 1.6), runLane(1, lanes[1], 1)]);
-      await actOut('unfair', 1, lanes[1], say);
+      await Promise.all([runLane(0, lanes[0], 'goal', 1.6), runLane(1, lanes[1], 1)]); live();
+      await actOut('unfair', 1, lanes[1], say); live();
     } else {
       const which = r.lane != null && lanes.length > 1 ? [r.lane] : lanes.map((_, k) => k);
-      await Promise.all(lanes.map((ln, k) => runLane(k, ln, which.includes(k) ? at : 'goal')));
-      await Promise.all(which.map((k, i) => actOut(kind, k, lanes[k], i === 0 ? say : '')));
+      await Promise.all(lanes.map((ln, k) => runLane(k, ln, which.includes(k) ? at : 'goal'))); live();
+      await Promise.all(which.map((k, i) => actOut(kind, k, lanes[k], i === 0 ? say : ''))); live();
       const ln = lanes[which[0]];
       if (typeof ln.stop === 'number') addSvg('<circle class="fail-ring" cx="' + ln.ipts[ln.stop][0] + '" cy="' + (ln.ipts[ln.stop][1] - 12) + '" r="17"/>');
     }
     banner(false, '❌ Playtest failed');
     Fx.sound('bad');
-    await wait(500);
+    await wait(500); live();
   }
 
   async function onTest() {
     if (!run || run.busy || run.won) return;
-    const ev = evaluate(run.L, run.st, run.S);
-    run.busy = true;
-    run.newId = null;
+    const r = run, ev = evaluate(run.L, run.st, run.S);
+    r.busy = true;
+    r.newId = null;
     document.body.classList.add('is-busy');
     $('#feedback').hidden = true;
     renderPreview();
-    try { await playTest(ev); } finally { run.busy = false; document.body.classList.remove('is-busy'); }
+    try { await playTest(ev); } catch (e) { if (e !== ABORT_TEST) throw e; }
+    finally { r.busy = false; if (!run || !run.busy) document.body.classList.remove('is-busy'); }
+    if (run !== r) return;   // the student left this level while the test played: nothing to show here
     run.last = ev;
     run.bad = new Set(ev.fails.flatMap(x => x.parts));
     renderParts();
