@@ -1472,6 +1472,10 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-views { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin: 10px auto 2px; }
 .gk-view { padding: 6px 12px; border-radius: 10px; border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; opacity: .78; }
 .gk-view.on { opacity: 1; border-color: var(--gk-accent); background: rgba(255,255,255,.15); }
+.gk-view-btn { position: absolute; right: 14px; bottom: 236px; pointer-events: auto; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700;
+  padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.35); background: var(--gk-panel, rgba(10,16,30,.75)); color: #fff; }
+.gk-view-btn:hover { border-color: var(--gk-accent); }
+.gk-view-btn kbd { font: inherit; font-size: 11px; padding: 0 5px; margin-left: 4px; border-radius: 4px; background: rgba(255,255,255,.18); }
 .gk-diff { margin: 10px auto 4px; max-width: 520px; }
 .gk-diff-title { font-weight: 700; margin-bottom: 6px; }
 .gk-diff-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -2494,9 +2498,7 @@ GK_LIBRARY.worlds = {
       const who = chars ? '<div class="gk-chars"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
         clabels.map(c => '<button type="button" class="gk-char' + (c.id === this.game.character ? ' on' : '') + '" data-char="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.character) + '">' +
           this.avatar(c.look || {}) + '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
-      const views = cfg.ui.views, view = GK.Settings.get('view', views && views[0] ? views[0][0] : null);
-      const cam = views && views.length > 1 ? '<div class="gk-views"><span class="gk-diff-title">Camera</span>' +
-        views.map(v => '<button type="button" class="gk-view' + (v[0] === view ? ' on' : '') + '" data-view="' + U.esc(v[0]) + '" aria-pressed="' + (v[0] === view) + '">' + U.esc(v[1]) + '</button>').join('') + '</div>' : '';
+      const cam = this.viewsHtml(cfg);
       const diff = choices ? '<div class="gk-diff"><div class="gk-diff-title">' + U.esc((cfg.difficulty && cfg.difficulty.title) || 'Difficulty') + '</div><div class="gk-diff-row">' +
         dlabels.map(c => '<button type="button" class="gk-diff-btn d-' + U.esc(c.id) + (c.id === this.game.difficulty ? ' on' : '') + '" data-diff="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.difficulty) + '">' +
           '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
@@ -2523,12 +2525,7 @@ GK_LIBRARY.worlds = {
           s.querySelectorAll('[data-char]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
         };
       });
-      s.querySelectorAll('[data-view]').forEach(b => {
-        b.onclick = () => {
-          GK.Settings.set('view', b.getAttribute('data-view'));
-          s.querySelectorAll('[data-view]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
-        };
-      });
+      this.bindViews(s);
       s.querySelectorAll('[data-diff]').forEach(b => {
         b.onclick = () => {
           this.game.setDifficulty(b.getAttribute('data-diff'));
@@ -2571,13 +2568,31 @@ GK_LIBRARY.worlds = {
         '<button class="gk-btn primary big" data-a="resume">▶ Resume</button>' +
         '<div class="gk-row center">' + (h.checkpoint ? '<button class="gk-btn" data-a="checkpoint">↩ Last checkpoint</button>' : '') + '<button class="gk-btn" data-a="restart">⟲ Restart</button>' +
         '<button class="gk-btn" data-a="sound">' + (this.game.audio.muted ? '🔇 Sound off' : '🔊 Sound on') + '</button></div>' +
-        this.controlsHtml(cfg) + this.menuLink(cfg));
+        this.viewsHtml(cfg) + this.controlsHtml(cfg) + this.menuLink(cfg));
+      this.bindViews(s);
       s.querySelector('[data-a=resume]').onclick = h.resume;
       s.querySelector('[data-a=restart]').onclick = h.restart;
       const cp = s.querySelector('[data-a=checkpoint]');
       if (cp) cp.onclick = h.checkpoint;
       const snd = s.querySelector('[data-a=sound]');
       snd.onclick = () => { h.sound(); snd.textContent = this.game.audio.muted ? '🔇 Sound off' : '🔊 Sound on'; };
+    }
+    /** Camera choice (ui.views, e.g. first / third person) for the title and pause screens; kept in GK.Settings 'view'. */
+    viewsHtml(cfg) {
+      const views = cfg.ui.views;
+      if (!views || views.length < 2) return '';
+      const cur = GK.Settings.get('view', views[0][0]);
+      return '<div class="gk-views"><span class="gk-diff-title">Camera</span>' +
+        views.map(v => '<button type="button" class="gk-view' + (v[0] === cur ? ' on' : '') + '" data-view="' + U.esc(v[0]) + '" aria-pressed="' + (v[0] === cur) + '">' + U.esc(v[1]) + '</button>').join('') + '</div>';
+    }
+    bindViews(s) {
+      s.querySelectorAll('[data-view]').forEach(b => {
+        b.onclick = () => {
+          GK.Settings.set('view', b.getAttribute('data-view'));
+          s.querySelectorAll('[data-view]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+          this.game.emit('view', { view: b.getAttribute('data-view') });
+        };
+      });
     }
     /** r: {won, reason, total, stars, maxStars, best, breakdown, time, done, required}; h: {restart, next, checkpoint} */
     showEnd(cfg, r, h) {
@@ -5637,10 +5652,27 @@ GK_LIBRARY.worlds = {
       this.worldMesh = this.renderer.mesh(g.world.geo);
       if (cfg.ui.vignette && !this.vignette) this.vignette = this.canvas.insertAdjacentElement('afterend', U.el('div', 'gk-vignette'));
       if (cfg.ui.minimap) this.buildMinimap();
+      // a camera button on the screen (click it, press V, or use the pause menu)
+      if (cfg.ui.views && cfg.ui.views.length > 1 && !this.viewBtn) {
+        this.viewBtn = U.el('button', 'gk-view-btn');
+        this.viewBtn.type = 'button';
+        this.viewBtn.onmousedown = e => e.stopPropagation();
+        this.viewBtn.onclick = e => { e.stopPropagation(); this.toggleView(); };
+        g.ui.hud.appendChild(this.viewBtn);
+        this.viewLabel = null;
+      }
+    }
+    /** Switch first ↔ third person (V, the camera button, or the pause menu). */
+    toggleView(to) {
+      const g = this.game, next = to || (this.viewMode() === 'third' ? 'first' : 'third');
+      GK.Settings.set('view', next);
+      g.ui.toast(next === 'third' ? '🎥 Third-person camera · press V for first person' : '👁 First-person view · press V for third person');
+      g.emit('view', { view: next });
     }
     teardown() {
       if (this.worldMesh) { this.renderer.free(this.worldMesh); this.worldMesh = null; }
       if (this.mini) { this.mini.canvas.remove(); this.mini = null; }
+      if (this.viewBtn) { this.viewBtn.remove(); this.viewBtn = null; }
     }
     /** ui.minimap: a round north-up map in the corner. The level is drawn once; the moving things every frame. */
     buildMinimap() {
@@ -5710,12 +5742,7 @@ GK_LIBRARY.worlds = {
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
       if (this.flashes.length) { for (const f of this.flashes) f.t -= dt; this.flashes = this.flashes.filter(f => f.t > 0); }
-      if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) {
-        const next = this.viewMode() === 'third' ? 'first' : 'third';
-        GK.Settings.set('view', next);
-        g.ui.toast(next === 'third' ? '🎥 Third-person camera · press V for first person' : '👁 First-person view · press V for third person');
-        g.emit('view', { view: next });
-      }
+      if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) this.toggleView();
       if (mode === 'playing' && g.setFocus) {
         const hit = g.world.raycast(g.player.eye(), g.player.forward(), g.player.cfg.reach);
         g.setFocus(hit.entity && hit.entity.currentInteraction() ? hit.entity : null);
@@ -5729,9 +5756,18 @@ GK_LIBRARY.worlds = {
         const a = g.shakeAmp * Math.min(1, g.shakeT * 4);
         eye = [eye[0] + (Math.random() - 0.5) * a, eye[1] + (Math.random() - 0.5) * a, eye[2] + (Math.random() - 0.5) * a];
       }
-      const third = this.viewMode() === 'third';
+      let third = this.viewMode() === 'third';
+      if (this.viewBtn) {
+        const label = third ? '🎥 Third person' : '👁 First person';
+        if (this.viewLabel !== label) { this.viewLabel = label; this.viewBtn.innerHTML = label + '<kbd>V</kbd>'; this.viewBtn.title = 'Switch the camera (V)'; }
+        this.viewBtn.style.display = g.state.mode === 'playing' || g.state.mode === 'paused' ? '' : 'none';
+      }
       let look = g.player.forward();
-      if (third) { const c = this.thirdCamera(eye); eye = c.pos; look = c.dir; }
+      if (third) {
+        const c = this.thirdCamera(eye);
+        if (c.dist < 1.1) third = false;   // backed against a wall: no room for the camera, show first person until there is
+        else { eye = c.pos; look = c.dir; }
+      }
       this.camPos = eye;
       r.setCamera(eye, look, g.player.cfg.fov);
       const items = [{ mesh: this.worldMesh, pos: [0, 0, 0], grid: true }];
@@ -5748,7 +5784,8 @@ GK_LIBRARY.worlds = {
       for (const e of g.world.entities) {
         if (!e.active || !e.shape) continue;
         const mesh = r.cached(e.shape.key, () => e.shape.geo);
-        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, scale: e.scale, tint: e.tint, alpha: e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });
+        const ghost = third && this.seeThrough && this.seeThrough.has(e);
+        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, scale: e.scale, tint: e.tint, alpha: ghost ? 0.22 : e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });
         if (!SHADOW[e.type]) continue;
         const dx = e.pos[0] - eye[0], dz = e.pos[2] - eye[2];
         if (dx * dx + dz * dz > 900) continue;
@@ -5811,12 +5848,21 @@ GK_LIBRARY.worlds = {
     thirdCamera(eye) {
       const p = this.game.player, f = p.forward(), yaw = p.yaw, right = [Math.cos(yaw), 0, -Math.sin(yaw)];
       const head = [p.pos[0], p.pos[1] + p.cfg.eyeHeight - 0.05, p.pos[2]];
-      const want = [head[0] - f[0] * 3.1 + right[0] * 0.6, head[1] - f[1] * 3.1 + 0.45, head[2] - f[2] * 3.1 + right[2] * 0.6];
+      const want = [head[0] - f[0] * 3.0 + right[0] * 0.85, head[1] - f[1] * 3.0 + 0.35, head[2] - f[2] * 3.0 + right[2] * 0.85];
       const d = V.sub(want, head), L = V.len(d), u = V.scale(d, 1 / L);
       const hit = this.game.world.raycast(head, u, L + 0.3);
       const t = hit.hit ? Math.max(0.3, Math.min(L, hit.t - 0.3)) : L;
       const pos = V.add(head, V.scale(u, t));
-      return { pos, dir: V.norm(V.sub(V.add(eye, V.scale(f, 14)), pos)) };
+      // scenery you can walk through (pipes, glass cases…) between the camera and the character turns see-through
+      const see = this.seeThrough = new Set(), body = [p.pos[0], p.pos[1] + 0.9, p.pos[2]], toBody = V.sub(body, pos), lb = V.len(toBody), ub = V.scale(toBody, 1 / lb);
+      for (const e of this.game.world.entities) {
+        if (!e.active || !e.shape || e.blocks() || e.type === 'hazard' || e.type === 'fx' || e.type === 'pickup' || e.type === 'collectible' || e.type === 'powerup') continue;
+        const bx = e.box(true);
+        if (bx.max[1] - bx.min[1] < 0.6) continue;
+        const a1 = GK.Physics.rayBox(head, u, bx), a2 = GK.Physics.rayBox(pos, ub, bx);
+        if ((a1 >= 0 && a1 < t) || (a2 >= 0 && a2 < lb)) see.add(e);
+      }
+      return { pos, dist: t, dir: V.norm(V.sub(V.add(eye, V.scale(f, 14)), pos)) };
     }
     /** Third person: the character, walking (legs and arms swing), holding and using the tool. */
     drawHero(items, vm) {
@@ -5828,22 +5874,36 @@ GK_LIBRARY.worlds = {
       this.walkK = (this.walkK || 0) + ((p.moving ? 1 : 0) - (this.walkK || 0)) * 0.2;
       const sw = Math.sin((p.bobT || 0) * 2) * 0.6 * this.walkK, air = p.grounded ? 0 : 0.35;
       const sx = GK.heroShoulderX(look), lerp = (a, b, t) => a + (b - a) * t;
-      let armR = -sw * 0.8 + air, armL = sw * 0.8 + air;
+      // arm pitch: 0 = hanging, PI/2 = pointing forward. Arm yaw (turn at the shoulder): + turns toward the character's left.
+      let armR = -sw * 0.8 + air, armL = sw * 0.8 + air, yawR = 0, yawL = 0;
+      const gun = vm && !vm.melee, aim = gun ? p.pitch - (vm.kick || 0) * 0.2 - (vm.lower || 0) * 0.9 : 0;
       if (vm && vm.melee) {
         const k = vm.swing || 0;
         armR = k <= 0 ? 0.95 : k < 0.2 ? lerp(0.95, 2.8, k / 0.2) : k < 0.6 ? lerp(2.8, 0.45, (k - 0.2) / 0.4) : lerp(0.45, 0.95, (k - 0.6) / 0.4);
-      } else if (vm) { armR = Math.PI / 2 + p.pitch - (vm.kick || 0) * 0.2 - (vm.lower || 0) * 0.9; armL = armR - 0.12; }
+      } else if (gun) {
+        // held at the right hip, out to the side where the over-the-shoulder camera sees it; it still points where you aim
+        armR = 0.95 + aim * 0.35; yawR = -0.38;
+        armL = 0.35 + sw * 0.4; yawL = -0.25;
+      }
       items.push({ mesh: part('torso'), pos: at(0, 0, 0), yaw: Y });
       items.push({ mesh: part('head'), pos: at(0, H.neck, 0), yaw: Y, pitch: U.clamp(p.pitch * 0.5, -0.45, 0.45) });
       items.push({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: sw + air });
       items.push({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -sw + air * 0.4 });
-      items.push({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y, pitch: armL });
-      items.push({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: armR });
+      items.push({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y + yawL, pitch: armL });
+      items.push({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y + yawR, pitch: armR });
       if (vm) {
-        const sh = at(-sx, H.shoulder, 0), L = H.arm - 0.04;
-        const hand = [sh[0] + Math.sin(armR) * n * L, sh[1] - Math.cos(armR) * L, sh[2] + Math.sin(armR) * c * L];
+        const sh = at(-sx, H.shoulder, 0), L = H.arm - 0.04, nr = Math.sin(Y + yawR), cr = Math.cos(Y + yawR);
+        const hand = [sh[0] + Math.sin(armR) * nr * L, sh[1] - Math.cos(armR) * L, sh[2] + Math.sin(armR) * cr * L];
         const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
-        items.push({ mesh, pos: hand, yaw: Y, pitch: vm.melee ? armR + Math.PI + 1.0 : armR - Math.PI / 2, scale: vm.melee ? 1 : 0.95, hi: vm.glow || 0 });
+        if (vm.melee) items.push({ mesh, pos: hand, yaw: Y + yawR, pitch: armR + Math.PI + 1.0, scale: 1.1, hi: vm.glow || 0 });
+        else {
+          // the gun points where the player aims; its grip (about 0.1 below and 0.11 behind its centre) sits in the hand
+          // angled a little outward like a relaxed hip carry, so the over-the-shoulder camera sees its side
+          const s = 2.0, gy = Y + yawR * 0.8, gp = aim * 0.6 - 0.08, ng = Math.sin(gy), cg = Math.cos(gy), ca = Math.cos(gp), sa = Math.sin(gp);
+          const Z = [ng * ca, sa, cg * ca], Up = [-ng * sa, ca, -cg * sa];
+          const pos = [0, 1, 2].map(i => hand[i] + (0.1 * Up[i] + 0.11 * Z[i]) * s);
+          items.push({ mesh, pos, yaw: gy, pitch: gp, scale: s, hi: vm.glow || 0 });
+        }
       }
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
       items.push({ mesh: blob, pos: [p.pos[0], p.pos[1] + 0.02, p.pos[2]], scale: [0.45, 1, 0.45], alpha: 0.34 });
