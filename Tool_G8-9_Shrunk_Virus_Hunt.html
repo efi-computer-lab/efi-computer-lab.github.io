@@ -711,6 +711,9 @@ window.GAME = {
     phoneCell: { type: 'collectible', model: 'energyCell', item: 'phoneCell', points: 25, name: 'battery cell', color: '#2ecc71' },
   },
 
+  // Save on this computer as each act starts: a closed browser or a shutdown loses at most the current act.
+  resume: true,
+
   scenes: [
     // ================= ACT 1: inside the server =================
     { id: 'server', title: 'content:acts.server', world: 'server-inside', spawn: 'default',
@@ -1422,6 +1425,9 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-name .gk-input { width: 240px; font-size: 18px; text-align: center; }
 .gk-name .gk-input.need { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.35); }
 .gk-lead-title { margin: 14px 0 6px; font-weight: 800; color: var(--gk-accent); }
+.gk-resume { margin: 12px auto 6px; padding: 4px 16px 10px; max-width: 460px; border: 2px solid var(--gk-accent); border-radius: 12px; background: rgba(255,255,255,.06); }
+.gk-resume p { margin: 6px 0; }
+.gk-resume .gk-lead-title { margin-top: 8px; }
 .gk-leaders { margin: 0 auto 8px; border-collapse: collapse; min-width: 300px; font-size: 14px; }
 .gk-leaders th, .gk-leaders td { padding: 4px 10px; border-bottom: 1px solid rgba(255,255,255,.12); text-align: left; }
 .gk-leaders th { opacity: .7; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
@@ -2387,8 +2393,19 @@ GK_LIBRARY.worlds = {
     }
     menuLink(cfg) { return cfg.ui.menuUrl ? '<p><a class="gk-link" href="' + U.esc(cfg.ui.menuUrl) + '">← ' + U.esc(cfg.ui.menuLabel || 'Menu') + '</a></p>' : ''; }
     /** levels: null or {count, unlocked, names} — shows a level picker. onPlay(levelIndex). */
-    showTitle(cfg, onPlay, levels) {
+    /** resume (optional): {info: saved resume point, onResume()} — adds a "Continue" box above the Play button. */
+    showTitle(cfg, onPlay, levels, resume) {
       const best = this.game.store.get('best', 0);
+      let cont = '';
+      if (resume) {
+        const r = resume.info, when = new Date(r.at);
+        const day = isNaN(when) ? '' : when.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        cont = '<div class="gk-resume"><div class="gk-lead-title">💾 Saved game on this computer</div>' +
+          '<p>' + U.esc(r.title || ('Part ' + r.part)) + (r.parts ? ' (' + r.part + ' of ' + r.parts + ')' : '') +
+          (r.name ? ' · <b>' + U.esc(r.name) + '</b>' : '') + ' · ' + (r.score || 0) + ' points' + (day ? '<br><span class="gk-muted">Saved ' + U.esc(day) + '</span>' : '') + '</p>' +
+          '<button class="gk-btn primary big" data-a="resume">▶ Continue' + (r.name ? ' as ' + U.esc(r.name) : '') + '</button>' +
+          '<p class="gk-muted">Not you? Type your name below and start a new game.</p></div>';
+      }
       let pick = '';
       if (levels) {
         pick = '<div class="gk-levels">' + levels.names.map((n, i) => '<button class="gk-btn' + (i === levels.unlocked - 1 ? ' primary' : '') + '" data-level="' + i + '"' + (i >= levels.unlocked ? ' disabled' : '') + '>' + (i >= levels.unlocked ? '🔒 ' : '') + U.esc(n) + '</button>').join('') + '</div>';
@@ -2397,10 +2414,10 @@ GK_LIBRARY.worlds = {
       const s = this.screen('gk-title-screen',
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
-        (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') +
+        (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
         (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
-        (levels ? pick : '<button class="gk-btn primary big" data-level="0">▶ Play</button>') +
+        (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
         (best && !lead ? '<p class="gk-muted">Best score on this computer: ' + best + '</p>' : '') + this.menuLink(cfg));
       const nameBox = s.querySelector('#gk-name');
@@ -2409,6 +2426,8 @@ GK_LIBRARY.worlds = {
         setTimeout(() => nameBox.focus(), 50);
         nameBox.onkeydown = e => { if (e.key === 'Enter') { const b = s.querySelector('[data-level]:not([disabled])'); if (b) b.click(); } };
       }
+      const rb = s.querySelector('[data-a=resume]');
+      if (rb) rb.onclick = resume.onResume;
       s.querySelectorAll('[data-level]').forEach(b => {
         b.onclick = () => {
           if (nameBox) {
@@ -2560,7 +2579,7 @@ GK_LIBRARY.worlds = {
   'use strict';
   const U = GK.util;
   const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts',
-    'content', 'levels', 'scenes', 'startScene', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
+    'content', 'levels', 'scenes', 'startScene', 'resume', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
     'locations', 'spawns', 'routes', 'spawn', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
     'scoring', 'hints', 'win', 'lose', 'ui', 'audio', 'controls', 'hooks', 'triggers', 'vars', 'flags', 'intro',
     'winText', 'loseText', 'teacher', 'quiz'];
@@ -2736,6 +2755,7 @@ GK_LIBRARY.worlds = {
     ui: { accent: '#4cc9f0', markers: true, showControls: true, labelRange: 10, crosshair: false, lockHint: false, menuUrl: null, menuLabel: 'Menu', askName: false, leaderboard: false },
     audio: { muted: false, volume: 0.7, sounds: {} },
     teacher: { pin: null },
+    resume: false,  // scene games: save on THIS computer as each scene (act) starts; the title screen offers "Continue"
     controls: {},
     hooks: {},      // setup(game) start(game) update(game, dt) win(game) lose(game)
   };
@@ -2868,13 +2888,70 @@ GK_LIBRARY.worlds = {
     }
     /** Best results on this computer (ui.leaderboard): [{name, score, time, stars, at}], best first. */
     leaders() { return this.store.get('leaders', []); }
-    /** Restart: a level restarts itself; a scene-based game restarts from its first scene. */
-    restart() { this.loadLevel(this.sceneMode ? Math.max(0, this.stageIndex(this.base.startScene || 0)) : this.levelIndex); }
+    /** Restart: a level restarts itself; a scene-based game restarts from its first scene. A restart is a new game,
+        so the saved resume point is dropped. */
+    restart() {
+      this.store.remove('resume');
+      this.loadLevel(this.sceneMode ? Math.max(0, this.stageIndex(this.base.startScene || 0)) : this.levelIndex);
+    }
     unlockedLevels() { return Math.min(this.levelCount, Math.max(1, Number(this.store.get('unlocked', 1)) || 1)); }
     showTitle() {
       const levels = this.levelCount > 1 && !this.sceneMode;
-      this.ui.showTitle(this.cfg, i => { this.audio.unlock(); if (i !== this.levelIndex) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); } },
-        levels ? { count: this.levelCount, unlocked: this.unlockedLevels(), names: this.stages.map((l, k) => l.title || ('Level ' + (k + 1))) } : null);
+      const saved = this.savedResume();
+      this.ui.showTitle(this.cfg, i => {
+        this.audio.unlock();
+        this.store.remove('resume');   // a new game replaces the old resume point
+        if (i !== this.levelIndex) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); }
+      }, levels ? { count: this.levelCount, unlocked: this.unlockedLevels(), names: this.stages.map((l, k) => l.title || ('Level ' + (k + 1))) } : null,
+      saved ? { info: saved, onResume: () => { this.audio.unlock(); this.resumeSaved(saved); } } : null);
+    }
+
+    // ================= resume after a crash (config.resume) =================
+    /** Saved on this computer when a scene starts, so a closed browser or a sudden shutdown loses at most the
+        current scene. Only the entry of a scene is saved: nothing is running yet (no timers, waves or dialogs). */
+    saveResume(spawn) {
+      if (!this.cfg.resume || !this.sceneMode) return;
+      const stage = this.stages[this.levelIndex] || {};
+      this.store.set('resume', {
+        v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null,
+        part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
+        name: this.playerName || '', score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
+      });
+    }
+    /** The resume point on this computer, or null (none, another game's, or damaged). */
+    savedResume() {
+      if (!this.base.resume || !this.sceneMode) return null;
+      const r = this.store.get('resume', null);
+      const ok = r && r.v === 1 && r.id === (this.base.id || 'game') && r.snap && this.stageIndex(r.scene) > 0;
+      if (r && !ok) this.store.remove('resume');
+      return ok ? r : null;
+    }
+    /** Continue from a resume point: rebuild its scene, put the saved state back, then start it like a scene entry. */
+    resumeSaved(r) {
+      try {
+        this.ui.hideScreens();
+        if (r.name) this.setPlayerName(r.name);
+        this.sceneMemory = {};
+        this.restore(r.snap);   // mode is 'title' here, so nothing starts yet
+        this.state.inZone = {};
+        if (r.name) this.state.vars.playerName = this.playerName;
+        if (this.world) {
+          const at = (r.spawn && this.world.spawns[r.spawn]) || this.world.spawn;
+          this.player.place(at.pos, at.rot);
+          this.checkpoint = { pos: at.pos.slice(), rot: at.rot };
+        }
+        this.state.mode = 'playing';
+        this.input.clear();
+        if (this.view.begin) this.view.begin();
+        for (const m of this.mechanics) if (m.start) m.start(this);
+        this.ui.update(this);
+        this.emit('scene:enter', { id: this.stageId, from: null, resumed: true });
+      } catch (e) {
+        // a damaged save must never trap a student: forget it and start a fresh game
+        console.warn('[GK] resume failed, starting a new game:', e);
+        this.store.remove('resume');
+        this.loadLevel(Math.max(0, this.stageIndex(this.base.startScene || 0)));
+      }
     }
     /** Move to another scene (or level) and KEEP progress: flags, vars, inventory, score, time, objectives.
         Each scene remembers its objects (collected items stay collected). Happens at the end of the current step. */
@@ -2903,6 +2980,7 @@ GK_LIBRARY.worlds = {
       this.state.mode = 'playing';
       if (this.view.begin) this.view.begin();
       for (const m of this.mechanics) if (m.start) m.start(this);
+      this.saveResume(t.spawn);   // before scene:enter, so a resume replays the same entry (story card included)
       this.emit('scene:enter', { id: this.stageId, from });
     }
 
@@ -2957,6 +3035,7 @@ GK_LIBRARY.worlds = {
       Object.assign(res, { won, reason, time: this.state.time, done: obj ? obj.doneCount() : null, required: obj ? obj.required().length : null });
       const next = won && !this.sceneMode && this.levelIndex + 1 < this.levelCount;
       if (won && next) this.store.set('unlocked', Math.max(this.unlockedLevels(), this.levelIndex + 2));
+      if (won) this.store.remove('resume');   // finished: nothing left to continue
       // results history on this computer (teacher panel)
       const hist = this.store.get('history', []);
       hist.push({ at: new Date().toISOString(), level: this.levelIndex + 1, won, score: res.total, time: Math.round(this.state.time), hints: this.state.hintsUsed || 0 });
