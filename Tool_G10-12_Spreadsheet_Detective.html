@@ -474,6 +474,8 @@ body { background: #eef1f5; }
 }
 .closed-box .stars { font-size: 1.6rem; color: #f5b700; letter-spacing: 3px; }
 .closed-box .stars .off { color: #d9d2bf; }
+.closed-box .msg-good { margin: 8px 0 0; font-weight: 700; color: #137333; }
+.closed-box .redo-tip { margin: 8px 0 0; font-size: .9rem; color: var(--ink-2); }
 
 /* Spreadsheet */
 .sheet-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #fff; }
@@ -3276,8 +3278,11 @@ function lvl(id) {
   if (!L.shown) L.shown = {};
   return L;
 }
-const unlocked = id => id === 1 || !!(data.levels[id - 1] && data.levels[id - 1].done);
-const allClosed = () => CASES.every(cs => data.levels[cs.id] && data.levels[cs.id].done);
+/* closed = solved at least once. A case that is being redone for more stars (L.redo) stays closed, so later
+   cases stay open and the certificate stays earned; L.done is only the current attempt. */
+const isClosed = id => !!(data.levels[id] && (data.levels[id].done || data.levels[id].redo));
+const unlocked = id => id === 1 || isClosed(id - 1);
+const allClosed = () => CASES.every(cs => isClosed(cs.id));
 const totalStars = () => CASES.reduce((s, cs) => s + ((data.levels[cs.id] && data.levels[cs.id].stars) || 0), 0);
 const starText = n => '<span>' + '&#9733;'.repeat(n) + '</span><span class="off">' + '&#9733;'.repeat(3 - n) + '</span>';
 
@@ -4265,7 +4270,9 @@ function renderCaseFile() {
     h += '</div></li>';
   });
   h += '</ol>' + verdictHtml(L, firstOpen === -1 || L.solved || L.done);
-  h += '<p style="margin-top:16px"><button type="button" class="btn btn-sm btn-ghost" data-act="restart">&#8635; Start this sheet again</button></p>';
+  h += '<p style="margin-top:16px">' + (L.done && L.stars < 3
+    ? '<button type="button" class="btn btn-sm btn-primary" data-act="redo">&#8635; Redo this case for &#9733;&#9733;&#9733;</button>'
+    : '<button type="button" class="btn btn-sm btn-ghost" data-act="restart">&#8635; Start this sheet again</button>') + '</p>';
   el.innerHTML = h;
 }
 
@@ -4284,7 +4291,8 @@ function verdictHtml(L, open) {
   if (L.done) {
     const nextCs = CASES.find(c => c.id === cur.cs.id + 1);
     h += '<div class="closed-box"><div class="closed-stamp">CASE CLOSED</div><div class="stars" aria-label="' + L.stars + ' of 3 stars">' + starText(L.stars) + '</div>' +
-      '<p>' + esc(v.why) + '</p><div class="btn-row">' +
+      '<p>' + esc(v.why) + '</p>' + (cur.redoMsg ? '<p class="msg-good">' + esc(cur.redoMsg) + '</p>' : '') +
+      (L.stars < 3 ? '<p class="redo-tip">Want all 3 stars? Press <strong>&#8635; Redo this case</strong> below and solve it again with no <em>Show answer</em> and no wrong verdict.</p>' : '') + '<div class="btn-row">' +
       (nextCs ? '<button type="button" class="btn btn-primary" data-act="next">Next case &rarr;</button>' : '<button type="button" class="btn btn-primary" data-act="cert">&#127942; Get your certificate</button>') +
       '<button type="button" class="btn" data-act="board">Case board</button></div></div>';
   }
@@ -4305,10 +4313,15 @@ function practicePanel() {
 $('#casefile').addEventListener('click', e => {
   const b = e.target.closest('[data-act], [data-opt]');
   if (!b || !cur) return;
-  if (editing && !commit()) return;
+  const act2 = b.dataset.act;
+  /* A half-typed or broken formula (for example "=D2-") must never make these buttons do nothing:
+     starting again or leaving the sheet drops the typing; a hint, an answer or a check still opens and the
+     typing stays for the student to fix. Only a verdict waits for the sheet to be finished. */
+  const stuck = editing && !commit();
+  if (stuck && b.dataset.opt != null) return;
+  if (stuck && ['restart', 'redo', 'clear-practice', 'next', 'board', 'cert'].indexOf(act2) >= 0) cancelEdit();
   if (b.dataset.opt != null) { pickVerdict(Number(b.dataset.opt)); return; }
   const i = Number(b.dataset.i);
-  const act2 = b.dataset.act;
   if (act2 === 'check') {
     const st = cur.states[i];
     if (st.ok) return;
@@ -4316,7 +4329,7 @@ $('#casefile').addEventListener('click', e => {
     renderCaseFile();
     Fx.sound('bad');
     Fx.shake($('[data-task="' + i + '"]'));
-    if (st.cell) selectKey(st.cell);
+    if (st.cell && !editing) selectKey(st.cell);
   } else if (act2 === 'hint') {
     hintOpen[i] = !hintOpen[i];
     renderCaseFile();
@@ -4335,6 +4348,30 @@ $('#casefile').addEventListener('click', e => {
       afterChange();
       selectKey('A1');
     }, true);
+  } else if (act2 === 'redo') {
+    const L = lvl(cur.cs.id);
+    if (!L.done || L.stars >= 3) return;
+    confirmBox('Redo case ' + cur.cs.id + ' for 3 stars?',
+      'The case sheet starts fresh and you solve the case again: the tasks, then the verdict. ' +
+      'Your best stars are kept (' + L.stars + ' of 3), so you can only go up. Hints are free; <strong>Show answer</strong> or a wrong verdict costs a star. ' +
+      'Your other cases are not changed.', 'Redo the case', () => {
+        L.redo = true;   // still closed for unlocks and the certificate while redoing
+        L.done = false; L.solved = false; L.shown = {}; L.wrong = 0;
+        pushUndo();
+        cur.book = buildCaseBook(cur.cs);
+        cur.undo = []; cur.redo = [];
+        cur.wrongPicks = {};
+        cur.verdictMsg = '';
+        cur.redoMsg = '';
+        cur.states = null; cur.ready = false;
+        feedbackFor = {}; hintOpen = {};
+        save();
+        afterChange();
+        selectKey('A1');
+        cur.ready = true;
+        toast('Case ' + cur.cs.id + ' is open again. Go for 3 stars!');
+        const top = $('#casefile'); if (top) top.scrollTop = 0;
+      });
   } else if (act2 === 'next') openCase(cur.cs.id + 1);
   else if (act2 === 'board') goHome();
   else if (act2 === 'cert') showCert();
@@ -4353,9 +4390,12 @@ function pickVerdict(i) {
   if (L.done) return;
   if (i === cs.verdict.answer) {
     const stars = Math.max(1, 3 - (Object.keys(L.shown).length ? 1 : 0) - (L.wrong ? 1 : 0));
+    const before = L.stars || 0, wasRedo = !!L.redo;
     L.done = true;
-    L.stars = Math.max(L.stars || 0, stars);
+    L.redo = false;
+    L.stars = Math.max(before, stars);
     cur.verdictMsg = '';
+    cur.redoMsg = !wasRedo ? '' : stars > before ? 'New best: ' + stars + ' of 3 stars!' : 'This time: ' + stars + ' of 3 stars. You keep your best (' + before + ').';
     save();
     Fx.sound('win');
     renderCaseFile();
@@ -4427,19 +4467,20 @@ function goHome() {
 
 function renderHome() {
   $('#det-name').value = data.name || '';
-  const closed = CASES.filter(cs => data.levels[cs.id] && data.levels[cs.id].done).length;
+  const closed = CASES.filter(cs => isClosed(cs.id)).length;
   $('#board-sum').textContent = closed + ' of ' + CASES.length + ' cases closed · ' + totalStars() + ' of ' + CASES.length * 3 + ' stars';
-  const nextCs = CASES.find(cs => !(data.levels[cs.id] && data.levels[cs.id].done));
+  const nextCs = CASES.find(cs => !isClosed(cs.id));
   $('#btn-continue').innerHTML = nextCs ? (closed ? 'Open case ' + nextCs.id + ' &rarr;' : 'Start case 1 &rarr;') : '&#127942; See your certificate';
   $('#board').innerHTML = CASES.map(cs => {
     const L = data.levels[cs.id];
     const open = unlocked(cs.id);
-    const done = L && L.done;
+    const done = isClosed(cs.id);
     return '<button type="button" class="folder' + (nextCs && nextCs.id === cs.id ? ' next' : '') + '" data-case="' + cs.id + '"' + (open ? '' : ' disabled') + '>' +
       '<span class="num">CASE ' + String(cs.id).padStart(2, '0') + '</span>' +
       '<span class="ttl">' + esc(cs.title) + '</span>' +
       '<span class="skill">' + icon(cs.icon) + esc(cs.skill) + '</span>' +
-      (done ? '<span class="closed" aria-hidden="true">CLOSED</span><span class="stars" aria-label="' + L.stars + ' of 3 stars">' + starText(L.stars) + '</span>'
+      (done ? '<span class="closed" aria-hidden="true">CLOSED</span><span class="stars" aria-label="' + L.stars + ' of 3 stars">' + starText(L.stars) + '</span>' +
+        (L.redo ? '<span class="lock">&#8635; Redo in progress &rarr;</span>' : L.stars < 3 ? '<span class="lock">&#8635; Redo for &#9733;&#9733;&#9733;</span>' : '')
         : open ? '<span class="lock">' + (L && L.solved ? 'Verdict waiting' : 'Open case') + ' &rarr;</span>' : '<span class="lock">&#128274; Close case ' + (cs.id - 1) + ' first</span>') +
       '</button>';
   }).join('') +
@@ -4453,7 +4494,7 @@ $('#board').addEventListener('click', e => {
   if (b.dataset.practice) openPractice(); else openCase(Number(b.dataset.case));
 });
 $('#btn-continue').addEventListener('click', () => {
-  const nextCs = CASES.find(cs => !(data.levels[cs.id] && data.levels[cs.id].done));
+  const nextCs = CASES.find(cs => !isClosed(cs.id));
   if (nextCs) openCase(nextCs.id); else showCert();
 });
 $('#btn-practice').addEventListener('click', openPractice);
