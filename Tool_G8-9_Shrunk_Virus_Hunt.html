@@ -8247,8 +8247,20 @@ GK.Worlds.add('server-inside', {
         const muzzle = game.muzzlePoint ? game.muzzlePoint(aim) : null;   // third person: the gun's muzzle
         let start = muzzle || [eye[0] + f[0] * 0.55 + Math.cos(yaw) * 0.16, eye[1] + f[1] * 0.55 - 0.13, eye[2] + f[2] * 0.55 - Math.sin(yaw) * 0.16];
         let dir = V.norm(V.sub(aim, start));
-        // the tip sits beside the eye: if scenery is in its way but not in the crosshair's, shoot along the crosshair
-        if (wallAt(game, start, dir, V.dist(start, aim) - 0.3) < Infinity || (muzzle && wallAt(game, eye, V.norm(V.sub(muzzle, eye)), V.dist(eye, muzzle)) < Infinity)) {
+        if (muzzle) {
+          // third person, point-blank: the wall or enemy is closer than the end of the barrel (narrow corridors, an enemy
+          // right in front of you). The shot lands there and then, at the gun, instead of starting from your head.
+          const toM = V.sub(muzzle, eye), lm = V.len(toM);
+          if (wallAt(game, eye, V.scale(toM, 1 / lm), lm) < Infinity || V.dot(V.sub(aim, muzzle), toM) <= 0) {
+            pointBlank(w, ray, aim);
+            game.kick = 1;
+            if (game.lightFlash) game.lightFlash(aim, w.color, 4, 0.1);
+            game.audio.play(w.splash ? 'boom' : 'hit');
+            game.emit('weapon:fire', { id: s.cur, pointBlank: true });
+            return true;
+          }
+        } else if (wallAt(game, start, dir, V.dist(start, aim) - 0.3) < Infinity) {
+          // first person: the tip sits beside the eye; if scenery is in its way but not in the crosshair's, shoot along the crosshair
           start = V.add(eye, V.scale(f, 0.4)); dir = V.norm(V.sub(aim, start));
         }
         for (let i = 0; i < (w.pellets || 1); i++) {
@@ -8295,6 +8307,21 @@ GK.Worlds.add('server-inside', {
         game.audio.play(hits.length ? 'slash' : 'swing');
         game.emit('weapon:fire', { id: s.cur, melee: true, hits: hits.length });
         return true;
+      };
+      /** A shot that lands at once (third person, the target closer than the muzzle): hit the enemy under the crosshair,
+          or burst on the wall; splash weapons explode there. */
+      const pointBlank = (w, ray, aim) => {
+        if (w.splash) { fx.explode(aim, w); game.ui.hitMarker('hit'); return; }
+        const e = enemyAt(game, ray.o, ray.d, V.dist(ray.o, aim) + 0.6).e;
+        if (!e) { game.burst(aim, w.color, 4); return; }
+        let r = 'blocked';
+        for (let i = 0; i < (w.pellets || 1); i++) {
+          r = game.hitHazard ? game.hitHazard(e, w.damage) : 'blocked';
+          if (r === 'defeated' || r === 'blocked' || r === 'miss') break;
+        }
+        game.ui.hitMarker(r === 'blocked' ? 'blocked' : 'hit');
+        if (r !== 'defeated') game.burst(aim, r === 'blocked' ? '#4cc9f0' : w.color, 6);
+        game.emit('weapon:hit', { id: e.id });
       };
       const explode = (pos, w) => {
         for (const e of game.world.entities) {
