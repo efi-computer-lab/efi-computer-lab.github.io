@@ -672,14 +672,14 @@ window.GAME_CONTENT = {};
     { name: 'Cyber Core', text: 'CHAMPIONSHIP: a mountain, 2 red lights, 2 glass bridges, 7 firewalls. Points ×1.5!' },
   ];
 
-  C.characters = { title: 'Choose your racer', leo: 'Leo', leoText: 'Blue hoodie', kai: 'Kai', kaiText: 'Green jacket', mia: 'Mia', miaText: 'Pink top', zara: 'Zara', zaraText: 'Purple outfit' };
+  C.characters = { title: 'Your racer', leo: 'Leo', leoText: '', kai: 'Kai', kaiText: '', mia: 'Mia', miaText: '', zara: 'Zara', zaraText: '' };
 
   C.texts = {
     waiting: 'You are in! Wait for your teacher to start the round. Walk around the start and try the controls.',
     howto: 'HOW TO PLAY: race to the 🏁 finish. Red FIREWALLS block the road: answer at a terminal (E) to open them (wrong = 5 s freeze; 💡 Show answer costs points). Grab ❓ boxes for random gadgets, then press 1 2 3. 🔴 RED LIGHT = stand still! ⭐ BONUS terminals give extra points.',
   };
-  C.description = 'Race through five cyber worlds with your class. Open firewalls with Computer/ICT answers, use cartoon gadgets, find shortcuts and hidden data, help each other at team bridges. Five rounds, one champion!';
-  C.subtitle = 'Grade 8–9 · class race in 5 rounds';
+  C.description = '';
+  C.subtitle = 'Grade 8–9';
 })(window.GAME_CONTENT);
 
 </script>
@@ -692,8 +692,16 @@ window.GAME_CONTENT = {};
 (function () {
   const C = window.GAME_CONTENT;
   const life = { train: { model: 'train', speed: 10 }, drone: { model: 'droneBot', speed: 4 }, boat: { model: 'boat', speed: 3 } };
+  // background music per world: tempo, key (root Hz), minor / major, chord progression (scale degrees), sounds
+  const MUSIC = [
+    { bpm: 124, root: 110, mode: 'minor', prog: [0, 5, 3, 4], wave: 'sawtooth', arpWave: 'square' },     // Neon City: synthwave
+    { bpm: 110, root: 146.8, mode: 'major', prog: [0, 4, 5, 3], wave: 'triangle', arpWave: 'triangle' }, // Digital Forest: bright
+    { bpm: 132, root: 82.4, mode: 'minor', prog: [0, 0, 5, 6], wave: 'square', arpWave: 'sawtooth' },    // Data Factory: industrial
+    { bpm: 116, root: 87.3, mode: 'major', prog: [0, 5, 3, 4], wave: 'sine', arpWave: 'triangle' },      // Digital Ocean: breezy
+    { bpm: 140, root: 69.3, mode: 'minor', prog: [0, 5, 6, 4], wave: 'sawtooth', arpWave: 'square' },    // Cyber Core: epic
+  ];
   const round = (i, world, gates, charges) => ({
-    id: 'r' + (i + 1), title: 'content:rounds.' + i + '.name', world, quiz: { gates }, gadgets: { charges },
+    id: 'r' + (i + 1), title: 'content:rounds.' + i + '.name', world, quiz: { gates }, gadgets: { charges }, music: MUSIC[i],
     roundInfo: { name: C.rounds[i].name, text: C.rounds[i].text },
   });
 
@@ -704,7 +712,7 @@ window.GAME_CONTENT = {};
     description: 'content:description',
     type: 'first-person-3d',
     world: 'rush-city',
-    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'juice', 'online', 'quiz-gates', 'gadgets', 'race'],
+    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'juice', 'music', 'online', 'quiz-gates', 'gadgets', 'race'],
     levels: [
       round(0, 'rush-city', ['easy', 'easy', 'easy', 'medium', 'easy'], 1),
       round(1, 'rush-forest', ['easy', 'medium', 'easy', 'medium', 'medium', 'easy'], 2),
@@ -714,7 +722,7 @@ window.GAME_CONTENT = {};
     ],
     player: { walkSpeed: 5.6, sprintSpeed: 7.6, jumpSpeed: 6.2, killY: -1.6, reach: 3.2, health: null },
     render: { far: 300 },
-    ui: { accent: '#4cc9f0', askName: true, levelSelect: false, restart: false, pauseNote: 'The race keeps going while you are paused!', minimap: true, vignette: true, labelRange: 14, showHintKey: false, leaderboard: false,
+    ui: { accent: '#4cc9f0', askName: true, levelSelect: false, restart: false, showControls: false, pauseNote: '⏳ The race goes on!', minimap: true, vignette: true, labelRange: 14, showHintKey: false, leaderboard: false,
       controls: [['W A S D', 'Run'], ['Mouse', 'Look'], ['Space', 'Jump'], ['Shift', 'Sprint'], ['E / click', 'Use a terminal'], ['1 2 3', 'Gadgets'], ['V', 'Camera'], ['Esc', 'Pause']] },
     timer: { show: false },
     scoring: { objective: 0, wrongAnswer: 0, hint: 0, allowNegative: true },
@@ -723,7 +731,7 @@ window.GAME_CONTENT = {};
     race: { roundTime: 600, timeChoices: [360, 480, 600], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', reward: { easy: 10, medium: 12, hard: 16, case: 15, comeback: 75, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
     // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
-    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2, 3], bowling: [1.5, 3], banana: [3, 1], virus: [1.5, 2.5], bubble: [3, 1.5], ghost: [1, 2], anchor: [1.5, 1.5], rocket: [1, 4], scanner: [1.5, 1], jumppad: [1.5, 2] } },
+    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bubble: [2.5, 1.5], jetpack: [1, 4], scanner: [1.5, 1], jumppad: [2, 2.5] } },
     juice: { dust: '#d8dee9' },
     characters: { default: 'leo', title: 'content:characters.title', choices: [
       { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
@@ -747,15 +755,17 @@ window.GAME_CONTENT = {};
       sterm: (L, n) => ({ type: 'qterm', pool: 'shortcut', opens: ['sdoor-' + n.split('-')[1]] }),
       ibox: { type: 'itembox' },
       glass: { type: 'glasstile' },
-      hammer: { type: 'pendulum', swing: 0.72, period: 3.0 },
+      hammer: { type: 'pendulum', swing: 0.56, period: 2.8 },
       fan: { type: 'wind', model: 'bigFan', ahead: true, push: 5.5, pulse: [3, 2.5] },
       redlight: { type: 'redlight' },
       watcher: { type: 'watcher' },
       boulder: { type: 'boulder', speed: 7.5, r: 1.3, gap: 1.2 },
       ddoor: { type: 'dashdoor' },
-      laser: { type: 'hazard', model: 'laserGate', look: { size: 9.6 }, solid: false, pulse: [1.5, 1.4], damage: 1, knockback: 5, points: 0, faceTravel: false, bob: 0, label: null },
+      pusher: { type: 'piston', period: 2.8 },
+      jumpbar: { type: 'jumpbar', speed: 4.5 },
+      laser: { type: 'hazard', model: 'laserGate', look: { size: 8.6 }, solid: false, pulse: [1.5, 1.4], damage: 1, knockback: 5, points: 0, faceTravel: false, bob: 0, label: null },
       drone: { type: 'hazard', model: 'droneBot', speed: 2.6, damage: 1, knockback: 6, hover: 1.0, bob: 0.15, points: 0, faceTravel: false },
-      sweeper: { type: 'sweeper', length: 9.4, spin: 1.15 },
+      sweeper: { type: 'sweeper', length: 8.2, spin: 1.15 },
       belt: { type: 'conveyor', speed: 3.2 },
       sbelt: { type: 'conveyor', speed: 4.6, color: '#7cfc00' },
       pad: { type: 'speedpad', seconds: 2.5 },
@@ -1083,7 +1093,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/juice/juice","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","juice","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/juice/juice","mechanics/music/music","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","juice","music","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1123,6 +1133,7 @@ GK_LIBRARY.mechanics = {
   powerups: { needs: [], spatial: true, about: 'floating power-ups: speed, shield, freeze, double points, heal, rapid fire (timed, shown as HUD chips)' },
   online: { needs: [], spatial: true, files: ['online/firebase/firebase-app-compat', 'online/firebase/firebase-database-compat', 'online/config'], about: 'internet rooms (room code), other players drawn as animated ghosts, position sync, events; free Firebase (online/)' },
   terrain: { needs: [], spatial: true, about: 'conveyor belts, bounce pads, speed pads, ice, crumbling platforms, wind / low-gravity zones, spinning sweeper bars; game.knock()' },
+  music: { needs: [], spatial: false, about: 'background music made live with WebAudio (bass, arpeggios, pad, drums; style per game or level); game.musicLevel()' },
   juice: { needs: [], spatial: true, about: 'game feel: speed widens the view + speed lines, dust puffs when running, landing rings, boost trails; game.fxBurst()' },
   'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
   gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
@@ -1520,10 +1531,12 @@ GK_LIBRARY.worlds = {
         mousedown: e => {
           if (e.target !== this.el) return;
           if (e.button === 0) this.mouse = true;   // held: e.g. automatic fire
+          if (e.button === 2) this.rightClicks = (this.rightClicks || 0) + 1;   // takeRight(): e.g. punch
           if (!this.locked) this.drag = [e.clientX, e.clientY];
           if (e.button === 0 && this.onClick) this.onClick(this.locked);
         },
         mouseup: () => { this.drag = null; this.mouse = false; },
+        contextmenu: e => { if (e.target === this.el || this.locked) e.preventDefault(); },   // right click is a game button
         wheel: e => { if (this.locked || e.target === this.el) this.wheel += e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0; },
         lockchange: () => {
           this.locked = document.pointerLockElement === this.el;
@@ -1539,12 +1552,15 @@ GK_LIBRARY.worlds = {
       document.addEventListener('mouseup', this.handlers.mouseup);
       document.addEventListener('pointerlockchange', this.handlers.lockchange);
       document.addEventListener('wheel', this.handlers.wheel, { passive: true });
+      document.addEventListener('contextmenu', this.handlers.contextmenu);
       this.wheel = 0;
     }
     /** Is the action held down? */
     down(action) { return !!this.forced[action] || (this.map[action] || []).some(c => this.keys.has(c)); }
     /** Was the action pressed this frame? */
     pressed(action) { return (this.map[action] || []).some(c => this.hits.has(c)); }
+    /** Right clicks since the last call. */
+    takeRight() { const n = this.rightClicks || 0; this.rightClicks = 0; return n; }
     /** Mouse movement since the last call. */
     takeMouse() { const d = [this.dx, this.dy]; this.dx = 0; this.dy = 0; return d; }
     endFrame() { this.hits.clear(); }
@@ -1565,6 +1581,7 @@ GK_LIBRARY.worlds = {
       document.removeEventListener('mouseup', this.handlers.mouseup);
       document.removeEventListener('pointerlockchange', this.handlers.lockchange);
       document.removeEventListener('wheel', this.handlers.wheel);
+      document.removeEventListener('contextmenu', this.handlers.contextmenu);
     }
   }
   Input.DEFAULT_KEYS = DEFAULT_KEYS;
@@ -4427,7 +4444,7 @@ GK_LIBRARY.worlds = {
     solid(pos, size, color, o) {
       o = o || {};
       if (!o.noDraw) this.geo.box(pos[0], pos[1], pos[2], size[0], size[1], size[2], color, { top: o.top, noBottom: true });
-      if (!o.noCollide) this.statics.push({ min: [pos[0] - size[0] / 2, pos[1], pos[2] - size[2] / 2], max: [pos[0] + size[0] / 2, pos[1] + size[1], pos[2] + size[2] / 2], color, top: o.top || color, kind: o.kind || 'wall' });
+      if (!o.noCollide) this.statics.push({ min: [pos[0] - size[0] / 2, pos[1], pos[2] - size[2] / 2], max: [pos[0] + size[0] / 2, pos[1] + size[1], pos[2] + size[2] / 2], color, top: o.top || color, kind: o.kind || 'wall', noDraw: o.noDraw || undefined });
     }
     floor(f) {
       const p = this.toPos(f), s = f.size || [10, 10], t = 0.3, color = f.color || this.colors.floor;
@@ -5425,6 +5442,10 @@ GK_LIBRARY.worlds = {
       items.push(Object.assign({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: sw * 0.8 + air + (f.armsUp || 0) }, base));
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
       items.push({ mesh: blob, pos: [e.pos[0], (f.ground != null ? f.ground : e.pos[1]) + 0.02, e.pos[2]], scale: [0.42, 1, 0.42], alpha: 0.3 });
+      if (f.balloon) {   // figure.balloon: a balloon tied above the head (colour)
+        const bal = r.cached('gk:balloon' + f.balloon, () => new GK.Geo().sphere(0, 0.75, 0, 0.75, f.balloon, { glow: 0.4, seg: 10, rings: 7 }).box(0, -1.1, 0, 0.03, 1.1, 0.03, '#ffffff'));
+        items.push({ mesh: bal, pos: [p[0], p[1] + GK.HERO.height + 1.1, p[2]] });
+      }
       if (f.bubble) {   // figure.bubble: a see-through shield bubble around the character (colour)
         const ball = r.cached('gk:bubble' + f.bubble, () => new GK.Geo().sphere(0, 0, 0, 1, f.bubble, { glow: 0.7, seg: 12, rings: 8 }));
         items.push({ mesh: ball, pos: [p[0], p[1] + 0.95, p[2]], scale: [0.85, 1.15, 0.85], alpha: 0.28 });
@@ -5630,6 +5651,7 @@ GK_LIBRARY.worlds = {
      plateA-N / plateB-N / bridge-N {size, bridge} · fakepad-N / fake-N {fake} · bounce-N · sdoor-N / sterm-N · sbelt-N {size}
      shard-N · crate-N · secret-N · case-N · comeback-1 · life-N (+route, data {kind}) · finish {size} · ibox-N (gadget boxes)
      glass-N {row, col, size} · hammer-N · fan-N {size} · redlight-N {size, back, watcher} / watcher-N / rlback-N ·
+     pusher-N {reach, w, h} (wall pusher, faces into the lane) · jumpbar-N {travel, w} (low bar sliding along the lane) ·
      boulder-N (+route) · ddoor-N {row, real, width, height}
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
@@ -5853,7 +5875,7 @@ GK_LIBRARY.worlds = {
       };
       strip(-half, -5, null, T.floor); strip(-5, 5, gpit, T.floor); strip(5, half, pit, T.floor2 || T.floor);
       if (pit) this.box(F, pit[0], pit[1], half - 0.3, half, -3, 3, T.wall);   // the pit's side walls (look)
-      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      const gaps = [];   // ground pushers: [u, side] → a gap in that fence, a housing behind it
       // dividers: three lanes
       this.wall(F, 8, 64, -5.6, -4.4, T.dividerH || 3, T.divider || T.wall);
       this.wall(F, 8, 64, 4.4, 5.6, T.dividerH || 3, T.divider || T.wall);
@@ -5875,7 +5897,7 @@ GK_LIBRARY.worlds = {
           for (const v of [-5, 5]) this.deco(F, 'slab', u, v, 3, 0, { size: [0.6, 4.4, 0.6], color: '#2d3748' });
         }
       } else if (o.mid === 'belt') { this.slot('belt', F, 36, 0, 0.02, 0, { size: [6, 40] }); this.belt(F, 16, 56, -3, 3); for (const u of [24, 48]) this.slot('laser', F, u, 0, 0, 0); }
-      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); }
+      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); this.slot('jumpbar', F, 14, 0, 0, 0, { travel: 22, w: 8.6 }); this.slot('jumpbar', F, 40, 0, 0, 0, { travel: 20, w: 8.6 }); }
       // ----- left lane
       const LV = -R;
       if (o.left === 'high' || o.left === 'crumble') {
@@ -5887,6 +5909,7 @@ GK_LIBRARY.worlds = {
           for (const u of [34, 38, 42]) this.slot('crumble', F, u + 0, LV, 2.0, 0, { size: [3.4, 0.4, 3.4] });
         }
         for (const u of [20, 28, 48, 54]) this.slot('shard', F, u, LV, 2.4, 0);
+        for (const u of [24, 52]) { this.slot('pusher', F, u, -half + 0.1, 2.4, -90, { reach: 4.5, w: 3, h: 2 }); this.housing(F, u, -1, 2.4); }   // shove you off the walkway
         for (const u of [16, 30, 46, 57]) this.deco(F, 'glowStrip', u, LV - 4, 2.4, 0, { size: [0.15, 0.6, 0.15], color: T.accent }, null, { solid: false });
       } else if (o.left === 'tunnel') {
         this.deco(F, 'slab', 36, LV, 3.2, 0, { size: [10.2, 0.5, 52], color: T.roof || dk(T.wall, 0.8) }, null, { solid: false });
@@ -5894,6 +5917,7 @@ GK_LIBRARY.worlds = {
         for (const u of [16, 26, 36, 46, 56]) this.deco(F, 'glowStrip', u, LV, 3.15, 0, { size: [6, 0.06, 0.4], color: T.tunnelLight || T.accent }, null, { solid: false });
         for (const u of [20, 32, 44]) this.slot('shard', F, u, LV, 0, 0);
         this.slot('crate', F, 52, LV + 3, 0, 0);
+        this.slot('jumpbar', F, 16, LV, 0, 0, { travel: 36, w: 8.6 });
       } else if (o.left === 'short') {
         // shortcut: a locked door across the lane (a hard question opens it), then a fast belt
         this.wall(F, 11.6, 12.4, -half, -9.0 - 1.9, 3.4);
@@ -5907,7 +5931,11 @@ GK_LIBRARY.worlds = {
       }
       // ----- right lane
       const RV = R;
-      if (o.right === 'speed') { for (const u of [16, 34, 52]) this.slot('pad', F, u, RV, 0.02, 0); this.slot('shard', F, 44, RV + 3, 0, 0); }
+      if (o.right === 'speed') {
+        for (const u of [16, 34, 52]) this.slot('pad', F, u, RV, 0.02, 0);
+        this.slot('shard', F, 44, RV + 3, 0, 0);
+        for (const u of [25, 43, 60]) { this.slot('pusher', F, u, half - 0.1, 0, 90, { reach: 5, w: 3, h: 2.2 }); gaps.push([u, 1]); }   // pushers from the outer wall
+      }
       else if (o.right === 'ice') {
         this.slot('ice', F, 22, RV, 0.02, 0, { size: [9, 16] }); this.slot('ice', F, 46, RV, 0.02, 0, { size: [9, 16] });
         this.wall(F, 22, 25, 5.6, 9.5, 1.3); this.wall(F, 34, 37, 10.5, 14.4, 1.3); this.wall(F, 46, 49, 5.6, 9.5, 1.3);
@@ -5943,6 +5971,12 @@ GK_LIBRARY.worlds = {
         this.slot('bounce', F, 27, RV, 0, 0); this.slot('bounce', F, 45, RV, 0, 0);
         this.slot('shard', F, 39, RV, 0, 0);
       }
+      for (const s2 of [-1, 1]) {   // the side fences, with a gap at each ground pusher
+        const v0 = s2 < 0 ? -half - 0.6 : half, v1 = s2 < 0 ? -half : half + 0.6;
+        let u = 0;
+        for (const [gu] of gaps.filter(x => x[1] === s2).sort((a, b) => a[0] - b[0])) { this.fence(F, u, gu - 1.7, v0, v1); this.housing(F, gu, s2, 0); u = gu + 1.7; }
+        this.fence(F, u, L, v0, v1);
+      }
       for (const u of [8, 64]) { this.lamp(F, u, -half + 1, 90); this.lamp(F, u, half - 1, -90); }
       for (const v of [-10, 0, 10]) this.slot('ibox', F, 5, v, 0, 0);   // random gadget boxes before the lanes split
       for (const v of [-8, 8]) this.slot('ibox', F, 67, v, 0, 0);
@@ -5958,7 +5992,7 @@ GK_LIBRARY.worlds = {
       this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
       this.loc('rlback-' + n, F, 3, 0, 0, 0);
       this.loc('redlight-' + n, F, 32, 0, 0, 0, { size: [W, 8, 52], back: 'rlback-' + n, watcher: 'watcher-' + n });
-      this.loc('watcher-' + n, F, 60, 0, 0, 180, { w: W - 1 });
+      this.loc('watcher-' + n, F, 60, 0, 0, 180, { w: W + 3.4 });   // its posts stand outside the fences
       for (const u of [6, 58]) this.deco(F, 'plane', u, 0, 0.02, 0, { size: [W, 0.8], color: u === 6 ? '#ffffff' : '#ffd166', glow: 0.8 });
       for (let u = 12; u < 56; u += 8) for (const v of [-half + 1, half - 1]) this.deco(F, 'glowStrip', u, v, 0.05, 0, { size: [0.4, 0.1, 3], color: '#ff4fd8' });
       this.sides(F, L);
@@ -5981,7 +6015,10 @@ GK_LIBRARY.worlds = {
       this.deco(F, 'ramp', (u2 + u3) / 2, 0, 0.15, 180, { w: W, len: ramp, h: H, color: T.hillTop || U.shade(col, 1.1) });
       this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
       this.loc('cp-' + this.num('cp'), F, (u1 + u2) / 2, 0, H, 0);
-      [-9, 0, 9].forEach((v, i) => { const nm = this.slot('boulder', F, u1 + 1, v, H, 0, { phase: i / 3 }); this.routes[nm] = [F.pt(u1 + 1, v), F.pt(u0 - 3, v)].map((q, k) => [q[0], k ? 0 : H, q[1]]); });
+      [-12, -6, 0, 6, 12].forEach((v, i) => {   // boulders follow the steps: plateau → top step → bottom step → the flat
+        const nm = this.slot('boulder', F, u1 + 3, v, H, 0, { phase: (i * 2 % 5) / 5 });
+        this.routes[nm] = [[u1 + 3, H], [u1, H], [u0, 0], [u0 - 6, 0]].map(q => { const p = F.pt(q[0], v); return [p[0], q[1], p[1]]; });
+      });
       for (const v of [-8, 0, 8]) this.slot('ibox', F, (u1 + u2) / 2, v, H, 0);
       for (const v of [-12, 12]) this.slot('shard', F, (u1 + u2) / 2, v, H, 0);
       this.sides(F, L);
@@ -6005,6 +6042,22 @@ GK_LIBRARY.worlds = {
       this.sides(F, L);
       this.course(F, L, 0);
       this.advance(F, L);
+    }
+    /** The box a wall pusher hides in, outside the fence at u on side s (−1 / +1), standing at height y. The course stays
+        closed behind it (invisible walls), and the pusher slides out of its open front. */
+    housing(F, u, s, y) {
+      const T = this.T, v = s * (W / 2), out = s * 5.6, c = T.wall;
+      const vv = (a, b) => (s > 0 ? [v + a, v + b] : [v - b, v - a]);
+      const [b0, b1] = vv(5.6, 6.2), [t0, t1] = vv(0, 6.2);
+      this.box(F, u - 1.9, u + 1.9, b0, b1, 0, 9, null, { invisible: true });   // back wall
+      for (const su of [-1, 1]) this.box(F, u + su * 1.9 - 0.15, u + su * 1.9 + 0.15, t0, t1, 0, 9, null, { invisible: true });   // side walls
+      const mid = (t0 + t1) / 2, len = t1 - t0;
+      this.deco(F, 'slab', u, mid, y + 2.5, 0, { size: [len, 0.25, 3.8], color: c });
+      for (const su of [-1, 1]) this.deco(F, 'slab', u + su * 1.8, mid, y, 0, { size: [len, 2.5, 0.2], color: c });
+      this.deco(F, 'slab', u, (b0 + b1) / 2, y, 0, { size: [0.3, 2.5, 3.8], color: c });
+      this.deco(F, 'glowStrip', u, v + s * 0.05, y + 2.6, 0, { size: [0.2, 0.12, 3.6], color: '#ff9f43' });
+      if (y > 0) this.deco(F, 'slab', u, mid, 0, 0, { size: [len, y, 3.8], color: dk(c, 0.8) });   // a pillar under a raised housing
+      void out;
     }
     /** A belt bed (dark strip with rails) under a conveyor slot. */
     belt(F, u0, u1, v0, v1) {
@@ -6059,7 +6112,9 @@ GK_LIBRARY.worlds = {
       const toward = side === 0 ? [lu, lv + 9] : [lu - 7, lv + side * 7];
       if (o.case !== false) this.slot('case', F, toward[0], toward[1], 0, side === 0 ? -90 : 180);
       for (const [du, dv] of [[-9, 0], [9, 0], [0, -9], [0, 9]]) if (Math.abs(lv + dv) < half - 2) this.slot('shard', F, lu + du, lv + dv, 0, 0);
-      for (const v of [-6, 0, 6]) this.slot('ibox', F, 10, v, 0, 0);
+      for (const v of [-6, 0, 6]) this.slot('ibox', F, 5, v, 0, 0);
+      this.slot('sweeper', F, 13, 0, 0, 0, { length: 10, spin: 1.3 });
+      if (side === 0) this.slot('sweeper', F, P - 10, 0, 0, 0, { length: 10, spin: -1.3 }); else this.slot('sweeper', F, P / 2, side * 13, 0, 0, { length: 10, spin: -1.3 });
       this.slot('crate', F, 4, o.comeback && side > 0 ? half - 3 : -half + 3, 0, 0); this.slot('crate', F, P - 4, side > 0 ? -half + 3 : half - 3, 0, 0);   // never on the comeback platform
       if (o.comeback) this.comeback(F, side === 0 ? P - 6 : 6, side >= 0 ? -half + 5 : half - 5, side);
       // world life: something moving around the plaza outside its walls
@@ -7796,7 +7851,7 @@ GK_LIBRARY.worlds = {
                                                           ahead: the region starts at the entity, like a fan; pulse: [on, off] gusts)
      { type: 'lowgrav', size: [w, h, d], gravity: 0.4 }   low-gravity region: floaty, higher jumps
      { type: 'sweeper', length: 8, spin: 1.2, y: 0.6 }    spinning bar: jump it or get knocked away
-     party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'glasstile' (glass bridge: one fake
+     party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'piston' (wall pusher), 'jumpbar' (low laser bar), 'glasstile' (glass bridge: one fake
      per row), 'dashdoor' (Door Dash: real doors break, fake ones bounce you), 'redlight' + 'watcher' (Red Light, Green
      Light), wind `pulse: [on, off]` (big fans). They use game.raceClock() and game.trapRandom(key) when present.
    Adds game.knock([dx, dz], power, {stun, up, kind, source}) → true if it landed. Before landing it asks
@@ -8011,27 +8066,77 @@ GK_LIBRARY.worlds = {
       }
     },
   });
-  /** Rolling boulder: {type: 'boulder', route (top → bottom), speed: 7, r: 1.3, gap: 1.6 s between boulders, phase (0..1)}.
-      It follows the route's heights (rolls down a hill); then a new one starts at the top. */
+  /** Rolling boulder: {type: 'boulder', route (top → … → bottom), speed: 7, r: 1.3, gap: 1.2 s between boulders, phase (0..1),
+      lift: 0.42 (rides this high over the route: just above the step corners)}. It follows every point of the route (so it rolls down
+      stairs without sinking into them), grows in at the top and shrinks away at the bottom. */
   P.add('boulder', {
-    defaults: { model: 'boulder', solid: false, speed: 7, r: 1.3, gap: 1.6, power: 12 },
+    defaults: { model: 'boulder', solid: false, speed: 7, r: 1.3, gap: 1.2, power: 12, lift: 0.42 },
     init(e) {
-      const pts = (e.def.route && e.world.routes[e.def.route]) || [e.pos.slice(), e.pos.slice()];
-      e.a = pts[0].slice(); e.b = pts[pts.length - 1].slice(); e.len = Math.max(0.1, V.dist(e.a, e.b));
-      e.setLook({ r: e.def.r, color: e.def.color }); e.yaw = Math.atan2(e.b[0] - e.a[0], e.b[2] - e.a[2]);
+      const pts = ((e.def.route && e.world.routes[e.def.route]) || [e.pos.slice(), e.pos.slice()]).map(p => p.slice());
+      e.pts = pts; e.cum = [0];
+      for (let i = 1; i < pts.length; i++) e.cum.push(e.cum[i - 1] + V.dist(pts[i - 1], pts[i]));
+      e.len = Math.max(0.1, e.cum[e.cum.length - 1]);
+      e.a = pts[0].slice(); e.b = pts[pts.length - 1].slice();
+      e.setLook({ r: e.def.r, color: e.def.color });
     },
     update(e, dt, g) {
       const d = e.def, run = e.len / d.speed, cyc = run + d.gap, t = clockOf(g) + (d.phase || 0) * cyc, k = ((t % cyc) + cyc) % cyc;
       if (k > run) { e.visible = false; return; }
       e.visible = true;
-      const f = k / run;
-      e.pos = [e.a[0] + (e.b[0] - e.a[0]) * f, e.a[1] + (e.b[1] - e.a[1]) * f, e.a[2] + (e.b[2] - e.a[2]) * f];
-      e.pitch = (k * d.speed / d.r) % (Math.PI * 2);
-      if (!e.enabled || g.state.mode !== 'playing') return;
+      const s0 = k * d.speed;
+      let i = 1;
+      while (i < e.cum.length - 1 && e.cum[i] < s0) i++;
+      const a = e.pts[i - 1], b = e.pts[i], seg = Math.max(0.001, e.cum[i] - e.cum[i - 1]), f = U.clamp((s0 - e.cum[i - 1]) / seg, 0, 1);
+      e.pos = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f + d.lift, a[2] + (b[2] - a[2]) * f];
+      e.yaw = Math.atan2(b[0] - a[0], b[2] - a[2]);
+      e.pitch = (s0 / d.r) % (Math.PI * 2);
+      const grow = Math.min(1, s0 / 2, (e.len - s0) / 2.5);   // appear and disappear smoothly
+      e.scale = [grow, grow, grow];
+      if (!e.enabled || g.state.mode !== 'playing' || grow < 0.5) return;
       const p = g.player.pos, c = [e.pos[0], e.pos[1] + d.r, e.pos[2]];
       if (Math.hypot(p[0] - c[0], p[2] - c[2]) < d.r + 0.4 && p[1] < c[1] + d.r && p[1] + 1.7 > c[1] - d.r && g.knock) {
-        const dx = (e.b[0] - e.a[0]) / e.len, dz = (e.b[2] - e.a[2]) / e.len;
-        if (g.knock([dx, dz], d.power, { stun: 1.0, up: 6, kind: 'boulder', source: e.id })) { g.audio.play('boom'); burst(g, c, '#c8a27a', 12); }
+        const dx = (b[0] - a[0]) / seg, dz = (b[2] - a[2]) / seg, l = Math.hypot(dx, dz) || 1;
+        if (g.knock([dx / l, dz / l], d.power, { stun: 1.0, up: 6, kind: 'boulder', source: e.id })) { g.audio.play('boom'); burst(g, c, '#c8a27a', 12); }
+      }
+    },
+  });
+  M.add('piston', o => {   // a pusher block: its front face is at the origin, the block goes back (−z) into the wall
+    const w = o.w || 3, h = o.h || 2, L = o.len || 5, c = o.color || '#ff9f43';
+    return G().box(0, 0, -L / 2, w, h, L, '#4a5568', { top: '#718096' }).box(0, 0.05, -0.08, w + 0.06, h - 0.1, 0.16, c, { glow: 0.8 })
+      .box(0, h * 0.4, 0.01, w * 0.6, h * 0.2, 0.04, '#1a202c');
+  });
+  M.add('jumpBar', o => {   // a low laser bar across a lane (jump it!), posts at both ends
+    const w = o.w || 9.6, c = o.color || '#ff2d55';
+    return G().box(0, 0.32, 0, w, 0.16, 0.16, c, { glow: 1 }).box(-w / 2, 0, 0, 0.3, 0.6, 0.3, '#2d3748').box(w / 2, 0, 0, 0.3, 0.6, 0.3, '#2d3748');
+  });
+  /** Wall pusher: {type: 'piston', reach: 4.5, period: 2.8, phase, w, h} shoots out the way it faces, holds, slides back.
+      Being hit while it shoots out throws you aside (off a walkway, into a lane). */
+  P.add('piston', {
+    defaults: { model: 'piston', solid: false, reach: 4.5, period: 2.8, w: 3, h: 2.2, power: 11 },
+    init(e) { e.setLook({ w: e.def.w, h: e.def.h }); e.base = e.pos.slice(); e.phase = e.def.phase != null ? e.def.phase : (hashOf(e.id) % 100) / 100; },
+    update(e, dt, g) {
+      const d = e.def, c = ((clockOf(g) / d.period + e.phase) % 1 + 1) % 1;
+      const k = c < 0.1 ? c / 0.1 : c < 0.4 ? 1 : c < 0.8 ? 1 - (c - 0.4) / 0.4 : 0, out = c < 0.1, f = fwd(e);
+      e.pos = [e.base[0] + f[0] * d.reach * k, e.base[1], e.base[2] + f[1] * d.reach * k];
+      if (!e.enabled || g.state.mode !== 'playing' || !g.knock) return;
+      const p = g.player.pos, dx = p[0] - e.pos[0], dz = p[2] - e.pos[2], along = dx * f[0] + dz * f[1], side = Math.abs(dx * f[1] - dz * f[0]);
+      if (along > -0.4 && along < 0.9 && side < d.w / 2 + 0.3 && p[1] < e.pos[1] + d.h && p[1] + 1.7 > e.pos[1] && (out || along < 0.4)) {
+        if (g.knock([f[0], f[1]], out ? d.power : 6, { stun: out ? 0.6 : 0.2, up: out ? 4 : 2, kind: 'piston', source: e.id }) && out) g.audio.play('boom');
+      }
+    },
+  });
+  /** Low laser bar: {type: 'jumpbar', travel: 20, speed: 4.5, w: 9.6} slides back and forth along the way it faces;
+      jump over it, or it trips you. */
+  P.add('jumpbar', {
+    defaults: { model: 'jumpBar', solid: false, travel: 20, speed: 4.5, w: 9.6, power: 8 },
+    init(e) { e.setLook({ w: e.def.w }); e.base = e.pos.slice(); e.phase = (hashOf(e.id) % 100) / 100; },
+    update(e, dt, g) {
+      const d = e.def, per = 2 * d.travel / d.speed, c = ((clockOf(g) / per + e.phase) % 1 + 1) % 1, k = c < 0.5 ? c * 2 : 2 - c * 2, dir = c < 0.5 ? 1 : -1, f = fwd(e);
+      e.pos = [e.base[0] + f[0] * d.travel * k, e.base[1], e.base[2] + f[1] * d.travel * k];
+      if (!e.enabled || g.state.mode !== 'playing' || !g.knock) return;
+      const p = g.player.pos, dx = p[0] - e.pos[0], dz = p[2] - e.pos[2], along = dx * f[0] + dz * f[1], side = Math.abs(dx * f[1] - dz * f[0]);
+      if (Math.abs(along) < 0.45 && side < d.w / 2 && p[1] < e.pos[1] + 0.48) {
+        if (g.knock([f[0] * dir, f[1] * dir], d.power, { stun: 0.6, up: 4, kind: 'jumpbar', source: e.id })) { g.audio.play('zap'); burst(g, [p[0], p[1] + 0.3, p[2]], '#ff2d55', 8); }
       }
     },
   });
@@ -8116,7 +8221,7 @@ GK_LIBRARY.worlds = {
           hud.style.cssText = 'position:absolute;left:50%;top:21%;transform:translateX(-50%);font:900 clamp(22px,4.4vw,48px) system-ui;padding:8px 26px;border-radius:18px;z-index:4;pointer-events:none;text-shadow:0 3px 12px rgba(0,0,0,.7);white-space:nowrap';
           g.ui.hud.appendChild(hud);
         }
-        const txt = ph === 'red' ? '🔴 RED LIGHT · FREEZE!' : ph === 'warn' ? '🟡 GET READY TO STOP…' : '🟢 GREEN LIGHT · RUN!';
+        const txt = ph === 'red' ? '🔴 STOP!' : ph === 'warn' ? '🟡 …' : '🟢 GO!';
         if (hud.textContent !== txt) {
           hud.textContent = txt;
           hud.style.background = ph === 'red' ? 'rgba(255,45,85,.88)' : ph === 'warn' ? 'rgba(255,209,102,.9)' : 'rgba(46,204,113,.82)';
@@ -8240,7 +8345,7 @@ GK_LIBRARY.worlds = {
         const sc = S.size * (1.6 - 0.6 * k);
         e.scale = [sc, sc, sc]; e.alpha = 0.65 * k;
       }
-      const hs = Math.hypot(pl.vel[0], pl.vel[2]), boosted = game.hasPower && (game.hasPower('speed') || game.hasPower('rocket'));
+      const hs = Math.hypot(pl.vel[0], pl.vel[2]), boosted = game.hasPower && (game.hasPower('speed') || game.hasPower('rocket') || game.hasPower('jetpack'));
       const run = pl.cfg.walkSpeed || 5, fast = U.clamp((hs - run * 1.05) / Math.max(1, (pl.cfg.sprintSpeed || 7) - run), 0, 1);
       // wider view and speed lines when fast
       const want = (fast * 0.7 + (boosted && hs > 3 ? 0.6 : 0)) * J.cfg.fov;
@@ -8265,8 +8370,91 @@ GK_LIBRARY.worlds = {
       J.air = !pl.grounded;
       if (boosted && hs > 3) {
         J.trailT -= dt;
-        if (J.trailT <= 0) { J.trailT = 0.05; spawn(game, [pl.pos[0], pl.pos[1] + 0.7 + Math.random() * 0.6, pl.pos[2]], J.cfg.trail, [0, 0.3, 0], 0.9, 0.35); }
+        if (J.trailT <= 0) { J.trailT = 0.05; spawn(game, [pl.pos[0], pl.pos[1] + 0.7 + Math.random() * 0.6, pl.pos[2]], game.hasPower('jetpack') ? '#ff9f43' : J.cfg.trail, [0, game.hasPower('jetpack') ? -2 : 0.3, 0], 0.9, 0.35); }
       }
+    },
+  });
+})();
+
+</script>
+<script>/* mechanics/music/music.js */
+/* Game Kit · mechanics/music   (any game type)
+   Background music made live with WebAudio (no files, works offline): bass, chord arpeggios, a soft pad and drums,
+   looping a 4-chord progression. A game (or each level) picks the style:
+     music: { bpm: 124, root: 110, mode: 'minor' | 'major', prog: [0, 5, 3, 4] (scale degrees), wave: 'sawtooth',
+              arpWave: 'square', drums: true, volume: 0.1 }
+   game.musicLevel() (optional, from another mechanic) gives 0..1: 0 = silent, under 0.6 = calm (no drums), 1 = full.
+   It stops on the title / end screens and follows the game's Sound on/off. */
+(function () {
+  'use strict';
+  const SCALES = { minor: [0, 2, 3, 5, 7, 8, 10], major: [0, 2, 4, 5, 7, 9, 11] };
+  const S = { ctx: null, out: null, noise: null, step: 0, next: 0, timer: null, cfg: null, game: null };
+
+  const hz = (root, semis) => root * Math.pow(2, semis / 12);
+  function degree(cfg, d) { const sc = SCALES[cfg.mode] || SCALES.minor, o = Math.floor(d / 7); return sc[((d % 7) + 7) % 7] + 12 * o; }
+  function tone(t, f, dur, type, vol, attack) {
+    const o = S.ctx.createOscillator(), g = S.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (attack || 0.01)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(S.out); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function kick(t) {
+    const o = S.ctx.createOscillator(), g = S.ctx.createGain();
+    o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g); g.connect(S.out); o.start(t); o.stop(t + 0.25);
+  }
+  function hiss(t, dur, vol, freq, type) {
+    const src = S.ctx.createBufferSource(), f = S.ctx.createBiquadFilter(), g = S.ctx.createGain();
+    src.buffer = S.noise; f.type = type; f.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(S.out); src.start(t); src.stop(t + dur + 0.02);
+  }
+  /** Schedule one 16th-note step of the loop (16 steps a bar, one chord a bar, 4 bars). */
+  function play(step, t, level) {
+    const c = S.cfg, s16 = step % 16, bar = Math.floor(step / 16) % c.prog.length, deg = c.prog[bar], d16 = 60 / c.bpm / 4;
+    const chord = [0, 2, 4].map(k => degree(c, deg + k));
+    if (s16 % 2 === 0 && [0, 1, 1, 0, 1, 1, 0, 1][s16 / 2]) tone(t, hz(c.root / 2, chord[0]), d16 * 1.8, c.wave, 0.22);   // bass
+    const arp = [0, 1, 2, 1, 0, 2, 1, 2][s16 % 8];
+    tone(t, hz(c.root * 2, chord[arp] + (s16 >= 8 ? 12 : 0)), d16 * 0.9, c.arpWave, 0.05);                                // arpeggio
+    if (s16 === 0) for (const n of chord) tone(t, hz(c.root, n), d16 * 15, 'triangle', 0.035, 0.3);                      // pad
+    if (level >= 0.6 && c.drums) {
+      if (s16 % 4 === 0) kick(t);
+      if (s16 === 4 || s16 === 12) hiss(t, 0.16, 0.35, 1800, 'bandpass');
+      if (s16 % 2 === 1) hiss(t, 0.04, 0.12, 8000, 'highpass');
+    }
+  }
+  function tick() {
+    const g = GK.current;
+    if (!g || !g.audio || !g.audio.ctx || !S.cfg) return;
+    if (S.ctx !== g.audio.ctx) {   // first time (after the Play click unlocked the sound)
+      S.ctx = g.audio.ctx;
+      S.out = S.ctx.createGain(); S.out.connect(S.ctx.destination);
+      S.noise = S.ctx.createBuffer(1, S.ctx.sampleRate, S.ctx.sampleRate);
+      const d = S.noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      S.next = S.ctx.currentTime + 0.1;
+    }
+    const mode = g.state && g.state.mode, on = mode === 'playing' || mode === 'modal' || mode === 'paused';
+    let level = on ? (g.musicLevel ? g.musicLevel() : 1) : 0;
+    if (mode === 'paused') level = Math.min(level, 0.4);
+    const vol = g.audio.muted || level <= 0 ? 0 : (S.cfg.volume == null ? 0.1 : S.cfg.volume) * (level >= 0.6 ? 1 : 0.6);
+    S.out.gain.setTargetAtTime(vol, S.ctx.currentTime, 0.3);
+    const d16 = 60 / S.cfg.bpm / 4;
+    if (S.next < S.ctx.currentTime) S.next = S.ctx.currentTime + 0.05;
+    while (S.next < S.ctx.currentTime + 0.25) {
+      if (vol > 0) play(S.step, S.next, level);
+      S.step++; S.next += d16;
+    }
+  }
+
+  GK.Music = S;
+  GK.Mechanics.add('music', {
+    configKeys: ['music'],
+    setup(game) {
+      const m = game.cfg.music || {};
+      const cfg = Object.assign({ bpm: 120, root: 110, mode: 'minor', prog: [0, 5, 3, 4], wave: 'sawtooth', arpWave: 'square', drums: true, volume: 0.1 }, m);
+      if (JSON.stringify(cfg) !== JSON.stringify(S.cfg)) { S.cfg = cfg; S.step = 0; }
+      if (!S.timer) S.timer = setInterval(() => { try { tick(); } catch (e) { /* sound is optional */ } }, 60);
     },
   });
 })();
@@ -8685,23 +8873,24 @@ window.GK_ONLINE_CONFIG = {
       e.setLook({ screen: SCREEN[d.pool] || '#2ecc71', color: d.pool === 'comeback' ? '#4a3b10' : '#1e2433' });
       if (!e.name) e.name = { gate: 'Firewall terminal', case: 'Cyber Case', comeback: 'COMEBACK CHALLENGE', shortcut: 'Shortcut lock' }[d.pool] || 'Terminal';
       // short, big, glowing labels for the optional challenges (seen from far away), plus a beam of light above them
-      if (e.label == null) e.label = { gate: '❓ FIREWALL ' + (d.gate || ''), case: '⭐ BONUS +' + R.case, comeback: '⭐ BONUS CHALLENGE +' + R.comeback, shortcut: '⚡ SHORTCUT' }[d.pool] || null;
+      // short labels (kids do not read long ones) and a soft beam of light above the optional challenges
+      if (e.label == null) e.label = { gate: '❓', case: '⭐ +' + R.case, comeback: '⭐ +' + R.comeback, shortcut: '⚡' }[d.pool] || null;
       e.labelCls = d.pool === 'gate' ? 'quiz-gate' : d.pool === 'comeback' ? 'quiz-bonus big' : 'quiz-bonus';
-      e.labelRange = d.pool === 'gate' ? 30 : 90;
-      if (d.pool !== 'gate' && e.world) e.world.add({ id: e.id + '-beam', type: 'decoration', model: 'beacon', pos: e.pos.slice(), solid: false, big: true, look: { color: SCREEN[d.pool] }, alpha: 0.4, spin: 0.8 });
+      e.labelRange = d.pool === 'gate' ? 25 : 40;
+      if (d.pool !== 'gate' && e.world) e.world.add({ id: e.id + '-beam', type: 'decoration', model: 'beacon', pos: e.pos.slice(), solid: false, look: { color: SCREEN[d.pool] }, alpha: 0.18, spin: 0.8 });
       e.interact = [{ type: 'quizTerminal', prompt: d.pool === 'gate' ? 'Answer to open the firewall' : d.pool === 'shortcut' ? 'Answer to open the shortcut' : 'Take the challenge' }];
     },
   });
 
   GK.Models.add('beacon', o => {   // a tall beam of light with a star on top: "come here!"
-    const c = o.color || '#ffd166', g = new GK.Geo().cyl(0, 1.8, 0, 0.45, 26, c, { seg: 8, glow: 1, noBottom: true });
-    for (let i = 0; i < 4; i++) g.add(new GK.Geo().box(0, 0, 0, 0.35, 1.6, 0.35, c, { glow: 1 }).rotZ(i * Math.PI / 4).move(0, 4.2, 0));
+    const c = o.color || '#ffd166', g = new GK.Geo().cyl(0, 1.8, 0, 0.22, 7, c, { seg: 8, glow: 0.8, noBottom: true });
+    for (let i = 0; i < 4; i++) g.add(new GK.Geo().box(0, 0, 0, 0.18, 0.9, 0.18, c, { glow: 0.8 }).rotZ(i * Math.PI / 4).move(0, 3.2, 0));
     return g;
   });
-  const CSS = '.gk-label.quiz-bonus{font:900 24px system-ui;color:#1a1a1a;background:linear-gradient(90deg,#ffd166,#fff3b0,#ffd166);border:3px solid #fff;padding:6px 16px;border-radius:14px;' +
-    'box-shadow:0 0 24px #ffd166,0 0 60px rgba(255,209,102,.6);animation:gkBonus 1s ease-in-out infinite alternate}.gk-label.quiz-bonus.big{font-size:32px;padding:8px 20px}' +
-    '.gk-label.quiz-gate{font:800 18px system-ui;color:#fff;background:rgba(255,77,109,.85);border:2px solid #ffb3c1;padding:4px 12px}' +
-    '@keyframes gkBonus{from{filter:brightness(1);box-shadow:0 0 18px #ffd166}to{filter:brightness(1.25);box-shadow:0 0 40px #ffd166,0 0 90px rgba(255,209,102,.8)}}';
+  const CSS = '.gk-label.quiz-bonus{font:900 19px system-ui;color:#1a1a1a;background:#ffd166;border:2px solid #fff;padding:3px 12px;border-radius:12px;' +
+    'box-shadow:0 0 10px rgba(255,209,102,.6);animation:gkBonus 1.4s ease-in-out infinite alternate}.gk-label.quiz-bonus.big{font-size:23px}' +
+    '.gk-label.quiz-gate{font:900 20px system-ui;color:#fff;background:rgba(255,77,109,.9);border:2px solid #ffb3c1;padding:2px 10px;border-radius:50%}' +
+    '@keyframes gkBonus{to{margin-top:-5px}}';
   function css() { if (document.getElementById('gk-quiz-css')) return; const st = document.createElement('style'); st.id = 'gk-quiz-css'; st.textContent = CSS; document.head.appendChild(st); }
 
   GK.Interactions.add('quizTerminal', {
@@ -8785,7 +8974,8 @@ window.GK_ONLINE_CONFIG = {
      3  🚀 Rocket Shoes   📡 Scanner     🟣 Jump Pad (anyone can use it)
    Nothing is permanent: knock-backs and slow-downs last a second or three, and after a big hit you are protected
    for 2.5 s (no chain attacks). Every attack has a counter (shown on the loadout screen).
-   Config  gadgets: { charges: 2, max: 3, choices: [[slot 1 ids], [slot 2 ids], [slot 3 ids]], recover: 2.5,
+   Mouse: left click = use the selected item (the wheel chooses), or PUNCH with empty hands; right click = punch.
+   Config  gadgets: { charges: 2, max: 3, choices: [[slot 1 ids], [slot 2 ids], [slot 3 ids]], recover: 2.5, punchCooldown: 0.7,
                       pickup: true (no loadout: random gadgets from ❓ boxes {type: 'itembox'}, one use each, 3 slots),
                       weights: {id: [weight for the leader, weight for the last racer]} (game.raceRank() 0..1) }
    Other players: another mechanic provides them (works alone too, with nobody to hit):
@@ -8806,7 +8996,10 @@ window.GK_ONLINE_CONFIG = {
     rocket: { label: '🚀 ROCKET', color: '#ff7a1a', duration: 3.5 },
     scan: { label: '📡 SCAN', color: '#7cfc00', duration: 8 },
     slow: { label: '🦠 LAGGING', color: '#38d39f', duration: 3 },
-    safe: { label: '✨ RECOVERING', color: '#ffffff', duration: 2.5, quiet: true },
+    safe: { label: '✨', color: '#ffffff', duration: 2.5, quiet: true },
+    jetpack: { label: '🚀 FLY', color: '#ff7a1a', duration: 3, quiet: true },
+    frozen: { label: '🧊', color: '#bfefff', duration: 2.2, quiet: true },
+    balloon: { label: '🎈', color: '#ff4fd8', duration: 2.6, quiet: true },
   });
 
   // ---------- models ----------
@@ -8846,6 +9039,8 @@ window.GK_ONLINE_CONFIG = {
     },
     update(e, dt) { if (e.state.backT > 0) { e.state.backT -= dt; if (e.state.backT <= 0) e.show(); } },
   });
+  M.add('iceShot', () => G().box(0, -0.25, 0, 0.5, 0.5, 0.5, '#bfefff', { glow: 0.9 }).box(0, -0.12, -0.5, 0.2, 0.2, 0.6, '#ffffff', { glow: 1 }));
+  M.add('balloonShot', () => G().sphere(0, 0.1, 0, 0.45, '#ff4fd8', { glow: 0.5, seg: 8, rings: 6 }).box(0, -0.6, 0, 0.03, 0.4, 0.03, '#ffffff'));
   M.add('bubble', o => G().sphere(0, 0, 0, 1, o.color || '#7fdbff', { glow: 0.7, seg: 12, rings: 8 }));
 
   // ---------- gadget definitions ----------
@@ -8855,41 +9050,62 @@ window.GK_ONLINE_CONFIG = {
     get(id) { return this.list[id] || null; },
     pick: null,   // the loadout chosen on this page (kept between rounds): [id, id, id]
   };
-  D.add('glove', { slot: 1, icon: '🥊', name: 'Spring Glove', text: 'Punch the nearest player in front of you (up to 7 m): they fly back and lose a second.', counter: 'Bubble Shield, Ghost Mode or Anchor. Or dodge sideways.', cd: 7,
+  /** The nearest other player in front of you (within range, inside the cone), or null. */
+  function aim(g, range, cone) {
+    const me = g.player, f = me.forward(), fl = Math.hypot(f[0], f[2]) || 1, fx = f[0] / fl, fz = f[2] / fl;
+    let best = null, bd = range;
+    for (const r of rivalsOf(g)) {
+      const dx = r.pos[0] - me.pos[0], dz = r.pos[2] - me.pos[2], d = Math.hypot(dx, dz);
+      if (d < bd && d > 0.01 && (dx * fx + dz * fz) / d > cone && Math.abs(r.pos[1] - me.pos[1]) < 3) { bd = d; best = { r, dir: [dx / d, dz / d], d }; }
+    }
+    return best;
+  }
+  const miss = (g, icon) => { g.ui.toast(icon + ' ✖', 'bad'); return false; };
+  D.add('glove', { slot: 1, icon: '🥊', name: 'Mega Glove', text: 'Punch far: the nearest player in front of you flies back.', counter: 'Bubble or dodge.', cd: 1,
     use(g) {
-      const me = g.player, f = me.forward(), fl = Math.hypot(f[0], f[2]) || 1, fx = f[0] / fl, fz = f[2] / fl;
-      let best = null, bd = 7.5;
-      for (const r of rivalsOf(g)) {
-        const dx = r.pos[0] - me.pos[0], dz = r.pos[2] - me.pos[2], d = Math.hypot(dx, dz);
-        if (d < bd && d > 0.01 && (dx * fx + dz * fz) / d > 0.45 && Math.abs(r.pos[1] - me.pos[1]) < 2.5) { bd = d; best = r; }
-      }
-      if (!best) { g.ui.toast('🥊 Nobody in range in front of you', 'bad'); return false; }
-      const dx = best.pos[0] - me.pos[0], dz = best.pos[2] - me.pos[2];
-      fx_(g, 'glove', me.pos, [dx / bd, dz / bd]);
-      g.hitRival(best.id, { k: 'knock', g: 'glove', dir: [dx / bd, dz / bd], power: 13, stun: 1.0, up: 5 });
+      const t = aim(g, 8, 0.45);
+      if (!t) return miss(g, '🥊');
+      fx_(g, 'glove', g.player.pos, t.dir);
+      g.hitRival(t.r.id, { k: 'knock', g: 'glove', dir: t.dir, power: 15, stun: 1.1, up: 6 });
       return true;
     } });
-  D.add('bowling', { slot: 1, icon: '🎳', name: 'Bowling Ball', text: 'Rolls straight ahead for 40 m and knocks over everyone it hits.', counter: 'Jump over it, or shield up.', cd: 8,
-    use(g) { const f = flatFwd(g); return share(g, { t: 'ball', x: g.player.pos[0] + f[0] * 1.2, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 1.2, dx: f[0], dz: f[1] }); } });
-  D.add('banana', { slot: 1, icon: '🍌', name: 'Banana Peel', text: 'Drop a slippery trap behind you. It stays for 45 s and trips the first player who steps on it.', counter: 'Watch the floor! The Scanner shows traps; Ghost Mode walks over them.', cd: 4,
+  D.add('bowling', { slot: 1, icon: '🎳', name: 'Bowling', text: 'Rolls ahead and knocks everyone over.', counter: 'Jump over it.', cd: 1,
+    use(g) { const f = flatFwd(g); g.audio.play('whoosh'); return share(g, { t: 'ball', x: g.player.pos[0] + f[0] * 1.2, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 1.2, dx: f[0], dz: f[1] }); } });
+  D.add('banana', { slot: 1, icon: '🍌', name: 'Banana', text: 'Drop it behind you: whoever steps on it slips.', counter: 'Look down!', cd: 1,
     use(g) { const f = flatFwd(g); return share(g, { t: 'banana', x: g.player.pos[0] - f[0] * 1.6, y: g.player.pos[1], z: g.player.pos[2] - f[1] * 1.6 }); } });
-  D.add('virus', { slot: 1, icon: '🦠', name: 'Lag Virus', text: 'Throw a green cloud 10 m ahead. Players inside lag: 40% slower for 3 s.', counter: 'Go around the cloud, or use Bubble Shield / Ghost Mode.', cd: 9,
+  D.add('freeze', { slot: 1, icon: '❄️', name: 'Freeze', text: 'The player in front of you becomes an ice cube for 2 s.', counter: 'Bubble.', cd: 1,
+    use(g) {
+      const t = aim(g, 16, 0.5);
+      if (!t) return miss(g, '❄️');
+      fx_(g, 'freeze', g.player.pos, t.dir);
+      g.hitRival(t.r.id, { k: 'freeze', g: 'freeze', seconds: 2.2 });
+      return true;
+    } });
+  D.add('balloon', { slot: 1, icon: '🎈', name: 'Balloon', text: 'A balloon lifts the player in front of you into the air.', counter: 'Bubble.', cd: 1,
+    use(g) {
+      const t = aim(g, 16, 0.5);
+      if (!t) return miss(g, '🎈');
+      fx_(g, 'balloon', g.player.pos, t.dir);
+      g.hitRival(t.r.id, { k: 'lift', g: 'balloon', seconds: 2.6 });
+      return true;
+    } });
+  D.add('bubble', { slot: 2, icon: '🫧', name: 'Bubble', text: '5 s: nothing can hit you.', counter: 'Wait 5 s.', cd: 1,
+    use(g) { g.activatePower('shield', 5, null, true); g.ui.toast('🫧 5 s', 'good'); return true; } });
+  D.add('jetpack', { slot: 3, icon: '🚀', name: 'Jetpack', text: 'Fly for 3 seconds!', counter: 'A glove still hits you.', cd: 1,
+    use(g) { g.activatePower('jetpack', 3, null, true); g.activatePower('speed', 3, null, true); g.player.vel[1] = Math.max(g.player.vel[1], 6); g.player.grounded = false; g.audio.play('whoosh'); return true; } });
+  D.add('scanner', { slot: 3, icon: '📡', name: 'Scanner', text: '8 s: see every trap, fake glass and hidden data.', counter: '', cd: 1,
+    use(g) { g.activatePower('scan', 8, null, true); g.ui.toast('📡 8 s', 'good'); return true; } });
+  D.add('jumppad', { slot: 3, icon: '🟣', name: 'Jump Pad', text: 'A bounce pad in front of you (anyone can use it).', counter: '', cd: 1,
+    use(g) { const f = flatFwd(g); return share(g, { t: 'pad', x: g.player.pos[0] + f[0] * 2.5, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 2.5, dx: f[0], dz: f[1] }); } });
+  // older items, kept for games that list them in gadgets.choices
+  D.add('virus', { slot: 1, icon: '🦠', name: 'Lag Virus', text: 'A green cloud ahead: players inside run slower.', counter: 'Go around it.', cd: 9,
     use(g) {
       const f = flatFwd(g), eye = g.player.eye(), hit = g.world.raycast([eye[0], g.player.pos[1] + 1, eye[2]], [f[0], 0, f[1]], 10), d = Math.max(2, (hit.hit ? hit.t : 10) - 1);
       return share(g, { t: 'virus', x: g.player.pos[0] + f[0] * d, y: g.player.pos[1], z: g.player.pos[2] + f[1] * d });
     } });
-  D.add('bubble', { slot: 2, icon: '🫧', name: 'Bubble Shield', text: '5 s: nothing can push, slow or trip you, and hazards cannot touch you.', counter: 'Wait it out: it only lasts 5 seconds.', cd: 10,
-    use(g) { g.activatePower('shield', 5, null, true); g.ui.toast('🫧 Bubble Shield: 5 s', 'good'); return true; } });
-  D.add('ghost', { slot: 2, icon: '👻', name: 'Ghost Mode', text: '4 s: gadgets, traps and lasers go right through you.', counter: 'It is short: attack after it ends.', cd: 12,
-    use(g) { g.activatePower('ghostmode', 4, null, true); g.ui.toast('👻 Ghost Mode: 4 s', 'good'); return true; } });
-  D.add('anchor', { slot: 2, icon: '⚓', name: 'Anchor Boots', text: '6 s: nobody can knock you back, and belts and wind cannot move you.', counter: 'Banana peels and lag clouds still work on you.', cd: 9,
-    use(g) { g.activatePower('anchor', 6, null, true); g.ui.toast('⚓ Anchor Boots: 6 s', 'good'); return true; } });
-  D.add('rocket', { slot: 3, icon: '🚀', name: 'Rocket Shoes', text: '3.5 s: run 60% faster and jump higher.', counter: 'A banana or a glove still stops you.', cd: 8,
-    use(g) { g.activatePower('rocket', 3.5, null, true); g.activatePower('speed', 3.5, null, true); g.audio.play('whoosh'); return true; } });
-  D.add('scanner', { slot: 3, icon: '📡', name: 'Scanner', text: '8 s: see traps, FAKE shortcuts and hidden data through walls.', counter: '(information, not an attack)', cd: 10,
-    use(g) { g.activatePower('scan', 8, null, true); g.ui.toast('📡 Scanning: traps, fakes and hidden data are marked', 'good'); return true; } });
-  D.add('jumppad', { slot: 3, icon: '🟣', name: 'Jump Pad', text: 'Place a bounce pad in front of you for 30 s. ANYONE can use it: put it where it helps you most.', counter: 'Others can use your pad too!', cd: 6,
-    use(g) { const f = flatFwd(g); return share(g, { t: 'pad', x: g.player.pos[0] + f[0] * 2.5, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 2.5, dx: f[0], dz: f[1] }); } });
+  D.add('ghost', { slot: 2, icon: '👻', name: 'Ghost', text: '4 s: things go through you.', counter: 'Wait.', cd: 12, use(g) { g.activatePower('ghostmode', 4, null, true); return true; } });
+  D.add('anchor', { slot: 2, icon: '⚓', name: 'Anchor', text: '6 s: nobody can push you.', counter: 'Banana.', cd: 9, use(g) { g.activatePower('anchor', 6, null, true); return true; } });
+  D.add('rocket', { slot: 3, icon: '👟', name: 'Rocket Shoes', text: 'Run faster for 3.5 s.', counter: '', cd: 8, use(g) { g.activatePower('rocket', 3.5, null, true); g.activatePower('speed', 3.5, null, true); return true; } });
 
   // ---------- helpers ----------
   function flatFwd(g) { const f = g.player.forward(), l = Math.hypot(f[0], f[2]) || 1; return [f[0] / l, f[2] / l]; }
@@ -8903,11 +9119,12 @@ window.GK_ONLINE_CONFIG = {
     if (g.shareGadget) g.shareGadget(o);
     return true;
   }
-  function fx_(g, kind, from, dir) {
-    if (kind !== 'glove') return;
-    const e = g.world.add({ type: 'fx', model: 'glove', pos: [from[0], from[1] + 1.3, from[2]], solid: false, rot: Math.atan2(dir[0], dir[1]) * 180 / Math.PI });
-    e.state.t = 0; e.state.dir = dir;
-    g.audio.play('boing');
+  function fx_(g, kind, from, dir, short) {
+    const model = { glove: 'glove', punch: 'glove', freeze: 'iceShot', balloon: 'balloonShot' }[kind];
+    if (!model) return;
+    const e = g.world.add({ type: 'fx', model, pos: [from[0], from[1] + 1.3, from[2]], solid: false, rot: Math.atan2(dir[0], dir[1]) * 180 / Math.PI });
+    e.state.t = 0; e.state.dir = dir; e.state.life = short ? 0.14 : 0.35; e.state.speed = short ? 14 : 22;
+    g.audio.play(kind === 'punch' ? 'swing' : kind === 'freeze' ? 'zap' : 'boing');
   }
   GK.Prefabs.has('fx') || P.add('fx', { defaults: { solid: false } });
 
@@ -8954,6 +9171,7 @@ window.GK_ONLINE_CONFIG = {
     '.gk-gslot .ic{font-size:30px;line-height:1}.gk-gslot .k{position:absolute;left:6px;top:4px;font-size:11px;opacity:.8;background:rgba(255,255,255,.15);border-radius:4px;padding:0 5px}' +
     '.gk-gslot .ch{position:absolute;right:6px;top:4px;font-size:12px;color:#ffd166}.gk-gslot .cd{position:absolute;inset:0;background:conic-gradient(rgba(0,0,0,.66) var(--p),transparent 0);pointer-events:none}' +
     '.gk-gslot.empty{opacity:.45}.gk-gslot.ready{border-color:#7cfc00;box-shadow:0 0 14px rgba(124,252,0,.35)}.gk-gslot.off{filter:grayscale(1);opacity:.5}' +
+    '.gk-gslot.sel{border-color:#ffd166;box-shadow:0 0 0 3px #ffd166,0 0 18px rgba(255,209,102,.6);transform:translateY(-6px)}.gk-ghint{align-self:center;font:800 15px system-ui;color:#fff;background:rgba(10,14,28,.7);padding:6px 10px;border-radius:10px;white-space:nowrap}' +
     '.gk-label.itembox{font-size:30px;background:none;text-shadow:0 0 14px #ffd166,0 0 30px #ffd166;animation:gkBob 0.8s ease-in-out infinite alternate}@keyframes gkBob{to{margin-top:-6px}}' +
     '.gk-gslot .nm{font-size:10px;opacity:.85;margin-top:4px;white-space:nowrap}.gk-gslot.fresh{border-color:#ffd166;box-shadow:0 0 22px #ffd166;animation:gkpop .35s}@keyframes gkpop{50%{transform:scale(1.25)}}' +
     '.gk-load{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.gk-load h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em;opacity:.85}' +
@@ -8967,7 +9185,7 @@ window.GK_ONLINE_CONFIG = {
   GK.Mechanics.add('gadgets', {
     configKeys: ['gadgets'],
     setup(game) {
-      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'virus'], ['bubble', 'ghost', 'anchor'], ['rocket', 'scanner', 'jumppad']] }, game.cfg.gadgets);
+      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'freeze', 'balloon'], ['bubble'], ['jetpack', 'jumppad', 'scanner']] }, game.cfg.gadgets);
       css();
       if (!D.pick) D.pick = cfg.choices.map(c => c[0]);
       const GG = game.gadgets = {
@@ -8977,30 +9195,43 @@ window.GK_ONLINE_CONFIG = {
         enabled: () => true,   // mechanics/race: only while racing
         use(i) {
           const s = GG.slots[i], d = s && D.get(s.id);
-          if (s && !s.id && cfg.pickup && game.state.mode === 'playing') { game.ui.toast('Slot ' + (i + 1) + ' is empty: grab a ❓ box!', 'bad'); return false; }
+          if (s && !s.id && cfg.pickup && game.state.mode === 'playing') { GG.punch(); return false; }
           if (!d || game.state.mode !== 'playing') return false;
-          if (!GG.enabled()) { game.ui.toast('Gadgets work during the race', 'bad'); return false; }
+          if (!GG.enabled()) return false;
           if (s.cd > 0) { game.audio.play('deny'); return false; }
           if (s.charges <= 0) { game.ui.toast(d.icon + ' No charges: answer questions to earn more!', 'bad'); game.audio.play('deny'); return false; }
           if (!d.use(game)) { s.cd = 1; return false; }
           s.charges--; s.cd = cfg.pickup ? 0.4 : d.cd;
           const used = s.id;
-          if (cfg.pickup && s.charges <= 0) s.id = null;   // used up: the slot is free for the next box
+          if (cfg.pickup && s.charges <= 0) { s.id = null; const nx = GG.slots.findIndex(x => x.id); if (nx >= 0) GG.sel = nx; }   // used up: the slot is free for the next box
           game.emit('gadget:use', { id: used });
           GG.draw(true);
+          return true;
+        },
+        sel: 0, punchCd: 0,
+        /** Everyone can punch, any time: the nearest player close in front is pushed back a little. */
+        punch() {
+          if (!GG.enabled() || GG.punchCd > 0 || game.state.mode !== 'playing') return false;
+          GG.punchCd = cfg.punchCooldown || 0.7;
+          const t = aim(game, 2.8, 0.35), f = flatFwd(game);
+          fx_(game, 'punch', game.player.pos, t ? t.dir : f, true);
+          game.emit('gadget:punch', {});
+          if (!t) return false;
+          game.hitRival(t.r.id, { k: 'knock', g: 'punch', dir: t.dir, power: 9, stun: 0.55, up: 3.5 });
           return true;
         },
         /** A random gadget into the first free slot (pickup mode). Racers further behind get better ones (like kart games). */
         giveRandom() {
           const i = GG.slots.findIndex(x => !x.id);
-          if (i < 0) { game.ui.toast('Your 3 gadget slots are full: use one (keys 1 2 3)!', 'bad'); return false; }
+          if (i < 0) { game.ui.toast('🎒 FULL', 'bad'); return false; }
           const r = game.raceRank ? game.raceRank() : 0.5, pool = cfg.choices.flat(), W = cfg.weights || {};
           const wt = id => { const w = W[id] || [1.5, 1.5]; return w[0] * (1 - r) + w[1] * r; };
           let x = Math.random() * pool.reduce((a, id) => a + wt(id), 0), id = pool[0];
           for (const k of pool) { x -= wt(k); if (x <= 0) { id = k; break; } }
           GG.slots[i] = { id, charges: 1, cd: 0, fresh: 1.2 };
           const d = D.get(id);
-          game.ui.toast('🎁 ' + d.icon + ' ' + d.name + '!  Press ' + (i + 1), 'good');
+          game.ui.toast('🎁 ' + d.icon + ' ' + d.name, 'good');
+          if (!GG.slots[GG.sel] || !GG.slots[GG.sel].id) GG.sel = i;
           game.audio.play('pickup');
           game.emit('gadget:got', { id, slot: i });
           GG.draw(true);
@@ -9039,16 +9270,23 @@ window.GK_ONLINE_CONFIG = {
         if (game.state.mode !== 'playing' && game.state.mode !== 'modal') return 'immune';
         if (game.gadgetsImmune && game.gadgetsImmune()) return 'immune';   // e.g. finished players
         const d = D.get(eff.g) || {}, who = fromName || (game.rivalName ? game.rivalName(from) : '') || 'Someone';
-        if (eff.k === 'slow') {
+        if (eff.k === 'freeze' || eff.k === 'lift') {
+          if (game.hasPower('ghostmode') || game.hasPower('shield')) { game.protect({ kind: eff.k, gadget: true }); return 'blocked'; }
+          if (game.hasPower('safe')) return 'immune';
+          const sec = eff.seconds || 2.4;
+          game.player.stun = Math.max(game.player.stun || 0, sec);
+          if (eff.k === 'freeze') { game.activatePower('frozen', sec, null, true); game.player.vel = [0, game.player.vel[1], 0]; game.ui.flash('#bfefff'); game.ui.toast('🧊 ' + who, 'bad'); game.audio.play('zap'); }
+          else { game.activatePower('balloon', sec, null, true); game.player.vel[1] = 5; game.player.grounded = false; game.ui.toast('🎈 ' + who, 'bad'); game.audio.play('boing'); }
+        } else if (eff.k === 'slow') {
           if (game.hasPower('ghostmode') || game.hasPower('shield')) { game.protect({ kind: 'slow', gadget: true }); return 'blocked'; }
           if (game.hasPower('safe')) return 'immune';
           game.activatePower('slow', eff.seconds || 3, null, true);
-          game.ui.toast((d.icon || '🦠') + ' ' + who + "'s lag virus got you!", 'bad');
+          game.ui.toast((d.icon || '🦠') + ' ' + who, 'bad');
         } else {
           const ok = game.knock(eff.dir || [Math.random() - 0.5, Math.random() - 0.5], eff.power || 10, { stun: eff.stun, up: eff.up, kind: eff.k === 'slip' ? 'slip' : eff.g, gadget: true, source: from });
           if (!ok) return game.hasPower('safe') && !game.hasPower('shield') && !game.hasPower('anchor') && !game.hasPower('ghostmode') ? 'immune' : 'blocked';
           if (eff.k === 'slip') game.state.spinT = 1.1;
-          game.ui.toast((d.icon || '💥') + ' ' + who + (eff.g === 'glove' ? ' punched you!' : eff.g === 'bowling' ? "'s bowling ball got you!" : eff.g === 'banana' ? "'s banana peel tripped you!" : ' hit you!'), 'bad');
+          game.ui.toast((eff.g === 'punch' ? '👊' : d.icon || '💥') + ' ' + who, 'bad');
           game.ui.flash('#ff9f43');
         }
         game.activatePower('safe', cfg.recover, null, true);
@@ -9060,8 +9298,8 @@ window.GK_ONLINE_CONFIG = {
         const d = D.get(gid) || {};
         game.state.gstats.hits++;
         if (d.slot === 1 && gid === 'banana') game.state.gstats.traps++;
-        game.scoring.add(10, (d.name || 'Gadget') + ' hit', 'strategy');
-        game.ui.toast((d.icon || '💥') + ' Hit' + (onName ? ' ' + onName : '') + '!', 'good');
+        game.scoring.add(gid === 'punch' ? 5 : 10, gid === 'punch' ? 'Punch' : (d.name || 'Gadget') + ' hit', 'strategy');
+        game.ui.toast((gid === 'punch' ? '👊' : d.icon || '💥') + ' +' + (gid === 'punch' ? 5 : 10), 'good');
         game.emit('gadget:landed', { id: gid, on: onName || null });
       };
       /** A shared gadget object (mine or someone else's) appears in my world. */
@@ -9084,21 +9322,38 @@ window.GK_ONLINE_CONFIG = {
     update(game, dt) {
       const GG = game.gadgets, pl = game.player;
       for (const s of GG.slots) { if (s.cd > 0) s.cd = Math.max(0, s.cd - dt); if (s.fresh > 0) s.fresh -= dt; }
-      if (game.state.mode === 'playing') for (let i = 0; i < 3; i++) if (game.input.hits.has('Digit' + (i + 1)) || game.input.hits.has('Numpad' + (i + 1))) GG.use(i);
+      if (GG.punchCd > 0) GG.punchCd -= dt;
+      const inp = game.input;
+      if (game.state.mode === 'playing') {
+        for (let i = 0; i < 3; i++) if (inp.hits.has('Digit' + (i + 1)) || inp.hits.has('Numpad' + (i + 1))) GG.use(i);
+        // the mouse: wheel = choose an item, left click = use it (or punch with empty hands), right click = punch
+        if (inp.wheel) { const full = [0, 1, 2].filter(i => GG.slots[i].id); if (full.length) { const k = full.indexOf(GG.sel); GG.sel = full[((k < 0 ? 0 : k) + (inp.wheel > 0 ? 1 : -1) + full.length) % full.length]; GG.draw(true); } inp.wheel = 0; }
+        if (game.clickFire && !game.focus) { game.clickFire = false; const s2 = GG.slots[GG.sel]; if (s2 && s2.id) GG.use(GG.sel); else GG.punch(); }
+        if (inp.takeRight && inp.takeRight()) GG.punch();
+      }
+      game.clickFire = false;
       // speeds and jumps (after powerups and terrain have set theirs this frame)
       if (game.hasPower('slow')) pl.speedMul *= 0.6;
       if (game.hasPower('rocket')) pl.jumpMul = (pl.jumpMul || 1) * 1.35;
+      if (game.hasPower('jetpack')) {   // fly about 3 m above the ground (walls and firewalls still stop you)
+        const hit = game.world.raycast([pl.pos[0], pl.pos[1] + 0.2, pl.pos[2]], [0, -1, 0], 12), ground = hit.hit ? pl.pos[1] + 0.2 - hit.t : pl.pos[1] - 12;
+        pl.gravityMul = 0; pl.vel[1] = U.clamp((ground + 3 - pl.pos[1]) * 3, -4, 6); pl.speedMul *= 1.25; pl.grounded = false;
+        if (game.fxBurst && Math.random() < dt * 30) game.fxBurst([pl.pos[0], pl.pos[1] + 0.3, pl.pos[2]], '#ff9f43', 1);
+      }
+      if (game.hasPower('balloon')) { pl.gravityMul = 0.12; if ((game.state.powers.balloon || 0) > 1.2) pl.vel[1] = Math.max(pl.vel[1], 2.2); }
+      if (game.hasPower('frozen')) { pl.vel[0] = 0; pl.vel[2] = 0; }
       if (game.state.spinT > 0) { game.state.spinT -= dt; pl.yaw += dt * Math.PI * 2.2; }
       // glove fx flying out
-      for (const e of game.world.entities) if (e.type === 'fx' && e.model === 'glove') { e.state.t += dt; e.pos[0] += e.state.dir[0] * dt * 18; e.pos[2] += e.state.dir[1] * dt * 18; if (e.state.t > 0.35) e.remove(); }
+      for (const e of game.world.entities) if (e.type === 'fx' && e.state.dir) { e.state.t += dt; e.pos[0] += e.state.dir[0] * dt * (e.state.speed || 18); e.pos[2] += e.state.dir[1] * dt * (e.state.speed || 18); if (e.state.t > (e.state.life || 0.35)) e.remove(); }
       // flags other PCs draw on my figure
-      if (game.online && game.online.flags) game.online.flags((pl.grounded ? 0 : 1) | (game.hasPower('shield') ? 2 : 0) | (game.hasPower('ghostmode') ? 4 : 0) | (game.hasPower('anchor') ? 8 : 0) | ((pl.stun || 0) > 0 ? 16 : 0) | (game.hasPower('rocket') ? 32 : 0));
+      if (game.online && game.online.flags) game.online.flags((pl.grounded ? 0 : 1) | (game.hasPower('shield') ? 2 : 0) | (game.hasPower('ghostmode') ? 4 : 0) | (game.hasPower('anchor') ? 8 : 0) | ((pl.stun || 0) > 0 && !game.hasPower('frozen') && !game.hasPower('balloon') ? 16 : 0) | (game.hasPower('rocket') || game.hasPower('jetpack') ? 32 : 0) | (game.hasPower('frozen') ? 64 : 0) | (game.hasPower('balloon') ? 128 : 0));
       // other players' looks from their flags (online ghosts and solo rivals)
       for (const e of game.world.entities) {
         if (!e.figure || e.flags == null) continue;
         const f = e.flags;
         e.alpha = f & 4 ? 0.3 : undefined;
-        e.figure.bubble = f & 2 ? '#7fdbff' : null;
+        e.figure.bubble = f & 64 ? '#bfefff' : f & 2 ? '#7fdbff' : null;
+        e.figure.balloon = f & 128 ? '#ff4fd8' : null;
         e.figure.spin = f & 16 ? (e.figure.spin || 0) + dt * 10 : 0;
         e.hi = f & 32 ? 0.25 : (e.hi || 0);
       }
@@ -9121,20 +9376,21 @@ window.GK_ONLINE_CONFIG = {
       force = true;
     }
     const on = GG.enabled() && game.state.mode !== 'title';
-    const key = GG.slots.map(s => s.id + s.charges + ':' + Math.ceil(s.cd * 4) + (s.fresh > 0 ? 'f' : '')).join('|') + on;
+    const key = GG.slots.map(s => s.id + s.charges + ':' + Math.ceil(s.cd * 4) + (s.fresh > 0 ? 'f' : '')).join('|') + on + GG.sel;
     if (!force && box.dataset.k === key) return;
     box.dataset.k = key;
     box.innerHTML = '';
     GG.slots.forEach((s, i) => {
-      const d = D.get(s.id) || (GG.cfg.pickup ? { icon: '❔', name: 'empty' } : {}), b = U.el('button', 'gk-gslot' + (s.charges ? '' : ' empty') + (on && s.charges && !s.cd ? ' ready' : '') + (on ? '' : ' off') + (s.fresh > 0 ? ' fresh' : ''));
+      const d = D.get(s.id) || (GG.cfg.pickup ? { icon: '❔', name: '' } : {}), b = U.el('button', 'gk-gslot' + (s.charges ? '' : ' empty') + (on && s.charges && !s.cd ? ' ready' : '') + (on ? '' : ' off') + (s.fresh > 0 ? ' fresh' : '') + (GG.cfg.pickup && i === GG.sel && s.id ? ' sel' : ''));
       b.type = 'button';
       b.title = (d.name || s.id) + ': ' + (d.text || '') + ' (key ' + (i + 1) + ')';
-      b.innerHTML = '<span class="k">' + (i + 1) + '</span><span class="ch">' + '●'.repeat(s.charges) + '</span><span class="ic">' + (d.icon || '?') + '</span><span class="nm">' + U.esc(d.name || s.id) + '</span>' +
+      b.innerHTML = '<span class="k">' + (i + 1) + '</span><span class="ch">' + '●'.repeat(s.charges) + '</span><span class="ic">' + (d.icon || '?') + '</span><span class="nm">' + U.esc(d.name || s.id || '') + '</span>' +
         (s.cd > 0 ? '<i class="cd" style="--p:' + Math.round(s.cd / (d.cd || 1) * 100) + '%"></i>' : '');
       b.onmousedown = e => e.stopPropagation();
       b.onclick = e => { e.stopPropagation(); GG.use(i); };
       box.appendChild(b);
     });
+    if (GG.cfg.pickup) box.appendChild(U.el('div', 'gk-ghint', '🖱 ' + (GG.slots[GG.sel] && GG.slots[GG.sel].id ? (D.get(GG.slots[GG.sel].id) || {}).icon : '👊') + '   🖱R 👊'));
   }
 
   /** The loadout screen: pick one gadget per slot. opts: {secondsLeft() → number, info: html, onDone(ids)} */
@@ -9322,6 +9578,10 @@ window.GK_ONLINE_CONFIG = {
     '.rush-host table{width:100%;border-collapse:collapse;font-size:15px}.rush-host td{padding:4px 4px;border-bottom:1px solid rgba(255,255,255,.08)}.rush-host select{font:inherit}' +
     '.rush-podium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:10px 0 4px}.rush-podium div{text-align:center;background:rgba(255,255,255,.08);border-radius:12px 12px 0 0;padding:8px 14px;min-width:120px}' +
     '.rush-podium .p1{height:150px;background:linear-gradient(#ffd166,#b8860b);color:#1a1a1a}.rush-podium .p2{height:115px;background:linear-gradient(#e2e8f0,#a0aec0);color:#1a1a1a}.rush-podium .p3{height:90px;background:linear-gradient(#f6ad55,#c05621);color:#1a1a1a}.rush-podium b{display:block;font-size:20px}' +
+    '.rush-playbtn{width:100%;font-size:30px!important;padding:16px!important;letter-spacing:.06em}.rush-botset select{flex:1;min-width:0}.rush-joinrow input{text-align:center}' +
+    '.rush-keys{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}.rush-keys span{background:rgba(255,255,255,.08);border-radius:10px;padding:4px 8px;font-size:18px}.rush-keys b{font:800 11px system-ui;margin-right:4px;opacity:.8}' +
+    '.rush-roundname{font:900 26px system-ui;letter-spacing:.04em}.rush-howto{display:flex;gap:10px;justify-content:center;margin-top:8px}.rush-howto div{background:rgba(255,255,255,.1);border-radius:14px;padding:8px 10px;min-width:70px}' +
+    '.rush-howto b{display:block;font-size:34px;line-height:1.1}.rush-howto span{font:800 12px system-ui;letter-spacing:.05em}' +
     '.rush-hosthud>:not(.gk-minimap){display:none!important}.rush-hl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.rush-hl div{background:rgba(255,255,255,.07);border-radius:12px;padding:10px}.rush-hl b{display:block;color:#ffd166;font-size:16px}';
   function css() { if (document.getElementById('gk-race-css')) return; const s = document.createElement('style'); s.id = 'gk-race-css'; s.textContent = CSS; document.head.appendChild(s); }
   function hudEl(g, cls) { let e = g.ui.hud.querySelector('.' + cls); if (!e) { e = U.el('div', cls); g.ui.hud.appendChild(e); } return e; }
@@ -9447,7 +9707,8 @@ window.GK_ONLINE_CONFIG = {
       }
       // put the figure on the course: centre line + its own lane offset (wandering a little)
       const zone = C.zones && C.zones.find(z => b.d >= z.d0 - 0.5 && b.d <= z.d1);
-      const p = C.at(b.d), w = zone && zone.kind === 'glass' ? (b.off >= 0 ? 2.3 : -2.3) : b.off + Math.sin(now / 2300 + b.speed * 5) * 1.2, x = p.x - p.dz * w, z = p.z + p.dx * w;
+      // bots run in the middle lane (never inside the lane walls), on the panes of a glass bridge
+      const p = C.at(b.d), w = zone && zone.kind === 'glass' ? (b.off >= 0 ? 2.3 : -2.3) : U.clamp(b.off * 0.55 + Math.sin(now / 2300 + b.speed * 5) * 0.8, -3.3, 3.3), x = p.x - p.dz * w, z = p.z + p.dx * w;
       const moving = running && !b.fin && b.pause <= 0 && b.stun <= 0 && !b.hold;
       const e = b.ent;
       e.pos[0] += (x - e.pos[0]) * Math.min(1, dt * 8); e.pos[2] += (z - e.pos[2]) * Math.min(1, dt * 8);
@@ -9457,7 +9718,9 @@ window.GK_ONLINE_CONFIG = {
       e.yaw = Math.atan2(p.dx, p.dz);
       e.figure.walk += ((moving ? 1 : 0) - e.figure.walk) * Math.min(1, dt * 8);
       e.figure.phase += dt * (moving ? b.speed : 0) * 3.2;
-      e.flags = b.stun > 0 ? 16 : 0;
+      if (b.fxT > 0) b.fxT -= dt; else b.fx = null;
+      e.flags = b.fx === 'freeze' ? 64 : b.fx === 'lift' ? 128 : b.stun > 0 ? 16 : 0;
+      if (b.fx === 'lift') e.pos[1] += Math.min(3.5, (b.fxT > 1 ? 3.5 : b.fxT * 3.5)) * 0.06;   // floats up with the balloon
     }
   }
   function hitBot(g, id, eff) {
@@ -9465,6 +9728,7 @@ window.GK_ONLINE_CONFIG = {
     if (!b || b.fin || g.state.race.phase !== 'running') return 'immune';
     if (b.safe && b.safe > clock(g)) return 'immune';
     if (eff.k === 'slow') b.slow = eff.seconds || 3;
+    else if (eff.k === 'freeze' || eff.k === 'lift') { b.stun = (eff.seconds || 2.4) + 0.3; b.fx = eff.k; b.fxT = b.stun; }
     else { b.stun = (eff.stun || 1) + 0.6; b.d = Math.max(0, b.d - (eff.power || 10) * 0.35); }
     b.safe = clock(g) + 2500;
     return 'hit';
@@ -9541,12 +9805,13 @@ window.GK_ONLINE_CONFIG = {
       game.raceClock = () => { const t = times(game); return t ? (clock(game) - t.startAt) / 1000 : game.state.time; };
       const seed = () => (R.mode === 'solo' ? (R.local && R.local.seed) || 'solo' : (game.online ? game.online.room : 'x')) + ':' + game.levelIndex;
       game.trapRandom = key => { let h = 2166136261; const k = seed() + ':' + key; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+      game.musicLevel = () => { const ph = game.state.race.phase; return ph === 'running' ? (game.state.race.finished ? 0.5 : 1) : ph === 'over' ? 0.3 : 0.5; };   // drums from GO
       game.raceRank = () => { const st2 = game.state.race; return st2.count > 1 ? U.clamp(((st2.place || 1) - 1) / (st2.count - 1), 0, 1) : 0.5; };
       game.on('terrain:caught', () => {
         game.scoring.add(-10, 'Caught on red light', 'strategy');
-        banner(game, '🔴 CAUGHT MOVING!<small>Back to the start line · −10</small>', 'bad', 2.2);
+        banner(game, '🔴 CAUGHT!<small>−10</small>', 'bad', 2);
       });
-      game.on('terrain:glass', () => banner(game, '💥 FAKE GLASS!', 'bad', 1.2));
+      game.on('terrain:glass', () => banner(game, '💥', 'bad', 1));
       // hazards (lasers, drones) knock you back along the course and stun you briefly
       game.on('player:hit', () => {
         const p = C.at(game.state.race.dist - 1);
@@ -9559,7 +9824,7 @@ window.GK_ONLINE_CONFIG = {
         if (ev.pool === 'comeback' && game.gadgets) game.gadgets.give('all', 1);
         sendStats(game, true);
       });
-      game.on('quiz:wrong', ev => { if (ev.pool === 'gate' || ev.pool === 'shortcut') banner(game, '🔒 WRONG ANSWER<small>Firewall rebooting… new question in ' + Math.round(ev.freeze + 1) + ' s</small>', 'bad', ev.freeze + 0.8); else banner(game, '✘ Not this time<small>No bonus. Keep racing!</small>', 'bad', 2); });
+      game.on('quiz:wrong', ev => { if (ev.pool === 'gate' || ev.pool === 'shortcut') banner(game, '❌<small>⏳ ' + Math.round(ev.freeze + 1) + ' s</small>', 'bad', ev.freeze + 0.8); else banner(game, '❌', 'bad', 1.5); });
       // player position in the start area
       R.myId = game.online ? game.online.id : 'me';
       placeAtStart(game);
@@ -9654,7 +9919,7 @@ window.GK_ONLINE_CONFIG = {
   function enter(g, phase, from) {
     const st = g.state.race;
     st.phase = phase;
-    if (phase === 'lobby') info(g, R.mode === 'online' ? '⏳ ' + T(g, 'waiting', 'Waiting for your teacher to start the round…') + '<br><small>Room ' + U.esc(g.online ? g.online.room : '') + '</small>' : '');
+    if (phase === 'lobby') info(g, R.mode === 'online' ? '<b class="rush-roundname">⏳ 👩‍🏫</b><br>' + U.esc(g.online ? g.online.room : '') : '');
     if (phase === 'prep') {
       info(g, '');
       placeAtStart(g);
@@ -9662,8 +9927,8 @@ window.GK_ONLINE_CONFIG = {
       if (g.gadgets && g.gadgets.cfg.pickup && !st.chose) {
         st.chose = true;
         const ri = g.cfg.roundInfo || {};
-        info(g, '<b style="font-size:20px">Round ' + (g.levelIndex + 1) + ': ' + U.esc(ri.name || g.cfg.stageTitle || '') + '</b>' + (ri.text ? '<br>' + U.esc(ri.text) : '') +
-          '<br><small>' + T(g, 'howto', '') + '</small>');
+        info(g, '<b class="rush-roundname">' + (g.levelIndex + 1) + ' · ' + U.esc(ri.name || g.cfg.stageTitle || '') + '</b>' +
+          '<div class="rush-howto">' + [['🏁', 'FINISH'], ['❓', 'ANSWER'], ['🎁', 'GRAB'], ['🖱', 'USE / 👊'], ['🔴', 'FREEZE'], ['⭐', 'BONUS']].map(x => '<div><b>' + x[0] + '</b><span>' + x[1] + '</span></div>').join('') + '</div>');
       } else if (g.gadgets && !st.chose) {
         st.chose = true;
         const t = times(g), ri = g.cfg.roundInfo || {};
@@ -9710,7 +9975,7 @@ window.GK_ONLINE_CONFIG = {
     if (g.online && R.mode === 'online') {
       g.online.set({ fin: Math.round(st.finishMs), r: g.levelIndex }); sendStats(g, true);
       setTimeout(() => { if (GK.current === g) g.onlineSilent = true; }, 3000);
-      setTimeout(() => { if (GK.current === g && st.phase === 'running') info(g, '🏁 You finished ' + ORD(st.place) + '! Watch the others race: the round ends when everyone is done or the time is up.'); }, 3200);
+      setTimeout(() => { if (GK.current === g && st.phase === 'running') info(g, '<b class="rush-roundname">🏁 ' + ORD(st.place) + '</b> ⏳'); }, 3200);
     }
     if (g.gadgets) g.gadgets.draw(true);
     if (R.mode === 'solo') {
@@ -10006,18 +10271,19 @@ window.GK_ONLINE_CONFIG = {
     // play with bots (no internet): how many, how good, and which world to start in (kept on this PC)
     const pref = GK.Settings.get('rushBots', { n: 7, skill: 'normal', round: 0 }), rounds = (g.cfg.content && g.cfg.content.rounds) || [];
     const opt = (list, cur) => list.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + U.esc(t) + '</option>').join('');
-    box.innerHTML = '<b>🤖 Play with bots</b> <span class="gk-muted">(no internet needed)</span>' +
-      '<div class="row rush-botset"><label>Bots <select data-a="bn">' + opt([[3, '3'], [5, '5'], [7, '7'], [11, '11'], [15, '15']], pref.n) + '</select></label>' +
-      '<label>Bot level <select data-a="bs">' + opt([['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], pref.skill) + '</select></label>' +
-      '<label>Start at <select data-a="br">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, 'Round ' + (i + 1) + (rounds[i] ? ': ' + rounds[i].name : '')]), pref.round) + '</select></label></div>' +
-      '<button class="gk-btn primary big" data-a="solo" style="width:100%">🤖 Race the bots ▶</button>' +
-      (online ? '<div class="rush-or">or</div><b>🌐 Class race</b><div class="row"><input class="gk-input" data-a="room" maxlength="16" placeholder="Room code, e.g. NEON-42" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn" data-a="join">Join</button></div>' : '<p class="gk-muted">Online class races need the website copy and internet.</p>') +
+    // big buttons and pictures, very few words (students do not read long texts)
+    box.innerHTML = '<button class="gk-btn primary big rush-playbtn" data-a="solo">🤖 PLAY ▶</button>' +
+      '<div class="row rush-botset"><select data-a="bn" title="Bots">' + opt([[3, '🤖 3'], [5, '🤖 5'], [7, '🤖 7'], [11, '🤖 11'], [15, '🤖 15']], pref.n) + '</select>' +
+      '<select data-a="bs" title="Bot level">' + opt([['easy', '😊 Easy'], ['normal', '🙂 Normal'], ['hard', '😈 Hard']], pref.skill) + '</select>' +
+      '<select data-a="br" title="World">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, '🗺 ' + (i + 1) + ' ' + (rounds[i] ? rounds[i].name : '')]), pref.round) + '</select></div>' +
+      (online ? '<div class="row rush-joinrow"><input class="gk-input" data-a="room" maxlength="16" placeholder="🌐 CODE" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn" data-a="join">JOIN ▶</button></div>' : '') +
       '<div class="st"></div>' +
-      (online ? '<details><summary>👩‍🏫 Teacher</summary><p class="gk-muted">Host the class race on the projector: you get a room code; students join it; you start each round.</p><button class="gk-btn" data-a="host">Host a class race</button></details>' : '');
+      '<div class="rush-keys"><span><b>WASD</b>🏃</span><span><b>SPACE</b>⤴</span><span><b>SHIFT</b>⚡</span><span><b>🖱</b>👊🎁</span><span><b>E</b>❓</span></div>' +
+      (online ? '<details><summary>👩‍🏫</summary><button class="gk-btn" data-a="host">Host a class race</button></details>' : '');
     const ctl = s.querySelector('.gk-controls');   // above the key list, so it is on screen without scrolling
     (ctl || play).parentNode.insertBefore(box, ctl || play);
     const st = box.querySelector('.st'), say = (t, ok) => { if (st) { st.textContent = t; st.className = 'st ' + (ok ? 'ok' : 'bad'); } };
-    const nameOk = () => { const nb = data.nameBox; if (nb && !nb.value.trim()) { nb.focus(); nb.classList.add('need'); say('Type your name first (a nickname is fine).'); return false; } if (nb) g.setPlayerName(nb.value.trim().slice(0, 16)); return true; };
+    const nameOk = () => { const nb = data.nameBox; if (nb && !nb.value.trim()) { nb.focus(); nb.classList.add('need'); say('✏️ Name?'); return false; } if (nb) g.setPlayerName(nb.value.trim().slice(0, 16)); return true; };
     // start a fresh level 0 now that the mode is known (setup builds bots / host view for the mode)
     const go = (mode, level) => { R.mode = mode; R.reset(); g.audio.unlock(); g.ui.hideScreens(); g.loadLevel(level || 0); };
     box.querySelector('[data-a=solo]').onclick = () => {
