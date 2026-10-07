@@ -665,18 +665,18 @@ window.GAME_CONTENT = {};
   C.quiz = { easy: C.easy, medium: C.medium, hard: C.hard, comeback: C.comeback, case: window.CYBER_ARENA_BANK || [] };
 
   C.rounds = [
-    { name: 'Neon City', text: 'TRAINING: easy questions and 1 charge per gadget. Learn the controls, the gates and the routes!' },
-    { name: 'Digital Forest', text: 'Bounce mushrooms, caves and river stepping stones. Look for the hidden rooms!' },
-    { name: 'Data Factory', text: 'Conveyor belts, moving platforms and molten-data pits. Team bridges give +12! Points ×1.1' },
-    { name: 'Digital Ocean', text: 'Floating decks and harder questions. Traps everywhere: the Scanner shows them. Points ×1.25' },
-    { name: 'Cyber Core', text: 'CHAMPIONSHIP ROUND: 7 firewalls, 3 charges per gadget, points ×1.5. Everything you have learned!' },
+    { name: 'Neon City', text: 'TRAINING: easy questions. 🔴 Red Light, Green Light, swinging hammers, a hill with boulders, Door Dash and a glass bridge!' },
+    { name: 'Digital Forest', text: 'Roll down the hill, cross the GLASS BRIDGE (half the panes are fake!), freeze on red light. Look for the hidden rooms!' },
+    { name: 'Data Factory', text: 'Door Dash, hammers, conveyor belts and molten pits. Team bridges give +15! Points ×1.1' },
+    { name: 'Digital Ocean', text: 'Two glass bridges, big fans, harder questions. The 📡 Scanner shows fake glass and traps. Points ×1.25' },
+    { name: 'Cyber Core', text: 'CHAMPIONSHIP: a mountain, 2 red lights, 2 glass bridges, 7 firewalls. Points ×1.5!' },
   ];
 
   C.characters = { title: 'Choose your racer', leo: 'Leo', leoText: 'Blue hoodie', kai: 'Kai', kaiText: 'Green jacket', mia: 'Mia', miaText: 'Pink top', zara: 'Zara', zaraText: 'Purple outfit' };
 
   C.texts = {
     waiting: 'You are in! Wait for your teacher to start the round. Walk around the start and try the controls.',
-    howto: 'HOW TO PLAY: race to the 🏁 finish. Red FIREWALLS block the road: answer at a terminal (E) to open them. Wrong = 5 s freeze and a new question. 💡 Show answer costs points. Keys 1 2 3 = gadgets. Grab ◆ data shards and 📦 crates. 🤝 Team plates need two players. Choose your lane: fast but dangerous, or slow but safe!',
+    howto: 'HOW TO PLAY: race to the 🏁 finish. Red FIREWALLS block the road: answer at a terminal (E) to open them (wrong = 5 s freeze; 💡 Show answer costs points). Grab ❓ boxes for random gadgets, then press 1 2 3. 🔴 RED LIGHT = stand still! ⭐ BONUS terminals give extra points.',
   };
   C.description = 'Race through five cyber worlds with your class. Open firewalls with Computer/ICT answers, use cartoon gadgets, find shortcuts and hidden data, help each other at team bridges. Five rounds, one champion!';
   C.subtitle = 'Grade 8–9 · class race in 5 rounds';
@@ -704,7 +704,7 @@ window.GAME_CONTENT = {};
     description: 'content:description',
     type: 'first-person-3d',
     world: 'rush-city',
-    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'online', 'quiz-gates', 'gadgets', 'race'],
+    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'juice', 'online', 'quiz-gates', 'gadgets', 'race'],
     levels: [
       round(0, 'rush-city', ['easy', 'easy', 'easy', 'medium', 'easy'], 1),
       round(1, 'rush-forest', ['easy', 'medium', 'easy', 'medium', 'medium', 'easy'], 2),
@@ -720,9 +720,11 @@ window.GAME_CONTENT = {};
     scoring: { objective: 0, wrongAnswer: 0, hint: 0, allowNegative: true },
     win: false,
     online: { rate: 3, ghostAlpha: 1, labelRange: 45, dot: '#ffd166' },
-    race: { roundTime: 600, timeChoices: [360, 480, 600], prep: 30, soloPrep: 25, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
+    race: { roundTime: 600, timeChoices: [360, 480, 600], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', reward: { easy: 10, medium: 12, hard: 16, case: 15, comeback: 75, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
-    gadgets: { charges: 2, max: 3, recover: 2.5 },
+    // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
+    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2, 3], bowling: [1.5, 3], banana: [3, 1], virus: [1.5, 2.5], bubble: [3, 1.5], ghost: [1, 2], anchor: [1.5, 1.5], rocket: [1, 4], scanner: [1.5, 1], jumppad: [1.5, 2] } },
+    juice: { dust: '#d8dee9' },
     characters: { default: 'leo', title: 'content:characters.title', choices: [
       { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
       { id: 'kai', label: 'content:characters.kai', text: 'content:characters.kaiText', look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#27ae60', pants: '#34495e', shoes: '#e74c3c', accent: '#7cfc00' } },
@@ -733,6 +735,7 @@ window.GAME_CONTENT = {};
       boing: { wave: 'sine', notes: [220, 520, 880], dur: 0.07, vol: 0.18 },
       whoosh: { wave: 'sawtooth', notes: [300, 700, 1200], dur: 0.05, vol: 0.06 },
       go: { wave: 'square', notes: [523, 784, 1047, 1568], dur: 0.09, vol: 0.2 },
+      glass: { wave: 'triangle', notes: [2400, 1800, 900, 300], dur: 0.05, vol: 0.2 },
     } },
     // the course worlds name their gameplay spots; these are the entities that fill them (worlds/_course.js lists them)
     slots: {
@@ -742,6 +745,14 @@ window.GAME_CONTENT = {};
       comeback: { type: 'qterm', pool: 'comeback' },
       sdoor: { type: 'door', width: 3.8, height: 2.6, slide: 'up', speed: 3, color: '#7cfc00', locked: { flag: 'answer-at-lock', text: '⚡ SHORTCUT: answer the HARD question at the lock to open it.' } },
       sterm: (L, n) => ({ type: 'qterm', pool: 'shortcut', opens: ['sdoor-' + n.split('-')[1]] }),
+      ibox: { type: 'itembox' },
+      glass: { type: 'glasstile' },
+      hammer: { type: 'pendulum', swing: 0.72, period: 3.0 },
+      fan: { type: 'wind', model: 'bigFan', ahead: true, push: 5.5, pulse: [3, 2.5] },
+      redlight: { type: 'redlight' },
+      watcher: { type: 'watcher' },
+      boulder: { type: 'boulder', speed: 7.5, r: 1.3, gap: 1.2 },
+      ddoor: { type: 'dashdoor' },
       laser: { type: 'hazard', model: 'laserGate', look: { size: 9.6 }, solid: false, pulse: [1.5, 1.4], damage: 1, knockback: 5, points: 0, faceTravel: false, bob: 0, label: null },
       drone: { type: 'hazard', model: 'droneBot', speed: 2.6, damage: 1, knockback: 6, hover: 1.0, bob: 0.15, points: 0, faceTravel: false },
       sweeper: { type: 'sweeper', length: 9.4, spin: 1.15 },
@@ -1072,7 +1083,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/juice/juice","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","juice","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1112,6 +1123,7 @@ GK_LIBRARY.mechanics = {
   powerups: { needs: [], spatial: true, about: 'floating power-ups: speed, shield, freeze, double points, heal, rapid fire (timed, shown as HUD chips)' },
   online: { needs: [], spatial: true, files: ['online/firebase/firebase-app-compat', 'online/firebase/firebase-database-compat', 'online/config'], about: 'internet rooms (room code), other players drawn as animated ghosts, position sync, events; free Firebase (online/)' },
   terrain: { needs: [], spatial: true, about: 'conveyor belts, bounce pads, speed pads, ice, crumbling platforms, wind / low-gravity zones, spinning sweeper bars; game.knock()' },
+  juice: { needs: [], spatial: true, about: 'game feel: speed widens the view + speed lines, dust puffs when running, landing rings, boost trails; game.fxBurst()' },
   'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
   gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
   race: { needs: ['objectives', 'quiz-gates', 'gadgets'], spatial: true, about: 'class race in rounds: start barrier, countdown, progress along routes.course, live positions, finish, round scoring + championship; online host (mechanics/online) or solo with rival bots' },
@@ -5342,7 +5354,7 @@ GK_LIBRARY.worlds = {
         else { eye = c.pos; look = c.dir; }
       }
       this.camPos = eye;
-      r.setCamera(eye, look, g.player.cfg.fov);
+      r.setCamera(eye, look, g.player.cfg.fov + (g.fovKick || 0));   // game.fovKick: a mechanic widens the view (speed)
       // anything further than the end of the fog cannot be seen: skip those chunks and entities (big worlds stay fast)
       const fogEnd = (g.cfg.environment.fog && g.cfg.environment.fog[1]) || r.far, cull = Math.min(r.far, fogEnd + 6), cull2 = cull * cull;
       const items = [];
@@ -5368,7 +5380,7 @@ GK_LIBRARY.worlds = {
         if (!e.shape) continue;
         const mesh = r.cached(e.shape.key, () => e.shape.geo);
         const ghost = third && this.seeThrough && this.seeThrough.has(e);
-        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, scale: e.scale, tint: e.tint, alpha: ghost ? 0.22 : e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });
+        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, pitch: e.pitch, roll: e.roll, scale: e.scale, tint: e.tint, alpha: ghost ? 0.22 : e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });   // entity.pitch / roll: swinging and rolling things
         if (!SHADOW[e.type]) continue;
         const dx = e.pos[0] - eye[0], dz = e.pos[2] - eye[2];
         if (dx * dx + dz * dz > 900) continue;
@@ -5604,9 +5616,11 @@ GK_LIBRARY.worlds = {
      {k: 'start'}                                    24 start spots, a barrier line, an arch
      {k: 'lanes', left, mid, right}                  72 m, split into 3 lanes by two walls (each lane a different route)
          left:  'high' (raised walkway, shards on top) | 'tunnel' (covered) | 'short' (shortcut door + fast belt) | 'crumble'
-         mid:   'laser' | 'drone' | 'sweeper' | 'belt' | 'plain'
+         mid:   'laser' | 'drone' | 'sweeper' | 'belt' | 'plain' | 'glass' (Squid Game glass bridge) | 'hammer' (swinging hammers)
          right: 'speed' | 'ice' | 'stones' (stepping stones over a pit; stones: 'crumble') | 'movers' | 'coop' (2-player bridge) |
-                'fake' (a "shortcut" that dead-ends) | 'bounce' (walls you bounce over)
+                'fake' (a "shortcut" that dead-ends) | 'bounce' (walls you bounce over) | 'fans' (big fans, gusts against you)
+     {k: 'redlight'}   Red Light, Green Light arena (64 m) · {k: 'hill', height, run} terraced hill + rolling boulders ·
+     {k: 'doors'}      Door Dash: 3 walls of 5 doors, 2 real in each
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
      {k: 'plaza', turn: 'n'|'e'|'s'|'w', secret, comeback, case}   44 × 44 square with the landmark, shards, crates
      {k: 'finish'}                                   finish line and podium
@@ -5614,7 +5628,9 @@ GK_LIBRARY.worlds = {
      start-1…24 · barrier {width} · cp-N (checkpoint, sector entries) · door-G-a|b|c / term-G-a|b|c {gate} · gate-G
      laser-N · drone-N (+route) · sweeper-N · belt-N {size} · pad-N · ice-N {size} · mover-N {size} (+route) · crumble-N {size}
      plateA-N / plateB-N / bridge-N {size, bridge} · fakepad-N / fake-N {fake} · bounce-N · sdoor-N / sterm-N · sbelt-N {size}
-     shard-N · crate-N · secret-N · case-N · comeback-1 · life-N (+route, data {kind}) · finish {size}
+     shard-N · crate-N · secret-N · case-N · comeback-1 · life-N (+route, data {kind}) · finish {size} · ibox-N (gadget boxes)
+     glass-N {row, col, size} · hammer-N · fan-N {size} · redlight-N {size, back, watcher} / watcher-N / rlback-N ·
+     boulder-N (+route) · ddoor-N {row, real, width, height}
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
 (function () {
@@ -5622,6 +5638,8 @@ GK_LIBRARY.worlds = {
   const U = GK.util, M = GK.Models, G = () => new GK.Geo();
   const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
   const W = 30, LANE_L = 72, GATE_L = 12, PLAZA = 44;
+  /** Half the size of each landmark's solid base (spinning ones: a square inside the circle it sweeps). */
+  const CORE = { holoComputer: 1.5, worldTree: 1.8, processor: 4.9, floatingServer: 4.9, cyberCore: 4.2 };
 
   // ===================== scenery models =====================
   M.add('tower', o => {   // skyscraper with glowing window bands
@@ -5730,6 +5748,18 @@ GK_LIBRARY.worlds = {
     return g;
   });
   M.add('podium', o => G().box(0, 0, 0, 3, 2.2, 3, '#ecc94b', { top: '#faf089' }).box(-3, 0, 0, 3, 1.5, 3, '#cbd5e0').box(3, 0, 0, 3, 1, 3, '#dd6b20').box(0, 2.2, 0, 1, 1.2, 0.2, '#ffffff', { glow: 0.6 }));
+  M.add('ramp', o => {   // a wedge: w wide, len long, rising from 0 (z = -len/2) to h (z = +len/2); front +z
+    const w = o.w || 10, L = o.len || 10, h = o.h || 3, c = o.color || '#4a5568', g = G(), x0 = -w / 2, x1 = w / 2, z0 = -L / 2, z1 = L / 2;
+    g.quad([x0, 0, z0], [x1, 0, z0], [x1, h, z1], [x0, h, z1], c, [0, -10, 0]);
+    g.tri([x0, 0, z0], [x0, h, z1], [x0, 0, z1], U.shade(c, 0.8), [10, 0, 0]).tri([x1, 0, z0], [x1, h, z1], [x1, 0, z1], U.shade(c, 0.8), [-10, 0, 0]);
+    return g;
+  });
+  M.add('bigFan', o => {   // a giant fan on legs, blowing toward +z
+    const c = o.color || '#4fd1c5', g = G().box(-2.4, 0, -0.4, 0.4, 3, 0.4, '#2d3748').box(2.4, 0, -0.4, 0.4, 3, 0.4, '#2d3748');
+    g.add(G().cyl(0, -0.3, 0, 2.6, 0.6, '#2d3748', { seg: 16 }).rotX(Math.PI / 2).move(0, 3.2, 0));
+    for (let i = 0; i < 4; i++) g.add(G().box(0, 0, 0, 0.5, 2.2, 0.1, c, { glow: 0.5 }).move(0, 1.1, 0).rotZ(i * Math.PI / 2).move(0, 3.2, 0.35));
+    return g.add(G().cyl(0, -0.2, 0, 0.5, 0.4, '#ffd166', { seg: 10, glow: 0.8 }).rotX(Math.PI / 2).move(0, 3.2, 0.4));
+  });
   M.add('glowStrip', o => { const s = o.size || [10, 0.2, 0.2]; return G().box(0, 0, 0, s[0], s[1], s[2], o.color || '#4cc9f0', { glow: 1 }); });
   M.add('slab', o => { const s = o.size || [4, 0.4, 4]; return G().box(0, 0, 0, s[0], s[1], s[2], o.color || '#4a5568', { top: o.top }); });
   M.add('plane', o => { const s = o.size || [10, 10]; return G().plane(0, 0, 0, s[0], s[1], o.color || '#2a4365', { glow: o.glow || 0 }); });
@@ -5777,7 +5807,7 @@ GK_LIBRARY.worlds = {
     wall(F, u0, u1, v0, v1, h, color) { this.box(F, u0, u1, v0, v1, 0, h, color || this.T.wall, { top: this.T.wallTop }); }
     deco(F, model, u, v, y, rot, look, scale, extra) {
       const p = F.pt(u, v);
-      this.scenery.push(Object.assign({ model, pos: [p[0], y || 0, p[1]], rot: F.rot(rot), look, scale, merge: true }, extra));
+      this.scenery.push(Object.assign({ model, pos: [p[0], y || 0, p[1]], rot: F.rot(rot), look, scale, merge: true, solid: false }, extra));   // scenery never blocks unless extra.solid
     }
     course(F, u, v) { const p = F.pt(u, v); this.routes.course.push([p[0], 0, p[1]]); }
     /** Scenery outside a straight stretch, both sides (theme.side picks the models). */
@@ -5814,14 +5844,15 @@ GK_LIBRARY.worlds = {
     lanes(o) {
       const F = frame(this.cur.x, this.cur.z, this.cur.dir), L = LANE_L, T = this.T, R = 10, half = W / 2;
       o = Object.assign({ left: 'high', mid: 'laser', right: 'speed' }, o);
-      const pit = o.right === 'stones' || o.right === 'coop' || o.right === 'movers' ? [24, 48] : null;
-      // floor: left + middle lanes whole; the right lane has a gap when it crosses a pit
-      this.floor(F, 0, L, -half, 5, T.floor);
-      if (pit) {
-        this.floor(F, 0, pit[0], 5, half, T.floor2 || T.floor); this.floor(F, pit[1], L, 5, half, T.floor2 || T.floor);
-        this.deco(F, 'plane', (pit[0] + pit[1]) / 2, R, -0.25, 0, { size: [W / 3, pit[1] - pit[0]], color: T.pit || '#1c4e80', glow: T.pitGlow || 0.3 }, null, { solid: false });
-        this.box(F, pit[0], pit[1], half - 0.3, half, -3, 3, T.wall);   // the pit's side walls (look)
-      } else this.floor(F, 0, L, 5, half, T.floor2 || T.floor);
+      const pit = o.right === 'stones' || o.right === 'coop' || o.right === 'movers' ? [24, 48] : null, gpit = o.mid === 'glass' ? [18, 54] : null;
+      // floors: each lane is whole unless it crosses a pit (right: stones / movers / team bridge; middle: glass bridge)
+      const strip = (v0, v1, gap, color) => {
+        if (!gap) { this.floor(F, 0, L, v0, v1, color); return; }
+        this.floor(F, 0, gap[0], v0, v1, color); this.floor(F, gap[1], L, v0, v1, color);
+        this.deco(F, 'plane', (gap[0] + gap[1]) / 2, (v0 + v1) / 2, -0.25, 0, { size: [v1 - v0, gap[1] - gap[0]], color: T.pit || '#1c4e80', glow: T.pitGlow || 0.3 });
+      };
+      strip(-half, -5, null, T.floor); strip(-5, 5, gpit, T.floor); strip(5, half, pit, T.floor2 || T.floor);
+      if (pit) this.box(F, pit[0], pit[1], half - 0.3, half, -3, 3, T.wall);   // the pit's side walls (look)
       this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
       // dividers: three lanes
       this.wall(F, 8, 64, -5.6, -4.4, T.dividerH || 3, T.divider || T.wall);
@@ -5833,7 +5864,17 @@ GK_LIBRARY.worlds = {
       if (o.mid === 'laser') for (const u of [20, 32, 44, 56]) this.slot('laser', F, u, 0, 0, 0);
       else if (o.mid === 'drone') for (const u of [20, 36, 52]) { const n = this.slot('drone', F, u, -3.5, 0.2, 0); this.routes[n] = [F.pt(u, -3.5), F.pt(u, 3.5)].map(p => [p[0], 0.2, p[1]]); }
       else if (o.mid === 'sweeper') for (const u of [22, 46]) this.slot('sweeper', F, u, 0, 0, 0);
-      else if (o.mid === 'belt') { this.slot('belt', F, 36, 0, 0.02, 0, { size: [6, 40] }); this.belt(F, 16, 56, -3, 3); for (const u of [24, 48]) this.slot('laser', F, u, 0, 0, 0); }
+      else if (o.mid === 'glass') {
+        // Squid Game glass bridge: two columns of panes; in every row one pane is fake (the same for the whole class)
+        for (let u = 20, i = 0; u <= 52; u += 4, i++) { const row = this.num('glassrow'); for (const [c, v] of [[0, -2.3], [1, 2.3]]) this.slot('glass', F, u, v, -0.2, 0, { row, col: c, size: [3.4, 0.2, 3.2] }); }
+        this.deco(F, 'neonSign', 15, 0, 3, 180, { color: '#9be7ff', w: 7, h: 1.8, y: 0.3 });
+      } else if (o.mid === 'hammer') {
+        for (const u of [22, 38, 54]) {
+          this.slot('hammer', F, u, 0, 0, 0);
+          this.deco(F, 'slab', u, 0, 7.4, 0, { size: [11.4, 0.5, 0.7], color: '#2d3748' });
+          for (const v of [-5, 5]) this.deco(F, 'slab', u, v, 3, 0, { size: [0.6, 4.4, 0.6], color: '#2d3748' });
+        }
+      } else if (o.mid === 'belt') { this.slot('belt', F, 36, 0, 0.02, 0, { size: [6, 40] }); this.belt(F, 16, 56, -3, 3); for (const u of [24, 48]) this.slot('laser', F, u, 0, 0, 0); }
       else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); }
       // ----- left lane
       const LV = -R;
@@ -5892,12 +5933,75 @@ GK_LIBRARY.worlds = {
         this.slot('fakepad', F, 44.2, RV, 0.02, 180);
         this.slot('fake', F, 10, RV, 0, 0, { fake: true });
         this.deco(F, 'neonSign', 6, 14, 0, 90, { color: '#ffd166', w: 3.4, h: 1.6, y: 2.6 });
+      } else if (o.right === 'fans') {
+        // big fans at the lane's end blow against you in gusts (wait for the pause, or push through)
+        this.slot('fan', F, 63, RV, 0, 180, { size: [9.6, 5, 54] });
+        for (const u of [20, 44]) this.slot('pad', F, u, RV, 0.02, 0);
+        this.slot('shard', F, 32, RV, 0, 0);
       } else if (o.right === 'bounce') {
         this.wall(F, 30, 31, 5.6, half, 2.4); this.wall(F, 48, 49, 5.6, half, 2.4);
         this.slot('bounce', F, 27, RV, 0, 0); this.slot('bounce', F, 45, RV, 0, 0);
         this.slot('shard', F, 39, RV, 0, 0);
       }
       for (const u of [8, 64]) { this.lamp(F, u, -half + 1, 90); this.lamp(F, u, half - 1, -90); }
+      for (const v of [-10, 0, 10]) this.slot('ibox', F, 5, v, 0, 0);   // random gadget boxes before the lanes split
+      for (const v of [-8, 8]) this.slot('ibox', F, 67, v, 0, 0);
+      this.sides(F, L);
+      this.course(F, L, 0);
+      this.advance(F, L);
+    }
+    /** RED LIGHT, GREEN LIGHT arena: a giant robot over the far end; move on red and you go back to the start line. */
+    redlight() {
+      const F = frame(this.cur.x, this.cur.z, this.cur.dir), L = 64, T = this.T, half = W / 2, n = this.num('redlight');
+      this.floor(F, 0, L, -half, half, T.plaza || T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
+      this.loc('rlback-' + n, F, 3, 0, 0, 0);
+      this.loc('redlight-' + n, F, 32, 0, 0, 0, { size: [W, 8, 52], back: 'rlback-' + n, watcher: 'watcher-' + n });
+      this.loc('watcher-' + n, F, 60, 0, 0, 180, { w: W - 1 });
+      for (const u of [6, 58]) this.deco(F, 'plane', u, 0, 0.02, 0, { size: [W, 0.8], color: u === 6 ? '#ffffff' : '#ffd166', glow: 0.8 });
+      for (let u = 12; u < 56; u += 8) for (const v of [-half + 1, half - 1]) this.deco(F, 'glowStrip', u, v, 0.05, 0, { size: [0.4, 0.1, 3], color: '#ff4fd8' });
+      this.sides(F, L);
+      this.course(F, L, 0);
+      this.advance(F, L);
+    }
+    /** A HILL: terraced ramp up, a plateau, ramp down; boulders roll down at the climbers. o.height (5.4), o.run (1.15). */
+    hill(o) {
+      o = o || {};
+      const F = frame(this.cur.x, this.cur.z, this.cur.dir), T = this.T, half = W / 2, H = o.height || 5.4, run = o.run || 1.15, n = Math.round(H / 0.3), ramp = n * run;
+      const u0 = 6, u1 = u0 + ramp, u2 = u1 + 16, u3 = u2 + ramp, L = u3 + 6, col = T.hill || T.floor2 || T.floor;
+      this.floor(F, 0, L, -half, half, T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      const back = Object.keys(DIRS).find(k => DIRS[k].a[0] === -DIRS[F.dir].a[0] && DIRS[k].a[1] === -DIRS[F.dir].a[1]);
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(u0, 0))), dir: F.dir, steps: n, rise: 0.3, run, width: W, color: col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(u3, 0))), dir: back, steps: n, rise: 0.3, run, width: W, color: col });
+      this.box(F, u1, u2, -half, half, 0, H, col, { top: T.hillTop || U.shade(col, 1.15) });
+      // smooth slopes over the steps (look only)
+      this.deco(F, 'ramp', (u0 + u1) / 2, 0, 0.15, 0, { w: W, len: ramp, h: H, color: T.hillTop || U.shade(col, 1.1) });
+      this.deco(F, 'ramp', (u2 + u3) / 2, 0, 0.15, 180, { w: W, len: ramp, h: H, color: T.hillTop || U.shade(col, 1.1) });
+      this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
+      this.loc('cp-' + this.num('cp'), F, (u1 + u2) / 2, 0, H, 0);
+      [-9, 0, 9].forEach((v, i) => { const nm = this.slot('boulder', F, u1 + 1, v, H, 0, { phase: i / 3 }); this.routes[nm] = [F.pt(u1 + 1, v), F.pt(u0 - 3, v)].map((q, k) => [q[0], k ? 0 : H, q[1]]); });
+      for (const v of [-8, 0, 8]) this.slot('ibox', F, (u1 + u2) / 2, v, H, 0);
+      for (const v of [-12, 12]) this.slot('shard', F, (u1 + u2) / 2, v, H, 0);
+      this.sides(F, L);
+      this.course(F, L, 0);
+      this.advance(F, L);
+    }
+    /** DOOR DASH: three walls of doors; in each wall only some doors break, the others are fake and bounce you back. */
+    doors() {
+      const F = frame(this.cur.x, this.cur.z, this.cur.dir), L = 56, T = this.T, half = W / 2, dw = 5.6;   // 5 doors per wall, one on the centre line
+      this.floor(F, 0, L, -half, half, T.floor2 || T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
+      [[14, 2], [28, 2], [42, 2]].forEach(([u, real]) => {
+        const row = this.num('doorrow');
+        for (let i = 0; i < 5; i++) this.slot('ddoor', F, u, (i - 2) * 6, 0, 180, { row, real, width: dw, height: 3.4 });
+        for (let i = 0; i < 4; i++) this.wall(F, u - 0.3, u + 0.3, -9.2 + i * 6, -8.8 + i * 6, 4.2, T.gate || T.wall);
+        this.wall(F, u - 0.3, u + 0.3, -half, -14.8, 4.2, T.gate || T.wall); this.wall(F, u - 0.3, u + 0.3, 14.8, half, 4.2, T.gate || T.wall);
+        this.deco(F, 'glowStrip', u, 0, 4.2, 0, { size: [W, 0.2, 0.7], color: '#b794f4' });
+      });
+      this.deco(F, 'neonSign', 6, 0, 0, 180, { color: '#b794f4', w: 8, h: 2, y: 3.6 });
       this.sides(F, L);
       this.course(F, L, 0);
       this.advance(F, L);
@@ -5947,10 +6051,15 @@ GK_LIBRARY.worlds = {
       // landmark away from the line the racers run
       const lu = side === 0 ? P / 2 : P * 0.7, lv = side === 0 ? -P * 0.27 : -side * P * 0.24;
       const lm = T.landmark;
-      if (lm) { const p = F.pt(lu, lv); this.scenery.push({ model: lm.model, pos: [p[0], 0, p[1]], rot: F.rot(side ? -side * 45 : 90), look: lm.look, scale: lm.scale, spin: lm.spin || 0, radius: lm.radius || 6, big: true, merge: false, id: 'landmark-' + this.num('landmark') }); }
+      if (lm) {
+        const p = F.pt(lu, lv), core = lm.core || CORE[lm.model] || 2;
+        this.scenery.push({ model: lm.model, pos: [p[0], 0, p[1]], rot: F.rot(side ? -side * 45 : 90), look: lm.look, scale: lm.scale, spin: lm.spin || 0, solid: false, big: true, merge: false, id: 'landmark-' + this.num('landmark') });
+        this.plats.push({ pos: [p[0], 0, p[1]], size: [core * 2, 8, core * 2], invisible: true, kind: 'prop' });   // only the visible base blocks you
+      }
       const toward = side === 0 ? [lu, lv + 9] : [lu - 7, lv + side * 7];
       if (o.case !== false) this.slot('case', F, toward[0], toward[1], 0, side === 0 ? -90 : 180);
       for (const [du, dv] of [[-9, 0], [9, 0], [0, -9], [0, 9]]) if (Math.abs(lv + dv) < half - 2) this.slot('shard', F, lu + du, lv + dv, 0, 0);
+      for (const v of [-6, 0, 6]) this.slot('ibox', F, 10, v, 0, 0);
       this.slot('crate', F, 4, o.comeback && side > 0 ? half - 3 : -half + 3, 0, 0); this.slot('crate', F, P - 4, side > 0 ? -half + 3 : half - 3, 0, 0);   // never on the comeback platform
       if (o.comeback) this.comeback(F, side === 0 ? P - 6 : 6, side >= 0 ? -half + 5 : half - 5, side);
       // world life: something moving around the plaza outside its walls
@@ -5994,7 +6103,7 @@ GK_LIBRARY.worlds = {
       this.fence(F, 0, L, -W / 2 - 0.6, -W / 2); this.fence(F, 0, L, W / 2, W / 2 + 0.6); this.fence(F, L, L + 0.6, -W / 2, W / 2);
       this.loc('finish', F, 10, 0, 0, 0, { size: [W, 3] });
       this.deco(F, 'courseArch', 10, 0, 0, 0, { w: W, color: '#ffd166', checker: true }, null, { solid: false });
-      this.deco(F, 'podium', 24, 0, 0, 180);
+      this.deco(F, 'podium', 24, 0, 0, 180, null, null, { solid: true });
       this.deco(F, 'plane', 10, 0, 0.015, 0, { size: [W, 2], color: '#ffffff', glow: 0.4 }, null, { solid: false });
       this.sides(F, L);
       this.course(F, 10, 0);
@@ -6031,7 +6140,7 @@ GK_LIBRARY.worlds = {
         decorations: this.scenery, locations: this.locs, routes: this.routes,
         spawns: { default: { pos: spawn.pos, rot: spawn.rot } },
         lights: this.lights, course: { length: courseLength(this.routes.course), gates: this.gateN, bounds: [x0, z0, x1, z1] },
-        offFloor: ['life', 'mover', 'bridge', 'crumble'],   // locations / routes that float or move over a gap on purpose
+        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder'],   // locations / routes that float or move over a gap on purpose
       };
     }
   }
@@ -6057,6 +6166,7 @@ GK_LIBRARY.worlds = {
     lighting: { sky: ['#0b1026', '#2a1b4d', '#5b2a6e'], fog: [60, 230], fogColor: '#2a1b4d', sun: { dir: [0.3, 1, 0.2], color: '#c8b6ff', intensity: 0.38 }, ambient: { sky: '#7a6be0', ground: '#2a2350' } },
     floor: '#2d3250', floor2: '#343a5e', plaza: '#3a3f66', wall: '#232946', wallTop: '#4cc9f0', fence: '#1c1f3a', divider: '#2b2f55',
     gate: '#3a0d2e', gateGlow: '#ff4d6d', walk: '#41477a', walkTop: '#5c63a8', stairs: '#41477a', pit: '#0f3460', pitGlow: 0.45,
+    hill: '#5b4fa8', hillTop: '#8f7fe8',
     accent: '#4cc9f0', accent2: '#ff4fd8', ground: '#141628', roof: '#1c1f3a', tunnelLight: '#ffd166',
     lamp: { model: 'lampPost', look: { color: '#ffd6a5' } },
     landmark: { model: 'holoComputer', look: { color: '#4cc9f0' }, radius: 8 },
@@ -6068,14 +6178,17 @@ GK_LIBRARY.worlds = {
   }, [
     { k: 'start' },
     { k: 'lanes', left: 'high', mid: 'plain', right: 'speed' }, { k: 'gate' },
+    { k: 'redlight' },
     { k: 'plaza', turn: 'n' },
-    { k: 'lanes', left: 'tunnel', mid: 'laser', right: 'coop' }, { k: 'gate' },
+    { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
+    { k: 'hill' },
     { k: 'lanes', left: 'high', mid: 'drone', right: 'fake' }, { k: 'gate' },
     { k: 'plaza', turn: 's', comeback: true },
-    { k: 'lanes', left: 'short', mid: 'laser', right: 'speed' }, { k: 'gate' },
+    { k: 'lanes', left: 'short', mid: 'laser', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'tunnel', mid: 'plain', right: 'bounce' }, { k: 'gate' },
+    { k: 'doors' },
+    { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
 })();
@@ -6091,6 +6204,7 @@ GK_LIBRARY.worlds = {
     lighting: { sky: ['#04151f', '#0b3d3a', '#1f6f5c'], fog: [55, 210], fogColor: '#0d3a37', sun: { dir: [-0.3, 1, 0.4], color: '#d8ffe6', intensity: 0.45 }, ambient: { sky: '#7fd8c0', ground: '#1d3b2a' } },
     floor: '#3b5d3a', floor2: '#44693f', plaza: '#35553a', wall: '#3a2f28', wallTop: '#7df9ff', fence: '#4a3b2f', fenceTop: '#7df9ff', divider: '#2f5a37', dividerH: 3.2,
     gate: '#1e3a2f', gateGlow: '#7cfc00', walk: '#6b4f3a', walkTop: '#8b6b4a', stairs: '#6b4f3a', stone: '#6c6f7d', stoneTop: '#8a8f9e', pit: '#1d6f8a', pitGlow: 0.5,
+    hill: '#2f7a45', hillTop: '#5fbf6a',
     accent: '#7df9ff', accent2: '#ff9df5', ground: '#1d3b2a', roof: '#2a2420', tunnelLight: '#b8f2e6',
     lamp: { model: 'mushroom', look: { color: '#ff9df5', h: 2.2 } },
     landmark: { model: 'worldTree', radius: 5 },
@@ -6103,14 +6217,17 @@ GK_LIBRARY.worlds = {
   }, [
     { k: 'start' },
     { k: 'lanes', left: 'high', mid: 'sweeper', right: 'bounce' }, { k: 'gate' },
+    { k: 'hill' },
     { k: 'plaza', turn: 's', secret: true },
-    { k: 'lanes', left: 'tunnel', mid: 'laser', right: 'stones' }, { k: 'gate' },
+    { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'crumble', mid: 'drone', right: 'coop' }, { k: 'gate' },
+    { k: 'redlight' },
+    { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
     { k: 'lanes', left: 'short', mid: 'sweeper', right: 'fake' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'tunnel', mid: 'laser', right: 'stones' }, { k: 'gate' },
+    { k: 'doors' },
+    { k: 'lanes', left: 'tunnel', mid: 'laser', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 's', secret: true },
     { k: 'lanes', left: 'high', mid: 'drone', right: 'speed' }, { k: 'gate' },
     { k: 'finish' },
@@ -6128,6 +6245,7 @@ GK_LIBRARY.worlds = {
     lighting: { sky: ['#1a1410', '#3d2b1f', '#8a4f2a'], fog: [50, 200], fogColor: '#46301f', sun: { dir: [0.4, 1, -0.2], color: '#ffd8a8', intensity: 0.5 }, ambient: { sky: '#d6a77a', ground: '#3a2a1e' } },
     floor: '#4a4f57', floor2: '#555b64', plaza: '#3f444b', wall: '#2d3238', wallTop: '#f6ad55', fence: '#ecc94b', fenceTop: '#1a202c', divider: '#3a3f46',
     gate: '#2b2d42', gateGlow: '#f6ad55', walk: '#606872', walkTop: '#7b8591', stairs: '#606872', stone: '#c08457', pit: '#ff6b35', pitGlow: 0.85,
+    hill: '#7a5a3a', hillTop: '#c08457',
     accent: '#f6ad55', accent2: '#4fd1c5', ground: '#22252a', roof: '#30353c', tunnelLight: '#4fd1c5',
     lamp: { model: 'lampPost', look: { color: '#ffd27f' } },
     landmark: { model: 'processor', spin: 0.15, radius: 8 },
@@ -6139,16 +6257,19 @@ GK_LIBRARY.worlds = {
   }, [
     { k: 'start' },
     { k: 'lanes', left: 'high', mid: 'belt', right: 'movers' }, { k: 'gate' },
+    { k: 'doors' },
     { k: 'plaza', turn: 'n' },
-    { k: 'lanes', left: 'crumble', mid: 'sweeper', right: 'coop' }, { k: 'gate' },
+    { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
+    { k: 'redlight' },
     { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'stones', stones: 'crumble' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
-    { k: 'lanes', left: 'short', mid: 'laser', right: 'fake' }, { k: 'gate' },
+    { k: 'lanes', left: 'short', mid: 'glass', right: 'fake' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'high', mid: 'drone', right: 'movers' }, { k: 'gate' },
+    { k: 'lanes', left: 'high', mid: 'drone', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 's' },
-    { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'bounce' }, { k: 'gate' },
+    { k: 'hill' },
+    { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
 })();
@@ -6164,6 +6285,7 @@ GK_LIBRARY.worlds = {
     lighting: { sky: ['#03203a', '#0a5f8a', '#8fd8ff'], fog: [70, 260], fogColor: '#4aa8d8', sun: { dir: [0.5, 1, 0.3], color: '#fff6e0', intensity: 0.6 }, ambient: { sky: '#a3dcff', ground: '#1c5a7a' } },
     floor: '#b89a6e', floor2: '#c6a87b', plaza: '#a88b62', wall: '#2c5f7c', wallTop: '#4fd1c5', fence: '#e2e8f0', fenceTop: '#4fd1c5', divider: '#2c5f7c',
     gate: '#14365a', gateGlow: '#4fd1c5', walk: '#8b6b4a', walkTop: '#a0785a', stairs: '#8b6b4a', stone: '#e2e8f0', stoneTop: '#fefcbf', pit: '#1c7fb5', pitGlow: 0.35,
+    hill: '#d9c08a', hillTop: '#f3e2b0',
     accent: '#4fd1c5', accent2: '#f6e05e', ground: '#0f5f96', groundGlow: 0.12, roof: '#1c3d5a', tunnelLight: '#7fdbff',
     lamp: { model: 'lampPost', look: { color: '#e6fffa' } },
     landmark: { model: 'floatingServer', spin: 0.1, radius: 7 },
@@ -6174,17 +6296,20 @@ GK_LIBRARY.worlds = {
     far: r => (r() < 0.6 ? { model: 'island', look: { r: 12 + r() * 8 }, y: 10 + r() * 20 } : { model: 'airship', look: { color: pick(r, ['#9f7aea', '#f6ad55', '#4fd1c5']) }, y: 30 + r() * 20, scale: 2 }),
   }, [
     { k: 'start' },
-    { k: 'lanes', left: 'high', mid: 'drone', right: 'movers' }, { k: 'gate' },
+    { k: 'lanes', left: 'high', mid: 'glass', right: 'movers' }, { k: 'gate' },
+    { k: 'redlight' },
     { k: 'plaza', turn: 's', secret: true },
-    { k: 'lanes', left: 'short', mid: 'sweeper', right: 'stones' }, { k: 'gate' },
+    { k: 'lanes', left: 'short', mid: 'hammer', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', comeback: true },
+    { k: 'doors' },
     { k: 'lanes', left: 'crumble', mid: 'laser', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'n' },
-    { k: 'lanes', left: 'tunnel', mid: 'drone', right: 'fake' }, { k: 'gate' },
+    { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
+    { k: 'hill' },
     { k: 'lanes', left: 'high', mid: 'sweeper', right: 'movers' }, { k: 'gate' },
     { k: 'plaza', turn: 's', secret: true },
-    { k: 'lanes', left: 'crumble', mid: 'laser', right: 'bounce' }, { k: 'gate' },
+    { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
 })();
@@ -6200,6 +6325,7 @@ GK_LIBRARY.worlds = {
     lighting: { sky: ['#0a0a1f', '#2b1055', '#d53a9d'], fog: [60, 240], fogColor: '#3a1462', sun: { dir: [-0.4, 0.8, 0.5], color: '#ffc4e8', intensity: 0.5 }, ambient: { sky: '#b28dff', ground: '#24124a' } },
     floor: '#3d3d5c', floor2: '#47476b', plaza: '#33334f', wall: '#2b2b44', wallTop: '#ff4fd8', fence: '#5a5a80', fenceTop: '#4cc9f0', divider: '#3a3a5a',
     gate: '#3a0d4e', gateGlow: '#ff4fd8', walk: '#5a5a80', walkTop: '#7a7ab0', stairs: '#5a5a80', stone: '#a0aec0', stoneTop: '#e2e8f0', pit: '#120024', pitGlow: 0.6,
+    hill: '#5a4a80', hillTop: '#efe6ff',
     accent: '#ff4fd8', accent2: '#4cc9f0', ground: '#1b1b33', roof: '#22223a', tunnelLight: '#4cc9f0',
     lamp: { model: 'crystal', look: { color: '#4cc9f0', h: 2.4 } },
     landmark: { model: 'cyberCore', look: { color: '#ff4fd8' }, spin: 0.25, radius: 7 },
@@ -6211,19 +6337,23 @@ GK_LIBRARY.worlds = {
     groundDetail: r => ({ model: 'crystal', look: { color: pick(r, ['#ff4fd8', '#4cc9f0']), h: 2 + r() * 3 }, y: -0.3, r: 2 }),
   }, [
     { k: 'start' },
+    { k: 'hill', height: 6, run: 1.1 },
     { k: 'lanes', left: 'high', mid: 'laser', right: 'ice' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
-    { k: 'lanes', left: 'crumble', mid: 'sweeper', right: 'stones', stones: 'crumble' }, { k: 'gate' },
+    { k: 'lanes', left: 'crumble', mid: 'glass', right: 'stones', stones: 'crumble' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'short', mid: 'drone', right: 'coop' }, { k: 'gate' },
+    { k: 'redlight' },
+    { k: 'lanes', left: 'short', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 's', comeback: true },
+    { k: 'doors' },
     { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'movers' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'high', mid: 'sweeper', right: 'fake' }, { k: 'gate' },
+    { k: 'lanes', left: 'high', mid: 'sweeper', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
-    { k: 'lanes', left: 'crumble', mid: 'laser', right: 'ice' }, { k: 'gate' },
+    { k: 'lanes', left: 'crumble', mid: 'glass', right: 'ice' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'tunnel', mid: 'drone', right: 'bounce' }, { k: 'gate' },
+    { k: 'redlight' },
+    { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
 })();
@@ -7662,15 +7792,19 @@ GK_LIBRARY.worlds = {
      { type: 'speedpad', seconds: 2.5, rot }              speed boost (uses the powerups mechanic when loaded)
      { type: 'ice', size: [w, d] }                        slippery: hard to stop and to steer
      { type: 'crumble', size: [w, h, d], delay: 0.7, back: 5 }   platform that shakes, falls when stood on, comes back
-     { type: 'wind', size: [w, h, d], push: 6, lift: 0, rot }    region pushing you the way it faces (lift = updraft)
+     { type: 'wind', size: [w, h, d], push: 6, lift: 0, rot, ahead, pulse }   region pushing you the way it faces (lift = updraft;
+                                                          ahead: the region starts at the entity, like a fan; pulse: [on, off] gusts)
      { type: 'lowgrav', size: [w, h, d], gravity: 0.4 }   low-gravity region: floaty, higher jumps
      { type: 'sweeper', length: 8, spin: 1.2, y: 0.6 }    spinning bar: jump it or get knocked away
+     party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'glasstile' (glass bridge: one fake
+     per row), 'dashdoor' (Door Dash: real doors break, fake ones bounce you), 'redlight' + 'watcher' (Red Light, Green
+     Light), wind `pulse: [on, off]` (big fans). They use game.raceClock() and game.trapRandom(key) when present.
    Adds game.knock([dx, dz], power, {stun, up, kind, source}) → true if it landed. Before landing it asks
    game.protect(opts) (another mechanic, e.g. a shield gadget, returns true to block it). Emits player:knocked {kind},
    terrain:bounce, terrain:boost. Effects work through body.stun / body.grip / body.gravityMul / body.jumpMul. */
 (function () {
   'use strict';
-  const U = GK.util, P = GK.Prefabs, M = GK.Models, Ph = GK.Physics;
+  const U = GK.util, V = GK.vec, P = GK.Prefabs, M = GK.Models, Ph = GK.Physics;
   const G = () => new GK.Geo();
 
   // ---------- models ----------
@@ -7785,7 +7919,15 @@ GK_LIBRARY.worlds = {
   P.add('wind', {
     defaults: { model: 'windVane', solid: false, size: [4, 4, 8], push: 6, lift: 0 },
     update(e, dt, g) {
-      if (!e.active || !e.enabled || g.state.mode !== 'playing' || !inBox(g, e, e.def.size)) return;
+      if (e.def.pulse) {   // pulse: [on, off] seconds (shared clock, so every PC sees the same gusts)
+        const c = e.def.pulse[0] + e.def.pulse[1], t = clockOf(g) + (e.def.phase || 0);
+        e.state.on = ((t % c) + c) % c < e.def.pulse[0];
+        e.hi = e.state.on ? 0.35 + Math.sin(t * 20) * 0.15 : 0;
+        if (!e.state.on) return;
+      }
+      // the region: centred on the entity, or (ahead: true) starting at it and reaching size[2] in front (a fan)
+      const inside = e.def.ahead ? (() => { const f2 = fwd(e), p = g.player.pos, dx = p[0] - e.pos[0], dz = p[2] - e.pos[2], al = dx * f2[0] + dz * f2[1], ac = Math.abs(dx * f2[1] - dz * f2[0]); return al >= 0 && al <= e.def.size[2] && ac <= e.def.size[0] / 2 && p[1] < e.pos[1] + e.def.size[1]; })() : inBox(g, e, e.def.size);
+      if (!e.active || !e.enabled || g.state.mode !== 'playing' || !inside) return;
       const f = fwd(e);
       g.terrainPush[0] += f[0] * e.def.push; g.terrainPush[1] += f[1] * e.def.push;
       if (e.def.lift) g.player.vel[1] = Math.max(g.player.vel[1], e.def.lift);
@@ -7807,6 +7949,193 @@ GK_LIBRARY.worlds = {
       if (dist < 0.55 && Math.abs(t) > 0.5 && g.knock) {
         const side = e.def.spin >= 0 ? 1 : -1, tx = -az * Math.sign(t) * side, tz = ax * Math.sign(t) * side;   // pushed the way the bar sweeps
         if (g.knock([tx + nx * 0.5, tz + nz * 0.5], e.def.power, { stun: 0.7, up: 4, kind: 'sweeper', source: e.id })) g.audio.play('boom');
+      }
+    },
+  });
+
+  // ================= party-game traps (Fall Guys / Stumble Guys / Squid Game style) =================
+  // Their timing comes from game.raceClock() when a race provides one (every PC sees the same swing / light), and
+  // "which tile / door is fake" from game.trapRandom(key) (the same for the whole class), else from the game's time.
+  const clockOf = g => (g.raceClock ? g.raceClock() : g.state.time);
+  const hashOf = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const rand = (g, key) => (g.trapRandom ? g.trapRandom(key) : (hashOf(key + ':' + (g.levelIndex || 0)) % 1000) / 1000);
+  const centre = g => [g.player.pos[0], g.player.pos[1] + 0.9, g.player.pos[2]];
+  const burst = (g, pos, color, n) => { if (g.fxBurst) g.fxBurst(pos, color, n); };
+  /** Is the player inside entity e's footprint (local size [across, height, along], turned with the entity)? */
+  function inLocal(g, e, size) {
+    const p = g.player.pos, dx = p[0] - e.pos[0], dz = p[2] - e.pos[2], c = Math.cos(e.yaw), s2 = Math.sin(e.yaw);
+    const lx = dx * c - dz * s2, lz = dx * s2 + dz * c;
+    return Math.abs(lx) <= size[0] / 2 && Math.abs(lz) <= size[2] / 2 && p[1] >= e.pos[1] - 1 && p[1] <= e.pos[1] + size[1];
+  }
+
+  M.add('pendulumHammer', o => {   // hangs from its pivot (the origin): arm down to −length, a big hammer head
+    const L = o.length || 5.5, c = o.color || '#ff5964', g = G().cyl(0, -0.3, 0, 0.35, 0.6, '#2d3748', { seg: 10 }).box(0, -L, 0, 0.3, L, 0.3, '#a0aec0');
+    g.box(0, -L - 0.95, 0, 1.6, 1.5, 3, c, { top: U.shade(c, 1.2) }).box(0, -L - 0.55, 0, 1.64, 0.25, 3.04, '#ffd166', { glow: 0.7 }).box(0, -L - 1.05, 0, 1.64, 0.25, 3.04, '#ffd166', { glow: 0.7 });
+    return g;
+  });
+  M.add('boulder', o => { const r = o.r || 1.3, c = o.color || '#8d6e63'; return G().sphere(0, r, 0, r, c, { seg: 9, rings: 7 }).box(0, r, 0, r * 0.3, r * 0.3, r * 2.04, o.glow || '#ffd166', { glow: 0.8 }); });
+  M.add('glassTile', o => {
+    const s = o.size || [3.4, 0.2, 3.2], g = G().box(0, 0, 0, s[0], s[1], s[2], '#9be7ff', { glow: 0.35 });
+    for (const x of [-1, 1]) g.box(x * (s[0] / 2 - 0.05), s[1], 0, 0.1, 0.04, s[2], '#e6fbff', { glow: 1 });
+    for (const z of [-1, 1]) g.box(0, s[1], z * (s[2] / 2 - 0.05), s[0], 0.04, 0.1, '#e6fbff', { glow: 1 });
+    return g;
+  });
+  M.add('dashDoor', o => {
+    const w = o.width || 4, h = o.height || 3.4, c = o.color || '#7c5cff';
+    return G().box(0, 0, 0, w, h, 0.4, c, { top: U.shade(c, 1.3) }).box(0, h * 0.35, 0.21, w * 0.5, h * 0.4, 0.03, '#ffffff', { glow: 0.85 })
+      .box(0, h * 0.42, 0.24, w * 0.16, h * 0.16, 0.03, c, { glow: 0.5 }).box(0, h - 0.18, 0.21, w, 0.18, 0.03, '#ffd166', { glow: 1 });
+  });
+  M.add('watcherBot', o => {   // Red Light robot over the arena's end: an arch with a giant head (look.eyes = light colour)
+    const w = o.w || 30, eyes = o.eyes || '#7cfc00', g = G();
+    for (const x of [-w / 2, w / 2]) g.box(x, 0, 0, 1.4, 8, 1.4, '#2d3748', { top: '#4a5568' }).box(x, 8, 0, 2.2, 2.6, 2.2, eyes, { glow: 1 });
+    g.box(0, 8.2, 0, w + 1.4, 0.8, 1.2, '#2d3748');
+    g.box(0, 9, 0, 6.5, 5, 5, '#ffd166', { top: '#ffe08a' }).box(0, 13.8, 0, 7, 1.2, 5.6, '#2b2b44');
+    g.box(-1.6, 11.2, 2.52, 1.4, 1.2, 0.08, eyes, { glow: 1 }).box(1.6, 11.2, 2.52, 1.4, 1.2, 0.08, eyes, { glow: 1 }).box(0, 9.8, 2.52, 2.6, 0.3, 0.06, '#1a202c');
+    return g;
+  });
+
+  /** Swinging hammer: {type: 'pendulum', length: 5.5, height: 7.5, swing: 0.95 (radians), period: 3.2, phase} — it swings
+      across the way it faces; touching the head throws you to the side. */
+  P.add('pendulum', {
+    defaults: { model: 'pendulumHammer', solid: false, length: 5.5, height: 7.5, swing: 0.95, period: 3.2, power: 13 },
+    init(e) { e.setLook({ length: e.def.length, color: e.def.color }); e.pos[1] += e.def.height; e.phase = e.def.phase != null ? e.def.phase : (hashOf(e.id) % 628) / 100; },
+    update(e, dt, g) {
+      const d = e.def, w = Math.PI * 2 / d.period, t = clockOf(g), th = d.swing * Math.sin(w * t + e.phase);
+      e.roll = th;
+      if (!e.active || !e.enabled || g.state.mode !== 'playing') return;
+      const X = [Math.cos(e.yaw), -Math.sin(e.yaw)], L = d.length + 0.95;
+      const head = [e.pos[0] + X[0] * L * Math.sin(th), e.pos[1] - L * Math.cos(th), e.pos[2] + X[1] * L * Math.sin(th)], c = centre(g);
+      if (V.dist(head, c) < 1.9 && g.knock) {
+        const side = Math.cos(w * t + e.phase) >= 0 ? 1 : -1;
+        if (g.knock([X[0] * side, X[1] * side], d.power, { stun: 0.9, up: 5, kind: 'hammer', source: e.id })) { g.audio.play('boom'); burst(g, head, '#ffd166', 10); }
+      }
+    },
+  });
+  /** Rolling boulder: {type: 'boulder', route (top → bottom), speed: 7, r: 1.3, gap: 1.6 s between boulders, phase (0..1)}.
+      It follows the route's heights (rolls down a hill); then a new one starts at the top. */
+  P.add('boulder', {
+    defaults: { model: 'boulder', solid: false, speed: 7, r: 1.3, gap: 1.6, power: 12 },
+    init(e) {
+      const pts = (e.def.route && e.world.routes[e.def.route]) || [e.pos.slice(), e.pos.slice()];
+      e.a = pts[0].slice(); e.b = pts[pts.length - 1].slice(); e.len = Math.max(0.1, V.dist(e.a, e.b));
+      e.setLook({ r: e.def.r, color: e.def.color }); e.yaw = Math.atan2(e.b[0] - e.a[0], e.b[2] - e.a[2]);
+    },
+    update(e, dt, g) {
+      const d = e.def, run = e.len / d.speed, cyc = run + d.gap, t = clockOf(g) + (d.phase || 0) * cyc, k = ((t % cyc) + cyc) % cyc;
+      if (k > run) { e.visible = false; return; }
+      e.visible = true;
+      const f = k / run;
+      e.pos = [e.a[0] + (e.b[0] - e.a[0]) * f, e.a[1] + (e.b[1] - e.a[1]) * f, e.a[2] + (e.b[2] - e.a[2]) * f];
+      e.pitch = (k * d.speed / d.r) % (Math.PI * 2);
+      if (!e.enabled || g.state.mode !== 'playing') return;
+      const p = g.player.pos, c = [e.pos[0], e.pos[1] + d.r, e.pos[2]];
+      if (Math.hypot(p[0] - c[0], p[2] - c[2]) < d.r + 0.4 && p[1] < c[1] + d.r && p[1] + 1.7 > c[1] - d.r && g.knock) {
+        const dx = (e.b[0] - e.a[0]) / e.len, dz = (e.b[2] - e.a[2]) / e.len;
+        if (g.knock([dx, dz], d.power, { stun: 1.0, up: 6, kind: 'boulder', source: e.id })) { g.audio.play('boom'); burst(g, c, '#c8a27a', 12); }
+      }
+    },
+  });
+  /** Glass bridge tile (Squid Game): {type: 'glasstile', row, col (0 | 1), size}. In each row one of the two is FAKE and
+      breaks as soon as you stand on it. game.trapRandom('glass:' + row) picks which: the same for the whole class. */
+  P.add('glasstile', {
+    defaults: { model: 'glassTile', solid: true, size: [3.4, 0.2, 3.2] },
+    init(e) { e.setLook({ size: e.def.size }); e.alpha = 0.62; e.state.broken = false; },
+    restore(e) { if (e.state.broken) e.hide(); },
+    update(e, dt, g) {
+      if (e.state.broken) return;
+      const fake = (rand(g, 'glass:' + e.def.row) < 0.5 ? 0 : 1) === e.def.col;
+      e.label = fake && g.hasPower && g.hasPower('scan') ? '✖ FAKE GLASS' : null;
+      if (!fake || g.state.mode !== 'playing') return;
+      const b = e.collider(), pl = g.player;
+      if (pl.grounded && Math.abs(pl.pos[1] - b.max[1]) < 0.1 && pl.pos[0] > b.min[0] - 0.1 && pl.pos[0] < b.max[0] + 0.1 && pl.pos[2] > b.min[2] - 0.1 && pl.pos[2] < b.max[2] + 0.1) {
+        e.state.broken = true; e.hide();
+        g.audio.play('glass'); burst(g, [e.pos[0], e.pos[1] + 0.3, e.pos[2]], '#bff6ff', 16);
+        g.emit('terrain:glass', { id: e.id });
+      }
+    },
+  });
+  /** Door Dash: {type: 'dashdoor', row, real: 2} facing the runners. In each row `real` doors break when you run into them;
+      the others are FAKE and bounce you back. game.trapRandom picks which (the same for the whole class). */
+  P.add('dashdoor', {
+    defaults: { model: 'dashDoor', solid: true, width: 4, height: 3.4, real: 2 },
+    init(e) { e.setLook({ width: e.def.width, height: e.def.height, color: e.def.color }); e.state.broken = false; },
+    restore(e) { if (e.state.broken) e.hide(); },
+    update(e, dt, g) {
+      if (e.state.broken || g.state.mode !== 'playing') return;
+      if (e.bounceT > 0) { e.bounceT -= dt; return; }
+      const pb = Ph.bodyBox(g.player.pos, g.player.r + 0.25, g.player.h), b = e.collider();
+      if (!Ph.overlap(pb, b)) return;
+      const row = g.world.entities.filter(x => x.type === 'dashdoor' && x.def.row === e.def.row).sort((x, y) => rand(g, 'door:' + x.id) - rand(g, 'door:' + y.id));
+      if (row.indexOf(e) < e.def.real) {
+        e.state.broken = true; e.hide(); g.audio.play('boom'); burst(g, e.center(), '#b794f4', 14); g.emit('terrain:door', { id: e.id, real: true });
+      } else {
+        e.bounceT = 0.8; e.hi = 1; e.label = '✖ FAKE'; e.labelRange = 30;
+        const f = fwd(e);
+        if (g.knock) g.knock([f[0], f[1]], 8, { stun: 0.45, up: 3, kind: 'door', source: e.id });   // the door faces the runners
+        g.audio.play('deny'); g.emit('terrain:door', { id: e.id, real: false });
+      }
+    },
+  });
+  /** The robot over a Red Light arena (look.eyes shows the light); a 'redlight' zone turns it. */
+  P.add('watcher', { defaults: { model: 'watcherBot', solid: false }, init(e) { e.setLook({ w: e.def.w || 30, eyes: '#7cfc00' }); e.baseYaw = e.yaw; } });
+  /** Red Light, Green Light (Squid Game): {type: 'redlight', size: [across, height, along], green: [3, 6], red: [2.5, 4.5],
+      warn: 1, back: 'locationName', watcher: 'entityId'}. Inside the zone you may only move on green; move on red (after a
+      short reaction time) and you are sent back to `back`. Emits terrain:caught {id}. The lights come from the shared clock,
+      so the whole class plays the same lights. */
+  P.add('redlight', {
+    defaults: { model: null, solid: false, size: [30, 6, 52], green: [3, 6], red: [2.5, 4.5], warn: 1.1, grace: 0.45, tol: 0.4 },
+    init(e) {
+      const d = e.def, r = U.rng(hashOf(e.id + ':' + (d.seed || 1)));
+      e.sched = [];
+      let t = -5;
+      while (t < 3600) {
+        const gr = d.green[0] + r() * (d.green[1] - d.green[0]), rd = d.red[0] + r() * (d.red[1] - d.red[0]);
+        e.sched.push([t, 'green'], [t + gr, 'warn'], [t + gr + d.warn, 'red']);
+        t += gr + d.warn + rd;
+      }
+      e.state.phase = 'green'; e.state.caught = 0;
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), live = !g.state.race || g.state.race.phase === 'running';
+      let ph = 'green';
+      if (live && t > 0) for (let i = 0; i < e.sched.length && e.sched[i][0] <= t; i++) ph = e.sched[i][1];
+      const w = d.watcher && g.world.get(d.watcher);
+      if (ph !== e.state.phase) {
+        e.state.phase = ph; e.redAt = t; e.redPos = null;
+        if (w) w.setLook({ eyes: ph === 'red' ? '#ff2d55' : ph === 'warn' ? '#ffd166' : '#7cfc00' });
+        if (inLocal(g, e, [d.size[0] + 20, 20, d.size[2] + 30])) g.audio.play(ph === 'red' ? 'deny' : ph === 'warn' ? 'tick' : 'go');
+        g.emit('terrain:light', { id: e.id, phase: ph });
+      }
+      if (w) { const target = ph === 'green' ? Math.PI : 0; w.turn = (w.turn || 0) + (target - (w.turn || 0)) * Math.min(1, dt * 6); w.yaw = w.baseYaw + w.turn; }
+      // the big light on the screen while you are in (or close to) the arena
+      const near = inLocal(g, e, [d.size[0] + 4, 20, d.size[2] + 24]), inside = inLocal(g, e, d.size);
+      let hud = g.ui.hud.querySelector('.gk-redlight-' + e.id);
+      if (near && g.state.mode !== 'title') {
+        if (!hud) {
+          hud = U.el('div', 'gk-redlight gk-redlight-' + e.id);
+          hud.style.cssText = 'position:absolute;left:50%;top:21%;transform:translateX(-50%);font:900 clamp(22px,4.4vw,48px) system-ui;padding:8px 26px;border-radius:18px;z-index:4;pointer-events:none;text-shadow:0 3px 12px rgba(0,0,0,.7);white-space:nowrap';
+          g.ui.hud.appendChild(hud);
+        }
+        const txt = ph === 'red' ? '🔴 RED LIGHT · FREEZE!' : ph === 'warn' ? '🟡 GET READY TO STOP…' : '🟢 GREEN LIGHT · RUN!';
+        if (hud.textContent !== txt) {
+          hud.textContent = txt;
+          hud.style.background = ph === 'red' ? 'rgba(255,45,85,.88)' : ph === 'warn' ? 'rgba(255,209,102,.9)' : 'rgba(46,204,113,.82)';
+          hud.style.color = ph === 'warn' ? '#1a1a1a' : '#fff';
+        }
+        hud.style.display = '';
+      } else if (hud) hud.style.display = 'none';
+      if (ph !== 'red' || !inside || !e.enabled || g.state.mode !== 'playing') return;
+      if (t - e.redAt < d.grace) return;   // a moment to react
+      const p = g.player.pos;
+      if (!e.redPos) { e.redPos = p.slice(); return; }
+      if (Math.hypot(p[0] - e.redPos[0], p[2] - e.redPos[2]) > d.tol || Math.abs(p[1] - e.redPos[1]) > 0.6) {
+        const back = d.back && g.world.locations[d.back];
+        if (back) g.player.place(back.pos, back.rot);
+        g.player.stun = Math.max(g.player.stun || 0, 1.0);
+        e.state.caught++; e.redPos = null;
+        g.audio.play('lose'); if (g.shake) g.shake(0.4, 0.15);
+        g.ui.flash('#ff2d55');
+        g.emit('terrain:caught', { id: e.id });
       }
     },
   });
@@ -7844,6 +8173,100 @@ GK_LIBRARY.worlds = {
       pl.gravityMul = game.terrainGrav;
       pl.jumpMul = game.terrainGrav < 1 ? 1.25 : 1;
       game.terrainPush = [0, 0]; game.terrainGrip = 1; game.terrainGrav = 1;
+    },
+  });
+})();
+
+</script>
+<script>/* mechanics/juice/juice.js */
+/* Game Kit · mechanics/juice   (spatial game types)
+   Game feel for running games:
+   - Speed (sprinting, speed boosts) widens the view (game.fovKick) and draws speed lines around the screen edge.
+   - Dust puffs fly up at your feet while you run, a ring of dust appears when you land a big jump, and a coloured trail
+     follows you while a speed power is on.
+   - game.fxBurst(pos, color, n): a burst of puffs, which other mechanics use for breaking glass, hits and pick-ups.
+   Config juice: { dust: '#cfd8e3', trail: '#4cc9f0', lines: true, fov: 10 }. Puffs are pooled (at most 48 entities). */
+(function () {
+  'use strict';
+  const U = GK.util, MAXP = 48;
+  GK.Models.add('puff', () => new GK.Geo().sphere(0, 0, 0, 0.22, '#ffffff', { glow: 0.55, seg: 6, rings: 4 }));
+  GK.Prefabs.add('puff', { defaults: { model: 'puff', solid: false } });
+
+  const CSS = '.gk-speedlines{position:absolute;inset:-10%;pointer-events:none;z-index:1;opacity:0;transition:opacity .15s;' +
+    'background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 5deg,rgba(255,255,255,.55) 5.2deg 5.5deg,transparent 5.7deg 9deg);' +
+    '-webkit-mask:radial-gradient(circle at 50% 50%,transparent 38%,#000 78%);mask:radial-gradient(circle at 50% 50%,transparent 38%,#000 78%);animation:gkLines .12s steps(2) infinite}' +
+    '@keyframes gkLines{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(2.3deg) scale(1.02)}100%{transform:rotate(-1.4deg) scale(1)}}';
+
+  function spawn(g, pos, color, vel, size, life) {
+    const J = g.juice;
+    let e = J.pool.find(p => !p.visible);
+    if (!e) {
+      if (J.pool.length >= MAXP) e = J.pool.reduce((a, b) => (a.state.life < b.state.life ? a : b));
+      else { e = g.world.add({ id: 'puff-' + J.pool.length, type: 'puff', pos: pos.slice() }); J.pool.push(e); }
+    }
+    e.pos = pos.slice(); e.tint = color; e.visible = true;
+    e.state.vel = vel; e.state.life = e.state.max = life || 0.6; e.state.size = size || 1;
+    e.scale = [e.state.size, e.state.size, e.state.size]; e.alpha = 0.7;
+    return e;
+  }
+
+  GK.Mechanics.add('juice', {
+    configKeys: ['juice'],
+    setup(game) {
+      if (!document.getElementById('gk-juice-css')) { const s = document.createElement('style'); s.id = 'gk-juice-css'; s.textContent = CSS; document.head.appendChild(s); }
+      const cfg = U.merge({ dust: '#cfd8e3', trail: game.cfg.ui.accent || '#4cc9f0', lines: true, fov: 10 }, game.cfg.juice);
+      game.juice = { cfg, pool: [], stepT: 0, trailT: 0, air: false, fall: 0 };
+      game.fovKick = 0;
+      game.fxBurst = (pos, color, n) => {
+        for (let i = 0; i < (n || 10); i++) {
+          const a = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 4;
+          spawn(game, pos, color || '#ffffff', [Math.cos(a) * sp, 1.5 + Math.random() * 4, Math.sin(a) * sp], 0.8 + Math.random() * 0.9, 0.5 + Math.random() * 0.4);
+        }
+      };
+      if (cfg.lines && !game.ui.hud.querySelector('.gk-speedlines')) game.ui.hud.insertBefore(U.el('div', 'gk-speedlines'), game.ui.hud.firstChild);
+    },
+    update(game, dt) {
+      const J = game.juice, pl = game.player;
+      if (!pl || !J) return;
+      // puffs: drift, slow down, grow, fade
+      for (const e of J.pool) {
+        if (!e.visible) continue;
+        const S = e.state;
+        S.life -= dt;
+        if (S.life <= 0) { e.visible = false; continue; }
+        const k = S.life / S.max;
+        e.pos[0] += S.vel[0] * dt; e.pos[1] += S.vel[1] * dt; e.pos[2] += S.vel[2] * dt;
+        S.vel[0] *= 0.92; S.vel[2] *= 0.92; S.vel[1] = S.vel[1] * 0.9 - 2 * dt;
+        const sc = S.size * (1.6 - 0.6 * k);
+        e.scale = [sc, sc, sc]; e.alpha = 0.65 * k;
+      }
+      const hs = Math.hypot(pl.vel[0], pl.vel[2]), boosted = game.hasPower && (game.hasPower('speed') || game.hasPower('rocket'));
+      const run = pl.cfg.walkSpeed || 5, fast = U.clamp((hs - run * 1.05) / Math.max(1, (pl.cfg.sprintSpeed || 7) - run), 0, 1);
+      // wider view and speed lines when fast
+      const want = (fast * 0.7 + (boosted && hs > 3 ? 0.6 : 0)) * J.cfg.fov;
+      game.fovKick += (want - game.fovKick) * Math.min(1, dt * 5);
+      const lines = game.ui.hud.querySelector('.gk-speedlines');
+      if (lines) lines.style.opacity = String(U.clamp(fast * 0.55 + (boosted && hs > 3 ? 0.45 : 0), 0, 0.9).toFixed(2));
+      // dust at the feet while running, a ring when landing hard, a trail while boosted
+      if (pl.grounded && hs > 3) {
+        J.stepT -= dt;
+        if (J.stepT <= 0) {
+          J.stepT = fast > 0.3 ? 0.11 : 0.2;
+          const back = [-pl.vel[0] / hs, -pl.vel[2] / hs], side = (Math.random() - 0.5) * 0.5;
+          spawn(game, [pl.pos[0] + back[0] * 0.3 - back[1] * side, pl.pos[1] + 0.12, pl.pos[2] + back[1] * 0.3 + back[0] * side], J.cfg.dust, [back[0] * 1.5, 0.8 + Math.random(), back[1] * 1.5], 0.7 + fast * 0.6, 0.45);
+        }
+      }
+      if (!pl.grounded) J.fall = Math.min(J.fall, pl.vel[1]);
+      if (pl.grounded && J.air && J.fall < -7) {
+        for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; spawn(game, [pl.pos[0], pl.pos[1] + 0.1, pl.pos[2]], J.cfg.dust, [Math.cos(a) * 4, 0.6, Math.sin(a) * 4], 1.1, 0.5); }
+        if (game.shake) game.shake(0.15, 0.06);
+      }
+      if (pl.grounded) J.fall = 0;
+      J.air = !pl.grounded;
+      if (boosted && hs > 3) {
+        J.trailT -= dt;
+        if (J.trailT <= 0) { J.trailT = 0.05; spawn(game, [pl.pos[0], pl.pos[1] + 0.7 + Math.random() * 0.6, pl.pos[2]], J.cfg.trail, [0, 0.3, 0], 0.9, 0.35); }
+      }
     },
   });
 })();
@@ -8257,15 +8680,29 @@ window.GK_ONLINE_CONFIG = {
 
   P.add('qterm', {
     defaults: { model: 'terminal', solid: true, pool: 'gate' },
-    init(e) {
-      const d = e.def;
+    init(e, game) {
+      const d = e.def, R = Object.assign({ case: 25, comeback: 60, shortcut: 10 }, ((game && game.cfg.quiz) || {}).reward);
       e.setLook({ screen: SCREEN[d.pool] || '#2ecc71', color: d.pool === 'comeback' ? '#4a3b10' : '#1e2433' });
       if (!e.name) e.name = { gate: 'Firewall terminal', case: 'Cyber Case', comeback: 'COMEBACK CHALLENGE', shortcut: 'Shortcut lock' }[d.pool] || 'Terminal';
-      if (e.label == null) e.label = { gate: '❓ Firewall ' + (d.gate || ''), case: '🔎 Cyber Case', comeback: '⭐ COMEBACK', shortcut: '⚡ Shortcut' }[d.pool] || null;
-      e.labelRange = d.pool === 'gate' ? 14 : 18;
+      // short, big, glowing labels for the optional challenges (seen from far away), plus a beam of light above them
+      if (e.label == null) e.label = { gate: '❓ FIREWALL ' + (d.gate || ''), case: '⭐ BONUS +' + R.case, comeback: '⭐ BONUS CHALLENGE +' + R.comeback, shortcut: '⚡ SHORTCUT' }[d.pool] || null;
+      e.labelCls = d.pool === 'gate' ? 'quiz-gate' : d.pool === 'comeback' ? 'quiz-bonus big' : 'quiz-bonus';
+      e.labelRange = d.pool === 'gate' ? 30 : 90;
+      if (d.pool !== 'gate' && e.world) e.world.add({ id: e.id + '-beam', type: 'decoration', model: 'beacon', pos: e.pos.slice(), solid: false, big: true, look: { color: SCREEN[d.pool] }, alpha: 0.4, spin: 0.8 });
       e.interact = [{ type: 'quizTerminal', prompt: d.pool === 'gate' ? 'Answer to open the firewall' : d.pool === 'shortcut' ? 'Answer to open the shortcut' : 'Take the challenge' }];
     },
   });
+
+  GK.Models.add('beacon', o => {   // a tall beam of light with a star on top: "come here!"
+    const c = o.color || '#ffd166', g = new GK.Geo().cyl(0, 1.8, 0, 0.45, 26, c, { seg: 8, glow: 1, noBottom: true });
+    for (let i = 0; i < 4; i++) g.add(new GK.Geo().box(0, 0, 0, 0.35, 1.6, 0.35, c, { glow: 1 }).rotZ(i * Math.PI / 4).move(0, 4.2, 0));
+    return g;
+  });
+  const CSS = '.gk-label.quiz-bonus{font:900 24px system-ui;color:#1a1a1a;background:linear-gradient(90deg,#ffd166,#fff3b0,#ffd166);border:3px solid #fff;padding:6px 16px;border-radius:14px;' +
+    'box-shadow:0 0 24px #ffd166,0 0 60px rgba(255,209,102,.6);animation:gkBonus 1s ease-in-out infinite alternate}.gk-label.quiz-bonus.big{font-size:32px;padding:8px 20px}' +
+    '.gk-label.quiz-gate{font:800 18px system-ui;color:#fff;background:rgba(255,77,109,.85);border:2px solid #ffb3c1;padding:4px 12px}' +
+    '@keyframes gkBonus{from{filter:brightness(1);box-shadow:0 0 18px #ffd166}to{filter:brightness(1.25);box-shadow:0 0 40px #ffd166,0 0 90px rgba(255,209,102,.8)}}';
+  function css() { if (document.getElementById('gk-quiz-css')) return; const st = document.createElement('style'); st.id = 'gk-quiz-css'; st.textContent = CSS; document.head.appendChild(st); }
 
   GK.Interactions.add('quizTerminal', {
     prompt: 'Answer',
@@ -8330,6 +8767,7 @@ window.GK_ONLINE_CONFIG = {
       return out;
     },
     setup(game) {
+      css();
       game.state.quiz = { correct: 0, wrong: 0, reveals: 0, done: {}, tries: {}, locked: {} };
       if (game.quizSeed && game.quizSeed !== Deck.seed) Deck.reset(game.quizSeed);
     },
@@ -8347,7 +8785,9 @@ window.GK_ONLINE_CONFIG = {
      3  🚀 Rocket Shoes   📡 Scanner     🟣 Jump Pad (anyone can use it)
    Nothing is permanent: knock-backs and slow-downs last a second or three, and after a big hit you are protected
    for 2.5 s (no chain attacks). Every attack has a counter (shown on the loadout screen).
-   Config  gadgets: { charges: 2, max: 3, choices: [[slot 1 ids], [slot 2 ids], [slot 3 ids]], recover: 2.5 }
+   Config  gadgets: { charges: 2, max: 3, choices: [[slot 1 ids], [slot 2 ids], [slot 3 ids]], recover: 2.5,
+                      pickup: true (no loadout: random gadgets from ❓ boxes {type: 'itembox'}, one use each, 3 slots),
+                      weights: {id: [weight for the leader, weight for the last racer]} (game.raceRank() 0..1) }
    Other players: another mechanic provides them (works alone too, with nobody to hit):
      game.rivals() → [{id, name, pos, yaw, ent}]  ·  game.hitRival(id, effect) (deliver an effect) ·
      game.shareGadget(obj) (tell the room about a ball / trap / cloud / pad) — mechanics/race does this online and for bots.
@@ -8381,6 +8821,30 @@ window.GK_ONLINE_CONFIG = {
     const g = G(), c = o.color || '#38d39f';
     for (const [x, y, z, r] of [[0, 1.2, 0, 1.6], [1.4, 1, 0.6, 1.1], [-1.3, 1.1, -0.5, 1.2], [0.3, 1.9, -1, 1], [-0.5, 0.8, 1.3, 1]]) g.sphere(x, y, z, r, c, { glow: 0.6, seg: 8, rings: 5 });
     return g;
+  });
+  M.add('itemBox', o => {   // a glowing ❓ box (rainbow edges)
+    const c = o.color || '#ffd166', g = G().box(0, 0, 0, 1.1, 1.1, 1.1, '#7c5cff', { glow: 0.35 });
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.box(x * 0.55, 0, z * 0.55, 0.12, 1.12, 0.12, c, { glow: 1 });
+    for (const y of [0, 1.1]) g.box(0, y - 0.06, 0, 1.22, 0.12, 1.22, c, { glow: 1 });
+    for (const f of [1, -1]) {   // a "?" on two faces
+      g.box(0, 0.78, f * 0.56, 0.42, 0.12, 0.04, '#ffffff', { glow: 1 }).box(0.17, 0.62, f * 0.56, 0.12, 0.24, 0.04, '#ffffff', { glow: 1 })
+        .box(0.03, 0.47, f * 0.56, 0.12, 0.12, 0.04, '#ffffff', { glow: 1 }).box(0, 0.22, f * 0.56, 0.12, 0.12, 0.04, '#ffffff', { glow: 1 });
+    }
+    return g;
+  });
+  /** ❓ box: touch it during the race for a random gadget (pickup mode); it comes back after `back` seconds. */
+  P.add('itembox', {
+    defaults: { model: 'itemBox', solid: false, hover: 0.9, spin: 1.8, bob: 0.18, back: 6 },
+    init(e) {
+      e.label = '❓'; e.labelRange = 30; e.labelCls = 'itembox';
+      e.onTouch = g => {
+        if (!e.active || g.state.mode !== 'playing' || !g.gadgets || !g.gadgets.enabled()) return;
+        if (!g.gadgets.giveRandom()) return;
+        if (g.fxBurst) g.fxBurst(e.center(), '#ffd166', 12);
+        e.hide(); e.state.backT = e.def.back;
+      };
+    },
+    update(e, dt) { if (e.state.backT > 0) { e.state.backT -= dt; if (e.state.backT <= 0) e.show(); } },
   });
   M.add('bubble', o => G().sphere(0, 0, 0, 1, o.color || '#7fdbff', { glow: 0.7, seg: 12, rings: 8 }));
 
@@ -8490,7 +8954,8 @@ window.GK_ONLINE_CONFIG = {
     '.gk-gslot .ic{font-size:30px;line-height:1}.gk-gslot .k{position:absolute;left:6px;top:4px;font-size:11px;opacity:.8;background:rgba(255,255,255,.15);border-radius:4px;padding:0 5px}' +
     '.gk-gslot .ch{position:absolute;right:6px;top:4px;font-size:12px;color:#ffd166}.gk-gslot .cd{position:absolute;inset:0;background:conic-gradient(rgba(0,0,0,.66) var(--p),transparent 0);pointer-events:none}' +
     '.gk-gslot.empty{opacity:.45}.gk-gslot.ready{border-color:#7cfc00;box-shadow:0 0 14px rgba(124,252,0,.35)}.gk-gslot.off{filter:grayscale(1);opacity:.5}' +
-    '.gk-gslot .nm{font-size:10px;opacity:.85;margin-top:4px;white-space:nowrap}' +
+    '.gk-label.itembox{font-size:30px;background:none;text-shadow:0 0 14px #ffd166,0 0 30px #ffd166;animation:gkBob 0.8s ease-in-out infinite alternate}@keyframes gkBob{to{margin-top:-6px}}' +
+    '.gk-gslot .nm{font-size:10px;opacity:.85;margin-top:4px;white-space:nowrap}.gk-gslot.fresh{border-color:#ffd166;box-shadow:0 0 22px #ffd166;animation:gkpop .35s}@keyframes gkpop{50%{transform:scale(1.25)}}' +
     '.gk-load{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.gk-load h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em;opacity:.85}' +
     '.gk-gcard{display:block;width:100%;text-align:left;margin:0 0 8px;padding:9px 10px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;font:inherit}' +
     '.gk-gcard b{font-size:15px}.gk-gcard .ic{font-size:22px;margin-right:6px}.gk-gcard p{margin:4px 0 0;font-size:12.5px;opacity:.9}.gk-gcard small{display:block;margin-top:4px;font-size:11.5px;opacity:.75}' +
@@ -8507,21 +8972,43 @@ window.GK_ONLINE_CONFIG = {
       if (!D.pick) D.pick = cfg.choices.map(c => c[0]);
       const GG = game.gadgets = {
         cfg,
-        slots: D.pick.map(id => ({ id, charges: cfg.charges, cd: 0 })),
+        // pickup mode (config pickup: true): no loadout; slots start empty and fill from ❓ boxes, one use each
+        slots: cfg.pickup ? [0, 1, 2].map(() => ({ id: null, charges: 0, cd: 0 })) : D.pick.map(id => ({ id, charges: cfg.charges, cd: 0 })),
         enabled: () => true,   // mechanics/race: only while racing
         use(i) {
           const s = GG.slots[i], d = s && D.get(s.id);
+          if (s && !s.id && cfg.pickup && game.state.mode === 'playing') { game.ui.toast('Slot ' + (i + 1) + ' is empty: grab a ❓ box!', 'bad'); return false; }
           if (!d || game.state.mode !== 'playing') return false;
           if (!GG.enabled()) { game.ui.toast('Gadgets work during the race', 'bad'); return false; }
           if (s.cd > 0) { game.audio.play('deny'); return false; }
           if (s.charges <= 0) { game.ui.toast(d.icon + ' No charges: answer questions to earn more!', 'bad'); game.audio.play('deny'); return false; }
           if (!d.use(game)) { s.cd = 1; return false; }
-          s.charges--; s.cd = d.cd;
-          game.emit('gadget:use', { id: s.id });
+          s.charges--; s.cd = cfg.pickup ? 0.4 : d.cd;
+          const used = s.id;
+          if (cfg.pickup && s.charges <= 0) s.id = null;   // used up: the slot is free for the next box
+          game.emit('gadget:use', { id: used });
+          GG.draw(true);
+          return true;
+        },
+        /** A random gadget into the first free slot (pickup mode). Racers further behind get better ones (like kart games). */
+        giveRandom() {
+          const i = GG.slots.findIndex(x => !x.id);
+          if (i < 0) { game.ui.toast('Your 3 gadget slots are full: use one (keys 1 2 3)!', 'bad'); return false; }
+          const r = game.raceRank ? game.raceRank() : 0.5, pool = cfg.choices.flat(), W = cfg.weights || {};
+          const wt = id => { const w = W[id] || [1.5, 1.5]; return w[0] * (1 - r) + w[1] * r; };
+          let x = Math.random() * pool.reduce((a, id) => a + wt(id), 0), id = pool[0];
+          for (const k of pool) { x -= wt(k); if (x <= 0) { id = k; break; } }
+          GG.slots[i] = { id, charges: 1, cd: 0, fresh: 1.2 };
+          const d = D.get(id);
+          game.ui.toast('🎁 ' + d.icon + ' ' + d.name + '!  Press ' + (i + 1), 'good');
+          game.audio.play('pickup');
+          game.emit('gadget:got', { id, slot: i });
+          GG.draw(true);
           return true;
         },
         /** Earn charges: slot index (0-2), 'random' or 'all'. */
         give(slot, n) {
+          if (cfg.pickup) { for (let k = 0; k < (slot === 'all' ? 2 : n || 1); k++) GG.giveRandom(); return; }
           const list = slot === 'all' ? [0, 1, 2] : [slot === 'random' || slot == null ? Math.floor(Math.random() * 3) : slot];
           for (const i of list) { const s = GG.slots[i]; if (s) s.charges = Math.min(cfg.max, s.charges + (n || 1)); }
           if (list.length) { const d = D.get(GG.slots[list[0]].id); game.ui.toast('+' + (n || 1) + ' charge' + (list.length > 1 ? ' for every gadget' : ': ' + (d ? d.icon + ' ' + d.name : '')), 'good'); }
@@ -8596,7 +9083,7 @@ window.GK_ONLINE_CONFIG = {
     },
     update(game, dt) {
       const GG = game.gadgets, pl = game.player;
-      for (const s of GG.slots) if (s.cd > 0) s.cd = Math.max(0, s.cd - dt);
+      for (const s of GG.slots) { if (s.cd > 0) s.cd = Math.max(0, s.cd - dt); if (s.fresh > 0) s.fresh -= dt; }
       if (game.state.mode === 'playing') for (let i = 0; i < 3; i++) if (game.input.hits.has('Digit' + (i + 1)) || game.input.hits.has('Numpad' + (i + 1))) GG.use(i);
       // speeds and jumps (after powerups and terrain have set theirs this frame)
       if (game.hasPower('slow')) pl.speedMul *= 0.6;
@@ -8634,12 +9121,12 @@ window.GK_ONLINE_CONFIG = {
       force = true;
     }
     const on = GG.enabled() && game.state.mode !== 'title';
-    const key = GG.slots.map(s => s.id + s.charges + ':' + Math.ceil(s.cd * 4)).join('|') + on;
+    const key = GG.slots.map(s => s.id + s.charges + ':' + Math.ceil(s.cd * 4) + (s.fresh > 0 ? 'f' : '')).join('|') + on;
     if (!force && box.dataset.k === key) return;
     box.dataset.k = key;
     box.innerHTML = '';
     GG.slots.forEach((s, i) => {
-      const d = D.get(s.id) || {}, b = U.el('button', 'gk-gslot' + (s.charges ? '' : ' empty') + (on && s.charges && !s.cd ? ' ready' : '') + (on ? '' : ' off'));
+      const d = D.get(s.id) || (GG.cfg.pickup ? { icon: '❔', name: 'empty' } : {}), b = U.el('button', 'gk-gslot' + (s.charges ? '' : ' empty') + (on && s.charges && !s.cd ? ' ready' : '') + (on ? '' : ' off') + (s.fresh > 0 ? ' fresh' : ''));
       b.type = 'button';
       b.title = (d.name || s.id) + ': ' + (d.text || '') + ' (key ' + (i + 1) + ')';
       b.innerHTML = '<span class="k">' + (i + 1) + '</span><span class="ch">' + '●'.repeat(s.charges) + '</span><span class="ic">' + (d.icon || '?') + '</span><span class="nm">' + U.esc(d.name || s.id) + '</span>' +
@@ -8889,18 +9376,51 @@ window.GK_ONLINE_CONFIG = {
     }
   }
   /** Bots run along the course, stop at gates to "answer", sometimes get stuck, and now and then use a gadget on you. */
+  /** Stretches of the course where bots behave differently: red light, glass bridge, door rows, hills, hammers. */
+  function zonesOf(g) {
+    const C = g.raceCourse, Z = [], dOf = p => C.project(p).d;
+    const add = (kind, d0, d1, ent, id) => Z.push({ kind, d0: Math.min(d0, d1), d1: Math.max(d0, d1), ent, id });
+    const groups = {};
+    for (const e of g.world.entities) {
+      if (e.type === 'redlight') { const dc = dOf(e.pos), h = e.def.size[2] / 2; add('red', dc - h, dc + h, e, e.id); }
+      else if (e.type === 'glasstile' || e.type === 'dashdoor') { const k = e.type + (e.type === 'dashdoor' ? e.def.row : ''); const d = dOf(e.pos); const G2 = groups[k] = groups[k] || { kind: e.type === 'glasstile' ? 'glass' : 'door', d0: d, d1: d }; G2.d0 = Math.min(G2.d0, d); G2.d1 = Math.max(G2.d1, d); }
+      else if (e.type === 'boulder') { add('hill', dOf(e.a) - 2, dOf(e.b) + 22, e, e.id); }
+      else if (e.type === 'pendulum') { const d = dOf(e.pos); add('hammer', d - 1, d + 1, e, e.id); }
+    }
+    for (const k in groups) add(groups[k].kind, groups[k].d0 - 2, groups[k].d1 + 1, null, k);
+    return Z;
+  }
   function stepBots(g, dt) {
     const C = g.raceCourse, st = g.state.race, now = clock(g);
     if (!R.bots || !C) return;
     const running = st.phase === 'running';
+    if (!C.zones) C.zones = zonesOf(g);
     for (const b of R.bots) {
       if (!b.ent) continue;
       if (running && !b.fin) {
+        b.seen = b.seen || {};
+        let slow = 1, hold = false;
+        for (const z of C.zones) {
+          if (b.d < z.d0 - 0.5 || b.d > z.d1) continue;
+          if (z.kind === 'red') {
+            const ph = z.ent.state.phase;
+            if (ph === 'red' || ph === 'warn') hold = true;
+            if (ph === 'red' && b.seen[z.id] !== z.ent.redAt) { b.seen[z.id] = z.ent.redAt; if (b.d > z.d0 + 1 && Math.random() < 0.08) b.d = z.d0; }   // some get caught
+          } else if (!b.seen[z.id]) {
+            b.seen[z.id] = 1;
+            if (z.kind === 'glass') b.pause += Math.floor(Math.random() * 3) * 4.5;   // fell through 0–2 fake panes
+            else if (z.kind === 'door') b.pause += 0.4 + Math.random() * 2.2;
+            else if (z.kind === 'hammer' && Math.random() < 0.25) b.stun = 1.2;
+          }
+          if (z.kind === 'hill') slow = Math.min(slow, 0.7);
+        }
+        b.hold = hold;
         if (b.stun > 0) b.stun -= dt;
         else if (b.pause > 0) b.pause -= dt;
+        else if (hold) { /* frozen on red light */ }
         else {
           const gate = C.gates[b.gate];
-          let v = b.speed * (b.slow > 0 ? 0.6 : 1) * (0.9 + 0.2 * Math.sin(now / 1700 + b.speed * 7));
+          let v = b.speed * slow * (b.slow > 0 ? 0.6 : 1) * (0.9 + 0.2 * Math.sin(now / 1700 + b.speed * 7));
           b.d += v * dt;
           if (gate && b.d >= gate.d - 3) {
             b.d = gate.d - 3;
@@ -8926,10 +9446,14 @@ window.GK_ONLINE_CONFIG = {
         }
       }
       // put the figure on the course: centre line + its own lane offset (wandering a little)
-      const p = C.at(b.d), w = b.off + Math.sin(now / 2300 + b.speed * 5) * 1.2, x = p.x - p.dz * w, z = p.z + p.dx * w;
-      const moving = running && !b.fin && b.pause <= 0 && b.stun <= 0;
+      const zone = C.zones && C.zones.find(z => b.d >= z.d0 - 0.5 && b.d <= z.d1);
+      const p = C.at(b.d), w = zone && zone.kind === 'glass' ? (b.off >= 0 ? 2.3 : -2.3) : b.off + Math.sin(now / 2300 + b.speed * 5) * 1.2, x = p.x - p.dz * w, z = p.z + p.dx * w;
+      const moving = running && !b.fin && b.pause <= 0 && b.stun <= 0 && !b.hold;
       const e = b.ent;
-      e.pos[0] += (x - e.pos[0]) * Math.min(1, dt * 8); e.pos[2] += (z - e.pos[2]) * Math.min(1, dt * 8); e.pos[1] = 0;
+      e.pos[0] += (x - e.pos[0]) * Math.min(1, dt * 8); e.pos[2] += (z - e.pos[2]) * Math.min(1, dt * 8);
+      // on hills the bots walk on the ground (a ray from above); elsewhere the course is flat
+      if (zone && zone.kind === 'hill') { const hit = g.world.raycast([e.pos[0], 12, e.pos[2]], [0, -1, 0], 14); const gy = hit.hit ? 12 - hit.t : 0; e.pos[1] += (gy - e.pos[1]) * Math.min(1, dt * 10); }
+      else e.pos[1] += (0 - e.pos[1]) * Math.min(1, dt * 10);
       e.yaw = Math.atan2(p.dx, p.dz);
       e.figure.walk += ((moving ? 1 : 0) - e.figure.walk) * Math.min(1, dt * 8);
       e.figure.phase += dt * (moving ? b.speed : 0) * 3.2;
@@ -8951,7 +9475,7 @@ window.GK_ONLINE_CONFIG = {
   function roundPoints(c, r, place, mult) {
     const S = c.score, caps = S.caps;
     const race = r.f ? S.finish + (S.place[place - 1] || 0) : Math.round(S.progress * Math.pow(U.clamp(r.d || 0, 0, 1), S.pow));
-    const academic = U.clamp(Math.round(r.a || 0), S.floor, caps.academic), strategy = U.clamp(Math.round(r.s || 0), 0, caps.strategy), explore = U.clamp(Math.round(r.x || 0), 0, caps.explore);
+    const academic = U.clamp(Math.round(r.a || 0), S.floor, caps.academic), strategy = U.clamp(Math.round(r.s || 0), -30, caps.strategy), explore = U.clamp(Math.round(r.x || 0), 0, caps.explore);
     return { race, academic, strategy, explore, total: Math.round((race + academic + strategy + explore) * mult) };
   }
   /** stats {id: {n, d, f, a, s, x, c, w, v, h, k}} → sorted rows with places and points. */
@@ -9013,6 +9537,16 @@ window.GK_ONLINE_CONFIG = {
       game.gadgetsImmune = () => game.state.race.finished || game.state.race.phase !== 'running';
       if (game.gadgets) game.gadgets.enabled = () => game.state.race.phase === 'running' && !game.state.race.finished && !game.state.race.over;
       game.raceInfo = () => ({ mode: R.mode, round: game.levelIndex, phase: game.state.race.phase });
+      // traps run on the race clock (seconds since GO) and pick fake glass / doors from a seed shared by the room
+      game.raceClock = () => { const t = times(game); return t ? (clock(game) - t.startAt) / 1000 : game.state.time; };
+      const seed = () => (R.mode === 'solo' ? (R.local && R.local.seed) || 'solo' : (game.online ? game.online.room : 'x')) + ':' + game.levelIndex;
+      game.trapRandom = key => { let h = 2166136261; const k = seed() + ':' + key; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+      game.raceRank = () => { const st2 = game.state.race; return st2.count > 1 ? U.clamp(((st2.place || 1) - 1) / (st2.count - 1), 0, 1) : 0.5; };
+      game.on('terrain:caught', () => {
+        game.scoring.add(-10, 'Caught on red light', 'strategy');
+        banner(game, '🔴 CAUGHT MOVING!<small>Back to the start line · −10</small>', 'bad', 2.2);
+      });
+      game.on('terrain:glass', () => banner(game, '💥 FAKE GLASS!', 'bad', 1.2));
       // hazards (lasers, drones) knock you back along the course and stun you briefly
       game.on('player:hit', () => {
         const p = C.at(game.state.race.dist - 1);
@@ -9039,7 +9573,7 @@ window.GK_ONLINE_CONFIG = {
       if (R.mode === 'host') game.input.unlock();
       if (R.mode === 'solo') {
         const c = cfgOf(game), now = clock(game);
-        R.local = { round: game.levelIndex, prepEnd: now + c.soloPrep * 1000, startAt: now + (c.soloPrep + c.countdown + 0.2) * 1000, endAt: 0, len: (R.roundTime || c.roundTime) * 1000 };
+        R.local = { seed: Math.random().toString(36).slice(2, 8), round: game.levelIndex, prepEnd: now + c.soloPrep * 1000, startAt: now + (c.soloPrep + c.countdown + 0.2) * 1000, endAt: 0, len: (R.roundTime || c.roundTime) * 1000 };
         R.local.endAt = R.local.startAt + R.local.len;
       }
       tick(game);
@@ -9125,7 +9659,12 @@ window.GK_ONLINE_CONFIG = {
       info(g, '');
       placeAtStart(g);
       const b = g.world.get('barrier'); if (b) b.show();
-      if (g.gadgets && !st.chose) {
+      if (g.gadgets && g.gadgets.cfg.pickup && !st.chose) {
+        st.chose = true;
+        const ri = g.cfg.roundInfo || {};
+        info(g, '<b style="font-size:20px">Round ' + (g.levelIndex + 1) + ': ' + U.esc(ri.name || g.cfg.stageTitle || '') + '</b>' + (ri.text ? '<br>' + U.esc(ri.text) : '') +
+          '<br><small>' + T(g, 'howto', '') + '</small>');
+      } else if (g.gadgets && !st.chose) {
         st.chose = true;
         const t = times(g), ri = g.cfg.roundInfo || {};
         g.gadgets.chooser({
@@ -9136,7 +9675,7 @@ window.GK_ONLINE_CONFIG = {
         });
       }
     }
-    if (phase === 'countdown') { info(g, ''); placeAtStart(g); }
+    if (phase === 'countdown') { if (!(g.gadgets && g.gadgets.cfg.pickup)) info(g, ''); placeAtStart(g); }
     if (phase === 'running') {
       const b = g.world.get('barrier'); if (b) b.hide();
       if (from === 'countdown' || from === 'prep') { banner(g, 'GO!', 'go', 1.2); g.audio.play('go'); }
@@ -9227,6 +9766,7 @@ window.GK_ONLINE_CONFIG = {
     }
     list.sort((a, b) => (a.fin && b.fin ? a.fin - b.fin : a.fin ? -1 : b.fin ? 1 : b.d - a.d));
     const me = list.findIndex(x => x.me) + 1;
+    st.count = list.length;
     if (st.finished && st.place) { /* keep the place you finished in */ } else st.place = me;
     const shown = list.slice(0, 5);
     const html = '<b class="big">' + ORD(st.finished ? st.place : me) + '</b> / ' + list.length + '<ol>' + shown.map(x => '<li class="' + (x.me ? 'me' : '') + (x.fin ? ' fin' : '') + '">' + U.esc(x.name) + '</li>').join('') + '</ol>' + (me > 5 ? '<small>… you: ' + ORD(me) + '</small>' : '');
