@@ -666,9 +666,9 @@ window.GAME_CONTENT = {};
 
   C.rounds = [
     { name: 'Neon City', text: 'TRAINING: 🔴 Red Light, Green Light, 🚪 Door Dash, lasers and a glass bridge.' },
-    { name: 'Digital Forest', text: '🪨 Boulder hill, 🌉 broken bridge over the river, stepping stones and spinning bars.' },
-    { name: 'Data Factory', text: '🚪 Door Dash, 📦 Packet Press, ✉ Spam Cannons, ⏳ Buffering Doors and 🟦 Bit Flip. Points ×1.1' },
-    { name: 'Digital Ocean', text: '🔴 Red Light, 🌊 Packet Wave, 💿 Spinning Hard Drive, 🚪 Port Shuffle and 🟩 Pixel Rain. Points ×1.25' },
+    { name: 'Digital Forest', text: '🪨 Boulder hill, 🌉 broken bridge, 🔵 pinball bumpers and ☑ captcha gates (punch the button!).' },
+    { name: 'Data Factory', text: '📦 Packet Press, ⬆ Upload Lifts, 🪧 Pop-up Ads, ⏳ Buffering Doors, 🟦 Bit Flip. Points ×1.1' },
+    { name: 'Digital Ocean', text: '🌊 Packet Wave, 💿 Hard Drive, 📶 Loading Bridges, 🔄 Revolving Doors, 🟩 Pixel Rain. Points ×1.25' },
     { name: 'Cyber Core', text: 'CHAMPIONSHIP: every trap, now in pairs. Points ×1.5!' },
   ];
 
@@ -720,7 +720,7 @@ window.GAME_CONTENT = {};
       round(3, 'rush-ocean', ['medium', 'hard', 'medium', 'hard', 'medium', 'hard'], 2),
       round(4, 'rush-core', ['medium', 'hard', 'hard', 'medium', 'hard', 'hard', 'hard'], 3),
     ],
-    player: { walkSpeed: 5.6, sprintSpeed: 7.6, sprintTime: 2, sprintRest: 3, jumpSpeed: 6.2, airJumps: 1, killY: -1.6, reach: 3.2, health: null },
+    player: { walkSpeed: 5.6, sprintSpeed: 7.6, sprintTime: 2, sprintRest: 5, jumpSpeed: 6.2, airJumps: 1, killY: -1.6, reach: 3.2, health: null },
     render: { far: 300 },
     ui: { accent: '#4cc9f0', askName: true, levelSelect: false, restart: false, showControls: false, pauseNote: '⏳ The race goes on!', minimap: true, vignette: true, labelRange: 14, showHintKey: false, leaderboard: false,
       controls: [['W A S D', 'Run'], ['Mouse', 'Look'], ['Space', 'Jump'], ['Shift', 'Sprint'], ['E / click', 'Use a terminal'], ['1 2 3', 'Gadgets'], ['V', 'Camera'], ['Esc', 'Pause']] },
@@ -731,7 +731,7 @@ window.GAME_CONTENT = {};
     race: { roundTime: 480, timeChoices: [360, 480], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', reward: { easy: 10, medium: 12, hard: 16, case: 15, comeback: 75, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
     // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
-    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bomb: [2, 2.5], jetpack: [1, 4], jumppad: [2, 2.5], ink: [0.6, 2.5], mega: [0.7, 2.5] } },
+    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bomb: [2, 2.5], jetpack: [1, 4], jumppad: [2, 2.5], mega: [0.7, 2.5] } },
     juice: { dust: '#d8dee9' },
     characters: { default: 'leo', title: 'content:characters.title', choices: [
       { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
@@ -778,6 +778,8 @@ window.GAME_CONTENT = {};
       // the later rounds' cyber obstacles (mechanics/cybertraps)
       press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
       wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
+      popup: { type: 'popup' }, bumper: { type: 'bumper' }, captcha: { type: 'captcha' }, lbridge: { type: 'loadbridge' },
+      lift: { type: 'lift' }, proxy: { type: 'turnstile' },
       mover: { type: 'mover', speed: 2.4, wait: 0.7, color: '#4cc9f0' },
       bounce: { type: 'bouncer', power: 11.5, launch: 7 },
       fakepad: { type: 'bouncer', power: 8, launch: 10, look: { color: '#ffd166' } },
@@ -5701,6 +5703,12 @@ GK_LIBRARY.worlds = {
      {k: 'wave', ports}      PACKET WAVE over the stretch, raised islands to stand on; ports: a port-shuffle wall at the end. 64 m
      {k: 'drive', cannons, spin}   SPINNING HARD DRIVE disk across the road; cannons: spam cannons shoot across it. 44 m
      {k: 'ports', rain}      two PORT SHUFFLE walls with PIXEL RAIN between them. 48 m
+     {k: 'adalley', bumpers} POP-UP ADS all over the road (punch them or go round); bumpers: pinball bumpers between them. 52 m
+     {k: 'pinball'}          a field of PINBALL BUMPERS. 48 m
+     {k: 'captcha'}          a wall of 3 CAPTCHA GATES (punch the button 3 times), then pop-ups. 40 m
+     {k: 'lbridge', period}  two gaps, each with 3 LOADING BRIDGES (different timing), an island between. 56 m
+     {k: 'lifts'}            a tall SERVER WALL: ride an UPLOAD LIFT up, run along the top, jump down. 44 m
+     {k: 'proxy'}            two rows of ROTATING PROXY revolving doors. 52 m
      {k: 'bridge'}     Broken bridge over a pit (68 m): jump the gaps in the middle (a hammer swings over two pieces),
                        crumbling tiles on the left, a narrow beam with a sliding laser bar on the right, an island halfway
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
@@ -6208,7 +6216,7 @@ GK_LIBRARY.worlds = {
       this.box(F, 24.5, 27, -half, half, 0, H, col, { top }); this.box(F, 51, 53.5, -half, half, 0, H, col, { top });
       this.deco(F, 'plane', 39, 0, 0.03, 0, { size: [W, 24], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
       for (let u = 28; u < 51; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
-      for (let j = 0; j < 7; j++) this.slot('flip', F, 39, (j - 3) * 3.4, H, 0, { size: [3.3, 0.3, 24], group: j % 2, period: o.period || 3 });
+      for (let j = 0; j < 7; j++) this.slot('flip', F, 39, (j - 3) * 3.4, H, 0, { size: [3.3, 0.3, 24], group: j % 2, period: o.period || 5 });
       this.slot('abyss', F, 39, 0, 0, 0, { size: [W, 1.0, 24], top: H });
       this.loc('airzone-' + this.num('airzone'), F, 39, 0, H, 0, { zone: 'air', len: 27, y: H });
       this.finishStretch(F, L);
@@ -6238,6 +6246,72 @@ GK_LIBRARY.worlds = {
       this.portWall(F, 12);
       if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14] });
       this.portWall(F, 36);
+      this.finishStretch(F, L);
+    }
+    adalley(o) {
+      o = o || {};
+      const L = 52, F = this.stretch(L);
+      let n = 0;
+      for (let u = 9; u < 46; u += 6) for (let i = 0; i < 4; i++) {
+        const v = -11.25 + i * 7.5 + ((u / 6) % 2 ? 3.75 : 0);
+        if (Math.abs(v) > 13.5) continue;
+        this.slot('popup', F, u, v, 0, 0, { phase: ((n++) * 0.37) % 1 });
+        if (o.bumpers && i < 3 && u < 42) this.slot('bumper', F, u + 3, v + 3.75, 0, 0);
+      }
+      this.deco(F, 'neonSign', 4, 12, 0, 180, { color: '#ff4fd8', w: 4, h: 1.8, y: 2.6 });
+      this.finishStretch(F, L);
+    }
+    pinball() {
+      const L = 48, F = this.stretch(L);
+      for (let u = 9, r = 0; u < 44; u += 5, r++) for (let v = -12 + (r % 2) * 3; v <= 12; v += 6) this.slot('bumper', F, u, v, 0, 0, { r: 1.3 + (r % 3) * 0.2 });
+      this.finishStretch(F, L);
+    }
+    captcha() {
+      const L = 40, F = this.stretch(L), T = this.T, half = W / 2, wu = 12, wh = 3;
+      for (const [v0, v1] of [[-half, -12.5], [-7.5, -2.5], [2.5, 7.5], [12.5, half]]) this.wall(F, wu, wu + 0.6, v0, v1, wh, T.gate || T.wall);
+      for (const v of [-10, 0, 10]) this.slot('captcha', F, wu + 0.3, v, 0, 0, { size: [5, wh, 0.6] });
+      this.deco(F, 'glowStrip', wu + 0.3, 0, wh, 0, { size: [W, 0.15, 0.7], color: '#2563eb' });
+      this.loc('cp-' + this.num('cp'), F, 16, 0, 0, 0);
+      for (const [u, v] of [[22, -8], [24, 6], [30, -2], [33, 10], [35, -10]]) this.slot('popup', F, u, v, 0, 0, { phase: (u * 0.13) % 1 });
+      this.finishStretch(F, L);
+    }
+    lbridge(o) {
+      o = o || {};
+      const L = 56, F = frame(this.cur.x, this.cur.z, this.cur.dir), T = this.T, half = W / 2, H = 1.5, col = T.walk || T.wall, top = T.walkTop, pit = T.pit || '#1c4e80';
+      const back = Object.keys(DIRS).find(k => DIRS[k].a[0] === -DIRS[F.dir].a[0] && DIRS[k].a[1] === -DIRS[F.dir].a[1]);
+      this.floor(F, 0, 6.5, -half, half, T.floor2 || T.floor); this.floor(F, 6.5, 45.5, -half, half, dk(pit, 0.75)); this.floor(F, 45.5, L, -half, half, T.floor2 || T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 2, 0, 0, 0);
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(4, 0))), dir: F.dir, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(48, 0))), dir: back, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      for (const [u0, u1] of [[6.5, 10], [24, 28], [42, 45.5]]) this.box(F, u0, u1, -half, half, 0, H, col, { top });
+      this.loc('cp-' + this.num('cp'), F, 26, 0, H, 0);
+      for (const [g0, g1, ph] of [[10, 24, 0], [28, 42, 0.5]]) {
+        this.deco(F, 'plane', (g0 + g1) / 2, 0, 0.03, 0, { size: [W, g1 - g0], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
+        for (let u = g0 + 1; u < g1; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
+        [-9, 0, 9].forEach((v, i) => this.slot('lbridge', F, g0, v, H, 0, { len: g1 - g0, w: 3.4, n: 10, period: o.period || 9, phase: (ph + i * 0.33) % 1 }));
+        this.slot('abyss', F, (g0 + g1) / 2, 0, 0, 0, { size: [W, 1.0, g1 - g0], top: H });
+      }
+      this.loc('airzone-' + this.num('airzone'), F, 26, 0, H, 0, { zone: 'air', len: 36, y: H });
+      this.finishStretch(F, L);
+    }
+    lifts() {
+      const L = 44, F = this.stretch(L), T = this.T, half = W / 2, wh = 3.2;
+      this.box(F, 14, 20, -half, half, 0, wh, T.wall, { top: T.wallTop || T.walkTop });   // the server wall (its top is a walkway)
+      for (let v = -13; v <= 13; v += 2.6) this.deco(F, 'glowStrip', 13.98, v, 0.6, 0, { size: [1.4, 1.9, 0.04], color: v % 5 > 2 ? '#4cc9f0' : '#7cfc00' });
+      [-9, 0, 9].forEach((v, i) => {
+        this.slot('lift', F, 12.2, v, 0, 0, { size: [3.4, 3.4], h: wh, period: 7, phase: i * 0.33 });
+        for (const s of [-1, 1]) this.deco(F, 'slab', 12.2, v + s * 1.95, 0, 0, { size: [0.25, wh + 1.2, 0.25], color: '#7cfc00' });
+      });
+      this.slot('shard', F, 17, 0, wh, 0);
+      this.finishStretch(F, L);
+    }
+    proxy() {
+      const L = 52, F = this.stretch(L), T = this.T;
+      [[15, 0.6, 0], [37, -0.6, 0.4]].forEach(([u, spin, ph]) => [-7.5, 7.5].forEach((v, i) => {
+        this.slot('proxy', F, u, v, 0, ph * 90 + i * 45, { r: 7, h: 3, spin: i ? -spin : spin });
+        this.box(F, u - 0.6, u + 0.6, v - 0.6, v + 0.6, 0, 3.6, T.wall, { top: '#b794f4' });   // the hub
+      }));
       this.finishStretch(F, L);
     }
     /** The box a wall pusher hides in, outside the fence at u on side s (−1 / +1), standing at height y. The course stays
@@ -6392,7 +6466,7 @@ GK_LIBRARY.worlds = {
         decorations: this.scenery, locations: this.locs, routes: this.routes,
         spawns: { default: { pos: spawn.pos, rot: spawn.rot } },
         lights: this.lights, course: { length: courseLength(this.routes.course), gates: this.gateN, bounds: [x0, z0, x1, z1] },
-        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder'],   // locations / routes that float or move over a gap on purpose
+        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder', 'proxy'],   // locations / routes that float or move over a gap on purpose (proxy: a revolving door round its own solid hub)
       };
     }
   }
@@ -6473,11 +6547,11 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'bridge' },
-    { k: 'lanes', left: 'crumble', mid: 'plain', right: 'coop' }, { k: 'gate' },
+    { k: 'pinball' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
     { k: 'lanes', left: 'short', mid: 'sweeper', right: 'fake' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'tunnel', mid: 'laser', right: 'fans' }, { k: 'gate' },
+    { k: 'captcha' }, { k: 'gate' },
     { k: 'plaza', turn: 's', secret: true },
     { k: 'lanes', left: 'high', mid: 'drone', right: 'speed' }, { k: 'gate' },
     { k: 'finish' },
@@ -6513,11 +6587,11 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
     { k: 'buffer' },
-    { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'stones', stones: 'crumble' }, { k: 'gate' },
+    { k: 'lifts' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
     { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'high', mid: 'drone', right: 'fans' }, { k: 'gate' },
+    { k: 'adalley' }, { k: 'gate' },
     { k: 'plaza', turn: 's' },
     { k: 'hill' },
     { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
@@ -6553,10 +6627,10 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'short', mid: 'sweeper', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', comeback: true },
     { k: 'bridge' },
-    { k: 'lanes', left: 'crumble', mid: 'laser', right: 'coop' }, { k: 'gate' },
+    { k: 'lbridge' }, { k: 'gate' },
     { k: 'plaza', turn: 'n' },
     { k: 'wave' },
-    { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'fans' }, { k: 'gate' },
+    { k: 'proxy' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'drive' },
     { k: 'gate' },
@@ -6593,7 +6667,7 @@ GK_LIBRARY.worlds = {
     { k: 'hill', height: 6, run: 1.1 },
     { k: 'lanes', left: 'high', mid: 'laser', right: 'ice' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
-    { k: 'lanes', left: 'crumble', mid: 'glass', right: 'stones', stones: 'crumble' }, { k: 'gate' },
+    { k: 'adalley', bumpers: true }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'redlight' },
     { k: 'press', rain: true, period: 2.9 },              // final round: the new obstacles in pairs
@@ -6605,9 +6679,9 @@ GK_LIBRARY.worlds = {
     { k: 'plaza', turn: 'e' },
     { k: 'wave', ports: true }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
-    { k: 'lanes', left: 'crumble', mid: 'glass', right: 'ice' }, { k: 'gate' },
+    { k: 'lbridge', period: 8 }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'buffer', period: 2.5 },
+    { k: 'buffer', period: 4 },
     { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
@@ -8507,14 +8581,20 @@ GK_LIBRARY.worlds = {
                                                                          under it = squashed 2.4 s
      { type: 'spamcannon', range: 24, speed: 7, period: 2.6, phase }     SPAM CANNON: shoots ✉ orbs the way it faces (cross on the gaps)
      { type: 'bufferdoor', size: [w, h, d], need: 2, open: 4 }           BUFFERING DOOR: stand on its pad 2 s to open it (for you)
-     { type: 'fliptile', size: [w, h, d], group: 0 | 1, period: 3 }      BIT FLIP: tiles of one group flip away every `period` s
-                                                                         (they blink first): hop to a tile that stays
+     { type: 'fliptile', size: [w, h, d], group: 0 | 1, period: 5, safe: 1.8 }   BIT FLIP: the two groups take turns to flip away; between
+                                                                         turns every tile is solid for `safe` s (the next ones blink): hop over
      { type: 'tsunami', size: [w, h, d], len: 50, speed: 8, period: 9 } PACKET WAVE: a wave rolls back over the area; be on a
                                                                          raised island when it passes, or it washes you back
      { type: 'portgate', row, index, n: 5, open: 2, period: 3 }          PORT SHUFFLE: in each wall only some ports are open; the
                                                                          open ones change every few seconds (they blink first)
      { type: 'spindisk', r: 11, spin: 0.5 }                              SPINNING HARD DRIVE: a giant disk that carries you round
      { type: 'pixelrain', area: [w, d], n: 6, period: 2.8 }              PIXEL RAIN: red squares on the floor, then a block drops there
+     { type: 'popup', period: 5, up: 2.8 }                               POP-UP AD: pops up in your way; punch it closed (+2) or go round
+     { type: 'bumper', r: 1.4 }                                          PINBALL BUMPER: bounces you away
+     { type: 'captcha', size, need: 3, open: 5 }                         CAPTCHA GATE: punch its button 3 times to open it (for you)
+     { type: 'loadbridge', len: 14, n: 10, period: 9 }                   LOADING BRIDGE: loads across a gap, then unloads from the far end
+     { type: 'lift', size, h: 3.2, period: 7 }                           UPLOAD LIFT: rides up a server wall and down again
+     { type: 'turnstile', r: 6.5, spin: 0.6 }                            ROTATING PROXY: a giant revolving door
    Bots (mechanics/race) read entity.botZone {kind, len, chance, pause, slow, lane, ground} to slow down in the same places.
    Emits trap:hit {kind}. Player effects: player.squashT (a squashed view). */
 (function () {
@@ -8668,18 +8748,18 @@ GK_LIBRARY.worlds = {
 
   // ---------- BIT FLIP TILES ----------
   P.add('fliptile', {
-    defaults: { model: 'flipTile', solid: true, size: [3.3, 0.3, 24], group: 0, period: 3, warn: 0.8 },
+    defaults: { model: 'flipTile', solid: true, size: [3.3, 0.3, 24], group: 0, period: 5, safe: 1.8 },
     init(e) { e.setLook({ size: e.def.size }); e.botZone = { kind: 'flip', len: e.def.size[2], chance: 0.6, pause: 3.5 }; e.state.ang = 0; },
     update(e, dt, g) {
-      const d = e.def, t = clockOf(g), cyc = Math.floor(t / d.period), k = t - cyc * d.period;
-      const flipped = (((cyc % 2) + 2) % 2) === d.group, soon = !flipped && k > d.period - d.warn;
+      // one group is flipped for (period − safe) s; then EVERY column is solid for `safe` s while the other group blinks: hop over
+      const d = e.def, t = clockOf(g), cyc = Math.floor(t / d.period), k = t - cyc * d.period, safe = k >= d.period - d.safe;
+      const flipped = !safe && (((cyc % 2) + 2) % 2) === d.group, soon = safe && (((cyc + 1) % 2) + 2) % 2 === d.group;
       e.solid = !flipped;
       const want = flipped ? Math.PI / 2 : 0;
       e.state.ang += (want - e.state.ang) * Math.min(1, dt * 14);
-      e.roll = e.state.ang;
+      e.roll = e.state.ang + (soon ? Math.sin(t * 40) * 0.035 : 0);   // a wobble you can see (the collision box stays put)
       e.alpha = flipped ? 0.35 : undefined;
       e.hi = soon ? (Math.sin(t * 28) > 0 ? 0.6 : 0.15) : 0;
-      e.offset[1] = soon ? Math.sin(t * 60) * 0.03 : 0;
     },
   });
 
@@ -8789,6 +8869,194 @@ GK_LIBRARY.worlds = {
           }
         } else { s.hide(); b.hide(); }
       });
+    },
+  });
+
+
+  // ===================== more obstacles (v7) =====================
+  /** Did the player punch this frame, close to e and facing it? (mechanics/gadgets counts 'gadget:punch' in state.events) */
+  function punchedAt(g, e, S, reach) {
+    const n = g.state.events['gadget:punch'] || 0;
+    if (n === S.pc) return false;
+    S.pc = n;
+    const pl = g.player, c = e.center ? e.center() : e.pos, dx = c[0] - pl.pos[0], dz = c[2] - pl.pos[2], d = Math.hypot(dx, dz), f = pl.forward(), fl = Math.hypot(f[0], f[2]) || 1;
+    return d < (reach || 3.4) && (d < 0.8 || (dx * f[0] + dz * f[2]) / (d * fl) > 0.45);
+  }
+  M.add('popupAd', o => {   // a pop-up advert: bright panel, "AD", a big ✖ to close, on both faces
+    const w = o.w || 3.6, h = o.h || 2.6, c = o.color || '#ff4fd8', g = G().box(0, 0, 0, w, h, 0.3, '#ffffff', { glow: 0.25 });
+    for (const f of [1, -1]) {
+      const z = f * 0.16;
+      g.box(0, 0.15, z, w - 0.3, h - 0.6, 0.02, c, { glow: 0.55 });
+      g.box(-0.3, h * 0.22, z * 1.04, w * 0.55, h * 0.5, 0.02, '#ffffff', { glow: 0.8 });                     // a "you won!" picture…
+      g.add(G().cyl(0, -0.02, 0, 0.42, 0.04, '#ffd166', { seg: 10, glow: 1 }).rotX(Math.PI / 2).move(-0.3, h * 0.47, z * 1.1));   // …with a prize
+      g.box(w * 0.32, h * 0.25, z * 1.04, 0.7, 0.32, 0.02, '#7cfc00', { glow: 1 });                          // a big "OK" button
+      g.box(w / 2 - 0.45, h - 0.45, z * 1.1, 0.62, 0.62, 0.02, '#e53e3e', { glow: 1 });                      // ✖ close
+      for (const a of [0.785, -0.785]) g.add(G().box(0, -0.04, 0, 0.5, 0.08, 0.02, '#ffffff', { glow: 1 }).rotZ(a).move(w / 2 - 0.45, h - 0.15, z * 1.16));
+    }
+    return g.box(0, -0.3, 0, 0.3, 0.3, 0.3, '#2d3748');
+  });
+  /** POP-UP AD: {type: 'popup', period: 5, up: 2.6, phase}. Pops up from the floor and blocks the way; PUNCH it to close it (for
+      you, +2), or run round it. A pop-up that springs up under you pushes you off. */
+  P.add('popup', {
+    defaults: { model: 'popupAd', solid: true, period: 5, up: 2.8, phase: 0 },
+    init(e) {
+      e.setLook({ color: ['#ff4fd8', '#f6ad55', '#38bdf8', '#7cfc00'][hashOf(e.id) % 4] });
+      e.state.k = 0; e.labelRange = 14; e.botZone = { kind: 'popup', len: 2, chance: 0.4, pause: 1.2 };
+    },
+    update(e, dt, g) {
+      const d = e.def, S = e.state, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), k = (cyc - idx) * d.period;
+      let want = k < d.up ? 1 : 0;
+      if (S.closed === idx || !e.enabled) want = 0;
+      S.k += (want - S.k) * Math.min(1, dt * 12);
+      if (want && S.k > 0.97) S.k = 1;
+      e.scale = [1, Math.max(0.02, S.k), 1];
+      const was = e.solid; e.solid = S.k > 0.6;
+      e.label = e.solid && live(g) ? '👊' : null;
+      if (!live(g)) return;
+      const pl = g.player, L = local(e, pl.pos), inside = Math.abs(L.x) < 1.95 && Math.abs(L.z) < 0.55 && pl.pos[1] < e.pos[1] + 2.4;
+      if (e.solid && !was && inside) { const f = fwd(e), s = L.z >= 0 ? 1 : -1; hit(g, e, 'popup', [f[0] * s, f[1] * s], 6, 0.3, 2); }
+      if (e.solid && punchedAt(g, e, S, 3.4)) {
+        S.closed = idx; g.audio.play('glass'); burst(g, [e.pos[0], e.pos[1] + 1.4, e.pos[2]], '#ffffff', 14);
+        if (g.scoring) g.scoring.add(2, 'Closed a pop-up', 'strategy');
+        g.emit('trap:popup', { id: e.id });
+      }
+    },
+  });
+
+  M.add('bumper', o => { const r = o.r || 1.4, c = o.color || '#38bdf8'; return G().cyl(0, 0, 0, r * 0.75, 0.7, '#1e293b', { seg: 16 }).cyl(0, 0.7, 0, r, 0.45, c, { seg: 16, glow: 0.7 }).cyl(0, 1.15, 0, r * 0.55, 0.12, '#ffffff', { seg: 16, glow: 1 }); });
+  /** PINBALL BUMPER: {type: 'bumper', r: 1.4, power: 10}. Touch it and you bounce away (it flashes). */
+  P.add('bumper', {
+    defaults: { model: 'bumper', solid: false, r: 1.4, power: 10 },
+    init(e) { e.setLook({ r: e.def.r, color: ['#38bdf8', '#ff4fd8', '#ffd166'][hashOf(e.id) % 3] }); e.botZone = { kind: 'bumper', len: 3, chance: 0.35, pause: 0.9 }; },
+    update(e, dt, g) {
+      const d = e.def, S = e.state;
+      if (S.flash > 0) { S.flash -= dt; e.hi = S.flash * 2; e.scale = [1 + S.flash * 0.4, 1, 1 + S.flash * 0.4]; } else { e.hi = 0; e.scale = [1, 1, 1]; }
+      if (!e.enabled || !live(g) || S.flash > 0.15) return;
+      const pl = g.player, dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2], dist = Math.hypot(dx, dz);
+      if (dist < d.r + 0.35 && pl.pos[1] < e.pos[1] + 1.2) {
+        S.flash = 0.35;
+        if (hit(g, e, 'bumper', dist > 0.05 ? [dx / dist, dz / dist] : [1, 0], d.power, 0.35, 3.5)) g.audio.play('boing');
+      }
+    },
+  });
+
+  M.add('captchaDoor', o => {
+    const s = o.size || [5, 3, 0.6], g = G().box(0, 0, 0, s[0], s[1], s[2], '#e2e8f0', { glow: 0.2 });
+    for (const f of [1, -1]) {
+      const z = f * (s[2] / 2 + 0.02);
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) g.box(-1.1 + i * 1.1, 0.8 + j * 1.0, z, 0.8, 0.7, 0.02, (i + j) % 2 ? '#94a3b8' : '#cbd5e1');   // "select all the squares…"
+      g.box(0, s[1] - 0.3, z, s[0] - 0.4, 0.2, 0.02, '#2563eb', { glow: 0.8 });
+    }
+    return g;
+  });
+  M.add('captchaButton', () => G().box(0, 0, 0, 0.6, 1.0, 0.6, '#334155').box(0, 1.0, 0, 1.1, 0.25, 1.1, '#ffffff', { glow: 0.4 }).box(0, 1.25, 0, 0.8, 0.06, 0.8, '#2563eb', { glow: 1 }).box(0, 1.31, 0, 0.5, 0.04, 0.5, '#ffffff', { glow: 1 }));
+  P.add('captchabutton', { defaults: { model: 'captchaButton', solid: true } });
+  /** CAPTCHA GATE ("I'm not a robot"): {type: 'captcha', size, need: 3, open: 5}. A door with a button in front of it: PUNCH
+      the button 3 times and the door opens for you for a few seconds. */
+  P.add('captcha', {
+    defaults: { model: 'captchaDoor', solid: true, size: [5, 3, 0.6], need: 3, open: 5 },
+    init(e) {
+      e.setLook({ size: e.def.size });
+      const f = fwd(e);
+      const sx = [Math.cos(e.yaw), -Math.sin(e.yaw)];   // the button stands in front of the door, a little to one side
+      e.btn = e.world.add({ id: e.id + '-btn', type: 'captchabutton', pos: [e.pos[0] - f[0] * 2.4 + sx[0] * 1.6, e.pos[1], e.pos[2] - f[1] * 2.4 + sx[1] * 1.6], rot: e.yaw * 180 / Math.PI, label: '👊 ☐☐☐' });
+      e.btn.labelRange = 20; e.btn.labelCls = 'itembox';
+      e.state.n = 0; e.state.openT = 0;
+      e.botZone = { kind: 'captcha', len: 6, chance: 1, pause: 1.8, lane: 1.6 };
+    },
+    restore(e) { if (e.state.openT > 0) e.hide(); else e.show(); },
+    update(e, dt, g) {
+      const d = e.def, S = e.state, pl = g.player;
+      if (S.openT > 0) {
+        S.openT -= dt;
+        const L = local(e, pl.pos), inside = Math.abs(L.x) < d.size[0] / 2 + 0.4 && Math.abs(L.z) < d.size[2] / 2 + 0.5;
+        if (S.openT <= 0 && !inside) { e.show(); S.n = 0; e.btn.label = '👊 ☐☐☐'; } else if (S.openT <= 0) S.openT = 0.2;
+        return;
+      }
+      if (!live(g) || !punchedAt(g, e.btn, S, 3)) return;
+      S.n++; g.audio.play('click'); burst(g, [e.btn.pos[0], e.btn.pos[1] + 1.3, e.btn.pos[2]], '#2563eb', 6);
+      e.btn.label = '👊 ' + '☑'.repeat(Math.min(S.n, d.need)) + '☐'.repeat(Math.max(0, d.need - S.n));
+      if (S.n >= d.need) {
+        S.openT = d.open; e.hide(); e.btn.label = '✅';
+        g.audio.play('pickup'); burst(g, [e.pos[0], e.pos[1] + 1.5, e.pos[2]], '#7cfc00', 14);
+        g.emit('trap:captcha', { id: e.id });
+      }
+    },
+  });
+
+  M.add('bridgeSeg', o => { const s = o.size || [3.4, 0.3, 1.4], c = o.color || '#4cc9f0'; return G().box(0, -s[1], 0, s[0], s[1], s[2] - 0.08, '#1e293b', { top: c }).box(0, 0.005, 0, s[0] - 0.4, 0.02, s[2] - 0.5, c, { glow: 0.9 }); });
+  P.add('bridgeseg', { defaults: { model: 'bridgeSeg', solid: true } });
+  /** LOADING BRIDGE: {type: 'loadbridge', len: 14, w: 3.4, n: 10, period: 9, load: 4, full: 3, phase}. A bridge over a gap that
+      loads piece by piece from your side (the % shows), stays complete for a moment, then unloads from the far end (those
+      pieces blink first). Wait for it, then run. */
+  P.add('loadbridge', {
+    defaults: { solid: false, len: 14, w: 3.4, n: 10, period: 9, load: 4, full: 3, phase: 0 },
+    init(e) {
+      const d = e.def, f = fwd(e), sl = d.len / d.n;
+      e.segs = [];
+      for (let i = 0; i < d.n; i++) e.segs.push(e.world.add({ id: e.id + '-s' + i, type: 'bridgeseg', pos: [e.pos[0] + f[0] * sl * (i + 0.5), e.pos[1], e.pos[2] + f[1] * sl * (i + 0.5)], rot: e.yaw * 180 / Math.PI, look: { size: [d.w, 0.3, sl] } }));
+      e.labelRange = 30; e.labelCls = 'itembox';
+      e.botZone = { kind: 'loadbridge', len: d.len, chance: 0.7, pause: 2.5 };
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, k = (cyc - Math.floor(cyc)) * d.period;
+      const frac = k < d.load ? k / d.load : k < d.load + d.full ? 1 : Math.max(0, 1 - (k - d.load - d.full) / (d.period - d.load - d.full));
+      const unloading = k >= d.load + d.full, have = n => Math.floor(d.n * frac + 1e-6) > n;
+      e.segs.forEach((s, i) => {
+        const on = have(i);
+        if (on && !s.visible) s.show(); else if (!on && s.visible) s.hide();
+        s.hi = on && (unloading || k > d.load + d.full - 0.8) && d.n * frac < i + 2.5 ? (Math.sin(t * 26) > 0 ? 0.7 : 0.1) : 0;
+      });
+      e.label = frac >= 1 ? '✅' : unloading ? '⚠' : '⏳ ' + Math.round(frac * 100) + '%';
+    },
+  });
+
+  M.add('liftPad', o => {
+    const s = o.size || [3.4, 3.4], g = G().box(0, -0.25, 0, s[0], 0.25, s[1], '#1e293b', { top: '#334155' });
+    for (const x of [-0.8, 0.8]) g.box(x, 0.005, 0.2, 0.25, 0.02, 0.9, '#7cfc00', { glow: 1 }).add(G().box(0, 0, 0, 0.25, 0.02, 0.7, '#7cfc00', { glow: 1 }).rotY(0.7).move(x - 0.22, 0.006, -0.35)).add(G().box(0, 0, 0, 0.25, 0.02, 0.7, '#7cfc00', { glow: 1 }).rotY(-0.7).move(x + 0.22, 0.006, -0.35));
+    return g.box(0, -0.25, s[1] / 2 - 0.05, s[0], 0.25, 0.1, '#7cfc00', { glow: 0.8 }).box(0, -0.25, -s[1] / 2 + 0.05, s[0], 0.25, 0.1, '#7cfc00', { glow: 0.8 });
+  });
+  /** UPLOAD LIFT: {type: 'lift', size: [3.4, 3.4], h: 3.2, period: 7, phase}. A platform that rides up a tall server wall and
+      down again: step on when it is down, step off at the top. (The platform carries you; it does not block.) */
+  P.add('lift', {
+    defaults: { model: 'liftPad', solid: false, size: [3.4, 3.4], h: 3.2, period: 7, phase: 0 },
+    init(e) { e.setLook({ size: e.def.size }); e.base = e.pos.slice(); e.botZone = { kind: 'lift', len: 8, chance: 1, pause: 2.6, ground: true }; },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, k = (cyc - Math.floor(cyc)) * d.period, P2 = d.period;
+      const ease = x => x * x * (3 - 2 * x), a = P2 * 0.2, b = a + P2 * 0.3, c = b + P2 * 0.2;   // wait down, rise, wait up, go down
+      const y = k < a ? 0 : k < b ? ease((k - a) / (b - a)) : k < c ? 1 : 1 - ease((k - c) / (P2 - c));
+      e.pos[1] = e.base[1] + 0.2 + y * (d.h - 0.2);
+      if (!live(g)) return;
+      const pl = g.player, L = local(e, pl.pos), top = e.pos[1];
+      if (Math.abs(L.x) < d.size[0] / 2 && Math.abs(L.z) < d.size[1] / 2 && pl.pos[1] <= top + 0.02 && pl.pos[1] > top - 0.7 && pl.vel[1] <= 0.5) {
+        pl.pos[1] = top; pl.vel[1] = 0; pl.grounded = true;   // standing on the lift
+      }
+    },
+  });
+
+  M.add('proxyDoor', o => {   // a revolving door: 4 glowing arms of length r, height h, round a hub at the origin
+    const r = o.r || 6.5, h = o.h || 3, c = o.color || '#b794f4', g = G().cyl(0, 0, 0, 0.6, h + 0.6, '#2d3748', { seg: 10 }).cyl(0, h + 0.6, 0, 0.8, 0.2, c, { seg: 10, glow: 1 });
+    for (let i = 0; i < 4; i++) g.add(G().box(0, 0.15, r / 2 + 0.3, 0.3, h - 0.15, r - 0.6, c, { glow: 0.6 }).box(0, h - 0.1, r / 2 + 0.3, 0.36, 0.14, r - 0.6, '#ffffff', { glow: 1 }).rotY(i * Math.PI / 2));
+    return g;
+  });
+  /** ROTATING PROXY: {type: 'turnstile', r: 6.5, h: 3, spin: 0.6}. A giant revolving door (its hub is solid; the world puts a
+      pillar there). Slip through between the arms; an arm that catches you sweeps you along. */
+  P.add('turnstile', {
+    defaults: { model: 'proxyDoor', solid: false, r: 6.5, h: 3, spin: 0.6, power: 8 },
+    init(e) { e.setLook({ r: e.def.r, h: e.def.h }); e.yaw0 = e.yaw; e.alpha = 0.85; e.botZone = { kind: 'proxy', len: e.def.r * 2, chance: 0.5, pause: 1.6 }; },
+    update(e, dt, g) {
+      const d = e.def, S = e.state;
+      e.yaw = e.yaw0 + d.spin * clockOf(g);
+      if (S.cd > 0) S.cd -= dt;
+      if (!e.enabled || !live(g) || S.cd > 0) return;
+      const pl = g.player, L = local(e, pl.pos), rp = Math.hypot(L.x, L.z);
+      if (rp < 0.7 || rp > d.r + 0.3 || pl.pos[1] > e.pos[1] + d.h) return;
+      const ang = Math.atan2(L.x, L.z), q = Math.PI / 2, dl = ((ang % q) + q) % q, near = Math.min(dl, q - dl);
+      if (rp * Math.sin(near) < 0.5) {   // an arm is touching you: it sweeps you the way it turns
+        S.cd = 0.8;
+        const dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2], s = Math.sign(d.spin) || 1;
+        hit(g, e, 'proxy', [dz * s, -dx * s], d.power, 0.5, 2.5) && g.audio.play('whoosh');
+      }
     },
   });
 
@@ -9771,7 +10039,7 @@ window.GK_ONLINE_CONFIG = {
   GK.Mechanics.add('gadgets', {
     configKeys: ['gadgets'],
     setup(game) {
-      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'freeze', 'balloon', 'ink', 'bomb'], ['mega'], ['jetpack', 'jumppad']] }, game.cfg.gadgets);
+      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'freeze', 'balloon', 'bomb'], ['mega'], ['jetpack', 'jumppad']] }, game.cfg.gadgets);
       css();
       if (!D.pick) D.pick = cfg.choices.map(c => c[0]);
       const GG = game.gadgets = {
