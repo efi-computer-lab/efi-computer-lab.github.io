@@ -720,7 +720,7 @@ window.GAME_CONTENT = {};
       round(3, 'rush-ocean', ['medium', 'hard', 'medium', 'hard', 'medium', 'hard'], 2),
       round(4, 'rush-core', ['medium', 'hard', 'hard', 'medium', 'hard', 'hard', 'hard'], 3),
     ],
-    player: { walkSpeed: 5.6, sprintSpeed: 7.6, jumpSpeed: 6.2, killY: -1.6, reach: 3.2, health: null },
+    player: { walkSpeed: 5.6, sprintSpeed: 7.6, jumpSpeed: 6.2, airJumps: 1, killY: -1.6, reach: 3.2, health: null },
     render: { far: 300 },
     ui: { accent: '#4cc9f0', askName: true, levelSelect: false, restart: false, showControls: false, pauseNote: '⏳ The race goes on!', minimap: true, vignette: true, labelRange: 14, showHintKey: false, leaderboard: false,
       controls: [['W A S D', 'Run'], ['Mouse', 'Look'], ['Space', 'Jump'], ['Shift', 'Sprint'], ['E / click', 'Use a terminal'], ['1 2 3', 'Gadgets'], ['V', 'Camera'], ['Esc', 'Pause']] },
@@ -731,7 +731,7 @@ window.GAME_CONTENT = {};
     race: { roundTime: 600, timeChoices: [360, 480, 600], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', reward: { easy: 10, medium: 12, hard: 16, case: 15, comeback: 75, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
     // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
-    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bubble: [2.5, 1.5], jetpack: [1, 4], scanner: [1.5, 1], jumppad: [2, 2.5] } },
+    gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bubble: [2.5, 1.5], jetpack: [1, 4], jumppad: [2, 2.5], ink: [0.6, 2.5], mega: [0.7, 2.5] } },
     juice: { dust: '#d8dee9' },
     characters: { default: 'leo', title: 'content:characters.title', choices: [
       { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
@@ -744,6 +744,9 @@ window.GAME_CONTENT = {};
       whoosh: { wave: 'sawtooth', notes: [300, 700, 1200], dur: 0.05, vol: 0.06 },
       go: { wave: 'square', notes: [523, 784, 1047, 1568], dur: 0.09, vol: 0.2 },
       glass: { wave: 'triangle', notes: [2400, 1800, 900, 300], dur: 0.05, vol: 0.2 },
+      punch: { wave: 'square', notes: [160, 90], dur: 0.05, vol: 0.16 },
+      splat: { wave: 'sawtooth', notes: [500, 260, 120], dur: 0.06, vol: 0.12 },
+      mega: { wave: 'square', notes: [262, 330, 392, 523, 659], dur: 0.07, vol: 0.14 },
     } },
     // the course worlds name their gameplay spots; these are the entities that fill them (worlds/_course.js lists them)
     slots: {
@@ -771,6 +774,7 @@ window.GAME_CONTENT = {};
       pad: { type: 'speedpad', seconds: 2.5 },
       ice: { type: 'ice' },
       crumble: { type: 'crumble', delay: 0.6, back: 4 },
+      abyss: { type: 'abyss' },
       mover: { type: 'mover', speed: 2.4, wait: 0.7, color: '#4cc9f0' },
       bounce: { type: 'bouncer', power: 11.5, launch: 7 },
       fakepad: { type: 'bouncer', power: 8, launch: 10, look: { color: '#ffd166' } },
@@ -3896,6 +3900,7 @@ GK_LIBRARY.worlds = {
                  'legL' / 'legR' (at the hip). Arms and legs hang straight down (−y) from the joint.
      'fpArms'    first-person sleeves and hands in WEAPON space (drawn with the weapon's own transform):
                  look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt)
+     'fpFist'    a first-person punching arm (fist at the origin, sleeve back toward the camera) in weapon space
      'sword'     a sword pointing UP (+y) from the hilt at the origin: look.color blade, look.glow edge, look.guard, look.grip
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail',
                        shirt, pants, shoes, accent (a small glowing badge), skirt: true }
@@ -4004,6 +4009,16 @@ GK_LIBRARY.worlds = {
       arm([0.05, -0.06, 0.07], [0.13, -0.17, -0.08], [0.22, -0.3, -0.26]);       // left hand under the barrel
     }
     return g;
+  });
+
+  /* A first-person punching arm in weapon space: the fist at the origin, the sleeve going back (−z) toward the camera. */
+  M.add('fpFist', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    segment(g, [0, -0.03, -0.6], [0, 0, -0.1], 0.16, 0.15, sl);
+    g.box(0, -0.035, -0.13, 0.18, 0.07, 0.06, dk(sl, 0.8));                                            // cuff
+    g.box(0, -0.11, 0, 0.22, 0.2, 0.22, sk, { top: dk(sk, 1.08) });                                    // fist
+    for (const x of [-0.075, -0.025, 0.025, 0.075]) g.box(x, 0.02, 0.1, 0.045, 0.06, 0.035, dk(sk, 0.88));   // knuckles
+    return g.box(0.12, -0.08, 0.02, 0.05, 0.1, 0.12, dk(sk, 0.95));                                    // thumb
   });
 
   /* Swords: hilt at the origin, blade up. */
@@ -4121,7 +4136,7 @@ GK_LIBRARY.worlds = {
 </script>
 <script>/* game-types/_spatial/body.js */
 /* Game Kit · game-types/_spatial/body.js
-   The player's body in a spatial world: WASD, sprint, jump (coyote time + jump buffer), gravity,
+   The player's body in a spatial world: WASD, sprint, jump (coyote time + jump buffer, airJumps: extra jumps in the air), gravity,
    box collision via GK.Physics, head-bob and optional health. Settings come from config.player.
    steering: 'camera' (first-person: W = where you look) | 'world' (top-down: W = north, body turns to face movement). */
 (function () {
@@ -4148,7 +4163,7 @@ GK_LIBRARY.worlds = {
       this.pitch = 0;
       this.grounded = false;
     }
-    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob, this.pos[2]]; }
+    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob + (this.eyeLift || 0), this.pos[2]]; }   // eyeLift: a mechanic raises the eyes (a giant)
     forward() {
       const cp = Math.cos(this.pitch);
       return [-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp];
@@ -4190,12 +4205,19 @@ GK_LIBRARY.worlds = {
       this.vel[1] = Math.max(this.vel[1] - c.gravity * (this.gravityMul || 1) * dt, -40);
 
       this.coyote = this.grounded ? 0.1 : this.coyote - dt;
-      this.jumpBuffer = ctl && input.pressed('jump') ? 0.12 : this.jumpBuffer - dt;
+      if (this.grounded) this.airLeft = c.airJumps || 0;
+      const press = ctl && input.pressed('jump');
+      this.jumpBuffer = press ? 0.12 : this.jumpBuffer - dt;
       if (c.canJump && this.jumpBuffer > 0 && this.coyote > 0) {
         this.vel[1] = c.jumpSpeed * (this.jumpMul || 1);
         this.coyote = this.jumpBuffer = 0;
         this.grounded = false;
         this.game.emit('player:jump');
+      } else if (c.canJump && press && this.airLeft > 0 && !this.grounded) {   // double jump
+        this.airLeft--;
+        this.vel[1] = Math.max(this.vel[1], c.jumpSpeed * (c.airJumpPower || 0.95) * (this.jumpMul || 1));
+        this.jumpBuffer = 0;
+        this.game.emit('player:jump', { air: true });
       }
 
       // Sub-steps keep fast movement from tunnelling through thin walls.
@@ -4740,7 +4762,7 @@ GK_LIBRARY.worlds = {
   const PLAYER = {
     height: 1.7, eyeHeight: 1.6, radius: 0.3, walkSpeed: 4.2, sprintSpeed: 7, jumpSpeed: 5.6, gravity: 18,
     stepHeight: 0.4, accel: 14, airAccel: 3, sensitivity: 0.0022, invertY: false, fov: 72, reach: 3,
-    canJump: true, canSprint: true, headBob: true, health: null, respawnOnDeath: false, killY: -15, steering: 'camera',
+    canJump: true, airJumps: 0, airJumpPower: 0.95, canSprint: true, headBob: true, health: null, respawnOnDeath: false, killY: -15, steering: 'camera',
   };
 
   const S = GK.Spatial = {
@@ -5189,6 +5211,8 @@ GK_LIBRARY.worlds = {
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
+  /** How far a punch reaches (0..1) at progress k (0..1): fast out, slower back. */
+  GK.punchReach = k => { const e = t => t * t * (3 - 2 * t); return k < 0 || k > 1 ? 0 : k < 0.3 ? e(k / 0.3) : 1 - e((k - 0.3) / 0.7); };
   const U = GK.util, V = GK.vec;
   const SHADOW = { hazard: 1, npc: 1, collectible: 1, powerup: 1, item: 1, pickup: 1 };
 
@@ -5419,29 +5443,33 @@ GK_LIBRARY.worlds = {
       const vm = g.viewModel;
       if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
       else if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) this.drawHeld(items, vm, eye);
+      else if (g.player.punchK >= 0 && g.state.mode === 'playing') this.drawPunch(items, eye);
       r.render(items);
 
       g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => { const s = r.project(l.pos); return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null; }).filter(Boolean));
       if (this.mini) this.drawMinimap();
     }
     /** An animated character that is not the player (other players online, race rivals, NPCs): entity.figure =
-        {look (a character look), walk (0..1: how much the limbs swing), phase (walk cycle), air (in a jump), spin (radians)}. */
+        {look (a character look), walk (0..1: how much the limbs swing), phase (walk cycle), air (in a jump), spin (radians),
+         punchK (0..1 while a punch runs, else −1), punchSide (1 = right arm, −1 = left), scale (1 = normal size)}. */
     drawFigure(items, e) {
       const r = this.renderer, f = e.figure, look = f.look || {}, H = GK.HERO;
       if (!H) return;
       const lk = f.key || (f.key = JSON.stringify(look)), part = name => r.cached('hero:' + name + lk, () => GK.Models.shape('heroPart', Object.assign({ part: name }, look), 'hero').geo);
-      const Y = e.yaw + (f.spin || 0), c = Math.cos(Y), n = Math.sin(Y), p = e.drawPos();
-      const at = (x, y, z) => [p[0] + x * c + z * n, p[1] + y, p[2] - x * n + z * c];
+      const Y = e.yaw + (f.spin || 0), c = Math.cos(Y), n = Math.sin(Y), p = e.drawPos(), k = f.scale || 1;
+      const at = (x, y, z) => [p[0] + (x * c + z * n) * k, p[1] + y * k, p[2] + (-x * n + z * c) * k];
       const sw = Math.sin(f.phase || 0) * 0.6 * (f.walk || 0), air = f.air ? 0.35 : 0, sx = GK.heroShoulderX(look);
-      const base = { tint: e.tint, alpha: e.alpha, hi: e.hi || 0 };
+      const pk = f.punchK >= 0 ? GK.punchReach(f.punchK) : 0;
+      const armL = U.lerp(-sw * 0.8 + air + (f.armsUp || 0), 1.65, f.punchSide < 0 ? pk : 0), armR = U.lerp(sw * 0.8 + air + (f.armsUp || 0), 1.65, f.punchSide < 0 ? 0 : pk);
+      const base = { tint: e.tint, alpha: e.alpha, hi: e.hi || 0, scale: k === 1 ? undefined : [k, k, k] };
       items.push(Object.assign({ mesh: part('torso'), pos: at(0, 0, 0), yaw: Y }, base));
       items.push(Object.assign({ mesh: part('head'), pos: at(0, H.neck, 0), yaw: Y }, base));
       items.push(Object.assign({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: sw + air }, base));
       items.push(Object.assign({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -sw + air * 0.4 }, base));
-      items.push(Object.assign({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y, pitch: -sw * 0.8 + air + (f.armsUp || 0) }, base));
-      items.push(Object.assign({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: sw * 0.8 + air + (f.armsUp || 0) }, base));
+      items.push(Object.assign({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y, pitch: armL }, base));
+      items.push(Object.assign({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: armR }, base));
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
-      items.push({ mesh: blob, pos: [e.pos[0], (f.ground != null ? f.ground : e.pos[1]) + 0.02, e.pos[2]], scale: [0.42, 1, 0.42], alpha: 0.3 });
+      items.push({ mesh: blob, pos: [e.pos[0], (f.ground != null ? f.ground : e.pos[1]) + 0.02, e.pos[2]], scale: [0.42 * k, 1, 0.42 * k], alpha: 0.3 });
       if (f.balloon) {   // figure.balloon: a balloon tied above the head (colour)
         const bal = r.cached('gk:balloon' + f.balloon, () => new GK.Geo().sphere(0, 0.75, 0, 0.75, f.balloon, { glow: 0.4, seg: 10, rings: 7 }).box(0, -1.1, 0, 0.03, 1.1, 0.03, '#ffffff'));
         items.push({ mesh: bal, pos: [p[0], p[1] + GK.HERO.height + 1.1, p[2]] });
@@ -5450,6 +5478,16 @@ GK_LIBRARY.worlds = {
         const ball = r.cached('gk:bubble' + f.bubble, () => new GK.Geo().sphere(0, 0, 0, 1, f.bubble, { glow: 0.7, seg: 12, rings: 8 }));
         items.push({ mesh: ball, pos: [p[0], p[1] + 0.95, p[2]], scale: [0.85, 1.15, 0.85], alpha: 0.28 });
       }
+    }
+    /** First person, empty hands: a punch. The arm shoots out from the lower right (or left) toward the crosshair and comes back. */
+    drawPunch(items, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const k = GK.punchReach(p.punchK), sd = p.punchSide < 0 ? -1 : 1;
+      const along = 0.3 + k * 0.42, side = sd * (0.3 - k * 0.24), down = -0.34 + k * 0.2;
+      const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const look = this.heroLook(), mesh = r.cached('fpFist' + JSON.stringify(look), () => GK.Models.shape('fpFist', look, 'arms').geo);
+      items.push({ mesh, pos, yaw: yaw + Math.PI - sd * (0.35 - k * 0.3), pitch: p.pitch + 0.18 - k * 0.12, roll: sd * 0.25, scale: 1, front: true });
     }
     /** The chosen character's look (a default one for games without characters). */
     heroLook() { const l = this.game.characterLook ? this.game.characterLook() : null; return l || {}; }
@@ -5519,6 +5557,7 @@ GK_LIBRARY.worlds = {
       const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
       const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
       const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (p.punchK >= 0 && !vm) { const k = GK.punchReach(p.punchK); if (p.punchSide < 0) out.armL = lerp(out.armL, 1.65, k); else out.armR = lerp(out.armR, 1.65, k); }
       if (!vm) return out;
       if (vm.melee) {
         const k = vm.swing || 0;
@@ -5642,6 +5681,8 @@ GK_LIBRARY.worlds = {
                 'fake' (a "shortcut" that dead-ends) | 'bounce' (walls you bounce over) | 'fans' (big fans, gusts against you)
      {k: 'redlight'}   Red Light, Green Light arena (64 m) · {k: 'hill', height, run} terraced hill + rolling boulders ·
      {k: 'doors'}      Door Dash: 3 walls of 5 doors, 2 real in each
+     {k: 'bridge'}     Broken bridge over a pit (68 m): jump the gaps in the middle (a hammer swings over two pieces),
+                       crumbling tiles on the left, a narrow beam with a sliding laser bar on the right, an island halfway
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
      {k: 'plaza', turn: 'n'|'e'|'s'|'w', secret, comeback, case}   44 × 44 square with the landmark, shards, crates
      {k: 'finish'}                                   finish line and podium
@@ -5652,7 +5693,8 @@ GK_LIBRARY.worlds = {
      shard-N · crate-N · secret-N · case-N · comeback-1 · life-N (+route, data {kind}) · finish {size} · ibox-N (gadget boxes)
      glass-N {row, col, size} · hammer-N · fan-N {size} · redlight-N {size, back, watcher} / watcher-N / rlback-N ·
      pusher-N {reach, w, h} (wall pusher, faces into the lane) · jumpbar-N {travel, w} (low bar sliding along the lane) ·
-     boulder-N (+route) · ddoor-N {row, real, width, height}
+     boulder-N (+route) · ddoor-N {row, real, width, height} · abyss-N {size} (the pit floor: touching it = a fall) ·
+     airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps)
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
 (function () {
@@ -6043,6 +6085,52 @@ GK_LIBRARY.worlds = {
       this.course(F, L, 0);
       this.advance(F, L);
     }
+    /** BROKEN BRIDGE: stairs up to a bridge over a glowing pit. Middle: pieces with gaps to jump (2.6–3.4 m: the long one needs a
+        sprint or a double jump) and a hammer swinging over two pieces. Left: crumbling tiles. Right: a narrow beam with a laser
+        bar sliding along it. An island with a checkpoint halfway. The pit floor is solid (an 'abyss' slot sends you back). */
+    bridge(o) {
+      o = o || {};
+      const F = frame(this.cur.x, this.cur.z, this.cur.dir), T = this.T, half = W / 2, H = 2.4, up = 8 * 0.5;
+      const a0 = 6, a1 = a0 + up, d0 = a1 + 4, i0 = d0 + 20, i1 = i0 + 4, d1 = i1 + 16, b0 = d1 + 4, b1 = b0 + up, L = b1 + 6;
+      const pit = T.pit || '#1c4e80', col = T.walk || T.wall, top = T.walkTop, acc = T.accent || '#4cc9f0';
+      this.floor(F, 0, a1, -half, half, T.floor); this.floor(F, a1, b0, -half, half, dk(pit, 0.75)); this.floor(F, b0, L, -half, half, T.floor);
+      this.deco(F, 'plane', (d0 + d1) / 2, 0, 0.03, 0, { size: [W, d1 - d0], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
+      for (let u = d0 + 1; u < d1; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });   // a laser floor: do not touch
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      const back = Object.keys(DIRS).find(k => DIRS[k].a[0] === -DIRS[F.dir].a[0] && DIRS[k].a[1] === -DIRS[F.dir].a[1]);
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(a0, 0))), dir: F.dir, steps: 8, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(b1, 0))), dir: back, steps: 8, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      for (const [u0, u1] of [[a1, d0], [i0, i1], [d1, b0]]) this.box(F, u0, u1, -half, half, 0, H, col, { top });   // decks and the island
+      const plank = (u0, u1, v0, v1) => {
+        this.box(F, u0, u1, v0, v1, H - 0.4, 0.4, col, { top });
+        for (const v of [v0 + 0.08, v1 - 0.08]) this.deco(F, 'glowStrip', (u0 + u1) / 2, v, H + 0.01, 0, { size: [0.12, 0.05, u1 - u0], color: acc });
+      };
+      // middle: the pieces (gaps 2.6, 3.0, 2.6 · 2.8, 3.4, 2.8)
+      for (const [u0, u1] of [[d0, d0 + 4.2], [d0 + 6.8, d0 + 10.6], [d0 + 13.6, d0 + 17.4], [i1 + 2.8, i1 + 6.6], [i1 + 10, i1 + 13.2]]) plank(u0, u1, -4, 4);
+      for (const u of [d0 + 8.7, i1 + 4.7]) {   // hammers over two pieces, on a frame standing in the pit
+        this.slot('hammer', F, u, 0, H, 0);
+        this.deco(F, 'slab', u, 0, H + 7.4, 0, { size: [11.4, 0.5, 0.7], color: '#2d3748' });
+        for (const v of [-5, 5]) this.deco(F, 'slab', u, v, 0, 0, { size: [0.6, H + 7.4, 0.6], color: '#2d3748' });
+      }
+      // left: crumbling tiles · right: a narrow beam with a laser bar
+      for (let u = d0 + 2; u < i0; u += 4) this.slot('crumble', F, u, -11, H - 0.4, 0, { size: [3.2, 0.4, 3.2] });
+      for (let u = i1 + 2; u < d1; u += 4) this.slot('crumble', F, u, -11, H - 0.4, 0, { size: [3.2, 0.4, 3.2] });
+      plank(d0, i0, 9.8, 12.2); plank(i1, d1, 9.8, 12.2);
+      this.slot('jumpbar', F, d0 + 1, 11, H, 0, { travel: 18, w: 2.2 }); this.slot('jumpbar', F, i1 + 1, 11, H, 0, { travel: 14, w: 2.2 });
+      // broken planks lying in the pit
+      for (const [u, v, r] of [[d0 + 5.5, 1.5, 20], [i1 + 8.6, -2, -15], [d0 + 12, -6.5, 70]]) this.deco(F, 'slab', u, v, 0.05, r, { size: [1.4, 0.3, 3], color: dk(col, 0.8) });
+      this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
+      this.loc('cp-' + this.num('cp'), F, i0 + 2, 0, H, 0);
+      this.slot('abyss', F, (d0 + i0) / 2, 0, 0, 0, { size: [W, 1.2, i0 - d0] });
+      this.slot('abyss', F, (i1 + d1) / 2, 0, 0, 0, { size: [W, 1.2, d1 - i1] });
+      this.loc('airzone-' + this.num('airzone'), F, i0 + 2, 0, H, 0, { zone: 'air', len: d1 - d0 + 3, y: H });
+      for (const v of [-8, 0, 8]) this.slot('ibox', F, (a1 + d0) / 2, v, H, 0);
+      this.slot('shard', F, d0 + 10, -11, H, 0); this.slot('shard', F, i1 + 7, 11, H, 0);
+      this.deco(F, 'neonSign', 3, -12, 0, 180, { color: acc, w: 4, h: 1.8, y: 2.6 });
+      this.sides(F, L);
+      this.course(F, L, 0);
+      this.advance(F, L);
+    }
     /** The box a wall pusher hides in, outside the fence at u on side s (−1 / +1), standing at height y. The course stays
         closed behind it (invisible walls), and the pusher slides out of its open front. */
     housing(F, u, s, y) {
@@ -6243,6 +6331,7 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'short', mid: 'laser', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'doors' },
+    { k: 'bridge' },
     { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
@@ -6277,6 +6366,7 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'redlight' },
+    { k: 'bridge' },
     { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
     { k: 'lanes', left: 'short', mid: 'sweeper', right: 'fake' }, { k: 'gate' },
@@ -6313,6 +6403,7 @@ GK_LIBRARY.worlds = {
     { k: 'start' },
     { k: 'lanes', left: 'high', mid: 'belt', right: 'movers' }, { k: 'gate' },
     { k: 'doors' },
+    { k: 'bridge' },
     { k: 'plaza', turn: 'n' },
     { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
@@ -6357,6 +6448,7 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'short', mid: 'hammer', right: 'stones' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', comeback: true },
     { k: 'doors' },
+    { k: 'bridge' },
     { k: 'lanes', left: 'crumble', mid: 'laser', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'n' },
     { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'fans' }, { k: 'gate' },
@@ -6401,6 +6493,7 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'short', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 's', comeback: true },
     { k: 'doors' },
+    { k: 'bridge' },
     { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'movers' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'lanes', left: 'high', mid: 'sweeper', right: 'fans' }, { k: 'gate' },
@@ -7851,6 +7944,7 @@ GK_LIBRARY.worlds = {
                                                           ahead: the region starts at the entity, like a fan; pulse: [on, off] gusts)
      { type: 'lowgrav', size: [w, h, d], gravity: 0.4 }   low-gravity region: floaty, higher jumps
      { type: 'sweeper', length: 8, spin: 1.2, y: 0.6 }    spinning bar: jump it or get knocked away
+     { type: 'abyss', size: [w, h, d] }                   a pit floor you must not touch: fall in → back to the last checkpoint
      party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'piston' (wall pusher), 'jumpbar' (low laser bar), 'glasstile' (glass bridge: one fake
      per row), 'dashdoor' (Door Dash: real doors break, fake ones bounce you), 'redlight' + 'watcher' (Red Light, Green
      Light), wind `pulse: [on, off]` (big fans). They use game.raceClock() and game.trapRandom(key) when present.
@@ -8028,7 +8122,7 @@ GK_LIBRARY.worlds = {
     g.box(0, -L - 0.95, 0, 1.6, 1.5, 3, c, { top: U.shade(c, 1.2) }).box(0, -L - 0.55, 0, 1.64, 0.25, 3.04, '#ffd166', { glow: 0.7 }).box(0, -L - 1.05, 0, 1.64, 0.25, 3.04, '#ffd166', { glow: 0.7 });
     return g;
   });
-  M.add('boulder', o => { const r = o.r || 1.3, c = o.color || '#8d6e63'; return G().sphere(0, r, 0, r, c, { seg: 9, rings: 7 }).box(0, r, 0, r * 0.3, r * 0.3, r * 2.04, o.glow || '#ffd166', { glow: 0.8 }); });
+  M.add('boulder', o => { const r = o.r || 1.3, c = o.color || '#8d6e63'; return G().sphere(0, 0, 0, r, c, { seg: 9, rings: 7 }).box(0, -r * 0.15, 0, r * 0.3, r * 0.3, r * 2.04, o.glow || '#ffd166', { glow: 0.8 }); });   // centred: it rolls around its middle
   M.add('glassTile', o => {
     const s = o.size || [3.4, 0.2, 3.2], g = G().box(0, 0, 0, s[0], s[1], s[2], '#9be7ff', { glow: 0.35 });
     for (const x of [-1, 1]) g.box(x * (s[0] / 2 - 0.05), s[1], 0, 0.1, 0.04, s[2], '#e6fbff', { glow: 1 });
@@ -8087,17 +8181,31 @@ GK_LIBRARY.worlds = {
       let i = 1;
       while (i < e.cum.length - 1 && e.cum[i] < s0) i++;
       const a = e.pts[i - 1], b = e.pts[i], seg = Math.max(0.001, e.cum[i] - e.cum[i - 1]), f = U.clamp((s0 - e.cum[i - 1]) / seg, 0, 1);
-      e.pos = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f + d.lift, a[2] + (b[2] - a[2]) * f];
+      const grow = Math.min(1, s0 / 2, (e.len - s0) / 2.5);   // appear and disappear smoothly
+      e.pos = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f + d.lift + d.r * grow, a[2] + (b[2] - a[2]) * f];   // pos = the ball's centre
       e.yaw = Math.atan2(b[0] - a[0], b[2] - a[2]);
       e.pitch = (s0 / d.r) % (Math.PI * 2);
-      const grow = Math.min(1, s0 / 2, (e.len - s0) / 2.5);   // appear and disappear smoothly
       e.scale = [grow, grow, grow];
       if (!e.enabled || g.state.mode !== 'playing' || grow < 0.5) return;
-      const p = g.player.pos, c = [e.pos[0], e.pos[1] + d.r, e.pos[2]];
+      const p = g.player.pos, c = e.pos;
       if (Math.hypot(p[0] - c[0], p[2] - c[2]) < d.r + 0.4 && p[1] < c[1] + d.r && p[1] + 1.7 > c[1] - d.r && g.knock) {
         const dx = (b[0] - a[0]) / seg, dz = (b[2] - a[2]) / seg, l = Math.hypot(dx, dz) || 1;
         if (g.knock([dx / l, dz / l], d.power, { stun: 1.0, up: 6, kind: 'boulder', source: e.id })) { g.audio.play('boom'); burst(g, c, '#c8a27a', 12); }
       }
+    },
+  });
+  /** A pit floor: {type: 'abyss', size: [w, h, d]} (invisible; the world paints the pit). Touch it and you are back at the
+      last checkpoint (game.respawn()). Emits terrain:fell. */
+  P.add('abyss', {
+    defaults: { solid: false, size: [10, 1.2, 10] },
+    update(e, dt, g) {
+      if (!e.enabled || g.state.mode !== 'playing' || !g.respawn || !inLocal(g, e, e.def.size)) return;
+      const p = g.player.pos;
+      burst(g, [p[0], p[1] + 0.3, p[2]], e.def.color || '#ff2d55', 14);
+      g.audio.play('hurt');
+      g.respawn();
+      g.player.stun = 0;
+      g.emit('terrain:fell', { id: e.id });
     },
   });
   M.add('piston', o => {   // a pusher block: its front face is at the origin, the block goes back (−z) into the wall
@@ -8974,7 +9082,11 @@ window.GK_ONLINE_CONFIG = {
      3  🚀 Rocket Shoes   📡 Scanner     🟣 Jump Pad (anyone can use it)
    Nothing is permanent: knock-backs and slow-downs last a second or three, and after a big hit you are protected
    for 2.5 s (no chain attacks). Every attack has a counter (shown on the loadout screen).
-   Mouse: left click = use the selected item (the wheel chooses), or PUNCH with empty hands; right click = punch.
+   Pickup races (pickup: true) use the party set: 🥊 Mega Glove · 🎳 Bowling · 🍌 Banana · ❄️ Freeze · 🎈 Balloon · 🦑 Ink (splats the
+   screens of everyone ahead) · 🫧 Bubble · 🍄 Mega (a giant for 5 s: run into players to knock them away) · 🚀 Jetpack (fly 3 s) ·
+   🟣 Jump Pad (a super jump at your feet; the pad stays for the others).
+   Mouse: left click = use the selected item (the wheel chooses), or PUNCH with empty hands; right click = punch. A punch swings
+   the player's own arm (player.punchK 0..1 → the view draws it; flag 256 tells the other PCs, figure.punchK animates them).
    Config  gadgets: { charges: 2, max: 3, choices: [[slot 1 ids], [slot 2 ids], [slot 3 ids]], recover: 2.5, punchCooldown: 0.7,
                       pickup: true (no loadout: random gadgets from ❓ boxes {type: 'itembox'}, one use each, 3 slots),
                       weights: {id: [weight for the leader, weight for the last racer]} (game.raceRank() 0..1) }
@@ -9000,6 +9112,8 @@ window.GK_ONLINE_CONFIG = {
     jetpack: { label: '🚀 FLY', color: '#ff7a1a', duration: 3, quiet: true },
     frozen: { label: '🧊', color: '#bfefff', duration: 2.2, quiet: true },
     balloon: { label: '🎈', color: '#ff4fd8', duration: 2.6, quiet: true },
+    mega: { label: '🍄 MEGA', color: '#ff4d6d', duration: 5, quiet: true },
+    inked: { label: '🦑', color: '#3a2357', duration: 3.5, quiet: true },
   });
 
   // ---------- models ----------
@@ -9095,8 +9209,19 @@ window.GK_ONLINE_CONFIG = {
     use(g) { g.activatePower('jetpack', 3, null, true); g.activatePower('speed', 3, null, true); g.player.vel[1] = Math.max(g.player.vel[1], 6); g.player.grounded = false; g.audio.play('whoosh'); return true; } });
   D.add('scanner', { slot: 3, icon: '📡', name: 'Scanner', text: '8 s: see every trap, fake glass and hidden data.', counter: '', cd: 1,
     use(g) { g.activatePower('scan', 8, null, true); g.ui.toast('📡 8 s', 'good'); return true; } });
-  D.add('jumppad', { slot: 3, icon: '🟣', name: 'Jump Pad', text: 'A bounce pad in front of you (anyone can use it).', counter: '', cd: 1,
-    use(g) { const f = flatFwd(g); return share(g, { t: 'pad', x: g.player.pos[0] + f[0] * 2.5, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 2.5, dx: f[0], dz: f[1] }); } });
+  D.add('jumppad', { slot: 3, icon: '🟣', name: 'Jump Pad', text: 'A super jump from your feet; the pad stays for the others.', counter: '', cd: 1,
+    use(g) { const f = flatFwd(g); return share(g, { t: 'pad', x: g.player.pos[0] + f[0] * 0.3, y: g.player.pos[1], z: g.player.pos[2] + f[1] * 0.3, dx: f[0], dz: f[1] }); } });
+  D.add('ink', { slot: 1, icon: '🦑', name: 'Ink', text: 'Splat! Everyone ahead of you gets ink on their screen.', counter: 'Bubble.', cd: 1,
+    use(g) {
+      const me = g.player.pos, C = g.raceCourse, d0 = C ? C.project(me).d : 0;
+      const ahead = rivalsOf(g).filter(r => (C ? C.project(r.pos).d > d0 + 0.5 : V.dist(r.pos, me) < 40));
+      if (!ahead.length) return miss(g, '🦑');
+      for (const r of ahead) g.hitRival(r.id, { k: 'ink', g: 'ink', seconds: 3.5 });
+      g.audio.play('splat'); g.ui.toast('🦑 × ' + ahead.length, 'good');
+      return true;
+    } });
+  D.add('mega', { slot: 2, icon: '🍄', name: 'Mega', text: '5 s: you are a GIANT. Run into players to knock them away!', counter: 'Run!', cd: 1,
+    use(g) { g.activatePower('mega', 5, null, true); g.audio.play('mega'); g.ui.toast('🍄 MEGA!', 'good'); return true; } });
   // older items, kept for games that list them in gadgets.choices
   D.add('virus', { slot: 1, icon: '🦠', name: 'Lag Virus', text: 'A green cloud ahead: players inside run slower.', counter: 'Go around it.', cd: 9,
     use(g) {
@@ -9120,7 +9245,7 @@ window.GK_ONLINE_CONFIG = {
     return true;
   }
   function fx_(g, kind, from, dir, short) {
-    const model = { glove: 'glove', punch: 'glove', freeze: 'iceShot', balloon: 'balloonShot' }[kind];
+    const model = { glove: 'glove', freeze: 'iceShot', balloon: 'balloonShot' }[kind];
     if (!model) return;
     const e = g.world.add({ type: 'fx', model, pos: [from[0], from[1] + 1.3, from[2]], solid: false, rot: Math.atan2(dir[0], dir[1]) * 180 / Math.PI });
     e.state.t = 0; e.state.dir = dir; e.state.life = short ? 0.14 : 0.35; e.state.speed = short ? 14 : 22;
@@ -9179,13 +9304,27 @@ window.GK_ONLINE_CONFIG = {
     '.gk-gcard b{font-size:15px}.gk-gcard .ic{font-size:22px;margin-right:6px}.gk-gcard p{margin:4px 0 0;font-size:12.5px;opacity:.9}.gk-gcard small{display:block;margin-top:4px;font-size:11.5px;opacity:.75}' +
     '.gk-gcard.on{border-color:#7cfc00;background:rgba(124,252,0,.12)}.gk-load-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}' +
     '.gk-load-time{font:800 22px system-ui;color:#ffd166}.gk-load-time.final{color:#ff4d6d;animation:gkpulse .5s infinite alternate}@keyframes gkpulse{to{transform:scale(1.08)}}' +
+    '.gk-ink{position:absolute;inset:0;pointer-events:none;z-index:4}.gk-ink i{position:absolute;transform:translate(-50%,-50%);border-radius:46% 54% 50% 50%;' +
+    'background:radial-gradient(circle at 40% 38%,#4a2d6e 0 22%,#1b1035 23% 60%,rgba(27,16,53,0) 71%);animation:gkInk var(--t) ease-out forwards}' +
+    '@keyframes gkInk{0%{transform:translate(-50%,-50%) scale(.2)}7%{transform:translate(-50%,-50%) scale(1.08)}13%{transform:translate(-50%,-50%) scale(1)}72%{opacity:1}100%{opacity:0;transform:translate(-50%,-40%) scale(1)}}' +
     '@media (max-width:760px){.gk-load{grid-template-columns:1fr}}';
+  /** Ink splats over my screen for `sec` seconds. */
+  function inkScreen(g, sec) {
+    const old = g.ui.hud.querySelector('.gk-ink'); if (old) old.remove();
+    const box = U.el('div', 'gk-ink'); box.style.setProperty('--t', sec + 's');
+    for (let i = 0; i < 7; i++) {
+      const s = U.el('i'), z = 18 + Math.random() * 20;
+      s.style.cssText = 'left:' + (12 + Math.random() * 76) + '%;top:' + (12 + Math.random() * 62) + '%;width:' + z + 'vmin;height:' + z * (0.8 + Math.random() * 0.3) + 'vmin;animation-delay:' + (i * 0.06) + 's';
+      box.appendChild(s);
+    }
+    g.ui.hud.appendChild(box);
+  }
   function css() { if (document.getElementById('gk-gadgets-css')) return; const s = document.createElement('style'); s.id = 'gk-gadgets-css'; s.textContent = CSS; document.head.appendChild(s); }
 
   GK.Mechanics.add('gadgets', {
     configKeys: ['gadgets'],
     setup(game) {
-      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'freeze', 'balloon'], ['bubble'], ['jetpack', 'jumppad', 'scanner']] }, game.cfg.gadgets);
+      const cfg = U.merge({ charges: 2, max: 3, recover: 2.5, choices: [['glove', 'bowling', 'banana', 'freeze', 'balloon', 'ink'], ['bubble', 'mega'], ['jetpack', 'jumppad']] }, game.cfg.gadgets);
       css();
       if (!D.pick) D.pick = cfg.choices.map(c => c[0]);
       const GG = game.gadgets = {
@@ -9213,10 +9352,13 @@ window.GK_ONLINE_CONFIG = {
         punch() {
           if (!GG.enabled() || GG.punchCd > 0 || game.state.mode !== 'playing') return false;
           GG.punchCd = cfg.punchCooldown || 0.7;
-          const t = aim(game, 2.8, 0.35), f = flatFwd(game);
-          fx_(game, 'punch', game.player.pos, t ? t.dir : f, true);
+          const pl = game.player, t = aim(game, 2.8, 0.35);
+          pl.punchSide = -(pl.punchSide || -1); pl.punchK = 0;   // the arm swings (right, left, right…)
+          game.audio.play('swing');
           game.emit('gadget:punch', {});
           if (!t) return false;
+          if (game.fxBurst) game.fxBurst([t.r.pos[0], t.r.pos[1] + 1.25, t.r.pos[2]], '#ffd166', 8);
+          game.audio.play('punch');
           game.hitRival(t.r.id, { k: 'knock', g: 'punch', dir: t.dir, power: 9, stun: 0.55, up: 3.5 });
           return true;
         },
@@ -9253,7 +9395,7 @@ window.GK_ONLINE_CONFIG = {
       // protection rules (mechanics/terrain asks before every knock)
       const lastBlock = { t: -9 };
       game.protect = opts => {
-        if (game.hasPower('ghostmode')) return true;
+        if (game.hasPower('ghostmode') || game.hasPower('mega')) return true;   // a giant cannot be pushed
         if (game.hasPower('shield')) {
           if (opts.gadget && game.state.time - lastBlock.t > 2) { lastBlock.t = game.state.time; game.state.gstats.blocks++; game.scoring.add(6, 'Blocked a gadget', 'strategy'); game.emit('gadget:blocked', { id: opts.kind }); }
           game.audio.play('blocked'); return true;
@@ -9277,6 +9419,12 @@ window.GK_ONLINE_CONFIG = {
           game.player.stun = Math.max(game.player.stun || 0, sec);
           if (eff.k === 'freeze') { game.activatePower('frozen', sec, null, true); game.player.vel = [0, game.player.vel[1], 0]; game.ui.flash('#bfefff'); game.ui.toast('🧊 ' + who, 'bad'); game.audio.play('zap'); }
           else { game.activatePower('balloon', sec, null, true); game.player.vel[1] = 5; game.player.grounded = false; game.ui.toast('🎈 ' + who, 'bad'); game.audio.play('boing'); }
+        } else if (eff.k === 'ink') {
+          if (game.hasPower('shield') || game.hasPower('mega')) { game.protect({ kind: 'ink', gadget: true }); return 'blocked'; }
+          if (game.hasPower('safe')) return 'immune';
+          game.activatePower('inked', eff.seconds || 3.5, null, true);
+          inkScreen(game, eff.seconds || 3.5);
+          game.ui.toast('🦑 ' + who, 'bad'); game.audio.play('splat');
         } else if (eff.k === 'slow') {
           if (game.hasPower('ghostmode') || game.hasPower('shield')) { game.protect({ kind: 'slow', gadget: true }); return 'blocked'; }
           if (game.hasPower('safe')) return 'immune';
@@ -9298,8 +9446,9 @@ window.GK_ONLINE_CONFIG = {
         const d = D.get(gid) || {};
         game.state.gstats.hits++;
         if (d.slot === 1 && gid === 'banana') game.state.gstats.traps++;
-        game.scoring.add(gid === 'punch' ? 5 : 10, gid === 'punch' ? 'Punch' : (d.name || 'Gadget') + ' hit', 'strategy');
-        game.ui.toast((gid === 'punch' ? '👊' : d.icon || '💥') + ' +' + (gid === 'punch' ? 5 : 10), 'good');
+        const pts = gid === 'punch' ? 5 : gid === 'ink' ? 3 : 10;   // ink hits everyone ahead: a few points each
+        game.scoring.add(pts, gid === 'punch' ? 'Punch' : (d.name || 'Gadget') + ' hit', 'strategy');
+        if (gid !== 'ink') game.ui.toast((gid === 'punch' ? '👊' : d.icon || '💥') + ' +' + pts, 'good');
         game.emit('gadget:landed', { id: gid, on: onName || null });
       };
       /** A shared gadget object (mine or someone else's) appears in my world. */
@@ -9342,11 +9491,29 @@ window.GK_ONLINE_CONFIG = {
       }
       if (game.hasPower('balloon')) { pl.gravityMul = 0.12; if ((game.state.powers.balloon || 0) > 1.2) pl.vel[1] = Math.max(pl.vel[1], 2.2); }
       if (game.hasPower('frozen')) { pl.vel[0] = 0; pl.vel[2] = 0; }
+      // 🍄 mega: a giant (higher eyes, a little faster); running into another player knocks them away
+      const mega = game.hasPower('mega');
+      pl.eyeLift = U.lerp(pl.eyeLift || 0, mega ? 1.5 : 0, Math.min(1, dt * 6));
+      if (mega && game.state.mode === 'playing') {
+        pl.speedMul *= 1.2;
+        GG.megaHit = GG.megaHit || {};
+        for (const r of rivalsOf(game)) {
+          const dx = r.pos[0] - pl.pos[0], dz = r.pos[2] - pl.pos[2], d = Math.hypot(dx, dz);
+          if (d < 1.8 && d > 0.01 && Math.abs(r.pos[1] - pl.pos[1]) < 2.6 && !(GG.megaHit[r.id] > game.state.time)) {
+            GG.megaHit[r.id] = game.state.time + 1.5;
+            if (game.fxBurst) game.fxBurst([r.pos[0], r.pos[1] + 1, r.pos[2]], '#ff4d6d', 10);
+            game.audio.play('punch');
+            game.hitRival(r.id, { k: 'knock', g: 'mega', dir: [dx / d, dz / d], power: 13, stun: 0.9, up: 6 });
+          }
+        }
+      }
+      if (!game.hasPower('inked')) { const ink = game.ui.hud.querySelector('.gk-ink'); if (ink) ink.remove(); }
+      if (pl.punchK >= 0) { pl.punchK += dt / 0.32; if (pl.punchK >= 1) pl.punchK = -1; }
       if (game.state.spinT > 0) { game.state.spinT -= dt; pl.yaw += dt * Math.PI * 2.2; }
       // glove fx flying out
       for (const e of game.world.entities) if (e.type === 'fx' && e.state.dir) { e.state.t += dt; e.pos[0] += e.state.dir[0] * dt * (e.state.speed || 18); e.pos[2] += e.state.dir[1] * dt * (e.state.speed || 18); if (e.state.t > (e.state.life || 0.35)) e.remove(); }
       // flags other PCs draw on my figure
-      if (game.online && game.online.flags) game.online.flags((pl.grounded ? 0 : 1) | (game.hasPower('shield') ? 2 : 0) | (game.hasPower('ghostmode') ? 4 : 0) | (game.hasPower('anchor') ? 8 : 0) | ((pl.stun || 0) > 0 && !game.hasPower('frozen') && !game.hasPower('balloon') ? 16 : 0) | (game.hasPower('rocket') || game.hasPower('jetpack') ? 32 : 0) | (game.hasPower('frozen') ? 64 : 0) | (game.hasPower('balloon') ? 128 : 0));
+      if (game.online && game.online.flags) game.online.flags((pl.grounded ? 0 : 1) | (game.hasPower('shield') ? 2 : 0) | (game.hasPower('ghostmode') ? 4 : 0) | (game.hasPower('anchor') ? 8 : 0) | ((pl.stun || 0) > 0 && !game.hasPower('frozen') && !game.hasPower('balloon') ? 16 : 0) | (game.hasPower('rocket') || game.hasPower('jetpack') ? 32 : 0) | (game.hasPower('frozen') ? 64 : 0) | (game.hasPower('balloon') ? 128 : 0) | (pl.punchK >= 0 ? 256 : 0) | (mega ? 512 : 0));
       // other players' looks from their flags (online ghosts and solo rivals)
       for (const e of game.world.entities) {
         if (!e.figure || e.flags == null) continue;
@@ -9356,6 +9523,11 @@ window.GK_ONLINE_CONFIG = {
         e.figure.balloon = f & 128 ? '#ff4fd8' : null;
         e.figure.spin = f & 16 ? (e.figure.spin || 0) + dt * 10 : 0;
         e.hi = f & 32 ? 0.25 : (e.hi || 0);
+        const fig = e.figure;
+        if ((f & 256) && !(fig.pf & 256)) { fig.punchSide = -(fig.punchSide || -1); fig.punchK = 0; }   // they started a punch
+        fig.pf = f;
+        if (fig.punchK >= 0) { fig.punchK += dt / 0.32; if (fig.punchK >= 1) fig.punchK = -1; }
+        fig.scale = U.lerp(fig.scale || 1, f & 512 ? 1.8 : 1, Math.min(1, dt * 6));
       }
       // scanner labels
       const scan = game.hasPower('scan');
@@ -9647,6 +9819,8 @@ window.GK_ONLINE_CONFIG = {
       else if (e.type === 'boulder') { add('hill', dOf(e.a) - 2, dOf(e.b) + 22, e, e.id); }
       else if (e.type === 'pendulum') { const d = dOf(e.pos); add('hammer', d - 1, d + 1, e, e.id); }
     }
+    // stretches the world marks with location data {zone, len, y} (e.g. 'air': a broken bridge, the bots hop its gaps)
+    for (const n in g.world.locations) { const L = g.world.locations[n], zd = L.data && L.data.zone; if (zd) { const d = dOf(L.pos), h = (L.data.len || 20) / 2; add(zd, d - h, d + h, null, n); Z[Z.length - 1].y = L.data.y || 0; } }
     for (const k in groups) add(groups[k].kind, groups[k].d0 - 2, groups[k].d1 + 1, null, k);
     return Z;
   }
@@ -9696,6 +9870,15 @@ window.GK_ONLINE_CONFIG = {
           if (b.d >= C.finish.d) { b.d = C.finish.d; b.fin = now - st.startAt; b.strat += Math.round(10 + Math.random() * 30); }
         }
         if (b.slow > 0) b.slow -= dt;
+        // bots punch you (with their arms) when you run right next to them
+        b.punchCd = (b.punchCd || 0) - dt;
+        const me0 = g.player.pos, pdx = me0[0] - b.ent.pos[0], pdz = me0[2] - b.ent.pos[2], pd = Math.hypot(pdx, pdz);
+        if (pd < 2.2 && pd > 0.3 && Math.abs(me0[1] - b.ent.pos[1]) < 1.5 && b.punchCd <= 0 && b.stun <= 0 && b.pause <= 0 && !b.hold && !st.finished && Math.random() < dt * (0.8 + b.mean)) {
+          b.punchCd = 2.5 + Math.random() * 2; b.punchT = 0.4; b.punchYaw = Math.atan2(pdx, pdz);
+          const fig = b.ent.figure; fig.punchSide = -(fig.punchSide || -1); fig.punchK = 0;
+          const r = g.gadgetEffect({ k: 'knock', g: 'punch', dir: [pdx / pd, pdz / pd], power: 8, stun: 0.5, up: 3 }, b.id, b.name);
+          if (r === 'hit') { b.strat += 5; g.audio.play('punch'); }
+        }
         // bot gadgets: a glove when you are close in front, or a banana dropped behind them
         b.nextAct -= dt;
         if (b.nextAct <= 0 && !st.finished) {
@@ -9713,9 +9896,15 @@ window.GK_ONLINE_CONFIG = {
       const e = b.ent;
       e.pos[0] += (x - e.pos[0]) * Math.min(1, dt * 8); e.pos[2] += (z - e.pos[2]) * Math.min(1, dt * 8);
       // on hills the bots walk on the ground (a ray from above); elsewhere the course is flat
-      if (zone && zone.kind === 'hill') { const hit = g.world.raycast([e.pos[0], 12, e.pos[2]], [0, -1, 0], 14); const gy = hit.hit ? 12 - hit.t : 0; e.pos[1] += (gy - e.pos[1]) * Math.min(1, dt * 10); }
-      else e.pos[1] += (0 - e.pos[1]) * Math.min(1, dt * 10);
+      // (a broken bridge: over a gap they hop)
+      e.figure.air = false;
+      if (zone && (zone.kind === 'hill' || zone.kind === 'air')) {
+        const hit = g.world.raycast([e.pos[0], 12, e.pos[2]], [0, -1, 0], 14); let gy = hit.hit ? 12 - hit.t : 0;
+        if (zone.kind === 'air' && gy < zone.y - 0.5) { gy = zone.y + 0.9; e.figure.air = moving; }
+        e.pos[1] += (gy - e.pos[1]) * Math.min(1, dt * 10);
+      } else e.pos[1] += (0 - e.pos[1]) * Math.min(1, dt * 10);
       e.yaw = Math.atan2(p.dx, p.dz);
+      if (b.punchT > 0) { b.punchT -= dt; e.yaw = b.punchYaw; }   // turns to you to punch
       e.figure.walk += ((moving ? 1 : 0) - e.figure.walk) * Math.min(1, dt * 8);
       e.figure.phase += dt * (moving ? b.speed : 0) * 3.2;
       if (b.fxT > 0) b.fxT -= dt; else b.fx = null;
@@ -9728,6 +9917,7 @@ window.GK_ONLINE_CONFIG = {
     if (!b || b.fin || g.state.race.phase !== 'running') return 'immune';
     if (b.safe && b.safe > clock(g)) return 'immune';
     if (eff.k === 'slow') b.slow = eff.seconds || 3;
+    else if (eff.k === 'ink') b.slow = eff.seconds || 3.5;
     else if (eff.k === 'freeze' || eff.k === 'lift') { b.stun = (eff.seconds || 2.4) + 0.3; b.fx = eff.k; b.fxT = b.stun; }
     else { b.stun = (eff.stun || 1) + 0.6; b.d = Math.max(0, b.d - (eff.power || 10) * 0.35); }
     b.safe = clock(g) + 2500;
@@ -9812,6 +10002,7 @@ window.GK_ONLINE_CONFIG = {
         banner(game, '🔴 CAUGHT!<small>−10</small>', 'bad', 2);
       });
       game.on('terrain:glass', () => banner(game, '💥', 'bad', 1));
+      game.on('terrain:fell', () => banner(game, '⚡', 'bad', 1));
       // hazards (lasers, drones) knock you back along the course and stun you briefly
       game.on('player:hit', () => {
         const p = C.at(game.state.race.dist - 1);
@@ -10278,7 +10469,7 @@ window.GK_ONLINE_CONFIG = {
       '<select data-a="br" title="World">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, '🗺 ' + (i + 1) + ' ' + (rounds[i] ? rounds[i].name : '')]), pref.round) + '</select></div>' +
       (online ? '<div class="row rush-joinrow"><input class="gk-input" data-a="room" maxlength="16" placeholder="🌐 CODE" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn" data-a="join">JOIN ▶</button></div>' : '') +
       '<div class="st"></div>' +
-      '<div class="rush-keys"><span><b>WASD</b>🏃</span><span><b>SPACE</b>⤴</span><span><b>SHIFT</b>⚡</span><span><b>🖱</b>👊🎁</span><span><b>E</b>❓</span></div>' +
+      '<div class="rush-keys"><span><b>WASD</b>🏃</span><span><b>SPACE</b>⤴⤴</span><span><b>SHIFT</b>⚡</span><span><b>🖱</b>👊🎁</span><span><b>E</b>❓</span></div>' +
       (online ? '<details><summary>👩‍🏫</summary><button class="gk-btn" data-a="host">Host a class race</button></details>' : '');
     const ctl = s.querySelector('.gk-controls');   // above the key list, so it is on screen without scrolling
     (ctl || play).parentNode.insertBefore(box, ctl || play);
