@@ -728,7 +728,7 @@ window.GAME_CONTENT = {};
     scoring: { objective: 0, wrongAnswer: 0, hint: 0, allowNegative: true },
     win: false,
     online: { rate: 3, ghostAlpha: 1, labelRange: 45, dot: '#ffd166' },
-    race: { roundTime: 600, timeChoices: [360, 480, 600], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
+    race: { roundTime: 480, timeChoices: [360, 480], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', reward: { easy: 10, medium: 12, hard: 16, case: 15, comeback: 75, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
     // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
     gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bubble: [2.5, 1.5], jetpack: [1, 4], jumppad: [2, 2.5], ink: [0.6, 2.5], mega: [0.7, 2.5] } },
@@ -10079,6 +10079,9 @@ window.GK_ONLINE_CONFIG = {
       if (g.state.mode === 'paused' && st.phase !== 'over') { const d = wall - last; t.prepEnd += d; t.startAt += d; t.endAt += d; }
       else if (st.phase === 'running' && g.state.mode === 'modal') stepBots(g, Math.min(0.25, (wall - last) / 1000));
     }
+    // solo: the round ends early only when you AND every bot are past the finish line (the round time is the hard limit;
+    // online, the host does the same for the class)
+    if (R.mode === 'solo' && t && st.phase === 'running' && st.finished && (R.bots || []).every(b => b.fin)) t.endAt = Math.min(t.endAt, now + 2500);
     let phase = 'lobby';
     if (t) phase = now < t.prepEnd ? 'prep' : now < t.startAt ? 'countdown' : now < t.endAt ? 'running' : 'over';
     if (R.mode === 'online' && R.node && R.node.phase === 'results' && R.node.resultsFor === g.levelIndex) phase = 'over';
@@ -10169,10 +10172,7 @@ window.GK_ONLINE_CONFIG = {
       setTimeout(() => { if (GK.current === g && st.phase === 'running') info(g, '<b class="rush-roundname">🏁 ' + ORD(st.place) + '</b> ⏳'); }, 3200);
     }
     if (g.gadgets) g.gadgets.draw(true);
-    if (R.mode === 'solo') {
-      // the round ends a little after you finish (the bots' places are worked out from where they are)
-      setTimeout(() => { if (R.local && GK.current === g && g.state.race === st) { R.local.endAt = Math.min(R.local.endAt, clock(g) + 4000); } }, 50);
-    }
+    if (R.mode === 'solo') setTimeout(() => { if (GK.current === g && st.phase === 'running') info(g, '<b class="rush-roundname">🏁 ' + ORD(st.place) + '</b> ⏳'); }, 3200);   // waiting for the others
   }
 
   // ===================== team plates =====================
