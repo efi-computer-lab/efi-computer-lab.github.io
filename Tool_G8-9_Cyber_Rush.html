@@ -667,9 +667,9 @@ window.GAME_CONTENT = {};
   C.rounds = [
     { name: 'Neon City', text: 'TRAINING: 🔴 Red Light, Green Light, 🚪 Door Dash, lasers and a glass bridge.' },
     { name: 'Digital Forest', text: '🪨 Boulder hill, 🌉 broken bridge over the river, stepping stones and spinning bars.' },
-    { name: 'Data Factory', text: '🚪 Door Dash, 🪨 slag hill, hammers and conveyor belts. Points ×1.1' },
-    { name: 'Digital Ocean', text: '🔴 Red Light on the beach, 🌉 broken pier, two glass bridges, moving platforms. Points ×1.25' },
-    { name: 'Cyber Core', text: 'CHAMPIONSHIP: EVERYTHING — red lights, hill, Door Dash, broken bridge, 7 firewalls. Points ×1.5!' },
+    { name: 'Data Factory', text: '🚪 Door Dash, 📦 Packet Press, ✉ Spam Cannons, ⏳ Buffering Doors and 🟦 Bit Flip. Points ×1.1' },
+    { name: 'Digital Ocean', text: '🔴 Red Light, 🌊 Packet Wave, 💿 Spinning Hard Drive, 🚪 Port Shuffle and 🟩 Pixel Rain. Points ×1.25' },
+    { name: 'Cyber Core', text: 'CHAMPIONSHIP: every trap, now in pairs. Points ×1.5!' },
   ];
 
   C.characters = { title: 'Your racer', leo: 'Leo', leoText: '', kai: 'Kai', kaiText: '', mia: 'Mia', miaText: '', zara: 'Zara', zaraText: '' };
@@ -712,7 +712,7 @@ window.GAME_CONTENT = {};
     description: 'content:description',
     type: 'first-person-3d',
     world: 'rush-city',
-    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'juice', 'music', 'online', 'quiz-gates', 'gadgets', 'race'],
+    mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'cybertraps', 'juice', 'music', 'online', 'quiz-gates', 'gadgets', 'race'],
     levels: [
       round(0, 'rush-city', ['easy', 'easy', 'easy', 'medium', 'easy'], 1),
       round(1, 'rush-forest', ['easy', 'medium', 'easy', 'medium', 'medium', 'easy'], 2),
@@ -775,6 +775,9 @@ window.GAME_CONTENT = {};
       ice: { type: 'ice' },
       crumble: { type: 'crumble', delay: 0.6, back: 4 },
       abyss: { type: 'abyss' },
+      // the later rounds' cyber obstacles (mechanics/cybertraps)
+      press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
+      wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
       mover: { type: 'mover', speed: 2.4, wait: 0.7, color: '#4cc9f0' },
       bounce: { type: 'bouncer', power: 11.5, launch: 7 },
       fakepad: { type: 'bouncer', power: 8, launch: 10, look: { color: '#ffd166' } },
@@ -1097,7 +1100,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/juice/juice","mechanics/music/music","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","juice","music","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/cybertraps/cybertraps","mechanics/juice/juice","mechanics/music/music","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","cybertraps","juice","music","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1138,6 +1141,7 @@ GK_LIBRARY.mechanics = {
   online: { needs: [], spatial: true, files: ['online/firebase/firebase-app-compat', 'online/firebase/firebase-database-compat', 'online/config'], about: 'internet rooms (room code), other players drawn as animated ghosts, position sync, events; free Firebase (online/)' },
   terrain: { needs: [], spatial: true, about: 'conveyor belts, bounce pads, speed pads, ice, crumbling platforms, wind / low-gravity zones, spinning sweeper bars; game.knock()' },
   music: { needs: [], spatial: false, about: 'background music made live with WebAudio (bass, arpeggios, pad, drums; style per game or level); game.musicLevel()' },
+  cybertraps: { needs: ['terrain'], spatial: true, about: 'cyber obstacles that delay racers: packet press, spam cannon, buffering door, bit-flip tiles, packet wave, port shuffle, spinning hard drive, pixel rain (shared clock: same on every PC)' },
   juice: { needs: [], spatial: true, about: 'game feel: speed widens the view + speed lines, dust puffs when running, landing rings, boost trails; game.fxBurst()' },
   'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
   gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
@@ -4163,7 +4167,7 @@ GK_LIBRARY.worlds = {
       this.pitch = 0;
       this.grounded = false;
     }
-    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob + (this.eyeLift || 0), this.pos[2]]; }   // eyeLift: a mechanic raises the eyes (a giant)
+    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob + (this.eyeLift || 0) - (this.squashT > 0 ? 0.9 : 0), this.pos[2]]; }   // squashT: flattened by a press   // eyeLift: a mechanic raises the eyes (a giant)
     forward() {
       const cp = Math.cos(this.pitch);
       return [-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp];
@@ -5689,6 +5693,14 @@ GK_LIBRARY.worlds = {
                 'fake' (a "shortcut" that dead-ends) | 'bounce' (walls you bounce over) | 'fans' (big fans, gusts against you)
      {k: 'redlight'}   Red Light, Green Light arena (64 m) · {k: 'hill', height, run} terraced hill + rolling boulders ·
      {k: 'doors'}      Door Dash: 3 walls of 5 doors, 2 real in each
+     LATER ROUNDS (mechanics/cybertraps fills the slots):
+     {k: 'press', cannons, rain, period}   PACKET PRESS LINE: 3 rows of 5 presses (neighbours slam at different times), then
+                       spam cannons shooting across (cannons) or pixel rain (rain). 60 m
+     {k: 'buffer', period}   a wall with 3 BUFFERING DOORS (stand on the pad 2 s) or stairs over it, then BIT-FLIP columns
+                       over a laser floor. 62 m
+     {k: 'wave', ports}      PACKET WAVE over the stretch, raised islands to stand on; ports: a port-shuffle wall at the end. 64 m
+     {k: 'drive', cannons, spin}   SPINNING HARD DRIVE disk across the road; cannons: spam cannons shoot across it. 44 m
+     {k: 'ports', rain}      two PORT SHUFFLE walls with PIXEL RAIN between them. 48 m
      {k: 'bridge'}     Broken bridge over a pit (68 m): jump the gaps in the middle (a hammer swings over two pieces),
                        crumbling tiles on the left, a narrow beam with a sliding laser bar on the right, an island halfway
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
@@ -5702,7 +5714,9 @@ GK_LIBRARY.worlds = {
      glass-N {row, col, size} · hammer-N · fan-N {size} · redlight-N {size, back, watcher} / watcher-N / rlback-N ·
      pusher-N {reach, w, h} (wall pusher, faces into the lane) · jumpbar-N {travel, w} (low bar sliding along the lane) ·
      boulder-N (+route) · ddoor-N {row, real, width, height} · abyss-N {size} (the pit floor: touching it = a fall) ·
-     airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps)
+     airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps) ·
+     press-N {size, phase, period} · cannon-N {range} · bdoor-N {size} · flip-N {size, group, period} · wave-N {size, len} ·
+     port-N {row, index, n, size} · disk-N {r, spin} · rain-N {area}
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
 (function () {
@@ -6139,6 +6153,93 @@ GK_LIBRARY.worlds = {
       this.course(F, L, 0);
       this.advance(F, L);
     }
+    // ---------- later rounds: cyber obstacles ----------
+    /** Straight stretch with floor, side fences and a checkpoint at its start; returns the frame. */
+    stretch(L, color) {
+      const F = frame(this.cur.x, this.cur.z, this.cur.dir), half = W / 2;
+      if (color !== false) this.floor(F, 0, L, -half, half, color || this.T.floor2 || this.T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
+      return F;
+    }
+    finishStretch(F, L) { this.sides(F, L); this.course(F, L, 0); this.advance(F, L); }
+    /** Spam cannons on the side fences, shooting across the road at the given u (alternating sides). */
+    cannons(F, us) { us.forEach((u, i) => { const s = i % 2 ? 1 : -1; this.slot('cannon', F, u, s * (W / 2 - 0.9), 0, s > 0 ? 90 : -90, { range: W - 2, phase: i * 0.37 }); }); }
+    /** A wall of 5 ports across the road at u (posts between them; the trap decides which ports are open). */
+    portWall(F, u) {
+      const row = this.num('portrow'), half = W / 2, T = this.T;
+      for (let i = 0; i < 5; i++) this.slot('port', F, u, (i - 2) * 6, 0, 0, { row, index: i, n: 5, size: [5.6, 3.2, 0.3] });
+      for (let i = 0; i < 4; i++) this.wall(F, u - 0.3, u + 0.3, -9.2 + i * 6, -8.8 + i * 6, 3.8, T.gate || T.wall);
+      this.wall(F, u - 0.3, u + 0.3, -half, -14.8, 3.8, T.gate || T.wall); this.wall(F, u - 0.3, u + 0.3, 14.8, half, 3.8, T.gate || T.wall);
+      this.deco(F, 'glowStrip', u, 0, 3.8, 0, { size: [W, 0.2, 0.7], color: '#ff2d55' });
+    }
+    press(o) {
+      o = o || {};
+      const L = 60, F = this.stretch(L);
+      [10, 21, 32].forEach((u, r) => {
+        for (let i = 0; i < 5; i++) this.slot('press', F, u, (i - 2) * 6, 0, 0, { size: [6, 3.4], phase: ((i % 2) * 0.5 + r * 0.22) % 1, period: o.period || 3.2 });
+        this.deco(F, 'slab', u, 0, 7.2, 0, { size: [W + 3, 0.6, 1.2], color: '#2d3748' });
+        for (const s of [-1, 1]) this.deco(F, 'slab', u, s * (W / 2 + 1.4), 0, 0, { size: [0.9, 7.8, 0.9], color: '#2d3748' });
+      });
+      if (o.cannons) this.cannons(F, [44, 49, 54]);
+      if (o.rain) this.slot('rain', F, 48, 0, 0, 0, { area: [W - 2, 16] });
+      this.deco(F, 'neonSign', 4, -12, 0, 180, { color: '#ffd166', w: 4, h: 1.8, y: 2.6 });
+      this.finishStretch(F, L);
+    }
+    buffer(o) {
+      o = o || {};
+      const L = 62, F = frame(this.cur.x, this.cur.z, this.cur.dir), T = this.T, half = W / 2, H = 1.5, col = T.walk || T.wall, top = T.walkTop, pit = T.pit || '#1c4e80';
+      const back = Object.keys(DIRS).find(k => DIRS[k].a[0] === -DIRS[F.dir].a[0] && DIRS[k].a[1] === -DIRS[F.dir].a[1]);
+      this.floor(F, 0, 24.5, -half, half, T.floor2 || T.floor); this.floor(F, 24.5, 53.5, -half, half, dk(pit, 0.75)); this.floor(F, 53.5, L, -half, half, T.floor2 || T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 2, 0, 0, 0);
+      // the wall: 3 buffering doors; stairs over it at the right edge (a longer way round, no waiting)
+      const wu = 10, wh = 3;
+      for (const [v0, v1] of [[-half, -11], [-7, -2], [2, 7], [11, 11.5]]) this.wall(F, wu, wu + 0.6, v0, v1, wh, T.gate || T.wall);
+      for (const v of [-9, 0, 9]) this.slot('bdoor', F, wu + 0.3, v, 0, 0, { size: [4, wh, 0.6] });
+      this.box(F, 8, 13, 11.5, half, 0, wh, col, { top });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(3, 13.25))), dir: F.dir, steps: 10, rise: 0.3, run: 0.5, width: 3.5, color: T.stairs || col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(18, 13.25))), dir: back, steps: 10, rise: 0.3, run: 0.5, width: 3.5, color: T.stairs || col });
+      this.deco(F, 'glowStrip', wu + 0.3, 0, wh, 0, { size: [W, 0.15, 0.7], color: '#4cc9f0' });
+      this.loc('cp-' + this.num('cp'), F, 20, 0, 0, 0);
+      // BIT FLIP: raised columns over a laser floor
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(22, 0))), dir: F.dir, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(56, 0))), dir: back, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.box(F, 24.5, 27, -half, half, 0, H, col, { top }); this.box(F, 51, 53.5, -half, half, 0, H, col, { top });
+      this.deco(F, 'plane', 39, 0, 0.03, 0, { size: [W, 24], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
+      for (let u = 28; u < 51; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
+      for (let j = 0; j < 7; j++) this.slot('flip', F, 39, (j - 3) * 3.4, H, 0, { size: [3.3, 0.3, 24], group: j % 2, period: o.period || 3 });
+      this.slot('abyss', F, 39, 0, 0, 0, { size: [W, 1.0, 24], top: H });
+      this.loc('airzone-' + this.num('airzone'), F, 39, 0, H, 0, { zone: 'air', len: 27, y: H });
+      this.finishStretch(F, L);
+    }
+    wave(o) {
+      o = o || {};
+      const L = 64, F = this.stretch(L), T = this.T, col = T.walk || T.wall, top = T.walkTop;
+      [[14, [-9, 9]], [26, [-4.5, 4.5]], [38, [-11, 11]], [50, [-4.5, 4.5]]].forEach(([u, vs]) => vs.forEach(v => {
+        this.box(F, u - 1.6, u + 1.6, v - 2, v + 2, 0, 1.5, col, { top: top || '#7dd3fc' });
+        this.box(F, u - 2.6, u - 1.6, v - 1.2, v + 1.2, 0, 0.75, col, { top });   // a step up
+      }));
+      this.slot('wave', F, 4, 0, 0, 0, { size: [W, 1.4, 1.6], len: o.ports ? 50 : 56 });
+      if (o.ports) this.portWall(F, 59);
+      this.deco(F, 'neonSign', 3, 12, 0, 180, { color: '#38bdf8', w: 4, h: 1.8, y: 2.6 });
+      this.finishStretch(F, L);
+    }
+    drive(o) {
+      o = o || {};
+      const L = 44, F = this.stretch(L);
+      this.slot('disk', F, 22, 0, 0, 0, { r: 12.5, spin: o.spin || 0.5 });
+      if (o.cannons) this.cannons(F, [15, 29]);
+      this.finishStretch(F, L);
+    }
+    ports(o) {
+      o = o || {};
+      const L = 48, F = this.stretch(L);
+      this.portWall(F, 12);
+      if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14] });
+      this.portWall(F, 36);
+      this.finishStretch(F, L);
+    }
     /** The box a wall pusher hides in, outside the fence at u on side s (−1 / +1), standing at height y. The course stays
         closed behind it (invisible walls), and the pusher slides out of its open front. */
     housing(F, u, s, y) {
@@ -6408,11 +6509,13 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'high', mid: 'belt', right: 'movers' }, { k: 'gate' },
     { k: 'doors' },
     { k: 'plaza', turn: 'n' },
+    { k: 'press', cannons: true },
     { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
+    { k: 'buffer' },
     { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'stones', stones: 'crumble' }, { k: 'gate' },
     { k: 'plaza', turn: 'n', comeback: true },
-    { k: 'lanes', left: 'short', mid: 'glass', right: 'fake' }, { k: 'gate' },
+    { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'lanes', left: 'high', mid: 'drone', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 's' },
@@ -6452,10 +6555,13 @@ GK_LIBRARY.worlds = {
     { k: 'bridge' },
     { k: 'lanes', left: 'crumble', mid: 'laser', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'n' },
+    { k: 'wave' },
     { k: 'lanes', left: 'tunnel', mid: 'glass', right: 'fans' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'high', mid: 'sweeper', right: 'movers' }, { k: 'gate' },
+    { k: 'drive' },
+    { k: 'gate' },
     { k: 'plaza', turn: 's', secret: true },
+    { k: 'ports' },
     { k: 'lanes', left: 'crumble', mid: 'drone', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
@@ -6490,17 +6596,18 @@ GK_LIBRARY.worlds = {
     { k: 'lanes', left: 'crumble', mid: 'glass', right: 'stones', stones: 'crumble' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
     { k: 'redlight' },
+    { k: 'press', rain: true, period: 2.9 },              // final round: the new obstacles in pairs
     { k: 'lanes', left: 'short', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 's', comeback: true },
     { k: 'doors' },
     { k: 'bridge' },
-    { k: 'lanes', left: 'tunnel', mid: 'belt', right: 'movers' }, { k: 'gate' },
+    { k: 'drive', cannons: true, spin: 0.55 }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'lanes', left: 'high', mid: 'sweeper', right: 'fans' }, { k: 'gate' },
+    { k: 'wave', ports: true }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
     { k: 'lanes', left: 'crumble', mid: 'glass', right: 'ice' }, { k: 'gate' },
     { k: 'plaza', turn: 'e' },
-    { k: 'redlight' },
+    { k: 'buffer', period: 2.5 },
     { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
@@ -8391,6 +8498,306 @@ GK_LIBRARY.worlds = {
 })();
 
 </script>
+<script>/* mechanics/cybertraps/cybertraps.js */
+/* Game Kit · mechanics/cybertraps   (needs: terrain; spatial)
+   Cyber-themed party obstacles that DELAY racers (about 2–8 s), never knock them out of the race. Every one runs on the shared
+   race clock (game.raceClock) and shared randomness (game.trapRandom), so all PCs in a room see the same thing; each PC only
+   checks its own player. Place them with world slots or `at:`.
+     { type: 'stamper', size: [w, d], top: 4.6, period: 3.2, phase }     PACKET PRESS: a block slams down (red blink first);
+                                                                         under it = squashed 2.4 s
+     { type: 'spamcannon', range: 24, speed: 7, period: 2.6, phase }     SPAM CANNON: shoots ✉ orbs the way it faces (cross on the gaps)
+     { type: 'bufferdoor', size: [w, h, d], need: 2, open: 4 }           BUFFERING DOOR: stand on its pad 2 s to open it (for you)
+     { type: 'fliptile', size: [w, h, d], group: 0 | 1, period: 3 }      BIT FLIP: tiles of one group flip away every `period` s
+                                                                         (they blink first): hop to a tile that stays
+     { type: 'tsunami', size: [w, h, d], len: 50, speed: 8, period: 9 } PACKET WAVE: a wave rolls back over the area; be on a
+                                                                         raised island when it passes, or it washes you back
+     { type: 'portgate', row, index, n: 5, open: 2, period: 3 }          PORT SHUFFLE: in each wall only some ports are open; the
+                                                                         open ones change every few seconds (they blink first)
+     { type: 'spindisk', r: 11, spin: 0.5 }                              SPINNING HARD DRIVE: a giant disk that carries you round
+     { type: 'pixelrain', area: [w, d], n: 6, period: 2.8 }              PIXEL RAIN: red squares on the floor, then a block drops there
+   Bots (mechanics/race) read entity.botZone {kind, len, chance, pause, slow, lane, ground} to slow down in the same places.
+   Emits trap:hit {kind}. Player effects: player.squashT (a squashed view). */
+(function () {
+  'use strict';
+  const U = GK.util, P = GK.Prefabs, M = GK.Models, G = () => new GK.Geo();
+  const clockOf = g => (g.raceClock ? g.raceClock() : g.state.time);
+  const hashOf = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const rand = (g, key) => (g.trapRandom ? g.trapRandom(key) : (hashOf(key + ':' + (g.levelIndex || 0)) % 1000) / 1000);
+  const fwd = e => [Math.sin(e.yaw), Math.cos(e.yaw)];
+  /** The player's position in entity e's frame: x across, z along its front. */
+  function local(e, p) {
+    const dx = p[0] - e.pos[0], dz = p[2] - e.pos[2], c = Math.cos(e.yaw), s = Math.sin(e.yaw);
+    return { x: dx * c - dz * s, z: dx * s + dz * c, y: p[1] - e.pos[1] };
+  }
+  const burst = (g, pos, color, n) => { if (g.fxBurst) g.fxBurst(pos, color, n); };
+  const live = g => g.state.mode === 'playing';
+  /** Knock with this trap's kind; true if it landed. */
+  function hit(g, e, kind, dir, power, stun, up) {
+    if (!g.knock || !g.knock(dir, power, { stun, up, kind, source: e.id })) return false;
+    g.emit('trap:hit', { id: kind });
+    return true;
+  }
+
+  // ---------- models ----------
+  M.add('pressBlock', o => {   // bottom at the origin; a shaft goes up to the gantry
+    const w = o.w || 5.6, d = o.d || 3.4, c = o.color || '#4a5568', g = G().box(0, 0, 0, w, 1.3, d, c, { top: U.shade(c, 1.2) });
+    for (let x = -w / 2 + 0.5; x < w / 2; x += 1.1) g.box(x, 0.05, d / 2 + 0.01, 0.5, 0.35, 0.02, '#ffd166', { glow: 0.6 }).box(x, 0.05, -d / 2 - 0.01, 0.5, 0.35, 0.02, '#ffd166', { glow: 0.6 });
+    return g.box(0, -0.02, 0, w - 0.2, 0.06, d - 0.2, '#ff4d6d', { glow: 0.9 }).cyl(0, 1.3, 0, 0.45, 6, '#a0aec0', { seg: 8 });
+  });
+  M.add('spamCannon', o => G().box(0, 0, -0.4, 1.4, 1.6, 1.2, '#2d3748', { top: '#4a5568' }).add(G().cyl(0, 0, 0, 0.42, 1.2, o.color || '#ff4fd8', { seg: 10, glow: 0.4 }).rotX(Math.PI / 2).move(0, 1.0, 0)).box(0, 1.55, -0.4, 0.9, 0.12, 0.9, '#ff4fd8', { glow: 1 }));
+  M.add('spamOrb', () => G().sphere(0, 0, 0, 0.5, '#ff4fd8', { glow: 0.55, seg: 8, rings: 6 }).box(0, -0.18, 0.42, 0.62, 0.42, 0.06, '#ffffff', { glow: 0.8 }).box(0, 0, 0.46, 0.5, 0.06, 0.02, '#ff4fd8', { glow: 1 }));
+  M.add('bufferDoor', o => {
+    const s = o.size || [4, 3.4, 0.5], g = G().box(0, 0, 0, s[0], s[1], s[2], '#2b2b8c', { glow: 0.35 });
+    for (const f of [1, -1]) {   // both faces: a "loading" bar and a red top light
+      const z = f * (s[2] / 2 + 0.02);
+      g.box(0, s[1] * 0.42, z, s[0] - 0.6, 0.5, 0.02, '#0b0b26');
+      for (let i = 0; i < 5; i++) g.box(-s[0] / 2 + 0.6 + i * (s[0] - 1.2) / 4, s[1] * 0.42 + 0.1, z * 1.02, 0.42, 0.3, 0.02, i < 2 ? '#7cfc00' : '#4cc9f0', { glow: 1 });
+      g.box(0, s[1] - 0.3, z, s[0] - 0.3, 0.14, 0.02, '#ff4d6d', { glow: 1 });
+    }
+    return g;
+  });
+  M.add('bufferPad', () => G().cyl(0, 0, 0, 1.3, 0.06, '#1a202c', { seg: 18 }).cyl(0, 0.06, 0, 1.1, 0.03, '#4cc9f0', { seg: 18, glow: 0.9 }).cyl(0, 0.09, 0, 0.6, 0.02, '#1a202c', { seg: 18 }));
+  M.add('flipTile', o => {   // top at the origin, hanging down
+    const s = o.size || [3.3, 0.3, 24], c = o.color || '#3d5afe', g = G().box(0, -s[1], 0, s[0], s[1], s[2], c, { top: U.shade(c, 1.25) });
+    for (let z = -s[2] / 2 + 1.5; z < s[2] / 2; z += 3) g.box(0, 0.005, z, s[0] - 0.5, 0.02, 0.12, '#ffffff', { glow: 0.5 });
+    return g.box(-s[0] / 2 + 0.06, 0.005, 0, 0.1, 0.03, s[2], '#ffffff', { glow: 0.9 }).box(s[0] / 2 - 0.06, 0.005, 0, 0.1, 0.03, s[2], '#ffffff', { glow: 0.9 });
+  });
+  M.add('waveWall', o => {
+    const s = o.size || [30, 1.4, 1.6], g = G().box(0, 0, 0, s[0], s[1], s[2], '#38bdf8', { glow: 0.55 });
+    return g.box(0, s[1], 0.1, s[0], 0.28, s[2] * 0.8, '#ffffff', { glow: 0.9 }).box(0, 0.2, -s[2] / 2 - 0.02, s[0], 0.12, 0.04, '#7dd3fc', { glow: 1 });
+  });
+  M.add('portField', o => {
+    const s = o.size || [5.2, 3.2, 0.3];
+    return G().box(0, 0, 0, s[0], s[1], s[2], '#ff2d55', { glow: 0.85 }).box(0, s[1] * 0.5 - 0.3, s[2] / 2 + 0.01, 1.2, 0.6, 0.02, '#ffffff', { glow: 1 }).box(0, s[1] * 0.5 - 0.3, -s[2] / 2 - 0.01, 1.2, 0.6, 0.02, '#ffffff', { glow: 1 });
+  });
+  M.add('hardDisk', o => {   // flat on the floor, radius r: sector stripes and a glowing hub
+    const r = o.r || 11, g = G().cyl(0, 0, 0, r, 0.06, '#1e293b', { seg: 32 }).cyl(0, 0.06, 0, r * 0.98, 0.02, '#334155', { seg: 32 });
+    for (let i = 0; i < 8; i++) g.add(G().box(0, 0.08, r * 0.5, 0.25, 0.02, r * 0.92, i % 2 ? '#4cc9f0' : '#ffd166', { glow: 0.85 }).rotY(i * Math.PI / 4));
+    return g.cyl(0, 0.08, 0, r * 0.12, 0.08, '#e2e8f0', { seg: 16, glow: 0.6 }).cyl(0, 0.08, 0, r * 0.995, 0.03, '#ff4fd8', { seg: 32, glow: 0.4 });
+  });
+  M.add('pixelBlock', o => { const s = o.s || 1.8, c = o.color || '#7cfc00'; return G().box(0, 0, 0, s, s, s, c, { glow: 0.45, top: U.shade(c, 1.2) }).box(0, s * 0.3, s / 2 + 0.01, s * 0.5, s * 0.4, 0.02, '#ffffff', { glow: 0.6 }); });
+  M.add('pixelShadow', o => { const s = o.s || 1.8; return G().box(0, 0, 0, s, 0.03, s, '#ff2d55', { glow: 0.9 }).box(0, 0.035, 0, s * 0.6, 0.02, s * 0.6, '#1a0a10'); });
+  const PIX = ['#7cfc00', '#4cc9f0', '#ffd166', '#ff4fd8', '#b794f4'];
+
+  // ---------- PACKET PRESS ----------
+  P.add('stamper', {
+    defaults: { model: 'pressBlock', solid: false, size: [5.6, 3.4], top: 4.6, period: 3.2, phase: 0, stun: 2.4 },
+    init(e) {
+      e.setLook({ w: e.def.size[0], d: e.def.size[1] }); e.base = e.pos.slice();
+      e.botZone = { kind: 'press', len: e.def.size[1] + 2, chance: 0.3, pause: 2.4 };
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, k = ((cyc % 1) + 1) % 1, idx = Math.floor(cyc);
+      let h = d.top;
+      if (k >= 0.55 && k < 0.75) { e.offset[0] = Math.sin(t * 70) * 0.05; e.hi = Math.sin(t * 25) > 0 ? 0.55 : 0.1; }   // about to slam: shakes and blinks
+      else { e.offset[0] = 0; e.hi = 0; }
+      if (k >= 0.75 && k < 0.8) h = d.top * (1 - (k - 0.75) / 0.05);
+      else if (k >= 0.8 && k < 0.9) h = 0;
+      else if (k >= 0.9) h = d.top * (k - 0.9) / 0.1;
+      e.pos[1] = e.base[1] + h;
+      if (!e.enabled || !live(g) || k < 0.76 || k >= 0.9 || e.state.hitCyc === idx) return;
+      const pl = g.player, L = local(e, pl.pos);
+      if (Math.abs(L.x) < d.size[0] / 2 + 0.2 && Math.abs(L.z) < d.size[1] / 2 + 0.2 && pl.pos[1] < e.pos[1] + 0.2 && pl.pos[1] + 1.7 > e.pos[1] - 0.05) {
+        e.state.hitCyc = idx;
+        const f = fwd(e), side = L.z >= 0 ? 1 : -1;
+        if (hit(g, e, 'press', [f[0] * side, f[1] * side], 3, d.stun, 0.5)) { pl.squashT = d.stun; g.audio.play('boom'); burst(g, [pl.pos[0], pl.pos[1] + 0.3, pl.pos[2]], '#ffd166', 12); }
+      }
+    },
+  });
+
+  // ---------- SPAM CANNON ----------
+  P.add('spamorb', { defaults: { model: 'spamOrb', solid: false } });
+  P.add('spamcannon', {
+    defaults: { model: 'spamCannon', solid: true, range: 24, speed: 7, period: 2.6, phase: 0, h: 1.0, power: 9, stun: 1.0 },
+    init(e) {
+      const d = e.def, n = Math.ceil(d.range / d.speed / d.period) + 1;
+      e.orbs = [];
+      for (let i = 0; i < n; i++) e.orbs.push(e.world.add({ id: e.id + '-orb' + i, type: 'spamorb', pos: e.pos.slice(), visible: false }));
+      e.orbs.forEach(o => o.hide());
+      e.botZone = { kind: 'cannon', len: 3, chance: 0.3, pause: 1.6 };
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), f = fwd(e), shot = Math.floor(t / d.period + d.phase), pl = g.player, S = e.state;
+      e.orbs.forEach((o, i) => {
+        const k = shot - i, age = t - (k - d.phase) * d.period, dist = 1 + age * d.speed;
+        if (age < 0 || dist > d.range || S['gone' + k]) { o.hide(); return; }
+        o.show(); o.yaw += dt * 4;
+        o.pos = [e.pos[0] + f[0] * dist, e.pos[1] + d.h, e.pos[2] + f[1] * dist];
+        if (!e.enabled || !live(g) || S['hit' + k]) return;
+        if (Math.hypot(pl.pos[0] - o.pos[0], pl.pos[2] - o.pos[2]) < 0.8 && pl.pos[1] < o.pos[1] + 0.45 && pl.pos[1] + 1.7 > o.pos[1] - 0.45) {
+          S['hit' + k] = 1; S['gone' + k] = 1; o.hide();
+          if (hit(g, e, 'spam', f, d.power, d.stun, 3.5)) { g.audio.play('splat'); burst(g, o.pos, '#ff4fd8', 12); }
+        }
+      });
+    },
+  });
+
+  // ---------- BUFFERING DOOR ----------
+  P.add('bufferpad', { defaults: { model: 'bufferPad', solid: false } });
+  P.add('bufferdoor', {
+    defaults: { model: 'bufferDoor', solid: true, size: [4, 3.4, 0.5], need: 2, open: 4 },
+    init(e) {
+      e.setLook({ size: e.def.size });
+      const f = fwd(e);
+      e.pad = e.world.add({ id: e.id + '-pad', type: 'bufferpad', pos: [e.pos[0] - f[0] * 2.4, e.pos[1] + 0.01, e.pos[2] - f[1] * 2.4], label: '⏳' });
+      e.pad.labelRange = 22; e.pad.labelCls = 'itembox';
+      e.state.prog = 0; e.state.openT = 0;
+      e.botZone = { kind: 'buffer', len: 6, chance: 1, pause: 2.1, lane: 1.4 };
+    },
+    restore(e) { if (e.state.openT > 0) e.hide(); else e.show(); },
+    update(e, dt, g) {
+      const d = e.def, S = e.state, pl = g.player, pad = e.pad;
+      if (S.openT > 0) {
+        S.openT -= dt;
+        const L = local(e, pl.pos), inside = Math.abs(L.x) < d.size[0] / 2 + 0.4 && Math.abs(L.z) < d.size[2] / 2 + 0.5;
+        if (S.openT <= 0 && !inside) { e.show(); pad.label = '⏳'; } else if (S.openT <= 0) S.openT = 0.2;
+        return;
+      }
+      if (!live(g)) return;
+      const on = Math.hypot(pl.pos[0] - pad.pos[0], pl.pos[2] - pad.pos[2]) < 1.35 && Math.abs(pl.pos[1] - pad.pos[1]) < 0.6;
+      S.prog = on ? S.prog + dt / d.need : Math.max(0, S.prog - dt / d.need * 0.5);
+      const pct = Math.min(99, Math.floor(S.prog * 100));
+      pad.label = S.prog > 0 ? '⏳ ' + pct + '%' : '⏳';
+      if (S.prog >= 1) {
+        S.prog = 0; S.openT = d.open; e.hide(); pad.label = '✅';
+        g.audio.play('pickup'); burst(g, [e.pos[0], e.pos[1] + 1.5, e.pos[2]], '#7cfc00', 14);
+        g.emit('trap:door', { id: e.id });
+      }
+    },
+  });
+
+  // ---------- BIT FLIP TILES ----------
+  P.add('fliptile', {
+    defaults: { model: 'flipTile', solid: true, size: [3.3, 0.3, 24], group: 0, period: 3, warn: 0.8 },
+    init(e) { e.setLook({ size: e.def.size }); e.botZone = { kind: 'flip', len: e.def.size[2], chance: 0.6, pause: 3.5 }; e.state.ang = 0; },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = Math.floor(t / d.period), k = t - cyc * d.period;
+      const flipped = (((cyc % 2) + 2) % 2) === d.group, soon = !flipped && k > d.period - d.warn;
+      e.solid = !flipped;
+      const want = flipped ? Math.PI / 2 : 0;
+      e.state.ang += (want - e.state.ang) * Math.min(1, dt * 14);
+      e.roll = e.state.ang;
+      e.alpha = flipped ? 0.35 : undefined;
+      e.hi = soon ? (Math.sin(t * 28) > 0 ? 0.6 : 0.15) : 0;
+      e.offset[1] = soon ? Math.sin(t * 60) * 0.03 : 0;
+    },
+  });
+
+  // ---------- PACKET WAVE ----------
+  P.add('tsunami', {
+    defaults: { model: 'waveWall', solid: false, size: [30, 1.4, 1.6], len: 50, speed: 8, period: 9, phase: 0, power: 13, stun: 1.0 },
+    init(e) {
+      e.setLook({ size: e.def.size }); e.base = e.pos.slice(); e.alpha = 0.6; e.label = '🌊'; e.labelRange = 45;
+      e.botZone = { kind: 'wave', len: e.def.len, chance: 0.45, pause: 2, ground: true };
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), age = (cyc - idx) * d.period, run = d.len / d.speed, f = fwd(e);
+      if (age > run + 0.3) { e.hide(); return; }
+      e.show();
+      const along = Math.max(0, d.len - Math.max(0, age - 0.5) * d.speed), rise = U.clamp(age / 0.5, 0.05, 1);
+      e.pos = [e.base[0] + f[0] * along, e.base[1], e.base[2] + f[1] * along];
+      e.scale = [1, rise, 1];
+      if (!e.enabled || !live(g) || age < 0.5 || e.state.hitCyc === idx) return;
+      const pl = g.player, L = local(e, pl.pos);
+      if (Math.abs(L.x) < d.size[0] / 2 && Math.abs(L.z) < d.size[2] / 2 + 0.35 && pl.pos[1] < e.pos[1] + d.size[1]) {
+        e.state.hitCyc = idx;
+        if (hit(g, e, 'wave', [-f[0], -f[1]], d.power, d.stun, 4)) { g.audio.play('whoosh'); burst(g, [pl.pos[0], pl.pos[1] + 1, pl.pos[2]], '#7dd3fc', 14); }
+      }
+    },
+  });
+
+  // ---------- PORT SHUFFLE ----------
+  /** Which ports of a row are open in cycle `cyc`: the `open` lowest of n shared random numbers. */
+  function openPorts(g, row, cyc, n, open) {
+    const r = [];
+    for (let i = 0; i < n; i++) r.push([rand(g, 'port:' + row + ':' + cyc + ':' + i), i]);
+    r.sort((a, b) => a[0] - b[0]);
+    return r.slice(0, open).map(x => x[1]);
+  }
+  P.add('portgate', {
+    defaults: { model: 'portField', solid: false, size: [5.2, 3.2, 0.3], row: 1, index: 0, n: 5, open: 2, period: 3, warn: 0.6, power: 8 },
+    init(e) { e.setLook({ size: e.def.size }); e.alpha = 0.55; e.botZone = { kind: 'ports', len: 3, chance: 0.7, pause: 2.2 }; },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), cyc = Math.floor(t / d.period), k = t - cyc * d.period;
+      const isOpen = openPorts(g, d.row, cyc, d.n, d.open).indexOf(d.index) >= 0;
+      const closing = isOpen && k > d.period - d.warn && openPorts(g, d.row, cyc + 1, d.n, d.open).indexOf(d.index) < 0;
+      e.state.open = isOpen;
+      if (isOpen && !closing) { e.hide(); return; }
+      e.show();
+      e.alpha = closing ? (Math.sin(t * 30) > 0 ? 0.5 : 0.12) : 0.55;
+      if (!isOpen && e.enabled && live(g)) {
+        const pl = g.player, L = local(e, pl.pos);
+        if (Math.abs(L.x) < d.size[0] / 2 && Math.abs(L.z) < d.size[2] / 2 + 0.45 && pl.pos[1] < e.pos[1] + d.size[1]) {
+          const f = fwd(e), side = L.z >= 0 ? 1 : -1;
+          if (hit(g, e, 'port', [f[0] * side, f[1] * side], d.power, 0.35, 2.5)) g.audio.play('zap');
+        }
+      }
+    },
+  });
+
+  // ---------- SPINNING HARD DRIVE ----------
+  P.add('spindisk', {
+    defaults: { model: 'hardDisk', solid: false, r: 11, spin: 0.5 },
+    init(e) { e.setLook({ r: e.def.r }); e.yaw0 = e.yaw; e.botZone = { kind: 'disk', len: e.def.r * 2, slow: 0.75 }; },
+    update(e, dt, g) {
+      const d = e.def;
+      e.yaw = e.yaw0 + d.spin * clockOf(g);
+      if (!e.enabled || !live(g)) return;
+      const pl = g.player, dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2];
+      if (Math.hypot(dx, dz) < d.r && Math.abs(pl.pos[1] - e.pos[1]) < 0.5 && g.terrainPush) {   // carried round with the disk
+        g.terrainPush[0] += d.spin * dz; g.terrainPush[1] += -d.spin * dx;
+      }
+    },
+  });
+
+  // ---------- PIXEL RAIN ----------
+  P.add('pixelblock', { defaults: { model: 'pixelBlock', solid: false } });
+  P.add('pixelshadow', { defaults: { model: 'pixelShadow', solid: false } });
+  P.add('pixelrain', {
+    defaults: { solid: false, area: [24, 12], n: 6, period: 2.8, warn: 1.1, size: 1.8, stun: 1.8 },
+    init(e) {
+      const d = e.def;
+      e.blocks2 = [];
+      for (let i = 0; i < d.n; i++) {
+        const b = e.world.add({ id: e.id + '-b' + i, type: 'pixelblock', pos: e.pos.slice(), look: { s: d.size, color: PIX[i % PIX.length] } });
+        const s = e.world.add({ id: e.id + '-s' + i, type: 'pixelshadow', pos: e.pos.slice(), look: { s: d.size } });
+        b.hide(); s.hide(); e.blocks2.push({ b, s });
+      }
+      e.botZone = { kind: 'rain', len: d.area[1], chance: 0.3, pause: 1.8 };
+    },
+    update(e, dt, g) {
+      const d = e.def, t = clockOf(g), c = Math.cos(e.yaw), sn = Math.sin(e.yaw);
+      e.blocks2.forEach(({ b, s }, i) => {
+        const cyc = t / d.period + i / d.n, idx = Math.floor(cyc), age = (cyc - idx) * d.period;
+        const lx = (rand(g, 'pix:' + e.id + ':' + i + ':' + idx) - 0.5) * (d.area[0] - d.size), lz = (rand(g, 'piz:' + e.id + ':' + i + ':' + idx) - 0.5) * (d.area[1] - d.size);
+        const x = e.pos[0] + lx * c + lz * sn, z = e.pos[2] - lx * sn + lz * c, fall = 0.22, lie = 0.9;
+        if (age < d.warn) {   // the red square grows: a block is coming
+          s.show(); b.hide(); s.pos = [x, e.pos[1] + 0.02, z]; const k = 0.35 + 0.65 * age / d.warn; s.scale = [k, 1, k];
+        } else if (age < d.warn + fall) {
+          s.show(); s.pos = [x, e.pos[1] + 0.02, z]; s.scale = [1, 1, 1]; b.show(); b.scale = [1, 1, 1];
+          b.pos = [x, e.pos[1] + 14 * (1 - (age - d.warn) / fall), z];
+        } else if (age < d.warn + fall + lie) {
+          s.hide(); b.show(); b.pos = [x, e.pos[1], z];
+          const k = U.clamp((d.warn + fall + lie - age) / 0.25, 0, 1); b.scale = [k, k, k];
+          if (e.enabled && live(g) && e.state['hit' + i] !== idx) {
+            e.state['hit' + i] = idx;   // checked once, as it lands
+            const pl = g.player, h = d.size / 2 + 0.3;
+            if (Math.abs(pl.pos[0] - x) < h && Math.abs(pl.pos[2] - z) < h && pl.pos[1] < e.pos[1] + d.size) {
+              const a = rand(g, 'pixd:' + i + ':' + idx) * Math.PI * 2;
+              if (hit(g, e, 'pixel', [Math.cos(a), Math.sin(a)], 5, d.stun, 3)) { g.audio.play('boom'); burst(g, [x, e.pos[1] + 1, z], PIX[i % PIX.length], 14); }
+            }
+          }
+        } else { s.hide(); b.hide(); }
+      });
+    },
+  });
+
+  GK.Mechanics.add('cybertraps', {
+    update(game, dt) { const pl = game.player; if (pl && pl.squashT > 0) pl.squashT -= dt; },
+  });
+})();
+
+</script>
 <script>/* mechanics/juice/juice.js */
 /* Game Kit · mechanics/juice   (spatial game types)
    Game feel for running games:
@@ -9858,7 +10265,12 @@ window.GK_ONLINE_CONFIG = {
       else if (e.type === 'glasstile' || e.type === 'dashdoor') { const k = e.type + (e.type === 'dashdoor' ? e.def.row : ''); const d = dOf(e.pos); const G2 = groups[k] = groups[k] || { kind: e.type === 'glasstile' ? 'glass' : 'door', d0: d, d1: d }; G2.d0 = Math.min(G2.d0, d); G2.d1 = Math.max(G2.d1, d); }
       else if (e.type === 'boulder') { add('hill', dOf(e.a) - 2, dOf(e.b) + 22, e, e.id); }
       else if (e.type === 'pendulum') { const d = dOf(e.pos); add('hammer', d - 1, d + 1, e, e.id); }
+      else if (e.botZone && !groups['bz' + e.botZone.kind + Math.round(dOf(e.pos) / 8)]) {   // obstacles that tell bots how they slow them
+        const d = dOf(e.pos), h = (e.botZone.len || 4) / 2; groups['bz' + e.botZone.kind + Math.round(d / 8)] = 1;
+        add('bz', d - h, d + h, e, e.id); Z[Z.length - 1].bz = e.botZone;
+      }
     }
+    for (const k in groups) if (k.indexOf('bz') === 0) delete groups[k];
     // stretches the world marks with location data {zone, len, y} (e.g. 'air': a broken bridge, the bots hop its gaps)
     for (const n in g.world.locations) { const L = g.world.locations[n], zd = L.data && L.data.zone; if (zd) { const d = dOf(L.pos), h = (L.data.len || 20) / 2; add(zd, d - h, d + h, null, n); Z[Z.length - 1].y = L.data.y || 0; } }
     for (const k in groups) add(groups[k].kind, groups[k].d0 - 2, groups[k].d1 + 1, null, k);
@@ -9885,8 +10297,10 @@ window.GK_ONLINE_CONFIG = {
             if (z.kind === 'glass') b.pause += Math.floor(Math.random() * 3) * 4.5;   // fell through 0–2 fake panes
             else if (z.kind === 'door') b.pause += 0.4 + Math.random() * 2.2;
             else if (z.kind === 'hammer' && Math.random() < 0.25) b.stun = 1.2;
+            else if (z.kind === 'bz' && z.bz.chance && Math.random() < z.bz.chance) b.pause += z.bz.pause * (0.6 + Math.random() * 0.8);
           }
           if (z.kind === 'hill') slow = Math.min(slow, 0.7);
+          if (z.kind === 'bz' && z.bz.slow) slow = Math.min(slow, z.bz.slow);
         }
         b.hold = hold;
         if (b.stun > 0) b.stun -= dt;
@@ -9931,14 +10345,15 @@ window.GK_ONLINE_CONFIG = {
       // put the figure on the course: centre line + its own lane offset (wandering a little)
       const zone = C.zones && C.zones.find(z => b.d >= z.d0 - 0.5 && b.d <= z.d1);
       // bots run in the middle lane (never inside the lane walls), on the panes of a glass bridge
-      const p = C.at(b.d), w = zone && zone.kind === 'glass' ? (b.off >= 0 ? 2.3 : -2.3) : U.clamp(b.off * 0.55 + Math.sin(now / 2300 + b.speed * 5) * 0.8, -3.3, 3.3), x = p.x - p.dz * w, z = p.z + p.dx * w;
+      const lane = zone && zone.bz && zone.bz.lane ? zone.bz.lane : 3.3;   // a narrow way through (e.g. a door)
+      const p = C.at(b.d), w = zone && zone.kind === 'glass' ? (b.off >= 0 ? 2.3 : -2.3) : U.clamp(b.off * 0.55 + Math.sin(now / 2300 + b.speed * 5) * 0.8, -lane, lane), x = p.x - p.dz * w, z = p.z + p.dx * w;
       const moving = running && !b.fin && b.pause <= 0 && b.stun <= 0 && !b.hold;
       const e = b.ent;
       e.pos[0] += (x - e.pos[0]) * Math.min(1, dt * 8); e.pos[2] += (z - e.pos[2]) * Math.min(1, dt * 8);
       // on hills the bots walk on the ground (a ray from above); elsewhere the course is flat
       // (a broken bridge: over a gap they hop)
       e.figure.air = false;
-      if (zone && (zone.kind === 'hill' || zone.kind === 'air')) {
+      if (zone && (zone.kind === 'hill' || zone.kind === 'air' || (zone.bz && zone.bz.ground))) {
         const hit = g.world.raycast([e.pos[0], 12, e.pos[2]], [0, -1, 0], 14); let gy = hit.hit ? 12 - hit.t : 0;
         if (zone.kind === 'air' && gy < zone.y - 0.5) { gy = zone.y + 0.9; e.figure.air = moving; }
         e.pos[1] += (gy - e.pos[1]) * Math.min(1, dt * 10);
