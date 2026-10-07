@@ -8721,7 +8721,7 @@ window.GK_ONLINE_CONFIG = {
     multipliers: [1, 1, 1.1, 1.25, 1.5],
     // finishers: 60 + a place bonus (1st 140 … 10th 77 … 20th 62); non-finishers: progress^1.3 × 60 (80% → 45, 40% → 18)
     score: { finish: 60, place: [80, 66, 55, 46, 39, 33, 28, 24, 20, 17, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2], progress: 60, pow: 1.3, caps: { academic: 180, strategy: 90, explore: 60 }, floor: -40 },
-    bots: 7, botNames: ['Pixel', 'Nova', 'Byte', 'Turbo', 'Echo', 'Glitch', 'Chip', 'Luna', 'Rex', 'Zippy'],
+    bots: 7, botNames: ['Pixel', 'Nova', 'Byte', 'Turbo', 'Echo', 'Glitch', 'Chip', 'Luna', 'Rex', 'Zippy', 'Bolt', 'Kiwi', 'Spark', 'Mochi', 'Vega'],
     points: { shard: 3, secret: 20, crate: [5, 10, 15], coop: 15 },
   };
   const ORD = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
@@ -8826,6 +8826,7 @@ window.GK_ONLINE_CONFIG = {
     '.rush-table tr.me td{background:rgba(124,252,0,.15);font-weight:800}.rush-table td.n{text-align:right;font-variant-numeric:tabular-nums}.rush-table tr.top1 td:first-child{color:#ffd166;font-weight:900}' +
     '.rush-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}.rush-mine{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0}.rush-mine span{background:rgba(255,255,255,.08);border-radius:10px;padding:6px 10px}' +
     '.rush-mine b{color:#ffd166}.rush-join{margin:12px auto;max-width:520px;background:rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;text-align:left}.rush-join .row{display:flex;gap:8px;margin:6px 0}.rush-join input{flex:1;text-transform:uppercase;font-weight:800;letter-spacing:.08em}' +
+    '.rush-botset{flex-wrap:wrap;gap:10px!important;font-weight:700;font-size:13px}.rush-botset select{margin-left:4px;font:inherit;padding:3px 6px;border-radius:8px}' +
     '.rush-join .st{min-height:20px;font-weight:700;margin-top:4px}.rush-join .st.bad{color:#ff6b6b}.rush-join .st.ok{color:#7cfc00}.rush-join details{margin-top:8px;opacity:.85}.rush-or{text-align:center;opacity:.6;margin:6px 0}' +
     '.rush-host{position:absolute;left:12px;top:12px;bottom:12px;width:min(430px,44vw);z-index:15;background:rgba(8,10,24,.9);color:#fff;border-radius:16px;padding:14px 16px;overflow:auto;font:14px system-ui}' +
     '.rush-host .code{font:900 46px system-ui;letter-spacing:.08em;color:#ffd166;text-align:center}.rush-host .url{text-align:center;opacity:.85;word-break:break-all;font-size:12.5px}.rush-host .pl{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}' +
@@ -8866,10 +8867,12 @@ window.GK_ONLINE_CONFIG = {
   function makeBots(g) {
     const c = cfgOf(g), names = c.botNames.slice().sort(() => Math.random() - 0.5), chars = (g.characterChoices() || [{ id: null }]).map(x => x.id);
     R.bots = [];
-    for (let i = 0; i < c.bots; i++) {
-      const k = i / Math.max(1, c.bots - 1);   // 0 = strongest … 1 = weakest, mixed so the PC player has real rivals
+    // the title screen's bot settings (R.botCount, R.botSkill: easy / normal / hard), else the game's config
+    const n = R.botCount || c.bots, sk = { easy: { sp: 0.78, th: 1.45, ac: -0.15 }, normal: { sp: 1, th: 1, ac: 0 }, hard: { sp: 1.18, th: 0.65, ac: 0.08 } }[R.botSkill || 'normal'];
+    for (let i = 0; i < n; i++) {
+      const k = i / Math.max(1, n - 1);   // 0 = strongest … 1 = weakest, mixed so the PC player has real rivals
       // speeds along the centre line (no detours, no falls), so a little below a good student's real pace
-      R.bots.push({ id: 'bot' + i, name: names[i % names.length], char: chars[i % chars.length], speed: 4.4 - k * 1.7 + Math.random() * 0.3, think: 8 + k * 12, acc: 0.86 - k * 0.3, curious: Math.random(), mean: Math.random() });
+      R.bots.push({ id: 'bot' + i, name: names[i % names.length], char: chars[i % chars.length], speed: (4.4 - k * 1.7 + Math.random() * 0.3) * sk.sp, think: (8 + k * 12) * sk.th, acc: Math.min(0.97, 0.86 - k * 0.3 + sk.ac), curious: Math.random(), mean: Math.random() });
     }
   }
   function placeBots(g) {
@@ -9460,15 +9463,31 @@ window.GK_ONLINE_CONFIG = {
     let qRoom = (location.search.match(/[?&]room=([A-Za-z0-9-]+)/) || [])[1] || '';
     try { if (!qRoom) qRoom = sessionStorage.getItem('gk.rush.room') || ''; } catch (e) { /* storage off */ }
     const box = U.el('div', 'rush-join');
-    box.innerHTML = (online ? '<b>🌐 Class race</b><div class="row"><input class="gk-input" data-a="room" maxlength="16" placeholder="Room code, e.g. NEON-42" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn primary" data-a="join">Join</button></div><div class="st"></div><div class="rush-or">or</div>' : '<p class="gk-muted">Online class races need the website copy and internet.</p>') +
-      '<button class="gk-btn big" data-a="solo" style="width:100%">🤖 Practice solo vs bots (no internet needed)</button>' +
+    // play with bots (no internet): how many, how good, and which world to start in (kept on this PC)
+    const pref = GK.Settings.get('rushBots', { n: 7, skill: 'normal', round: 0 }), rounds = (g.cfg.content && g.cfg.content.rounds) || [];
+    const opt = (list, cur) => list.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + U.esc(t) + '</option>').join('');
+    box.innerHTML = '<b>🤖 Play with bots</b> <span class="gk-muted">(no internet needed)</span>' +
+      '<div class="row rush-botset"><label>Bots <select data-a="bn">' + opt([[3, '3'], [5, '5'], [7, '7'], [11, '11'], [15, '15']], pref.n) + '</select></label>' +
+      '<label>Bot level <select data-a="bs">' + opt([['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], pref.skill) + '</select></label>' +
+      '<label>Start at <select data-a="br">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, 'Round ' + (i + 1) + (rounds[i] ? ': ' + rounds[i].name : '')]), pref.round) + '</select></label></div>' +
+      '<button class="gk-btn primary big" data-a="solo" style="width:100%">🤖 Race the bots ▶</button>' +
+      (online ? '<div class="rush-or">or</div><b>🌐 Class race</b><div class="row"><input class="gk-input" data-a="room" maxlength="16" placeholder="Room code, e.g. NEON-42" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn" data-a="join">Join</button></div>' : '<p class="gk-muted">Online class races need the website copy and internet.</p>') +
+      '<div class="st"></div>' +
       (online ? '<details><summary>👩‍🏫 Teacher</summary><p class="gk-muted">Host the class race on the projector: you get a room code; students join it; you start each round.</p><button class="gk-btn" data-a="host">Host a class race</button></details>' : '');
-    play.parentNode.insertBefore(box, play);
+    const ctl = s.querySelector('.gk-controls');   // above the key list, so it is on screen without scrolling
+    (ctl || play).parentNode.insertBefore(box, ctl || play);
     const st = box.querySelector('.st'), say = (t, ok) => { if (st) { st.textContent = t; st.className = 'st ' + (ok ? 'ok' : 'bad'); } };
     const nameOk = () => { const nb = data.nameBox; if (nb && !nb.value.trim()) { nb.focus(); nb.classList.add('need'); say('Type your name first (a nickname is fine).'); return false; } if (nb) g.setPlayerName(nb.value.trim().slice(0, 16)); return true; };
     // start a fresh level 0 now that the mode is known (setup builds bots / host view for the mode)
-    const go = mode => { R.mode = mode; R.reset(); g.audio.unlock(); g.ui.hideScreens(); g.loadLevel(0); };
-    box.querySelector('[data-a=solo]').onclick = () => { if (!nameOk()) return; GK.QuizDeck.reset((g.playerName || 'p') + Math.random()); go('solo'); };
+    const go = (mode, level) => { R.mode = mode; R.reset(); g.audio.unlock(); g.ui.hideScreens(); g.loadLevel(level || 0); };
+    box.querySelector('[data-a=solo]').onclick = () => {
+      if (!nameOk()) return;
+      const v = a => box.querySelector('[data-a=' + a + ']').value, p = { n: Number(v('bn')), skill: v('bs'), round: Number(v('br')) };
+      GK.Settings.set('rushBots', p);
+      R.botCount = p.n; R.botSkill = p.skill;
+      GK.QuizDeck.reset((g.playerName || 'p') + Math.random());
+      go('solo', p.round);
+    };
     const jb = box.querySelector('[data-a=join]'), rb = box.querySelector('[data-a=room]');
     if (jb) {
       const join = () => {
