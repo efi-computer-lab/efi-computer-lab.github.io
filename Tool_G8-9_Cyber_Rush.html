@@ -672,7 +672,8 @@ window.GAME_CONTENT = {};
     { name: 'Cyber Core', text: 'CHAMPIONSHIP: every trap, now in pairs. Points ×1.5!' },
   ];
 
-  C.characters = { title: 'Your racer', leo: 'Leo', leoText: '', kai: 'Kai', kaiText: '', mia: 'Mia', miaText: '', zara: 'Zara', zaraText: '' };
+  C.characters = { title: 'Your racer', leo: 'Leo', leoText: '', kai: 'Kai', kaiText: '', max: 'Max', maxText: '', ravi: 'Ravi', raviText: '', jun: 'Jun', junText: '',
+    mia: 'Mia', miaText: '', zara: 'Zara', zaraText: '', aiko: 'Aiko', aikoText: '', nia: 'Nia', niaText: '', sofia: 'Sofia', sofiaText: '' };
 
   C.texts = {
     waiting: 'You are in! Wait for your teacher to start the round. Walk around the start and try the controls.',
@@ -736,8 +737,14 @@ window.GAME_CONTENT = {};
     characters: { default: 'leo', title: 'content:characters.title', choices: [
       { id: 'leo', label: 'content:characters.leo', text: 'content:characters.leoText', look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#f5f6fa', accent: '#4cc9f0' } },
       { id: 'kai', label: 'content:characters.kai', text: 'content:characters.kaiText', look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#27ae60', pants: '#34495e', shoes: '#e74c3c', accent: '#7cfc00' } },
+      { id: 'max', label: 'content:characters.max', text: 'content:characters.maxText', look: { body: 'm', skin: '#ffdbac', hair: '#d4a017', hairStyle: 'spiky', shirt: '#e67e22', pants: '#2c3e50', shoes: '#ecf0f1', accent: '#ffd166' } },
+      { id: 'ravi', label: 'content:characters.ravi', text: 'content:characters.raviText', look: { body: 'm', skin: '#a0662d', hair: '#111111', hairStyle: 'short', shirt: '#c0392b', pants: '#1e272e', shoes: '#f5f6fa', accent: '#ff4d6d' } },
+      { id: 'jun', label: 'content:characters.jun', text: 'content:characters.junText', look: { body: 'm', skin: '#f0c08a', hair: '#222222', hairStyle: 'long', shirt: '#16a085', pants: '#34495e', shoes: '#ffd166', accent: '#4cc9f0' } },
       { id: 'mia', label: 'content:characters.mia', text: 'content:characters.miaText', look: { body: 'f', skin: '#e0ac69', hair: '#6b3e26', hairStyle: 'long', shirt: '#e84393', pants: '#2c3e50', shoes: '#f5f6fa', accent: '#ff4fd8' } },
       { id: 'zara', label: 'content:characters.zara', text: 'content:characters.zaraText', look: { body: 'f', skin: '#c68642', hair: '#d9a441', hairStyle: 'ponytail', shirt: '#8e44ad', pants: '#1e272e', shoes: '#f1c40f', accent: '#ffd166', skirt: true } },
+      { id: 'aiko', label: 'content:characters.aiko', text: 'content:characters.aikoText', look: { body: 'f', skin: '#f6d2b0', hair: '#1b1b1b', hairStyle: 'ponytail', shirt: '#00b4d8', pants: '#2d3436', shoes: '#ff4fd8', accent: '#4cc9f0', skirt: true } },
+      { id: 'nia', label: 'content:characters.nia', text: 'content:characters.niaText', look: { body: 'f', skin: '#6b3e26', hair: '#2b1a10', hairStyle: 'long', shirt: '#f1c40f', pants: '#5f27cd', shoes: '#ffffff', accent: '#7cfc00' } },
+      { id: 'sofia', label: 'content:characters.sofia', text: 'content:characters.sofiaText', look: { body: 'f', skin: '#e8b98a', hair: '#8e3b1f', hairStyle: 'long', shirt: '#2ecc71', pants: '#2c3e50', shoes: '#e84393', accent: '#ff4fd8', skirt: true } },
     ] },
     audio: { sounds: {
       boing: { wave: 'sine', notes: [220, 520, 880], dur: 0.07, vol: 0.18 },
@@ -779,7 +786,7 @@ window.GAME_CONTENT = {};
       press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
       wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
       popup: { type: 'popup' }, bumper: { type: 'bumper' }, captcha: { type: 'captcha' }, lbridge: { type: 'loadbridge' },
-      lift: { type: 'lift' }, proxy: { type: 'turnstile' }, bdisk: { type: 'balancedisk' },
+      lift: { type: 'lift' }, proxy: { type: 'turnstile' }, bdisk: { type: 'balancedisk' }, spring: { type: 'springtrap' },
       mover: { type: 'mover', speed: 2.4, wait: 0.7, color: '#4cc9f0' },
       bounce: { type: 'bouncer', power: 11.5, launch: 7 },
       fakepad: { type: 'bouncer', power: 8, launch: 10, look: { color: '#ffd166' } },
@@ -5712,7 +5719,7 @@ GK_LIBRARY.worlds = {
      {k: 'balance', spin}    the CYBER BALANCE DISK: stairs up, a turning and tipping disk over a laser floor, stairs down. 40 m
                        (a fall: back to the checkpoint before it + 3 s frozen)
      Layouts, timings and phases are RANDOM from the world's seed (theme.seed): the same course every time, but no neat rows.
-     Lanes with no traps of their own, and the plazas, get random bumpers and pop-ups (Builder.scatter).
+     Lanes, plazas and the new stretches get random bumpers, pop-ups and SPRING tiles (Builder.scatter); spring-N slots.
      {k: 'bridge'}     Broken bridge over a pit (68 m): jump the gaps in the middle (a hammer swings over two pieces),
                        crumbling tiles on the left, a narrow beam with a sliding laser bar on the right, an island halfway
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
@@ -5899,12 +5906,12 @@ GK_LIBRARY.worlds = {
       for (const n in this.locs) { const L = this.locs[n], ex = /^(sweeper|disk|proxy)-/.test(n) ? 4.5 : 0; if (Math.hypot(L.pos[0] - x, L.pos[2] - z) < r + 1.6 + ex) return false; }   // sweepers etc. turn round their spot
       return true;
     }
-    /** n random traps (kinds: 'bumper' | 'popup') spread over u0..u1 × v0..v1, never on walls, stairs or other slots. */
+    /** n random traps (kinds: 'bumper' | 'popup' | 'spring') spread over u0..u1 × v0..v1, never on walls, stairs or other slots. */
     scatter(F, u0, u1, v0, v1, n, kinds) {
       for (let i = 0, tries = 0; i < n && tries < n * 60; tries++) {
         const kind = kinds[Math.floor(this.rnd() * kinds.length)], u = this.rr(u0, u1), v = this.rr(v0, v1);
-        const data = kind === 'bumper' ? (this.rnd() < 0.35 ? { slide: this.rr(1.2, 2.6), r: this.rr(1.1, 1.5) } : { r: this.rr(1.2, 1.7) }) : { phase: this.rnd() };
-        if (!this.clear(F, u, v, kind === 'popup' ? 2.1 : (data.r || 1.4) + 0.3 + (data.slide || 0))) continue;
+        const data = kind === 'bumper' ? (this.rnd() < 0.4 ? { slide: this.rr(1.2, 2.8), r: this.rr(1.1, 1.5) } : { r: this.rr(1.2, 1.7) }) : kind === 'spring' ? {} : { phase: this.rnd() };
+        if (!this.clear(F, u, v, kind === 'popup' ? 2.1 : kind === 'spring' ? 1.5 : (data.r || 1.4) + 0.3 + (data.slide || 0))) continue;
         this.slot(kind, F, u, v, 0, kind === 'popup' ? Math.round(this.rr(-25, 25)) : 0, data);
         i++;
       }
@@ -5987,7 +5994,7 @@ GK_LIBRARY.worlds = {
       // ----- middle lane: the direct route, with the round's obstacles
       if (o.mid === 'laser') for (const u of [20, 32, 44, 56]) this.slot('laser', F, u, 0, 0, 0);
       else if (o.mid === 'drone') for (const u of [20, 36, 52]) { const n = this.slot('drone', F, u, -3.5, 0.2, 0); this.routes[n] = [F.pt(u, -3.5), F.pt(u, 3.5)].map(p => [p[0], 0.2, p[1]]); }
-      else if (o.mid === 'sweeper') for (const u of [22, 46]) this.slot('sweeper', F, u + this.rr(-3, 3), 0, 0, 0, { spin: (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.0, 1.7) });
+      else if (o.mid === 'sweeper') for (const u of [22, 46]) this.slot('sweeper', F, u + this.rr(-3, 3), 0, 0, 0, { spin: (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.3, 2.1) });
       else if (o.mid === 'glass') {
         // Squid Game glass bridge: two columns of panes; in every row one pane is fake (the same for the whole class)
         for (let u = 20, i = 0; u <= 52; u += 4, i++) { const row = this.num('glassrow'); for (const [c, v] of [[0, -2.3], [1, 2.3]]) this.slot('glass', F, u, v, -0.2, 0, { row, col: c, size: [3.4, 0.2, 3.2] }); }
@@ -5995,12 +6002,12 @@ GK_LIBRARY.worlds = {
       } else if (o.mid === 'hammer') {
         for (const u0 of [22, 38, 54]) {
           const u = u0 + this.rr(-2.5, 2.5);
-          this.slot('hammer', F, u, 0, 0, 0, { period: this.rr(2.2, 3.3), phase: this.rr(0, 6.28) });
+          this.slot('hammer', F, u, 0, 0, 0, { period: this.rr(1.9, 2.8), phase: this.rr(0, 6.28) });
           this.deco(F, 'slab', u, 0, 7.4, 0, { size: [11.4, 0.5, 0.7], color: '#2d3748' });
           for (const v of [-5, 5]) this.deco(F, 'slab', u, v, 3, 0, { size: [0.6, 4.4, 0.6], color: '#2d3748' });
         }
       } else if (o.mid === 'belt') { this.slot('belt', F, 36, 0, 0.02, 0, { size: [6, 40] }); this.belt(F, 16, 56, -3, 3); for (const u of [24, 48]) this.slot('laser', F, u, 0, 0, 0); }
-      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); this.slot('jumpbar', F, 14, 0, 0, 0, { travel: 22, w: 8.6, speed: this.rr(3.6, 5.8) }); this.slot('jumpbar', F, 40, 0, 0, 0, { travel: 20, w: 8.6, speed: this.rr(3.6, 5.8) }); }
+      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); this.slot('jumpbar', F, 14, 0, 0, 0, { travel: 22, w: 8.6, speed: this.rr(4.6, 6.8) }); this.slot('jumpbar', F, 40, 0, 0, 0, { travel: 20, w: 8.6, speed: this.rr(4.6, 6.8) }); }
       // ----- left lane
       const LV = -R;
       if (o.left === 'high' || o.left === 'crumble') {
@@ -6018,7 +6025,7 @@ GK_LIBRARY.worlds = {
         const segs = o.left === 'crumble' ? [[14, 32], [44, 58]] : [[14, 58]], spots = [];
         for (const [a, b] of segs) for (let u = a + 3; u < b - 2; u += 6) spots.push(u + this.rr(-0.8, 0.8));
         spots.forEach((u, i) => {
-          const data = { reach: 8.6, w: 3.2, h: 2, period: this.rr(2.0, 3.0), phase: this.rnd() };
+          const data = { reach: 8.6, w: 3.2, h: 2, period: this.rr(1.7, 2.5), phase: this.rnd() };
           if (i % 2 === 0) { this.slot('pusher', F, u, -half + 0.1, 2.4, -90, data); this.housing(F, u, -1, 2.4); }
           else { this.slot('pusher', F, u, -5.95, 2.4, 90, Object.assign(data, { len: 2.6 })); this.dividerHousing(F, u); }
         });
@@ -6029,7 +6036,7 @@ GK_LIBRARY.worlds = {
         for (const u of [16, 26, 36, 46, 56]) this.deco(F, 'glowStrip', u, LV, 3.15, 0, { size: [6, 0.06, 0.4], color: T.tunnelLight || T.accent }, null, { solid: false });
         for (const u of [20, 32, 44]) this.slot('shard', F, u, LV, 0, 0);
         this.slot('crate', F, 52, LV + 3, 0, 0);
-        this.slot('jumpbar', F, 16, LV, 0, 0, { travel: 36, w: 8.6, speed: this.rr(3.8, 6) });
+        this.slot('jumpbar', F, 16, LV, 0, 0, { travel: 36, w: 8.6, speed: this.rr(4.8, 7) });
       } else if (o.left === 'short') {
         // shortcut: a locked door across the lane (a hard question opens it), then a fast belt
         this.wall(F, 11.6, 12.4, -half, -9.0 - 1.9, 3.4);
@@ -6046,7 +6053,7 @@ GK_LIBRARY.worlds = {
       if (o.right === 'speed') {
         for (const u of [16, 34, 52]) this.slot('pad', F, u, RV, 0.02, 0);
         this.slot('shard', F, 44, RV + 3, 0, 0);
-        for (const u of [17, 27, 37, 47, 59]) { this.slot('pusher', F, u, half - 0.1, 0, 90, { reach: 9.1, w: 3.2, h: 2.2, period: this.rr(2.0, 3.0), phase: this.rnd() }); gaps.push([u, 1]); }   // pushers from the outer wall, all the way across
+        for (const u of [17, 27, 37, 47, 59]) { this.slot('pusher', F, u, half - 0.1, 0, 90, { reach: 9.1, w: 3.2, h: 2.2, period: this.rr(1.7, 2.5), phase: this.rnd() }); gaps.push([u, 1]); }   // pushers from the outer wall, all the way across
       }
       else if (o.right === 'ice') {
         this.slot('ice', F, 22, RV, 0.02, 0, { size: [9, 16] }); this.slot('ice', F, 46, RV, 0.02, 0, { size: [9, 16] });
@@ -6092,9 +6099,10 @@ GK_LIBRARY.worlds = {
       for (const u of [8, 64]) { this.lamp(F, u, -half + 1, 90); this.lamp(F, u, half - 1, -90); }
       for (const v of [-10, 0, 10]) this.slot('ibox', F, 5, v, 0, 0);   // random gadget boxes before the lanes split
       // no free lane: random bumpers and pop-ups in the lanes that have none of their own
-      if (o.left === 'tunnel') this.scatter(F, 12, 60, -13.8, -6.2, 3, ['bumper', 'popup']);
-      if (o.mid === 'plain' || o.mid === 'sweeper' || o.mid === 'drone') this.scatter(F, 12, 60, -3.4, 3.4, 2, ['popup', 'bumper']);
-      if (o.right === 'speed' || o.right === 'fake' || o.right === 'bounce' || o.right === 'ice' || o.right === 'fans') this.scatter(F, 12, o.right === 'fake' ? 42 : 60, 6.2, 13.8, o.right === 'speed' ? 3 : 2, ['bumper', 'popup']);
+      if (o.left === 'tunnel') this.scatter(F, 12, 60, -13.8, -6.2, 6, ['bumper', 'popup', 'spring']);
+      if (o.mid === 'plain' || o.mid === 'sweeper' || o.mid === 'drone' || o.mid === 'laser') this.scatter(F, 12, 60, -3.4, 3.4, 4, ['popup', 'spring', 'bumper', 'spring']);
+      if (o.right === 'speed' || o.right === 'fake' || o.right === 'bounce' || o.right === 'ice' || o.right === 'fans') this.scatter(F, 12, o.right === 'fake' ? 42 : 60, 6.2, 13.8, 5, ['bumper', 'popup', 'spring']);
+      this.scatter(F, 1, 7, -13.5, 13.5, 2, ['spring']);   // springs right where the lanes start
       for (const v of [-8, 8]) this.slot('ibox', F, 67, v, 0, 0);
       this.sides(F, L);
       this.course(F, L, 0);
@@ -6155,6 +6163,7 @@ GK_LIBRARY.worlds = {
         this.deco(F, 'glowStrip', u, 0, 4.2, 0, { size: [W, 0.2, 0.7], color: '#b794f4' });
       });
       this.deco(F, 'neonSign', 6, 0, 0, 180, { color: '#b794f4', w: 8, h: 2, y: 3.6 });
+      for (const [a, b] of [[17, 25], [31, 39], [45, 53]]) this.scatter(F, a, b, -13.5, 13.5, 4, ['spring', 'spring', 'bumper']);   // springs between the door walls
       this.sides(F, L);
       this.course(F, L, 0);
       this.advance(F, L);
@@ -6216,7 +6225,7 @@ GK_LIBRARY.worlds = {
     }
     finishStretch(F, L) { this.sides(F, L); this.course(F, L, 0); this.advance(F, L); }
     /** Spam cannons on the side fences, shooting across the road at the given u (alternating sides). */
-    cannons(F, us) { us.forEach(u => { const s = this.rnd() < 0.5 ? 1 : -1; this.slot('cannon', F, u, s * (W / 2 - 0.9), 0, s > 0 ? 90 : -90, { range: W - 2, phase: this.rnd(), period: this.rr(2.0, 3.0) }); }); }
+    cannons(F, us) { us.forEach(u => { const s = this.rnd() < 0.5 ? 1 : -1; this.slot('cannon', F, u, s * (W / 2 - 0.9), 0, s > 0 ? 90 : -90, { range: W - 2, phase: this.rnd(), period: this.rr(1.6, 2.4) }); }); }
     /** A wall of 5 ports across the road at u (posts between them; the trap decides which ports are open). */
     portWall(F, u) {
       const row = this.num('portrow'), half = W / 2, T = this.T;
@@ -6234,8 +6243,9 @@ GK_LIBRARY.worlds = {
         for (const s of [-1, 1]) this.deco(F, 'slab', u, s * (W / 2 + 1.4), 0, 0, { size: [0.9, 7.8, 0.9], color: '#2d3748' });
       });
       if (o.cannons) this.cannons(F, [42, 46, 50, 54].map(u => u + this.rr(-1, 1)));
-      if (o.rain) this.slot('rain', F, 48, 0, 0, 0, { area: [W - 2, 16], n: 9 });
+      if (o.rain) this.slot('rain', F, 48, 0, 0, 0, { area: [W - 2, 16], n: 12, period: 2.4 });
       this.deco(F, 'neonSign', 4, -12, 0, 180, { color: '#ffd166', w: 4, h: 1.8, y: 2.6 });
+      this.scatter(F, 4, 39, -13.5, 13.5, 6, ['spring']);   // springs between the press rows
       this.finishStretch(F, L);
     }
     buffer(o) {
@@ -6293,7 +6303,7 @@ GK_LIBRARY.worlds = {
       o = o || {};
       const L = 48, F = this.stretch(L);
       this.portWall(F, 12);
-      if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14], n: 9 });
+      if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14], n: 12, period: 2.4 });
       this.portWall(F, 36);
       this.finishStretch(F, L);
     }
@@ -6302,16 +6312,17 @@ GK_LIBRARY.worlds = {
       const L = 52, F = this.stretch(L);
       for (let u = 8; u < 47; u += 4.5) {   // rows of pop-ups at random places, edge to edge, with bumpers between
         const uu = u + this.rr(-0.8, 0.8), vs = [];
-        for (let k = 0; k < 40 && vs.length < (this.rnd() < 0.5 ? 3 : 4); k++) { const v = this.rr(-13, 13); if (vs.every(w => Math.abs(w - v) > 4.4)) vs.push(v); }
-        vs.forEach(v => this.slot('popup', F, uu, v, 0, Math.round(this.rr(-20, 20)), { phase: this.rnd(), period: this.rr(4, 6) }));
+        for (let k = 0; k < 60 && vs.length < (this.rnd() < 0.5 ? 4 : 5); k++) { const v = this.rr(-13, 13); if (vs.every(w => Math.abs(w - v) > 4.4)) vs.push(v); }
+        vs.forEach(v => this.slot('popup', F, uu, v, 0, Math.round(this.rr(-20, 20)), { phase: this.rnd(), period: this.rr(4, 5.5), up: this.rr(3, 3.8) }));
       }
-      this.scatter(F, 8, 48, -13.3, 13.3, o.bumpers ? 9 : 5, ['bumper']);
+      this.scatter(F, 8, 48, -13.3, 13.3, o.bumpers ? 12 : 8, ['bumper', 'spring']);
       this.deco(F, 'neonSign', 4, 12, 0, 180, { color: '#ff4fd8', w: 4, h: 1.8, y: 2.6 });
       this.finishStretch(F, L);
     }
     pinball() {
       const L = 48, F = this.stretch(L);
-      this.scatter(F, 7, 45, -13.3, 13.3, 26, ['bumper']);   // a random field, a third of them sliding
+      this.scatter(F, 7, 45, -13.3, 13.3, 30, ['bumper']);   // a random field, many of them sliding
+      this.scatter(F, 7, 45, -13.3, 13.3, 8, ['spring']);
       this.finishStretch(F, L);
     }
     captcha() {
@@ -6320,7 +6331,7 @@ GK_LIBRARY.worlds = {
       for (const v of [-10, 0, 10]) this.slot('captcha', F, wu + 0.3, v, 0, 0, { size: [5, wh, 0.6] });
       this.deco(F, 'glowStrip', wu + 0.3, 0, wh, 0, { size: [W, 0.15, 0.7], color: '#2563eb' });
       this.loc('cp-' + this.num('cp'), F, 16, 0, 0, 0);
-      this.scatter(F, 18, 38, -13.3, 13.3, 8, ['popup', 'bumper', 'popup']);
+      this.scatter(F, 18, 38, -13.3, 13.3, 12, ['popup', 'bumper', 'spring']);
       this.finishStretch(F, L);
     }
     lbridge(o) {
@@ -6375,7 +6386,7 @@ GK_LIBRARY.worlds = {
     proxy() {
       const L = 52, F = this.stretch(L);
       [14, 36].map(u => u + this.rr(-1.5, 1.5)).forEach(u => [-10, 0, 10].forEach(v => {   // 3 revolving doors per row, edge to edge
-        const spin = (this.rnd() < 0.5 ? -1 : 1) * this.rr(0.5, 0.9);
+        const spin = (this.rnd() < 0.5 ? -1 : 1) * this.rr(0.7, 1.1);
         this.slot('proxy', F, u + this.rr(-0.6, 0.6), v + this.rr(-0.5, 0.5), 0, Math.round(this.rr(0, 90)), { r: 5, h: 3, spin });
       }));
       this.finishStretch(F, L);
@@ -6459,12 +6470,12 @@ GK_LIBRARY.worlds = {
       if (o.case !== false) this.slot('case', F, toward[0], toward[1], 0, side === 0 ? -90 : 180);
       for (const [du, dv] of [[-9, 0], [9, 0], [0, -9], [0, 9]]) if (Math.abs(lv + dv) < half - 2) this.slot('shard', F, lu + du, lv + dv, 0, 0);
       for (const v of [-6, 0, 6]) this.slot('ibox', F, 5, v, 0, 0);
-      const sp = () => (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.0, 1.7);
+      const sp = () => (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.3, 2.1);
       this.slot('sweeper', F, 13, 0, 0, 0, { length: 10, spin: sp() });
       if (side === 0) this.slot('sweeper', F, P - 10, 0, 0, 0, { length: 10, spin: sp() }); else this.slot('sweeper', F, P / 2, side * 13, 0, 0, { length: 10, spin: sp() });
       this.slot('crate', F, 4, o.comeback && side > 0 ? half - 3 : -half + 3, 0, 0); this.slot('crate', F, P - 4, side > 0 ? -half + 3 : half - 3, 0, 0);   // never on the comeback platform
       if (o.comeback) this.comeback(F, side === 0 ? P - 6 : 6, side >= 0 ? -half + 5 : half - 5, side);
-      this.scatter(F, 7, P - 6, -half + 2.5, half - 2.5, 5, ['bumper', 'popup', 'bumper']);   // random traps all over the square
+      this.scatter(F, 7, P - 6, -half + 2.5, half - 2.5, 11, ['bumper', 'popup', 'spring', 'spring']);   // random traps all over the square
       // world life: something moving around the plaza outside its walls
       if (T.life) {
         const n = this.slot('life', F, -6, -half - 10, T.life.y || 0, 0, { kind: T.life.kind });
@@ -8674,6 +8685,7 @@ GK_LIBRARY.worlds = {
      { type: 'loadbridge', len: 14, n: 10, period: 9 }                   LOADING BRIDGE: loads across a gap, then unloads from the far end
      { type: 'lift', size, h: 3.2, period: 7 }                           UPLOAD LIFT: rides up a server wall and down again
      { type: 'turnstile', r: 6.5, spin: 0.6 }                            ROTATING PROXY: a giant revolving door
+     { type: 'springtrap', s: 2.4, power: 14 }                           SPRING TRAP: a floor tile that throws you BACKWARD
      { type: 'balancedisk', r: 9.5, spin: 0.35, tilt: 0.022 }            CYBER BALANCE DISK: a turning, tipping disk over a laser floor
    Timing is RANDOM but shared: presses slam at a different moment each cycle, pop-ups pop up at random times, cannons skip
    shots and change speed, waves come late or early, the bit-flip half is chosen at random, doors and disks speed up and slow
@@ -8989,7 +9001,7 @@ GK_LIBRARY.worlds = {
   /** POP-UP AD: {type: 'popup', period: 5, up: 2.6, phase}. Pops up from the floor and blocks the way; PUNCH it to close it (for
       you, +2), or run round it. A pop-up that springs up under you pushes you off. */
   P.add('popup', {
-    defaults: { model: 'popupAd', solid: true, period: 5, up: 2.8, phase: 0 },
+    defaults: { model: 'popupAd', solid: true, period: 5, up: 3.3, phase: 0 },
     init(e) {
       e.setLook({ color: ['#ff4fd8', '#f6ad55', '#38bdf8', '#7cfc00'][hashOf(e.id) % 4] });
       e.state.k = 0; e.labelRange = 14; e.botZone = { kind: 'popup', len: 2, chance: 0.4, pause: 1.2 };
@@ -9019,7 +9031,7 @@ GK_LIBRARY.worlds = {
   M.add('bumper', o => { const r = o.r || 1.4, c = o.color || '#38bdf8'; return G().cyl(0, 0, 0, r * 0.75, 0.7, '#1e293b', { seg: 16 }).cyl(0, 0.7, 0, r, 0.45, c, { seg: 16, glow: 0.7 }).cyl(0, 1.15, 0, r * 0.55, 0.12, '#ffffff', { seg: 16, glow: 1 }); });
   /** PINBALL BUMPER: {type: 'bumper', r: 1.4, power: 10}. Touch it and you bounce away (it flashes). */
   P.add('bumper', {
-    defaults: { model: 'bumper', solid: false, r: 1.4, power: 10, slide: 0 },
+    defaults: { model: 'bumper', solid: false, r: 1.4, power: 12, slide: 0 },
     init(e) { e.setLook({ r: e.def.r, color: ['#38bdf8', '#ff4fd8', '#ffd166'][hashOf(e.id) % 3] }); e.base = e.pos.slice(); e.botZone = { kind: 'bumper', len: 3, chance: 0.35, pause: 0.9 }; },
     update(e, dt, g) {
       const d = e.def, S = e.state;
@@ -9203,6 +9215,32 @@ GK_LIBRARY.worlds = {
         if (g.terrainPush) {   // carried round, and drifting downhill
           g.terrainPush[0] += st.w * dz - st.sx * d.push; g.terrainPush[1] += -st.w * dx - st.sz * d.push;
         }
+      }
+    },
+  });
+
+
+  M.add('springTile', o => {   // a floor tile with a coiled spring and arrows pointing BACK (−z): it throws you that way
+    const s = o.s || 2.4, g = G().box(0, 0, 0, s, 0.1, s, '#2d3748', { top: '#4a5568' }).box(0, 0.1, 0, s - 0.3, 0.06, s - 0.3, '#ff6b35', { glow: 0.55 });
+    for (const z of [0.35, -0.45]) for (const k of [-1, 1]) g.add(G().box(0, 0, 0, 0.16, 0.03, 0.75, '#ffffff', { glow: 1 }).rotY(k * 0.75).move(k * 0.24, 0.17, z));   // "back" arrows
+    for (const x of [-s / 2 + 0.18, s / 2 - 0.18]) for (let i = 0; i < 4; i++) g.box(x, 0.06 + i * 0.07, 0, 0.14, 0.04, s - 0.5, '#e2e8f0', { glow: 0.3 });   // the coil
+    return g;
+  });
+  /** SPRING TRAP: {type: 'springtrap', s: 2.4, power: 14, up: 7.5}. Step on it and it throws you BACKWARD (against the way it
+      faces: the course direction), high and far. Its plate jumps up when it fires. */
+  P.add('springtrap', {
+    defaults: { model: 'springTile', solid: false, s: 2.4, power: 14, up: 7.5 },
+    init(e) { e.setLook({ s: e.def.s }); e.botZone = { kind: 'spring', len: 3, chance: 0.4, pause: 1.6 }; },
+    update(e, dt, g) {
+      const d = e.def, S = e.state;
+      if (S.cd > 0) S.cd -= dt;
+      if (S.pop > 0) { S.pop -= dt; e.scale = [1, 1 + S.pop * 6, 1]; e.hi = S.pop * 2; } else { e.scale = [1, 1, 1]; e.hi = 0; }
+      if (!e.enabled || !live(g) || S.cd > 0) return;
+      const pl = g.player, L = local(e, pl.pos);
+      if (Math.abs(L.x) < d.s / 2 && Math.abs(L.z) < d.s / 2 && Math.abs(L.y) < 0.4) {
+        S.cd = 0.8; S.pop = 0.3;
+        const f = fwd(e);
+        if (hit(g, e, 'spring', [-f[0], -f[1]], d.power, 0.5, d.up)) { g.audio.play('boing'); burst(g, [pl.pos[0], pl.pos[1] + 0.3, pl.pos[2]], '#ff6b35', 12); }
       }
     },
   });
@@ -10590,7 +10628,8 @@ window.GK_ONLINE_CONFIG = {
 
   // ===================== CSS =====================
   const CSS = '.rush-timer{position:absolute;left:50%;top:10px;transform:translateX(-50%);font:900 34px/1 system-ui;color:#fff;background:rgba(10,14,28,.7);padding:8px 18px;border-radius:14px;letter-spacing:.04em;z-index:3;text-shadow:0 2px 8px #000}' +
-    '.rush-timer.warn{color:#ffd166}.rush-timer.end{color:#ff4d6d;animation:gkpulse .5s infinite alternate}.rush-timer small{display:block;font:700 11px system-ui;opacity:.75;text-align:center;letter-spacing:.12em}' +
+    '.gk-chars-row .gk-char{width:96px;padding:6px 4px}.gk-chars-row .gk-char svg{width:52px;height:52px}' +   // 10 racers: two rows of 5
+    '.rush-timer.fast{color:#ff9f43}.rush-timer.warn{color:#ffd166}.rush-timer.end{color:#ff4d6d;animation:gkpulse .5s infinite alternate}.rush-timer small{display:block;font:700 11px system-ui;opacity:.75;text-align:center;letter-spacing:.12em}' +
     '.rush-pos{position:absolute;right:14px;top:70px;min-width:170px;background:rgba(10,14,28,.72);border-radius:14px;padding:8px 12px;color:#fff;font:600 13px system-ui;z-index:3}' +
     '.rush-pos b.big{font:900 30px system-ui;color:#ffd166}.rush-pos ol{margin:6px 0 0;padding-left:20px}.rush-pos li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}.rush-pos li.me{color:#7cfc00;font-weight:800}.rush-pos li.fin::after{content:" ✔";color:#ffd166}' +
     '.rush-banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font:900 64px/1.05 system-ui;color:#fff;text-align:center;text-shadow:0 4px 18px rgba(0,0,0,.8);pointer-events:none;z-index:4;opacity:0;transition:opacity .2s}' +
@@ -10955,6 +10994,9 @@ window.GK_ONLINE_CONFIG = {
       if (g.state.mode === 'paused' && st.phase !== 'over') { const d = wall - last; t.prepEnd += d; t.startAt += d; t.endAt += d; }
       else if (st.phase === 'running' && g.state.mode === 'modal') stepBots(g, Math.min(0.25, (wall - last) / 1000));
     }
+    // ⏩ once the FIRST racer is past the finish line, the rest of the round runs at double speed (half the time is left;
+    // the timer counts down 2 s every second). Solo here; online the host does it.
+    if (R.mode === 'solo' && t && st.phase === 'running' && !t.fastAt && (st.finished || (R.bots || []).some(b => b.fin))) { t.fastAt = now; t.endAt = now + (t.endAt - now) / 2; }
     // solo: the round ends early only when you AND every bot are past the finish line (the round time is the hard limit;
     // online, the host does the same for the class)
     if (R.mode === 'solo' && t && st.phase === 'running' && st.finished && (R.bots || []).every(b => b.fin)) t.endAt = Math.min(t.endAt, now + 2500);
@@ -10969,11 +11011,13 @@ window.GK_ONLINE_CONFIG = {
       else if (phase === 'prep') { txt = fmt((t.prepEnd - now) / 1000); sub = 'GET READY'; }
       else if (phase === 'countdown') { txt = fmt(t.len / 1000); sub = 'ROUND ' + (g.levelIndex + 1); }
       else if (phase === 'running') {
-        const left = (t.endAt - now) / 1000;
+        const left = (t.endAt - now) / 1000 * (t.fastAt ? 2 : 1);   // ⏩ double speed: shown as 2 s per second
+        if (t.fastAt && !st.fastSeen) { st.fastSeen = 1; banner(g, '⏩ ×2', 'bad', 1.8); g.audio.play('tick'); }
         txt = fmt(left); sub = 'ROUND ' + (g.levelIndex + 1) + ' / ' + g.levelCount; cls = left <= 10 ? 'end' : left <= 60 ? 'warn' : '';
         for (const w of [300, 120, 60]) if (left <= w && left > w - 2 && !st.warned[w] && t.len / 1000 > w + 5) { st.warned[w] = 1; banner(g, (w / 60) + ':00 LEFT', w === 60 ? 'bad' : '', 1.8); g.audio.play('tick'); }
         if (left <= 10 && Math.ceil(left) !== st.lastTick) { st.lastTick = Math.ceil(left); banner(g, String(Math.max(1, Math.ceil(left))), 'bad', 0.8); g.audio.play('tick'); }
         if (st.finished) sub = 'FINISHED ' + ORD(st.place || 1);
+        if (t.fastAt) { sub = '⏩ ×2 · ' + sub; if (!cls) cls = 'fast'; }
       } else { txt = '0:00'; sub = 'TIME UP'; }
       const html = txt + '<small>' + sub + '</small>';
       if (timer._h !== html) { timer._h = html; timer.innerHTML = html; }
@@ -11240,7 +11284,7 @@ window.GK_ONLINE_CONFIG = {
     overlay(g, null);
     if (round !== g.levelIndex) g.loadLevel(round);
     g.online.ref('ev').remove();   // clear last round's gadget events
-    hostNode(g, { round, phase: 'prep', prepEnd: now + c.prep * 1000, startAt: now + (c.prep + c.countdown + 0.5) * 1000, endAt: now + (c.prep + c.countdown + 0.5) * 1000 + len, len, n: g.levelCount, resultsFor: null });
+    hostNode(g, { round, phase: 'prep', prepEnd: now + c.prep * 1000, startAt: now + (c.prep + c.countdown + 0.5) * 1000, endAt: now + (c.prep + c.countdown + 0.5) * 1000 + len, len, n: g.levelCount, resultsFor: null, fastAt: null });
     R.computed = null;
     drawHost(GK.current, true);
   }
@@ -11262,6 +11306,9 @@ window.GK_ONLINE_CONFIG = {
     const n = R.node, now = g.online ? g.online.serverNow() : Date.now();
     if (n && n.round === g.levelIndex && n.phase === 'prep') {
       if (now >= n.endAt + 2500 && R.computed !== n.round && g.levelIndex === n.round) hostResults(g);
+      // ⏩ the first finisher: the rest of the round runs at double speed
+      const anyFin = g.online.players().some(p => p.on && !p.me && p.raw && p.raw.fin > 0 && p.raw.r === n.round);
+      if (anyFin && !n.fastAt && now > n.startAt && now < n.endAt) hostNode(g, { fastAt: now, endAt: now + (n.endAt - now) / 2 });
       // everyone finished: end the round early
       const on = g.online.players().filter(p => p.on && !p.me), done = on.filter(p => p.raw && p.raw.fin > 0 && p.raw.r === n.round);
       if (now > n.startAt + 5000 && now < n.endAt && on.length && done.length === on.length) hostNode(g, { endAt: now });
