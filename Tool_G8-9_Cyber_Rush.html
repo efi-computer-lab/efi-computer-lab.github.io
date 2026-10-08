@@ -667,7 +667,7 @@ window.GAME_CONTENT = {};
   C.rounds = [
     { name: 'Neon City', text: 'TRAINING: 🔴 Red Light, Green Light, 🚪 Door Dash, lasers and a glass bridge.' },
     { name: 'Digital Forest', text: '🪨 Boulder hill, 🌉 broken bridge, 🔵 pinball bumpers and ☑ captcha gates (punch the button!).' },
-    { name: 'Data Factory', text: '📦 Packet Press, ⬆ Upload Lifts, 🪧 Pop-up Ads, ⏳ Buffering Doors, 🟦 Bit Flip. Points ×1.1' },
+    { name: 'Data Factory', text: '📦 Packet Press, 🌀 Balance Disk, ⬆ Upload Lifts, 🪧 Pop-up Ads, 🟦 Bit Flip. Points ×1.1' },
     { name: 'Digital Ocean', text: '🌊 Packet Wave, 💿 Hard Drive, 📶 Loading Bridges, 🔄 Revolving Doors, 🟩 Pixel Rain. Points ×1.25' },
     { name: 'Cyber Core', text: 'CHAMPIONSHIP: every trap, now in pairs. Points ×1.5!' },
   ];
@@ -779,7 +779,7 @@ window.GAME_CONTENT = {};
       press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
       wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
       popup: { type: 'popup' }, bumper: { type: 'bumper' }, captcha: { type: 'captcha' }, lbridge: { type: 'loadbridge' },
-      lift: { type: 'lift' }, proxy: { type: 'turnstile' },
+      lift: { type: 'lift' }, proxy: { type: 'turnstile' }, bdisk: { type: 'balancedisk' },
       mover: { type: 'mover', speed: 2.4, wait: 0.7, color: '#4cc9f0' },
       bounce: { type: 'bouncer', power: 11.5, launch: 7 },
       fakepad: { type: 'bouncer', power: 8, launch: 10, look: { color: '#ffd166' } },
@@ -1143,7 +1143,7 @@ GK_LIBRARY.mechanics = {
   online: { needs: [], spatial: true, files: ['online/firebase/firebase-app-compat', 'online/firebase/firebase-database-compat', 'online/config'], about: 'internet rooms (room code), other players drawn as animated ghosts, position sync, events; free Firebase (online/)' },
   terrain: { needs: [], spatial: true, about: 'conveyor belts, bounce pads, speed pads, ice, crumbling platforms, wind / low-gravity zones, spinning sweeper bars; game.knock()' },
   music: { needs: [], spatial: false, about: 'background music made live with WebAudio (bass, arpeggios, pad, drums; style per game or level); game.musicLevel()' },
-  cybertraps: { needs: ['terrain'], spatial: true, about: 'cyber obstacles that delay racers: packet press, spam cannon, buffering door, bit-flip tiles, packet wave, port shuffle, spinning hard drive, pixel rain (shared clock: same on every PC)' },
+  cybertraps: { needs: ['terrain'], spatial: true, about: 'cyber obstacles that delay racers: packet press, spam cannon, buffering door, bit-flip tiles, packet wave, port shuffle, spinning hard drive, pixel rain, pop-ups, bumpers, captcha gate, loading bridge, upload lift, revolving door, balance disk (shared clock: same on every PC)' },
   juice: { needs: [], spatial: true, about: 'game feel: speed widens the view + speed lines, dust puffs when running, landing rings, boost trails; game.fxBurst()' },
   'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
   gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
@@ -5708,7 +5708,11 @@ GK_LIBRARY.worlds = {
      {k: 'captcha'}          a wall of 3 CAPTCHA GATES (punch the button 3 times), then pop-ups. 40 m
      {k: 'lbridge', period}  two gaps, each with 3 LOADING BRIDGES (different timing), an island between. 56 m
      {k: 'lifts'}            a tall SERVER WALL: ride an UPLOAD LIFT up, run along the top, jump down. 44 m
-     {k: 'proxy'}            two rows of ROTATING PROXY revolving doors. 52 m
+     {k: 'proxy'}            two rows of 3 ROTATING PROXY revolving doors. 52 m
+     {k: 'balance', spin}    the CYBER BALANCE DISK: stairs up, a turning and tipping disk over a laser floor, stairs down. 40 m
+                       (a fall: back to the checkpoint before it + 3 s frozen)
+     Layouts, timings and phases are RANDOM from the world's seed (theme.seed): the same course every time, but no neat rows.
+     Lanes with no traps of their own, and the plazas, get random bumpers and pop-ups (Builder.scatter).
      {k: 'bridge'}     Broken bridge over a pit (68 m): jump the gaps in the middle (a hammer swings over two pieces),
                        crumbling tiles on the left, a narrow beam with a sliding laser bar on the right, an island halfway
      {k: 'gate'}                                     a firewall wall with 3 doors and 3 terminals, a checkpoint after it
@@ -5724,7 +5728,7 @@ GK_LIBRARY.worlds = {
      boulder-N (+route) · ddoor-N {row, real, width, height} · abyss-N {size} (the pit floor: touching it = a fall) ·
      airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps) ·
      press-N {size, phase, period} · cannon-N {range} · bdoor-N {size} · flip-N {size, group, period} · wave-N {size, len} ·
-     port-N {row, index, n, size} · disk-N {r, spin} · rain-N {area}
+     port-N {row, index, n, size} · disk-N {r, spin} · rain-N {area} · bdisk-N {r, spin}
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
 (function () {
@@ -5876,9 +5880,35 @@ GK_LIBRARY.worlds = {
     constructor(theme) {
       this.T = theme; this.rnd = U.rng(theme.seed || 7);
       this.floors = []; this.walls = []; this.plats = []; this.stairs = []; this.scenery = []; this.locs = {}; this.routes = { course: [] };
-      this.lights = []; this.n = {}; this.gateN = 0; this.rects = []; this.cur = { x: 0, z: 0, dir: theme.dir || 'e' };
+      this.lights = []; this.n = {}; this.gateN = 0; this.rects = []; this.avoid = []; this.cur = { x: 0, z: 0, dir: theme.dir || 'e' };
     }
     num(kind) { return (this.n[kind] = (this.n[kind] || 0) + 1); }
+    /** A random number in [a, b) from this world's seeded generator (the same course every time). */
+    rr(a, b) { return a + this.rnd() * (b - a); }
+    /** Is (u, v) in frame F free for a trap of radius r: on a floor, clear of walls, stairs, landmarks and other slots? */
+    clear(F, u, v, r) {
+      const p = F.pt(u, v), x = p[0], z = p[1];
+      if (!this.rects.some(q => x > q.x0 && x < q.x1 && z > q.z0 && z < q.z1)) return false;
+      if (this.plats.some(b => Math.abs(x - b.pos[0]) < b.size[0] / 2 + r && Math.abs(z - b.pos[2]) < b.size[2] / 2 + r)) return false;
+      if (this.avoid.some(a => Math.hypot(x - a.x, z - a.z) < a.r + r)) return false;
+      for (const st of this.stairs) {
+        const D = DIRS[st.dir], len = st.steps * st.run, cx = st.pos[0] + D.a[0] * len / 2, cz = st.pos[2] + D.a[1] * len / 2;
+        const hx = Math.abs(D.a[0]) * len / 2 + Math.abs(D.c[0]) * st.width / 2, hz = Math.abs(D.a[1]) * len / 2 + Math.abs(D.c[1]) * st.width / 2;
+        if (Math.abs(x - cx) < hx + r && Math.abs(z - cz) < hz + r) return false;
+      }
+      for (const n in this.locs) { const L = this.locs[n], ex = /^(sweeper|disk|proxy)-/.test(n) ? 4.5 : 0; if (Math.hypot(L.pos[0] - x, L.pos[2] - z) < r + 1.6 + ex) return false; }   // sweepers etc. turn round their spot
+      return true;
+    }
+    /** n random traps (kinds: 'bumper' | 'popup') spread over u0..u1 × v0..v1, never on walls, stairs or other slots. */
+    scatter(F, u0, u1, v0, v1, n, kinds) {
+      for (let i = 0, tries = 0; i < n && tries < n * 60; tries++) {
+        const kind = kinds[Math.floor(this.rnd() * kinds.length)], u = this.rr(u0, u1), v = this.rr(v0, v1);
+        const data = kind === 'bumper' ? (this.rnd() < 0.35 ? { slide: this.rr(1.2, 2.6), r: this.rr(1.1, 1.5) } : { r: this.rr(1.2, 1.7) }) : { phase: this.rnd() };
+        if (!this.clear(F, u, v, kind === 'popup' ? 2.1 : (data.r || 1.4) + 0.3 + (data.slide || 0))) continue;
+        this.slot(kind, F, u, v, 0, kind === 'popup' ? Math.round(this.rr(-25, 25)) : 0, data);
+        i++;
+      }
+    }
     slot(kind, F, u, v, y, rot, data) { const name = kind + '-' + this.num(kind); this.loc(name, F, u, v, y, rot, data); return name; }
     loc(name, F, u, v, y, rot, data) { const p = F.pt(u, v); this.locs[name] = { pos: [p[0], y || 0, p[1]], rot: F.rot(rot), data }; }
     floor(F, u0, u1, v0, v1, color, y) {
@@ -5957,31 +5987,34 @@ GK_LIBRARY.worlds = {
       // ----- middle lane: the direct route, with the round's obstacles
       if (o.mid === 'laser') for (const u of [20, 32, 44, 56]) this.slot('laser', F, u, 0, 0, 0);
       else if (o.mid === 'drone') for (const u of [20, 36, 52]) { const n = this.slot('drone', F, u, -3.5, 0.2, 0); this.routes[n] = [F.pt(u, -3.5), F.pt(u, 3.5)].map(p => [p[0], 0.2, p[1]]); }
-      else if (o.mid === 'sweeper') for (const u of [22, 46]) this.slot('sweeper', F, u, 0, 0, 0);
+      else if (o.mid === 'sweeper') for (const u of [22, 46]) this.slot('sweeper', F, u + this.rr(-3, 3), 0, 0, 0, { spin: (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.0, 1.7) });
       else if (o.mid === 'glass') {
         // Squid Game glass bridge: two columns of panes; in every row one pane is fake (the same for the whole class)
         for (let u = 20, i = 0; u <= 52; u += 4, i++) { const row = this.num('glassrow'); for (const [c, v] of [[0, -2.3], [1, 2.3]]) this.slot('glass', F, u, v, -0.2, 0, { row, col: c, size: [3.4, 0.2, 3.2] }); }
         this.deco(F, 'neonSign', 15, 0, 3, 180, { color: '#9be7ff', w: 7, h: 1.8, y: 0.3 });
       } else if (o.mid === 'hammer') {
-        for (const u of [22, 38, 54]) {
-          this.slot('hammer', F, u, 0, 0, 0);
+        for (const u0 of [22, 38, 54]) {
+          const u = u0 + this.rr(-2.5, 2.5);
+          this.slot('hammer', F, u, 0, 0, 0, { period: this.rr(2.2, 3.3), phase: this.rr(0, 6.28) });
           this.deco(F, 'slab', u, 0, 7.4, 0, { size: [11.4, 0.5, 0.7], color: '#2d3748' });
           for (const v of [-5, 5]) this.deco(F, 'slab', u, v, 3, 0, { size: [0.6, 4.4, 0.6], color: '#2d3748' });
         }
       } else if (o.mid === 'belt') { this.slot('belt', F, 36, 0, 0.02, 0, { size: [6, 40] }); this.belt(F, 16, 56, -3, 3); for (const u of [24, 48]) this.slot('laser', F, u, 0, 0, 0); }
-      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); this.slot('jumpbar', F, 14, 0, 0, 0, { travel: 22, w: 8.6 }); this.slot('jumpbar', F, 40, 0, 0, 0, { travel: 20, w: 8.6 }); }
+      else { this.slot('pad', F, 24, 0, 0.02, 0); this.slot('pad', F, 48, 0, 0.02, 0); this.slot('jumpbar', F, 14, 0, 0, 0, { travel: 22, w: 8.6, speed: this.rr(3.6, 5.8) }); this.slot('jumpbar', F, 40, 0, 0, 0, { travel: 20, w: 8.6, speed: this.rr(3.6, 5.8) }); }
       // ----- left lane
       const LV = -R;
       if (o.left === 'high' || o.left === 'crumble') {
         this.stairs.push({ pos: [...((p => [p[0], 0, p[1]])(F.pt(10, LV)))], dir: F.dir, steps: 8, rise: 0.3, run: 0.5, width: 8, color: T.stairs || T.wall });
         const gapA = o.left === 'crumble' ? 32 : 99, gapB = o.left === 'crumble' ? 44 : 99;
-        this.box(F, 14, Math.min(58, gapA), LV - 4, LV + 4, 2.0, 0.4, T.walk || T.wall, { top: T.walkTop });
+        this.box(F, 14, Math.min(58, gapA), LV - 4, LV + 4, 0, 2.4, T.walk || T.wall, { top: T.walkTop });   // solid: nobody runs underneath
         if (gapB < 58) {
-          this.box(F, gapB, 58, LV - 4, LV + 4, 2.0, 0.4, T.walk || T.wall, { top: T.walkTop });
+          this.box(F, gapB, 58, LV - 4, LV + 4, 0, 2.4, T.walk || T.wall, { top: T.walkTop });
+          this.slot('abyss', F, (gapA + gapB) / 2, LV, 0, 0, { size: [8, 1.0, gapB - gapA], top: 2.4 });   // fall from the crumbling tiles = back to the checkpoint
+          for (let u = gapA + 1; u < gapB; u += 2.5) this.deco(F, 'glowStrip', u, LV, 0.05, 0, { size: [7.6, 0.04, 0.18], color: '#ff2d55' });
           for (const u of [34, 38, 42]) this.slot('crumble', F, u + 0, LV, 2.0, 0, { size: [3.4, 0.4, 3.4] });
         }
         for (const u of [20, 28, 48, 54]) this.slot('shard', F, u, LV, 2.4, 0);
-        for (const u of [24, 52]) { this.slot('pusher', F, u, -half + 0.1, 2.4, -90, { reach: 4.5, w: 3, h: 2 }); this.housing(F, u, -1, 2.4); }   // shove you off the walkway
+        for (const u of [24, 52]) { this.slot('pusher', F, u, -half + 0.1, 2.4, -90, { reach: 4.5, w: 3, h: 2, period: this.rr(2.2, 3.2), phase: this.rnd() }); this.housing(F, u, -1, 2.4); }   // shove you off the walkway
         for (const u of [16, 30, 46, 57]) this.deco(F, 'glowStrip', u, LV - 4, 2.4, 0, { size: [0.15, 0.6, 0.15], color: T.accent }, null, { solid: false });
       } else if (o.left === 'tunnel') {
         this.deco(F, 'slab', 36, LV, 3.2, 0, { size: [10.2, 0.5, 52], color: T.roof || dk(T.wall, 0.8) }, null, { solid: false });
@@ -5989,7 +6022,7 @@ GK_LIBRARY.worlds = {
         for (const u of [16, 26, 36, 46, 56]) this.deco(F, 'glowStrip', u, LV, 3.15, 0, { size: [6, 0.06, 0.4], color: T.tunnelLight || T.accent }, null, { solid: false });
         for (const u of [20, 32, 44]) this.slot('shard', F, u, LV, 0, 0);
         this.slot('crate', F, 52, LV + 3, 0, 0);
-        this.slot('jumpbar', F, 16, LV, 0, 0, { travel: 36, w: 8.6 });
+        this.slot('jumpbar', F, 16, LV, 0, 0, { travel: 36, w: 8.6, speed: this.rr(3.8, 6) });
       } else if (o.left === 'short') {
         // shortcut: a locked door across the lane (a hard question opens it), then a fast belt
         this.wall(F, 11.6, 12.4, -half, -9.0 - 1.9, 3.4);
@@ -6006,7 +6039,7 @@ GK_LIBRARY.worlds = {
       if (o.right === 'speed') {
         for (const u of [16, 34, 52]) this.slot('pad', F, u, RV, 0.02, 0);
         this.slot('shard', F, 44, RV + 3, 0, 0);
-        for (const u of [25, 43, 60]) { this.slot('pusher', F, u, half - 0.1, 0, 90, { reach: 5, w: 3, h: 2.2 }); gaps.push([u, 1]); }   // pushers from the outer wall
+        for (const u of [25, 43, 60]) { this.slot('pusher', F, u, half - 0.1, 0, 90, { reach: 5, w: 3, h: 2.2, period: this.rr(2.2, 3.2), phase: this.rnd() }); gaps.push([u, 1]); }   // pushers from the outer wall
       }
       else if (o.right === 'ice') {
         this.slot('ice', F, 22, RV, 0.02, 0, { size: [9, 16] }); this.slot('ice', F, 46, RV, 0.02, 0, { size: [9, 16] });
@@ -6051,6 +6084,10 @@ GK_LIBRARY.worlds = {
       }
       for (const u of [8, 64]) { this.lamp(F, u, -half + 1, 90); this.lamp(F, u, half - 1, -90); }
       for (const v of [-10, 0, 10]) this.slot('ibox', F, 5, v, 0, 0);   // random gadget boxes before the lanes split
+      // no free lane: random bumpers and pop-ups in the lanes that have none of their own
+      if (o.left === 'tunnel') this.scatter(F, 12, 60, -13.8, -6.2, 3, ['bumper', 'popup']);
+      if (o.mid === 'plain' || o.mid === 'sweeper' || o.mid === 'drone') this.scatter(F, 12, 60, -3.4, 3.4, 2, ['popup', 'bumper']);
+      if (o.right === 'speed' || o.right === 'fake' || o.right === 'bounce' || o.right === 'ice' || o.right === 'fans') this.scatter(F, 12, o.right === 'fake' ? 42 : 60, 6.2, 13.8, o.right === 'speed' ? 3 : 2, ['bumper', 'popup']);
       for (const v of [-8, 8]) this.slot('ibox', F, 67, v, 0, 0);
       this.sides(F, L);
       this.course(F, L, 0);
@@ -6087,8 +6124,8 @@ GK_LIBRARY.worlds = {
       this.deco(F, 'ramp', (u2 + u3) / 2, 0, 0.15, 180, { w: W, len: ramp, h: H, color: T.hillTop || U.shade(col, 1.1) });
       this.loc('cp-' + this.num('cp'), F, 3, 0, 0, 0);
       this.loc('cp-' + this.num('cp'), F, (u1 + u2) / 2, 0, H, 0);
-      [-12, -6, 0, 6, 12].forEach((v, i) => {   // boulders follow the steps: plateau → top step → bottom step → the flat
-        const nm = this.slot('boulder', F, u1 + 3, v, H, 0, { phase: (i * 2 % 5) / 5 });
+      [-13.5, -9, -4.5, 0, 4.5, 9, 13.5].forEach(v => {   // boulders follow the steps: plateau → top step → bottom step → the flat
+        const nm = this.slot('boulder', F, u1 + 3, v, H, 0, { phase: this.rnd(), speed: this.rr(6.5, 9), gap: this.rr(0.6, 1.8) });
         this.routes[nm] = [[u1 + 3, H], [u1, H], [u0, 0], [u0 - 6, 0]].map(q => { const p = F.pt(q[0], v); return [p[0], q[1], p[1]]; });
       });
       for (const v of [-8, 0, 8]) this.slot('ibox', F, (u1 + u2) / 2, v, H, 0);
@@ -6172,7 +6209,7 @@ GK_LIBRARY.worlds = {
     }
     finishStretch(F, L) { this.sides(F, L); this.course(F, L, 0); this.advance(F, L); }
     /** Spam cannons on the side fences, shooting across the road at the given u (alternating sides). */
-    cannons(F, us) { us.forEach((u, i) => { const s = i % 2 ? 1 : -1; this.slot('cannon', F, u, s * (W / 2 - 0.9), 0, s > 0 ? 90 : -90, { range: W - 2, phase: i * 0.37 }); }); }
+    cannons(F, us) { us.forEach(u => { const s = this.rnd() < 0.5 ? 1 : -1; this.slot('cannon', F, u, s * (W / 2 - 0.9), 0, s > 0 ? 90 : -90, { range: W - 2, phase: this.rnd(), period: this.rr(2.0, 3.0) }); }); }
     /** A wall of 5 ports across the road at u (posts between them; the trap decides which ports are open). */
     portWall(F, u) {
       const row = this.num('portrow'), half = W / 2, T = this.T;
@@ -6184,13 +6221,13 @@ GK_LIBRARY.worlds = {
     press(o) {
       o = o || {};
       const L = 60, F = this.stretch(L);
-      [10, 21, 32].forEach((u, r) => {
-        for (let i = 0; i < 5; i++) this.slot('press', F, u, (i - 2) * 6, 0, 0, { size: [6, 3.4], phase: ((i % 2) * 0.5 + r * 0.22) % 1, period: o.period || 3.2 });
+      [8.5, 17, 25.5, 34].forEach(u => {
+        for (let i = 0; i < 5; i++) this.slot('press', F, u, (i - 2) * 6, 0, 0, { size: [6, 3.4], phase: this.rnd(), period: (o.period || 3.2) * this.rr(0.85, 1.2) });
         this.deco(F, 'slab', u, 0, 7.2, 0, { size: [W + 3, 0.6, 1.2], color: '#2d3748' });
         for (const s of [-1, 1]) this.deco(F, 'slab', u, s * (W / 2 + 1.4), 0, 0, { size: [0.9, 7.8, 0.9], color: '#2d3748' });
       });
-      if (o.cannons) this.cannons(F, [44, 49, 54]);
-      if (o.rain) this.slot('rain', F, 48, 0, 0, 0, { area: [W - 2, 16] });
+      if (o.cannons) this.cannons(F, [42, 46, 50, 54].map(u => u + this.rr(-1, 1)));
+      if (o.rain) this.slot('rain', F, 48, 0, 0, 0, { area: [W - 2, 16], n: 9 });
       this.deco(F, 'neonSign', 4, -12, 0, 180, { color: '#ffd166', w: 4, h: 1.8, y: 2.6 });
       this.finishStretch(F, L);
     }
@@ -6216,7 +6253,8 @@ GK_LIBRARY.worlds = {
       this.box(F, 24.5, 27, -half, half, 0, H, col, { top }); this.box(F, 51, 53.5, -half, half, 0, H, col, { top });
       this.deco(F, 'plane', 39, 0, 0.03, 0, { size: [W, 24], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
       for (let u = 28; u < 51; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
-      for (let j = 0; j < 7; j++) this.slot('flip', F, 39, (j - 3) * 3.4, H, 0, { size: [3.3, 0.3, 24], group: j % 2, period: o.period || 5 });
+      const field = this.num('flipfield');
+      for (let j = 0; j < 7; j++) this.slot('flip', F, 39, (j - 3) * 3.4, H, 0, { size: [3.3, 0.3, 24], group: j % 2, period: o.period || 5, field });
       this.slot('abyss', F, 39, 0, 0, 0, { size: [W, 1.0, 24], top: H });
       this.loc('airzone-' + this.num('airzone'), F, 39, 0, H, 0, { zone: 'air', len: 27, y: H });
       this.finishStretch(F, L);
@@ -6224,7 +6262,11 @@ GK_LIBRARY.worlds = {
     wave(o) {
       o = o || {};
       const L = 64, F = this.stretch(L), T = this.T, col = T.walk || T.wall, top = T.walkTop;
-      [[14, [-9, 9]], [26, [-4.5, 4.5]], [38, [-11, 11]], [50, [-4.5, 4.5]]].forEach(([u, vs]) => vs.forEach(v => {
+      [14, 26, 38, 50].map(u => u + this.rr(-1.5, 1.5)).map(u => {   // islands at random places (the middle line stays clear)
+        const vs = [];
+        for (let k = 0; k < 20 && vs.length < 3; k++) { const v = this.rr(-12.4, 12.4); if (Math.abs(v) > 2.9 && vs.every(w => Math.abs(w - v) > 6.5)) vs.push(v); }
+        return [u, vs];
+      }).forEach(([u, vs]) => vs.forEach(v => {
         this.box(F, u - 1.6, u + 1.6, v - 2, v + 2, 0, 1.5, col, { top: top || '#7dd3fc' });
         this.box(F, u - 2.6, u - 1.6, v - 1.2, v + 1.2, 0, 0.75, col, { top });   // a step up
       }));
@@ -6236,34 +6278,33 @@ GK_LIBRARY.worlds = {
     drive(o) {
       o = o || {};
       const L = 44, F = this.stretch(L);
-      this.slot('disk', F, 22, 0, 0, 0, { r: 12.5, spin: o.spin || 0.5 });
-      if (o.cannons) this.cannons(F, [15, 29]);
+      this.slot('disk', F, 22, 0, 0, 0, { r: 14.3, spin: (this.rnd() < 0.5 ? -1 : 1) * (o.spin || 0.5) });   // edge to edge
+      this.cannons(F, o.cannons ? [10, 17, 27, 34] : [14, 30]);
       this.finishStretch(F, L);
     }
     ports(o) {
       o = o || {};
       const L = 48, F = this.stretch(L);
       this.portWall(F, 12);
-      if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14] });
+      if (o.rain !== false) this.slot('rain', F, 24, 0, 0, 0, { area: [W - 2, 14], n: 9 });
       this.portWall(F, 36);
       this.finishStretch(F, L);
     }
     adalley(o) {
       o = o || {};
       const L = 52, F = this.stretch(L);
-      let n = 0;
-      for (let u = 9; u < 46; u += 6) for (let i = 0; i < 4; i++) {
-        const v = -11.25 + i * 7.5 + ((u / 6) % 2 ? 3.75 : 0);
-        if (Math.abs(v) > 13.5) continue;
-        this.slot('popup', F, u, v, 0, 0, { phase: ((n++) * 0.37) % 1 });
-        if (o.bumpers && i < 3 && u < 42) this.slot('bumper', F, u + 3, v + 3.75, 0, 0);
+      for (let u = 8; u < 47; u += 4.5) {   // rows of pop-ups at random places, edge to edge, with bumpers between
+        const uu = u + this.rr(-0.8, 0.8), vs = [];
+        for (let k = 0; k < 40 && vs.length < (this.rnd() < 0.5 ? 3 : 4); k++) { const v = this.rr(-13, 13); if (vs.every(w => Math.abs(w - v) > 4.4)) vs.push(v); }
+        vs.forEach(v => this.slot('popup', F, uu, v, 0, Math.round(this.rr(-20, 20)), { phase: this.rnd(), period: this.rr(4, 6) }));
       }
+      this.scatter(F, 8, 48, -13.3, 13.3, o.bumpers ? 9 : 5, ['bumper']);
       this.deco(F, 'neonSign', 4, 12, 0, 180, { color: '#ff4fd8', w: 4, h: 1.8, y: 2.6 });
       this.finishStretch(F, L);
     }
     pinball() {
       const L = 48, F = this.stretch(L);
-      for (let u = 9, r = 0; u < 44; u += 5, r++) for (let v = -12 + (r % 2) * 3; v <= 12; v += 6) this.slot('bumper', F, u, v, 0, 0, { r: 1.3 + (r % 3) * 0.2 });
+      this.scatter(F, 7, 45, -13.3, 13.3, 26, ['bumper']);   // a random field, a third of them sliding
       this.finishStretch(F, L);
     }
     captcha() {
@@ -6272,7 +6313,7 @@ GK_LIBRARY.worlds = {
       for (const v of [-10, 0, 10]) this.slot('captcha', F, wu + 0.3, v, 0, 0, { size: [5, wh, 0.6] });
       this.deco(F, 'glowStrip', wu + 0.3, 0, wh, 0, { size: [W, 0.15, 0.7], color: '#2563eb' });
       this.loc('cp-' + this.num('cp'), F, 16, 0, 0, 0);
-      for (const [u, v] of [[22, -8], [24, 6], [30, -2], [33, 10], [35, -10]]) this.slot('popup', F, u, v, 0, 0, { phase: (u * 0.13) % 1 });
+      this.scatter(F, 18, 38, -13.3, 13.3, 8, ['popup', 'bumper', 'popup']);
       this.finishStretch(F, L);
     }
     lbridge(o) {
@@ -6289,7 +6330,7 @@ GK_LIBRARY.worlds = {
       for (const [g0, g1, ph] of [[10, 24, 0], [28, 42, 0.5]]) {
         this.deco(F, 'plane', (g0 + g1) / 2, 0, 0.03, 0, { size: [W, g1 - g0], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
         for (let u = g0 + 1; u < g1; u += 2.5) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
-        [-9, 0, 9].forEach((v, i) => this.slot('lbridge', F, g0, v, H, 0, { len: g1 - g0, w: 3.4, n: 10, period: o.period || 9, phase: (ph + i * 0.33) % 1 }));
+        [-9, 0, 9].forEach(v => this.slot('lbridge', F, g0, v, H, 0, { len: g1 - g0, w: 3.4, n: 10, period: (o.period || 9) * this.rr(0.85, 1.15), phase: this.rnd() }));
         this.slot('abyss', F, (g0 + g1) / 2, 0, 0, 0, { size: [W, 1.0, g1 - g0], top: H });
       }
       this.loc('airzone-' + this.num('airzone'), F, 26, 0, H, 0, { zone: 'air', len: 36, y: H });
@@ -6300,17 +6341,35 @@ GK_LIBRARY.worlds = {
       this.box(F, 14, 20, -half, half, 0, wh, T.wall, { top: T.wallTop || T.walkTop });   // the server wall (its top is a walkway)
       for (let v = -13; v <= 13; v += 2.6) this.deco(F, 'glowStrip', 13.98, v, 0.6, 0, { size: [1.4, 1.9, 0.04], color: v % 5 > 2 ? '#4cc9f0' : '#7cfc00' });
       [-9, 0, 9].forEach((v, i) => {
-        this.slot('lift', F, 12.2, v, 0, 0, { size: [3.4, 3.4], h: wh, period: 7, phase: i * 0.33 });
+        this.slot('lift', F, 12.2, v, 0, 0, { size: [3.4, 3.4], h: wh, period: this.rr(6, 8.5), phase: this.rnd() });
         for (const s of [-1, 1]) this.deco(F, 'slab', 12.2, v + s * 1.95, 0, 0, { size: [0.25, wh + 1.2, 0.25], color: '#7cfc00' });
       });
       this.slot('shard', F, 17, 0, wh, 0);
       this.finishStretch(F, L);
     }
+    balance(o) {
+      o = o || {};
+      const L = 40, F = frame(this.cur.x, this.cur.z, this.cur.dir), T = this.T, half = W / 2, H = 1.5, r = 10.5, c = 20, col = T.walk || T.wall, top = T.walkTop, pit = T.pit || '#1c4e80';
+      const back = Object.keys(DIRS).find(k => DIRS[k].a[0] === -DIRS[F.dir].a[0] && DIRS[k].a[1] === -DIRS[F.dir].a[1]);
+      this.floor(F, 0, 6.5, -half, half, T.floor2 || T.floor); this.floor(F, 6.5, 33.5, -half, half, dk(pit, 0.75)); this.floor(F, 33.5, L, -half, half, T.floor2 || T.floor);
+      this.fence(F, 0, L, -half - 0.6, -half); this.fence(F, 0, L, half, half + 0.6);
+      this.loc('cp-' + this.num('cp'), F, 2, 0, 0, 0);
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(4, 0))), dir: F.dir, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.stairs.push({ pos: ((p => [p[0], 0, p[1]])(F.pt(36, 0))), dir: back, steps: 5, rise: 0.3, run: 0.5, width: W, color: T.stairs || col });
+      this.box(F, 6.5, c - r - 0.2, -half, half, 0, H, col, { top }); this.box(F, c + r + 0.2, 33.5, -half, half, 0, H, col, { top });
+      this.deco(F, 'plane', c, 0, 0.03, 0, { size: [W, 2 * r + 0.4], color: pit, glow: Math.max(0.6, T.pitGlow || 0) });
+      for (let u = c - r + 0.5; u < c + r; u += 2.2) this.deco(F, 'glowStrip', u, 0, 0.05, 0, { size: [W - 0.4, 0.04, 0.18], color: '#ff2d55' });
+      this.slot('bdisk', F, c, 0, H, Math.round(this.rr(0, 360)), { r, spin: (this.rnd() < 0.5 ? -1 : 1) * (o.spin || 0.55) });
+      this.slot('abyss', F, c, 0, 0, 0, { size: [W, 0.5, 2 * r + 0.4], top: H, penalty: 3 });
+      this.loc('airzone-' + this.num('airzone'), F, c, 0, H, 0, { zone: 'air', len: 30, y: H });
+      this.deco(F, 'neonSign', 3, -12, 0, 180, { color: '#4cc9f0', w: 4, h: 1.8, y: 2.6 });
+      this.finishStretch(F, L);
+    }
     proxy() {
-      const L = 52, F = this.stretch(L), T = this.T;
-      [[15, 0.6, 0], [37, -0.6, 0.4]].forEach(([u, spin, ph]) => [-7.5, 7.5].forEach((v, i) => {
-        this.slot('proxy', F, u, v, 0, ph * 90 + i * 45, { r: 7, h: 3, spin: i ? -spin : spin });
-        this.box(F, u - 0.6, u + 0.6, v - 0.6, v + 0.6, 0, 3.6, T.wall, { top: '#b794f4' });   // the hub
+      const L = 52, F = this.stretch(L);
+      [14, 36].map(u => u + this.rr(-1.5, 1.5)).forEach(u => [-10, 0, 10].forEach(v => {   // 3 revolving doors per row, edge to edge
+        const spin = (this.rnd() < 0.5 ? -1 : 1) * this.rr(0.5, 0.9);
+        this.slot('proxy', F, u + this.rr(-0.6, 0.6), v + this.rr(-0.5, 0.5), 0, Math.round(this.rr(0, 90)), { r: 5, h: 3, spin });
       }));
       this.finishStretch(F, L);
     }
@@ -6379,15 +6438,18 @@ GK_LIBRARY.worlds = {
         const p = F.pt(lu, lv), core = lm.core || CORE[lm.model] || 2;
         this.scenery.push({ model: lm.model, pos: [p[0], 0, p[1]], rot: F.rot(side ? -side * 45 : 90), look: lm.look, scale: lm.scale, spin: lm.spin || 0, solid: false, big: true, merge: false, id: 'landmark-' + this.num('landmark') });
         this.plats.push({ pos: [p[0], 0, p[1]], size: [core * 2, 8, core * 2], invisible: true, kind: 'prop' });   // only the visible base blocks you
+        this.avoid.push({ x: p[0], z: p[1], r: 9 });   // keep traps out of the landmark
       }
       const toward = side === 0 ? [lu, lv + 9] : [lu - 7, lv + side * 7];
       if (o.case !== false) this.slot('case', F, toward[0], toward[1], 0, side === 0 ? -90 : 180);
       for (const [du, dv] of [[-9, 0], [9, 0], [0, -9], [0, 9]]) if (Math.abs(lv + dv) < half - 2) this.slot('shard', F, lu + du, lv + dv, 0, 0);
       for (const v of [-6, 0, 6]) this.slot('ibox', F, 5, v, 0, 0);
-      this.slot('sweeper', F, 13, 0, 0, 0, { length: 10, spin: 1.3 });
-      if (side === 0) this.slot('sweeper', F, P - 10, 0, 0, 0, { length: 10, spin: -1.3 }); else this.slot('sweeper', F, P / 2, side * 13, 0, 0, { length: 10, spin: -1.3 });
+      const sp = () => (this.rnd() < 0.5 ? -1 : 1) * this.rr(1.0, 1.7);
+      this.slot('sweeper', F, 13, 0, 0, 0, { length: 10, spin: sp() });
+      if (side === 0) this.slot('sweeper', F, P - 10, 0, 0, 0, { length: 10, spin: sp() }); else this.slot('sweeper', F, P / 2, side * 13, 0, 0, { length: 10, spin: sp() });
       this.slot('crate', F, 4, o.comeback && side > 0 ? half - 3 : -half + 3, 0, 0); this.slot('crate', F, P - 4, side > 0 ? -half + 3 : half - 3, 0, 0);   // never on the comeback platform
       if (o.comeback) this.comeback(F, side === 0 ? P - 6 : 6, side >= 0 ? -half + 5 : half - 5, side);
+      this.scatter(F, 7, P - 6, -half + 2.5, half - 2.5, 5, ['bumper', 'popup', 'bumper']);   // random traps all over the square
       // world life: something moving around the plaza outside its walls
       if (T.life) {
         const n = this.slot('life', F, -6, -half - 10, T.life.y || 0, 0, { kind: T.life.kind });
@@ -6466,7 +6528,7 @@ GK_LIBRARY.worlds = {
         decorations: this.scenery, locations: this.locs, routes: this.routes,
         spawns: { default: { pos: spawn.pos, rot: spawn.rot } },
         lights: this.lights, course: { length: courseLength(this.routes.course), gates: this.gateN, bounds: [x0, z0, x1, z1] },
-        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder', 'proxy'],   // locations / routes that float or move over a gap on purpose (proxy: a revolving door round its own solid hub)
+        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder', 'proxy', 'abyss', 'bdisk'],   // locations / routes that float or move over a gap on purpose (proxy: a revolving door round its own solid hub)
       };
     }
   }
@@ -6584,6 +6646,7 @@ GK_LIBRARY.worlds = {
     { k: 'doors' },
     { k: 'plaza', turn: 'n' },
     { k: 'press', cannons: true },
+    { k: 'balance' },
     { k: 'lanes', left: 'crumble', mid: 'hammer', right: 'coop' }, { k: 'gate' },
     { k: 'plaza', turn: 'e', secret: true },
     { k: 'buffer' },
@@ -6676,6 +6739,7 @@ GK_LIBRARY.worlds = {
     { k: 'doors' },
     { k: 'bridge' },
     { k: 'drive', cannons: true, spin: 0.55 }, { k: 'gate' },
+    { k: 'balance', spin: 0.6 },
     { k: 'plaza', turn: 'e' },
     { k: 'wave', ports: true }, { k: 'gate' },
     { k: 'plaza', turn: 'n', secret: true },
@@ -8378,15 +8442,15 @@ GK_LIBRARY.worlds = {
   /** A pit floor: {type: 'abyss', size: [w, h, d]} (invisible; the world paints the pit). Touch it and you are back at the
       last checkpoint (game.respawn()). Emits terrain:fell. */
   P.add('abyss', {
-    defaults: { solid: false, size: [10, 1.2, 10] },
+    defaults: { solid: false, size: [10, 1.2, 10], penalty: 0 },   // penalty: seconds frozen at the checkpoint after the fall
     update(e, dt, g) {
       if (!e.enabled || g.state.mode !== 'playing' || !g.respawn || !inLocal(g, e, e.def.size)) return;
       const p = g.player.pos;
       burst(g, [p[0], p[1] + 0.3, p[2]], e.def.color || '#ff2d55', 14);
       g.audio.play('hurt');
       g.respawn();
-      g.player.stun = 0;
-      g.emit('terrain:fell', { id: e.id });
+      g.player.stun = e.def.penalty || 0;   // a short time penalty (or none)
+      g.emit('terrain:fell', { id: e.id, penalty: e.def.penalty || 0 });
     },
   });
   M.add('piston', o => {   // a pusher block: its front face is at the origin, the block goes back (−z) into the wall
@@ -8595,13 +8659,17 @@ GK_LIBRARY.worlds = {
      { type: 'loadbridge', len: 14, n: 10, period: 9 }                   LOADING BRIDGE: loads across a gap, then unloads from the far end
      { type: 'lift', size, h: 3.2, period: 7 }                           UPLOAD LIFT: rides up a server wall and down again
      { type: 'turnstile', r: 6.5, spin: 0.6 }                            ROTATING PROXY: a giant revolving door
+     { type: 'balancedisk', r: 9.5, spin: 0.35, tilt: 0.022 }            CYBER BALANCE DISK: a turning, tipping disk over a laser floor
+   Timing is RANDOM but shared: presses slam at a different moment each cycle, pop-ups pop up at random times, cannons skip
+   shots and change speed, waves come late or early, the bit-flip half is chosen at random, doors and disks speed up and slow
+   down (each from game.trapRandom(key + cycle), so every PC agrees). There is always a warning before a hit.
    Bots (mechanics/race) read entity.botZone {kind, len, chance, pause, slow, lane, ground} to slow down in the same places.
    Emits trap:hit {kind}. Player effects: player.squashT (a squashed view). */
 (function () {
   'use strict';
   const U = GK.util, P = GK.Prefabs, M = GK.Models, G = () => new GK.Geo();
   const clockOf = g => (g.raceClock ? g.raceClock() : g.state.time);
-  const hashOf = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const hashOf = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return h >>> 0; };
   const rand = (g, key) => (g.trapRandom ? g.trapRandom(key) : (hashOf(key + ':' + (g.levelIndex || 0)) % 1000) / 1000);
   const fwd = e => [Math.sin(e.yaw), Math.cos(e.yaw)];
   /** The player's position in entity e's frame: x across, z along its front. */
@@ -8664,18 +8732,19 @@ GK_LIBRARY.worlds = {
     defaults: { model: 'pressBlock', solid: false, size: [5.6, 3.4], top: 4.6, period: 3.2, phase: 0, stun: 2.4 },
     init(e) {
       e.setLook({ w: e.def.size[0], d: e.def.size[1] }); e.base = e.pos.slice();
-      e.botZone = { kind: 'press', len: e.def.size[1] + 2, chance: 0.3, pause: 2.4 };
+      e.slamAt = (g, idx) => 0.3 + 0.42 * rand(g, 'press:' + e.id + ':' + idx);   // this cycle's slam moment (part of the cycle)
+      e.botZone = { kind: 'press', len: e.def.size[1] + 2, chance: 0.35, pause: 2.4 };
     },
     update(e, dt, g) {
-      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, k = ((cyc % 1) + 1) % 1, idx = Math.floor(cyc);
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), k = cyc - idx, s = e.slamAt(g, idx);
       let h = d.top;
-      if (k >= 0.55 && k < 0.75) { e.offset[0] = Math.sin(t * 70) * 0.05; e.hi = Math.sin(t * 25) > 0 ? 0.55 : 0.1; }   // about to slam: shakes and blinks
+      if (k >= s - 0.2 && k < s) { e.offset[0] = Math.sin(t * 70) * 0.05; e.hi = Math.sin(t * 25) > 0 ? 0.55 : 0.1; }   // about to slam: shakes and blinks
       else { e.offset[0] = 0; e.hi = 0; }
-      if (k >= 0.75 && k < 0.8) h = d.top * (1 - (k - 0.75) / 0.05);
-      else if (k >= 0.8 && k < 0.9) h = 0;
-      else if (k >= 0.9) h = d.top * (k - 0.9) / 0.1;
+      if (k >= s && k < s + 0.05) h = d.top * (1 - (k - s) / 0.05);
+      else if (k >= s + 0.05 && k < s + 0.15) h = 0;
+      else if (k >= s + 0.15 && k < s + 0.25) h = d.top * (k - s - 0.15) / 0.1;
       e.pos[1] = e.base[1] + h;
-      if (!e.enabled || !live(g) || k < 0.76 || k >= 0.9 || e.state.hitCyc === idx) return;
+      if (!e.enabled || !live(g) || k < s + 0.01 || k >= s + 0.15 || e.state.hitCyc === idx) return;
       const pl = g.player, L = local(e, pl.pos);
       if (Math.abs(L.x) < d.size[0] / 2 + 0.2 && Math.abs(L.z) < d.size[1] / 2 + 0.2 && pl.pos[1] < e.pos[1] + 0.2 && pl.pos[1] + 1.7 > e.pos[1] - 0.05) {
         e.state.hitCyc = idx;
@@ -8690,7 +8759,8 @@ GK_LIBRARY.worlds = {
   P.add('spamcannon', {
     defaults: { model: 'spamCannon', solid: true, range: 24, speed: 7, period: 2.6, phase: 0, h: 1.0, power: 9, stun: 1.0 },
     init(e) {
-      const d = e.def, n = Math.ceil(d.range / d.speed / d.period) + 1;
+      const d = e.def, n = Math.ceil(d.range / (d.speed * 0.75) / d.period) + 1;
+      e.shot = (g, k) => ({ fire: rand(g, 'spam:' + e.id + ':' + k) > 0.2, speed: d.speed * (0.75 + 0.6 * rand(g, 'spv:' + e.id + ':' + k)) });
       e.orbs = [];
       for (let i = 0; i < n; i++) e.orbs.push(e.world.add({ id: e.id + '-orb' + i, type: 'spamorb', pos: e.pos.slice(), visible: false }));
       e.orbs.forEach(o => o.hide());
@@ -8699,8 +8769,8 @@ GK_LIBRARY.worlds = {
     update(e, dt, g) {
       const d = e.def, t = clockOf(g), f = fwd(e), shot = Math.floor(t / d.period + d.phase), pl = g.player, S = e.state;
       e.orbs.forEach((o, i) => {
-        const k = shot - i, age = t - (k - d.phase) * d.period, dist = 1 + age * d.speed;
-        if (age < 0 || dist > d.range || S['gone' + k]) { o.hide(); return; }
+        const k = shot - i, sh = e.shot(g, k), age = t - (k - d.phase) * d.period, dist = 1 + age * sh.speed;
+        if (!sh.fire || age < 0 || dist > d.range || S['gone' + k]) { o.hide(); return; }
         o.show(); o.yaw += dt * 4;
         o.pos = [e.pos[0] + f[0] * dist, e.pos[1] + d.h, e.pos[2] + f[1] * dist];
         if (!e.enabled || !live(g) || S['hit' + k]) return;
@@ -8748,12 +8818,13 @@ GK_LIBRARY.worlds = {
 
   // ---------- BIT FLIP TILES ----------
   P.add('fliptile', {
-    defaults: { model: 'flipTile', solid: true, size: [3.3, 0.3, 24], group: 0, period: 5, safe: 1.8 },
+    defaults: { model: 'flipTile', solid: true, size: [3.3, 0.3, 24], group: 0, period: 5, safe: 1.8, field: 0 },
     init(e) { e.setLook({ size: e.def.size }); e.botZone = { kind: 'flip', len: e.def.size[2], chance: 0.6, pause: 3.5 }; e.state.ang = 0; },
     update(e, dt, g) {
       // one group is flipped for (period − safe) s; then EVERY column is solid for `safe` s while the other group blinks: hop over
       const d = e.def, t = clockOf(g), cyc = Math.floor(t / d.period), k = t - cyc * d.period, safe = k >= d.period - d.safe;
-      const flipped = !safe && (((cyc % 2) + 2) % 2) === d.group, soon = safe && (((cyc + 1) % 2) + 2) % 2 === d.group;
+      const grp = c => (rand(g, 'flip:' + d.field + ':' + c) < 0.5 ? 0 : 1);   // which half flips this time (random, shared)
+      const flipped = !safe && grp(cyc) === d.group, soon = safe && grp(cyc + 1) === d.group;
       e.solid = !flipped;
       const want = flipped ? Math.PI / 2 : 0;
       e.state.ang += (want - e.state.ang) * Math.min(1, dt * 14);
@@ -8765,16 +8836,20 @@ GK_LIBRARY.worlds = {
 
   // ---------- PACKET WAVE ----------
   P.add('tsunami', {
-    defaults: { model: 'waveWall', solid: false, size: [30, 1.4, 1.6], len: 50, speed: 8, period: 9, phase: 0, power: 13, stun: 1.0 },
+    defaults: { model: 'waveWall', solid: false, size: [30, 1.4, 1.6], len: 50, speed: 8, period: 10, phase: 0, power: 13, stun: 1.0 },
     init(e) {
       e.setLook({ size: e.def.size }); e.base = e.pos.slice(); e.alpha = 0.6; e.label = '🌊'; e.labelRange = 45;
+      e.waveOf = (g, idx) => {   // this wave's speed and how late it starts (random, shared)
+        const d = e.def, speed = d.speed * (0.85 + 0.45 * rand(g, 'wsp:' + e.id + ':' + idx)), run = d.len / speed + 0.5;
+        return { speed, run, delay: Math.max(0, d.period - run - 1) * rand(g, 'wdl:' + e.id + ':' + idx) };
+      };
       e.botZone = { kind: 'wave', len: e.def.len, chance: 0.45, pause: 2, ground: true };
     },
     update(e, dt, g) {
-      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), age = (cyc - idx) * d.period, run = d.len / d.speed, f = fwd(e);
-      if (age > run + 0.3) { e.hide(); return; }
+      const d = e.def, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), w = e.waveOf(g, idx), age = (cyc - idx) * d.period - w.delay, f = fwd(e);
+      if (age < 0 || age > w.run + 0.8) { e.hide(); e.pos = [e.base[0] + f[0] * d.len, e.base[1], e.base[2] + f[1] * d.len]; return; }   // waiting at its start
       e.show();
-      const along = Math.max(0, d.len - Math.max(0, age - 0.5) * d.speed), rise = U.clamp(age / 0.5, 0.05, 1);
+      const along = Math.max(0, d.len - Math.max(0, age - 0.5) * w.speed), rise = U.clamp(age / 0.5, 0.05, 1);
       e.pos = [e.base[0] + f[0] * along, e.base[1], e.base[2] + f[1] * along];
       e.scale = [1, rise, 1];
       if (!e.enabled || !live(g) || age < 0.5 || e.state.hitCyc === idx) return;
@@ -8820,12 +8895,13 @@ GK_LIBRARY.worlds = {
     defaults: { model: 'hardDisk', solid: false, r: 11, spin: 0.5 },
     init(e) { e.setLook({ r: e.def.r }); e.yaw0 = e.yaw; e.botZone = { kind: 'disk', len: e.def.r * 2, slow: 0.75 }; },
     update(e, dt, g) {
-      const d = e.def;
-      e.yaw = e.yaw0 + d.spin * clockOf(g);
+      const d = e.def, t = clockOf(g), a = Math.abs(d.spin) * 0.5, ph = (hashOf(e.id) % 628) / 100;   // the speed changes all the time
+      e.yaw = e.yaw0 + d.spin * t + a / 0.45 * Math.sin(t * 0.45 + ph);
+      const w = d.spin + a * Math.cos(t * 0.45 + ph);
       if (!e.enabled || !live(g)) return;
       const pl = g.player, dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2];
       if (Math.hypot(dx, dz) < d.r && Math.abs(pl.pos[1] - e.pos[1]) < 0.5 && g.terrainPush) {   // carried round with the disk
-        g.terrainPush[0] += d.spin * dz; g.terrainPush[1] += -d.spin * dx;
+        g.terrainPush[0] += w * dz; g.terrainPush[1] += -w * dx;
       }
     },
   });
@@ -8902,10 +8978,12 @@ GK_LIBRARY.worlds = {
     init(e) {
       e.setLook({ color: ['#ff4fd8', '#f6ad55', '#38bdf8', '#7cfc00'][hashOf(e.id) % 4] });
       e.state.k = 0; e.labelRange = 14; e.botZone = { kind: 'popup', len: 2, chance: 0.4, pause: 1.2 };
+      e.upAt = (g, idx) => rand(g, 'pop:' + e.id + ':' + idx) * Math.max(0, e.def.period - e.def.up);   // when it pops up this cycle
     },
     update(e, dt, g) {
       const d = e.def, S = e.state, t = clockOf(g), cyc = t / d.period + d.phase, idx = Math.floor(cyc), k = (cyc - idx) * d.period;
-      let want = k < d.up ? 1 : 0;
+      const st = e.upAt(g, idx);
+      let want = k >= st && k < st + d.up ? 1 : 0;
       if (S.closed === idx || !e.enabled) want = 0;
       S.k += (want - S.k) * Math.min(1, dt * 12);
       if (want && S.k > 0.97) S.k = 1;
@@ -8926,10 +9004,14 @@ GK_LIBRARY.worlds = {
   M.add('bumper', o => { const r = o.r || 1.4, c = o.color || '#38bdf8'; return G().cyl(0, 0, 0, r * 0.75, 0.7, '#1e293b', { seg: 16 }).cyl(0, 0.7, 0, r, 0.45, c, { seg: 16, glow: 0.7 }).cyl(0, 1.15, 0, r * 0.55, 0.12, '#ffffff', { seg: 16, glow: 1 }); });
   /** PINBALL BUMPER: {type: 'bumper', r: 1.4, power: 10}. Touch it and you bounce away (it flashes). */
   P.add('bumper', {
-    defaults: { model: 'bumper', solid: false, r: 1.4, power: 10 },
-    init(e) { e.setLook({ r: e.def.r, color: ['#38bdf8', '#ff4fd8', '#ffd166'][hashOf(e.id) % 3] }); e.botZone = { kind: 'bumper', len: 3, chance: 0.35, pause: 0.9 }; },
+    defaults: { model: 'bumper', solid: false, r: 1.4, power: 10, slide: 0 },
+    init(e) { e.setLook({ r: e.def.r, color: ['#38bdf8', '#ff4fd8', '#ffd166'][hashOf(e.id) % 3] }); e.base = e.pos.slice(); e.botZone = { kind: 'bumper', len: 3, chance: 0.35, pause: 0.9 }; },
     update(e, dt, g) {
       const d = e.def, S = e.state;
+      if (d.slide) {   // slide: it moves to and fro across the road (metres each way)
+        const h = hashOf(e.id), w = 0.7 + (h % 5) * 0.15, x = d.slide * Math.sin(clockOf(g) * w + (h % 628) / 100), c = Math.cos(e.yaw), sn = Math.sin(e.yaw);
+        e.pos = [e.base[0] + x * c, e.base[1], e.base[2] - x * sn];
+      }
       if (S.flash > 0) { S.flash -= dt; e.hi = S.flash * 2; e.scale = [1 + S.flash * 0.4, 1, 1 + S.flash * 0.4]; } else { e.hi = 0; e.scale = [1, 1, 1]; }
       if (!e.enabled || !live(g) || S.flash > 0.15) return;
       const pl = g.player, dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2], dist = Math.hypot(dx, dz);
@@ -9045,17 +9127,67 @@ GK_LIBRARY.worlds = {
     defaults: { model: 'proxyDoor', solid: false, r: 6.5, h: 3, spin: 0.6, power: 8 },
     init(e) { e.setLook({ r: e.def.r, h: e.def.h }); e.yaw0 = e.yaw; e.alpha = 0.85; e.botZone = { kind: 'proxy', len: e.def.r * 2, chance: 0.5, pause: 1.6 }; },
     update(e, dt, g) {
-      const d = e.def, S = e.state;
-      e.yaw = e.yaw0 + d.spin * clockOf(g);
+      const d = e.def, S = e.state, t = clockOf(g), a = Math.abs(d.spin) * 0.45, ph = (hashOf(e.id) % 628) / 100;
+      e.yaw = e.yaw0 + d.spin * t + a / 0.5 * Math.sin(t * 0.5 + ph);   // speeds up and slows down
       if (S.cd > 0) S.cd -= dt;
       if (!e.enabled || !live(g) || S.cd > 0) return;
       const pl = g.player, L = local(e, pl.pos), rp = Math.hypot(L.x, L.z);
-      if (rp < 0.7 || rp > d.r + 0.3 || pl.pos[1] > e.pos[1] + d.h) return;
+      if (rp > d.r + 0.3 || pl.pos[1] > e.pos[1] + d.h) return;
+      if (rp < 0.95) {   // the hub
+        S.cd = 0.4; const dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2], l = Math.hypot(dx, dz) || 1;
+        hit(g, e, 'proxy', [dx / l, dz / l], 6, 0.2, 2);
+        return;
+      }
       const ang = Math.atan2(L.x, L.z), q = Math.PI / 2, dl = ((ang % q) + q) % q, near = Math.min(dl, q - dl);
       if (rp * Math.sin(near) < 0.5) {   // an arm is touching you: it sweeps you the way it turns
         S.cd = 0.8;
         const dx = pl.pos[0] - e.pos[0], dz = pl.pos[2] - e.pos[2], s = Math.sign(d.spin) || 1;
         hit(g, e, 'proxy', [dz * s, -dx * s], d.power, 0.5, 2.5) && g.audio.play('whoosh');
+      }
+    },
+  });
+
+
+  M.add('balanceDisk', o => {   // a giant data disk, top surface at y = 0, floating on a glowing spindle
+    const r = o.r || 9.5, c = o.color || '#4cc9f0', g = G().cyl(0, -0.55, 0, r, 0.55, '#141a36', { seg: 40 }).cyl(0, -0.02, 0, r - 0.06, 0.03, '#1f2b5c', { seg: 40 });
+    for (let i = 0; i < 12; i++) g.add(G().box(0, 0.012, r * 0.55, 0.12, 0.02, r * 0.78, i % 3 ? c : '#ff4fd8', { glow: 0.9 }).rotY(i * Math.PI / 6));   // circuit traces
+    for (let i = 0; i < 12; i++) g.add(G().box(0.6, 0.014, r * 0.62, 1.2, 0.02, 0.12, c, { glow: 0.9 }).rotY(i * Math.PI / 6 + 0.26));
+    for (const [rr, cc] of [[r * 0.45, '#7cfc00'], [r * 0.8, c], [r - 0.15, '#ff4fd8']]) for (let i = 0; i < 36; i++) g.add(G().box(0, 0.016, rr, 2 * Math.PI * rr / 36 * 0.7, 0.02, 0.14, cc, { glow: 1 }).rotY(i * Math.PI / 18));   // rings
+    for (let i = 0; i < 18; i++) { const a = i * 2.39, d = r * (0.25 + 0.65 * ((i * 0.618) % 1)); g.box(Math.cos(a) * d, 0.01, Math.sin(a) * d, 0.22, 0.12, 0.22, '#ffffff', { glow: 1 }); }   // data bits
+    g.cyl(0, 0, 0, 1.3, 0.1, '#e2e8f0', { seg: 16, glow: 0.5 }).cyl(0, 0.1, 0, 0.7, 0.05, '#ff4fd8', { seg: 16, glow: 1 });   // the centre mechanism
+    for (let i = 0; i < 4; i++) g.add(G().box(0, 0.1, 1.0, 0.18, 0.06, 0.5, '#ffd166', { glow: 1 }).rotY(i * Math.PI / 2));
+    return g.cone(0, -2.2, 0, r * 0.35, 1.65, '#141a36', { seg: 16 }).cyl(0, -6, 0, 0.7, 3.8, '#2d3748', { seg: 10 }).cyl(0, -3, 0, 0.75, 0.25, c, { seg: 10, glow: 1 });
+  });
+  /** CYBER BALANCE DISK: {type: 'balancedisk', r: 9.5, spin: 0.35, tilt: 0.022, push: 50}. A big floating data disk over a laser
+      floor: it turns (and carries you round) and slowly tips one way, then another (you drift downhill). You keep normal grip,
+      so you can steer. Its round edge is real: step past it and you fall (the laser floor sends you to the checkpoint).
+      Not a solid box: like the lift, it holds you on its (tilted) surface while you are inside the circle. */
+  P.add('balancedisk', {
+    defaults: { model: 'balanceDisk', solid: false, r: 9.5, spin: 0.35, tilt: 0.022, push: 50 },   // tilt: the edge stays within a step (0.35 m) of the decks
+    init(e) {
+      e.setLook({ r: e.def.r }); e.base = e.pos.slice(); e.yaw0 = e.yaw;
+      e.botZone = { kind: 'balance', len: e.def.r * 2, chance: 0.5, pause: 2.2, y: e.pos[1] };
+    },
+    /** The disk at race time t: yaw, the world slope (dh/dx, dh/dz) and its turning speed. */
+    stateAt(e, t) {
+      const d = e.def, h = (hashOf(e.id) % 628) / 100, w = d.spin * (1 + 0.2 * Math.sin(t * 0.3 + h));
+      const yaw = e.yaw0 + d.spin * t - d.spin * 0.2 / 0.3 * Math.cos(t * 0.3 + h);
+      return { yaw, w, sx: d.tilt * Math.sin(t * 0.55 + h), sz: d.tilt * Math.sin(t * 0.41 + h * 1.7) };
+    },
+    update(e, dt, g) {
+      const d = e.def, st = e.prefab.stateAt(e, clockOf(g)), c = Math.cos(st.yaw), s = Math.sin(st.yaw);
+      e.yaw = st.yaw;
+      e.pitch = Math.atan(st.sx * s + st.sz * c); e.roll = Math.atan(st.sx * c - st.sz * s);   // the slope, seen in the disk's own frame
+      e.slope = [st.sx, st.sz];
+      if (!e.enabled || !live(g)) return;
+      const pl = g.player, dx = pl.pos[0] - e.base[0], dz = pl.pos[2] - e.base[2];
+      if (Math.hypot(dx, dz) > d.r + 0.25) return;   // (+ the little gap to the decks, so you can always step off)
+      const h = e.base[1] + st.sx * dx + st.sz * dz;   // the surface right under you
+      if (pl.pos[1] <= h + 0.02 && pl.pos[1] > h - 0.8 && pl.vel[1] <= 0.5) {
+        pl.pos[1] = h; pl.vel[1] = 0; pl.grounded = true;
+        if (g.terrainPush) {   // carried round, and drifting downhill
+          g.terrainPush[0] += st.w * dz - st.sx * d.push; g.terrainPush[1] += -st.w * dx - st.sz * d.push;
+        }
       }
     },
   });
@@ -10621,7 +10753,8 @@ window.GK_ONLINE_CONFIG = {
       // on hills the bots walk on the ground (a ray from above); elsewhere the course is flat
       // (a broken bridge: over a gap they hop)
       e.figure.air = false;
-      if (zone && (zone.kind === 'hill' || zone.kind === 'air' || (zone.bz && zone.bz.ground))) {
+      if (zone && zone.bz && zone.bz.y != null) e.pos[1] += (zone.bz.y - e.pos[1]) * Math.min(1, dt * 10);
+      else if (zone && (zone.kind === 'hill' || zone.kind === 'air' || (zone.bz && zone.bz.ground))) {
         const hit = g.world.raycast([e.pos[0], 12, e.pos[2]], [0, -1, 0], 14); let gy = hit.hit ? 12 - hit.t : 0;
         if (zone.kind === 'air' && gy < zone.y - 0.5) { gy = zone.y + 0.9; e.figure.air = moving; }
         e.pos[1] += (gy - e.pos[1]) * Math.min(1, dt * 10);
@@ -10717,7 +10850,12 @@ window.GK_ONLINE_CONFIG = {
       // traps run on the race clock (seconds since GO) and pick fake glass / doors from a seed shared by the room
       game.raceClock = () => { const t = times(game); return t ? (clock(game) - t.startAt) / 1000 : game.state.time; };
       const seed = () => (R.mode === 'solo' ? (R.local && R.local.seed) || 'solo' : (game.online ? game.online.room : 'x')) + ':' + game.levelIndex;
-      game.trapRandom = key => { let h = 2166136261; const k = seed() + ':' + key; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+      game.trapRandom = key => {
+        let h = 2166136261; const k = seed() + ':' + key;
+        for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); }
+        h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;   // mix: "…:5" and "…:6" are far apart
+        return (h >>> 0) / 4294967296;
+      };
       game.musicLevel = () => { const ph = game.state.race.phase; return ph === 'running' ? (game.state.race.finished ? 0.5 : 1) : ph === 'over' ? 0.3 : 0.5; };   // drums from GO
       game.raceRank = () => { const st2 = game.state.race; return st2.count > 1 ? U.clamp(((st2.place || 1) - 1) / (st2.count - 1), 0, 1) : 0.5; };
       game.on('terrain:caught', () => {
@@ -10725,7 +10863,7 @@ window.GK_ONLINE_CONFIG = {
         banner(game, '🔴 CAUGHT!<small>−10</small>', 'bad', 2);
       });
       game.on('terrain:glass', () => banner(game, '💥', 'bad', 1));
-      game.on('terrain:fell', () => banner(game, '⚡', 'bad', 1));
+      game.on('terrain:fell', ev => banner(game, ev && ev.penalty ? '⚡<small>⏳ +' + ev.penalty + ' s</small>' : '⚡', 'bad', ev && ev.penalty ? ev.penalty : 1));
       // hazards (lasers, drones) knock you back along the course and stun you briefly
       game.on('player:hit', () => {
         const p = C.at(game.state.race.dist - 1);
