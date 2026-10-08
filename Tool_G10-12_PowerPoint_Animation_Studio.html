@@ -394,7 +394,7 @@ body { background: var(--bg); }
 .studio-hero { grid-template-columns: 1.15fr .85fr; }
 .hero-who { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .who-chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: .92rem; }
-.flow { list-style: none; margin: 6px 0 18px; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.flow { list-style: none; margin: 6px 0 18px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; max-width: 640px; }
 .flow li { position: relative; background: var(--studio); color: #fff; border-radius: 12px; padding: 10px 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .flow li:not(:last-child)::after { content: '›'; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: 900; font-size: 1.4rem; z-index: 1; }
 .flow span { font-size: 1.5rem; line-height: 1.2; }
@@ -812,7 +812,7 @@ body { background: var(--bg); }
 @media (max-width: 760px) {
   .studio-hero { grid-template-columns: 1fr; }
   .studio-hero .hero-art { display: none; }
-  .flow { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .flow { gap: 4px; }
   .flow small { display: none; }
   .m-tab .mt-l { display: none; }
   .m-tab.on .mt-l { display: inline; }
@@ -1010,39 +1010,51 @@ body { background: var(--bg); }
 .rec-prog { width: 240px; height: 8px; background: #333; border-radius: 99px; overflow: hidden; }
 .rec-prog i { display: block; height: 100%; width: 0; background: #e53935; }
 
-/* ===== editor screen + mission panel (dock) ===== */
+/* ===== editor screen + the guide card (dock) ===== */
 #screen-editor { padding: 0; }
-.ed-screen { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 10px; height: calc(100vh - 112px); min-height: 520px; padding: 8px 10px 10px; }
+.ed-screen { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 10px; height: calc(100vh - 112px); min-height: 520px; padding: 8px 10px 10px; }
 .ed-screen.dock-min { grid-template-columns: minmax(0, 1fr) 44px; }
 .ed-host { min-width: 0; min-height: 0; }
-.dock { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-y: auto; box-shadow: var(--shadow); font-size: .9rem; }
-.dock-head { position: sticky; top: 0; z-index: 2; display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; padding: 10px 12px; background: var(--studio); color: #fff; }
-.dock-head b { display: block; font-size: 1rem; }
-.dock-head span { display: block; font-size: .8rem; color: #d7d3ea; }
-.dock-x { border: 0; background: rgba(255, 255, 255, .15); color: #fff; border-radius: 6px; cursor: pointer; padding: 3px 8px; }
+.dock { background: var(--surface); border: 2px solid var(--studio); border-radius: 12px; overflow-y: auto; box-shadow: var(--shadow); font-size: .9rem; }
+.dock-x { border: 0; background: rgba(255, 255, 255, .15); color: #fff; border-radius: 6px; cursor: pointer; padding: 3px 8px; flex: none; }
 .dock-open { width: 100%; height: 100%; border: 0; background: var(--studio); color: #fff; cursor: pointer; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 14px; font: inherit; }
 .dock-open span { writing-mode: vertical-rl; font-weight: 700; letter-spacing: .1em; }
-.dock-sec { padding: 10px 12px; border-bottom: 1px solid var(--line); }
-.dock-sec > summary { cursor: pointer; font-weight: 800; list-style: none; }
-.dock-sec > summary::-webkit-details-marker { display: none; }
-.dock-sec > summary::before { content: '▸ '; color: var(--accent); }
-.dock-sec[open] > summary::before { content: '▾ '; }
-.dock-sec > summary small, .dock-h small { font-weight: 500; color: var(--muted); font-size: .76rem; }
-.dock-h { font-weight: 800; margin-bottom: 6px; }
-.dock .steps { margin-top: 8px; gap: 6px; }
-.dock .step { padding: 6px 8px; }
-.dock .st-num { width: 20px; height: 20px; font-size: .72rem; }
-.dock .st-text { font-size: .86rem; }
-.dock .st-chips { margin: 4px 0 0 52px; }
-.dock .twists label { padding: 6px 8px; font-size: .85rem; }
-.dock .quiz { margin-top: 4px; padding: 8px 10px; }
-.dock .quiz-a { grid-template-columns: 1fr; gap: 5px; }
-.dock .quiz-opt { padding: 6px 10px; font-size: .86rem; }
-.dock .made { margin-top: 10px; }
-.dock .made input { padding: 7px 10px; }
-.dock .complete-row { margin: 10px 0 4px; }
-.dock .hints { font-size: .84rem; }
-.task-mini { font-weight: 700; margin: 6px 0; }
+.gcard { display: flex; flex-direction: column; min-height: 100%; }
+.g-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--studio); color: #fff; }
+.g-head .g-ic { font-size: 1.5rem; line-height: 1; }
+.g-head b { flex: 1; font-size: 1rem; line-height: 1.2; }
+.g-dots { display: flex; flex-wrap: wrap; gap: 5px; padding: 12px 14px 0; }
+.g-dots i { width: 11px; height: 11px; border-radius: 50%; background: #dfe3ec; }
+.g-dots i.k { border-radius: 3px; }
+.g-dots i.d { background: var(--good); }
+.g-dots i.c { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .3); }
+.g-body { flex: 1; padding: 14px; }
+.g-say { margin: 0 0 14px; font-size: 1.2rem; line-height: 1.4; font-weight: 600; color: var(--ink); }
+.g-say b { color: var(--accent-dark); font-weight: 800; }
+.gcard.is-ok .g-say::after { content: '  ✓'; color: var(--good); font-weight: 900; }
+.gcard.is-ok .g-body { background: #ecf8f0; transition: background .2s; }
+.g-key { display: flex; align-items: center; gap: 6px; margin: 0 0 14px; font-weight: 700; color: var(--muted); }
+.g-key kbd { font: 700 1rem/1 inherit; min-width: 34px; text-align: center; padding: 8px 10px; border-radius: 8px; background: #fff; border: 1px solid var(--line-strong); border-bottom-width: 3px; color: var(--ink); }
+.g-show { width: 100%; justify-content: center; font-size: 1rem; padding: 10px; margin-bottom: 10px; }
+.g-idea { margin: -4px 0 12px; color: var(--ink-2); }
+.g-quiz { display: grid; gap: 6px; }
+.g-quiz .quiz-opt { font-size: .92rem; }
+.g-done { text-align: center; margin-bottom: 14px; }
+.g-done .g-big { display: block; font-size: 3rem; line-height: 1.1; }
+.g-done b { display: block; font-size: 1.25rem; }
+.g-done .done-stars { font-size: 1.8rem; }
+.g-twists { margin-top: 6px; }
+.g-twists summary { cursor: pointer; font-weight: 700; color: var(--ink-2); padding: 4px 0; }
+.g-twists .twists label { padding: 6px 8px; font-size: .85rem; }
+.g-tip { margin: 10px 0 0; font-size: .88rem; }
+.g-foot { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.g-foot .btn { flex: 1; justify-content: center; }
+.g-foot .btn[data-act="g-back"] { flex: 0 0 40px; }
+/* what the guide points at: the button lights up, the thing on the slide gets a ring */
+.guide-glow { position: relative; z-index: 4; outline: 3px solid #f59e0b !important; outline-offset: 2px; background: #fff1bf !important; border-radius: 6px; animation: coach-ring 1.4s ease-out infinite; }
+.ed-tab.guide-glow { color: #7a3c00 !important; }
+.guide-spot { position: absolute; z-index: 6; pointer-events: none; border: 4px dashed #f59e0b; border-radius: 14px; animation: g-spot 1.3s ease-in-out infinite; }
+@keyframes g-spot { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .6); } 50% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); } }
 .auto-checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
 .auto-checks li { display: flex; gap: 8px; align-items: flex-start; padding: 5px 8px; border-radius: 8px; background: var(--surface-2); font-size: .86rem; color: var(--ink-2); }
 .auto-checks li.ok { background: #e7f6ec; color: var(--good); }
@@ -1098,11 +1110,11 @@ body { background: var(--bg); }
         <div>
           <p class="eyebrow">Your animation studio</p>
           <h1>PowerPoint Animation Studio</h1>
-          <p class="hero-lead">PowerPoint is not only for boring presentations. Learn the real tools, then make <b>your own</b> animations, scenes and stories with them, in a Studio editor that works like PowerPoint.</p>
+          <p class="hero-lead">Make animations. Learn PowerPoint.</p>
           <div class="hero-who" id="hero-who"></div>
           <div class="btn-row" style="margin-top:14px">
             <button type="button" class="btn btn-primary btn-lg" id="btn-continue">Continue &rarr;</button>
-            <button type="button" class="btn btn-lg" data-act="open-studio">🖥️ Open my Studio file</button>
+            <button type="button" class="btn btn-lg" data-act="open-studio">🖥️ My Studio file</button>
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
@@ -1132,11 +1144,9 @@ body { background: var(--bg); }
       </div>
 
       <ol class="flow" aria-label="How every mission works">
-        <li><span>📖</span><b>Learn</b><small>see the skill</small></li>
-        <li><span>🖥️</span><b>Do it</b><small>in the editor</small></li>
-        <li><span>🎨</span><b>Create</b><small>your version</small></li>
-        <li><span>✅</span><b>Complete</b><small>check it</small></li>
-        <li><span>🔓</span><b>Unlock</b><small>the next one</small></li>
+        <li><span>👆</span><b>Follow the glow</b></li>
+        <li><span>🎨</span><b>Your turn</b></li>
+        <li><span>✅</span><b>Done</b></li>
       </ol>
 
       <div class="studio-progress" id="studio-progress"></div>
@@ -1145,25 +1155,11 @@ body { background: var(--bg); }
     </div>
   </section>
 
-  <!-- MISSION -->
-  <section id="screen-mission" class="screen" hidden>
-    <div class="container">
-      <div class="m-head" id="m-head"></div>
-      <div class="m-grid">
-        <div class="m-main">
-          <div class="m-tabs" id="m-tabs" role="tablist" aria-label="Mission steps"></div>
-          <div class="m-panel" id="m-panel" role="tabpanel"></div>
-        </div>
-        <aside class="m-side" id="m-side" aria-label="Mission help"></aside>
-      </div>
-    </div>
-  </section>
-
   <!-- THE EDITOR (works like PowerPoint) + mission panel -->
   <section id="screen-editor" class="screen" hidden>
     <div class="ed-screen">
       <div id="ed-host" class="ed-host"></div>
-      <aside id="dock" class="dock" aria-label="Mission panel"></aside>
+      <aside id="dock" class="dock" aria-label="Guide"></aside>
     </div>
   </section>
 
@@ -5522,7 +5518,8 @@ const Ribbon2 = (() => {
       else s.anims.push(a);
       E.selAnim = a.id;
     }, add ? 'addAnim' : 'effect');
-    Ed.preview(0);
+    const it = Anim.schedule(sl().anims, {}).items.find(q => q.a.id === E.selAnim);
+    Ed.preview(it ? Math.max(0, it.t0 - 0.1) : 0);
   }
   function setText(fn, evName) { const objs = sel().filter(o => o.t === 'text' || o.t === 'shape'); if (!objs.length) return; Ed.change(() => objs.forEach(fn), evName || 'font'); }
 
@@ -5794,17 +5791,282 @@ const Chk = (() => {
   return { CHECKS, FINAL_CHECKS, run, runFinal, combos };
 })();
 
+/* ===== The guide: one short instruction at a time, the thing to click lights up =====
+   GUIDES[missionId] = [step, ...]. A step:
+     say    one short instruction (HTML)
+     key    optional keyboard keys to show as a picture, e.g. 'Ctrl + D'
+     target () => element on the screen to light up (ribbon button, tab, menu item, pane row…)
+     spot   () => object (or {x,y,w,h}) on the slide to ring
+     begin  (c) => remember things when the step starts (c = this step's memory)
+     check  (c) => true once the student did it → the guide moves on by itself
+     act    (c) => "Show me": do it for them
+   After the guided steps every mission gets: Your turn (the mission's automatic checklist) → one quick question → Done. */
+const Guide = (() => {
+  const $q = sel => document.querySelector(sel);
+  const E = () => Ed.E;
+  const S = () => Ed.slide();
+  const deck = () => Ed.E.deck;
+  const run = (c, a) => Ribbon2.run(c, a);
+  const ev = n => (evOf(edKey)[n] || 0);
+  const sel1 = () => Ed.selObjs()[0] || null;
+
+  /* ---------- where to point ---------- */
+  const tabEl = name => $q('.ed-tab[data-tab="' + name + '"]');
+  /* the button on a tab: light up the tab first if another tab is open */
+  const on = (tab, sel) => () => {
+    const open = $q('.ed-menu');
+    if (open) return null;
+    if (E().tab !== tab) return tabEl(tab) || null;
+    return $q('.ed-bar ' + sel);
+  };
+  /* a menu item: light up the item when the menu is open, else the button that opens it */
+  const menu = (tab, button, item) => () => $q('.ed-menu ' + item) || on(tab, button)();
+  const ctxTab = () => $q('.ed-tab.ctx');
+  const onCtx = sel => () => { if ($q('.ed-menu')) return null; const t = ctxTab(); if (!t) return null; if (E().tab !== t.dataset.tab) return t; return $q('.ed-bar ' + sel); };
+
+  /* ---------- the slide ---------- */
+  const objs = () => S().objs;
+  const big = o => o.w * o.h > SW * SH * 0.35;
+  const cast = () => objs().filter(o => !o.hidden && o.t !== 'audio' && !o.ph && !big(o) && !(o.t === 'text'));
+  const castTop = () => cast().slice(-1)[0] || null;
+  const animsOf = o => (o ? S().anims.filter(a => a.o === o.id) : []);
+  const hasAnim = (o, k) => animsOf(o).some(a => !k || a.k === k);
+  function select(o) { if (!o) return; E().sel = [o.id]; E().selAnim = (animsOf(o).slice(-1)[0] || {}).id || null; Ed.after({ noThumbs: true }); }
+  function ensureCast(n) {
+    const th = theme();
+    while (cast().length < n) {
+      const i = cast().length;
+      Ed.change(() => { const o = Deck.makeSticker(S(), th.cast[i % 6], 160 + i * 300, 260 + (i % 2) * 120, 170); o.name = ['Hero', 'Friend', 'Target', 'Prop'][i % 4]; S().objs.push(o); });
+    }
+  }
+  const slidesBase = c => { c.n = deck().slides.length; };
+  const newSlide = c => deck().slides.length > c.n;
+  const notTyping = () => !E().editing;
+
+  const G = {
+    1: [
+      { say: 'Click <b>Click to add title</b>', spot: () => objs().find(o => o.ph === 'title'), check: () => E().editing || String((objs().find(o => o.ph === 'title') || {}).text || '').trim(), act: () => Ed.startText(objs().find(o => o.ph === 'title')) },
+      { say: 'Type a name for your studio. Then click the grey area.', spot: () => objs().find(o => o.ph === 'title'), check: () => notTyping() && String((objs().find(o => o.ph === 'title') || {}).text || '').trim().length >= 2, act: () => { const t = objs().find(o => o.ph === 'title'); Ed.change(() => { t.text = 'Nova Studios'; }); Ed.endText(); } },
+      { say: 'Click <b>Click to add subtitle</b>. Type your name.', spot: () => objs().find(o => o.ph === 'sub'), check: () => notTyping() && String((objs().find(o => o.ph === 'sub') || {}).text || '').trim().length >= 2, act: () => { const t = objs().find(o => o.ph === 'sub'); Ed.change(() => { t.text = 'by ' + (data.name || 'me'); }); Ed.endText(); } },
+      { say: 'Click <b>New Slide</b> › <b>Title and Content</b>', key: 'Ctrl + M', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="titleText"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'titleText') },
+      { say: 'Click <b>Layout</b>, then <b>Blank</b>', target: menu('Home', '[data-menu="layout"]', '[data-cmd="layout"][data-arg="blank"]'), check: () => S().layout === 'blank', act: () => run('layout', 'blank') },
+      { say: 'Click <b>Insert</b>, then <b>Text Box</b>', target: on('Insert', '[data-cmd="textbox"]'), check: () => (E().tool && E().tool.insert === 'text') || objs().some(o => o.t === 'text' && !o.ph && o.text), act: () => run('textbox') },
+      { say: 'Click on the slide and type <b>Coming soon</b>. Click the grey area.', spot: () => ({ x: 340, y: 300, w: 600, h: 120 }), check: () => notTyping() && objs().some(o => o.t === 'text' && !o.ph && String(o.text || '').trim()), act: () => { E().tool = null; Ed.change(() => { const o = Deck.makeText(S(), 400, 320, 480, 60, 'Coming soon'); S().objs.push(o); E().sel = [o.id]; }); } },
+      { say: 'Click your text. Pick a bigger <b>size</b>.', target: () => (sel1() && sel1().t === 'text' ? on('Home', '[data-input="size"]')() : null), spot: () => (sel1() && sel1().t === 'text' ? null : objs().find(o => o.t === 'text' && !o.ph)), check: () => objs().some(o => o.t === 'text' && !o.ph && o.size !== 32), act: () => { select(objs().find(o => o.t === 'text' && !o.ph)); run('size', '54'); } },
+      { say: () => 'Click <b>File</b>. Name the file <b>' + esc(firstName()) + '_Studio</b>.', target: () => $q('.ef-name') || $q('.ed-tab.file'), check: () => /_studio$/i.test(deck().title) && !/^my_studio$/i.test(deck().title), act: () => Ed.change(() => { deck().title = firstName() + '_Studio'; }) },
+      { say: () => ($q('.ed-file') ? 'Click <b>← Back</b>. Then press <b>Ctrl + S</b> to save.' : 'Press <b>Ctrl + S</b> to save.'), key: 'Ctrl + S', soft: true, target: () => $q('[data-fv="back"]'), check: () => !$q('.ed-file') && ev('save') > 0, act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('save'); } },
+      { say: 'Press <b>F5</b> to play your slides. <b>Esc</b> stops.', key: 'F5', check: () => ev('show') > 0 && !Show.live, act: () => run('show-start') }
+    ],
+    2: [
+      { say: 'Click <b>New Slide</b> › <b>Blank</b>', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="blank"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'blank') },
+      { say: 'Click <b>Layout</b>, then <b>Blank</b>', target: menu('Home', '[data-menu="layout"]', '[data-cmd="layout"][data-arg="blank"]'), check: () => S().layout === 'blank', act: () => run('layout', 'blank') },
+      { say: 'Click <b>Design</b>. Pick a background.', target: on('Design', '.bgsw'), check: () => S().bg && (S().bg.t === 'grad' || S().bg.c !== '#ffffff'), act: () => run('bg-preset', String(theme().id === 'space' ? 0 : 1)) },
+      { say: 'Click <b>Insert</b> › <b>Shapes</b> › <b>Rectangle</b>', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="rect"]'), check: () => !!(E().tool && E().tool.insert === 'shape'), act: () => run('shape', 'rect') },
+      { say: 'Drag across the bottom of the slide: the ground', spot: () => ({ x: 0, y: 560, w: 1280, h: 160 }), begin: c => { c.n = objs().length; }, check: c => objs().length > c.n, act: () => { E().tool = null; Ed.change(() => { const o = Deck.makeShape(S(), 'rect', 0, 560, 1280, 160); S().objs.push(o); E().sel = [o.id]; }); } },
+      { say: 'Click <b>Shape Fill</b>. Pick a colour.', target: onCtx('[data-menu="fill"]'), spot: () => (sel1() ? null : objs().find(o => o.t === 'shape')), check: () => objs().some(o => o.t === 'shape' && o.fill && o.fill.c !== '#4472c4'), act: () => { select(objs().filter(o => o.t === 'shape').pop()); run('fill', theme().ground); } },
+      { say: '<b>Shapes</b› › <b>Oval</b>. Hold <b>Shift</b> and drag: a circle.'.replace('</b›', '</b>'), key: 'Shift', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="oval"]'), check: () => objs().some(o => o.shape === 'oval'), act: () => Ed.change(() => { const o = Deck.makeShape(S(), 'oval', 1020, 60, 140, 140); o.fill = { t: 'solid', c: '#ffd54a' }; S().objs.push(o); E().sel = [o.id]; }) },
+      { say: 'Drag the round arrow <b>⟳</b> to turn a shape', target: () => $q('.ed-rot'), spot: () => (sel1() ? null : objs().filter(o => o.t === 'shape').pop()), check: () => objs().some(o => (o.rot || 0) !== 0), act: () => { const o = sel1() || objs().filter(o2 => o2.t === 'shape').pop(); select(o); run('rot-right'); } },
+      { say: 'Drag a corner <b>○</b> to make it bigger', target: () => $q('.ed-h.h-se'), begin: c => { c.n = ev('resize'); }, check: c => ev('resize') > c.n, act: () => { const o = sel1() || objs().filter(o2 => o2.t === 'shape').pop(); select(o); Ed.change(() => { o.w = Math.round(o.w * 1.3); o.h = Math.round(o.h * 1.3); }, 'resize'); } },
+      { say: 'Press <b>Ctrl + D</b> to copy it', key: 'Ctrl + D', spot: () => (sel1() ? null : objs().filter(o => o.t === 'shape').pop()), check: () => ev('dupObj') + ev('ctrlDrag') + ev('paste') > 0, act: () => { if (!sel1()) select(objs().filter(o => o.t === 'shape').pop()); run('dup-obj'); } }
+    ],
+    3: [
+      { say: 'Click <b>Duplicate</b> to copy your slide', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
+      { say: 'Click <b>Insert</b> › <b>Icons</b>. Pick one.', target: () => $q('.modal .ig') || on('Insert', '[data-cmd="icons"]')(), begin: c => { c.n = objs().filter(o => o.t === 'icon').length; }, check: c => objs().filter(o => o.t === 'icon').length > c.n, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { const o = Deck.makeIcon(S(), 'star', 560, 100, 160); S().objs.push(o); E().sel = [o.id]; }, 'icon'); } },
+      { say: 'Click <b>Graphics Fill</b>. Pick a colour.', target: onCtx('[data-menu="iconfill"]'), spot: () => (sel1() && sel1().t === 'icon' ? null : objs().find(o => o.t === 'icon')), check: () => objs().some(o => o.t === 'icon' && o.color !== '#262626'), act: () => { select(objs().filter(o => o.t === 'icon').pop()); run('icon-color', '#ffc000'); } },
+      { say: 'Click <b>Insert</b> › <b>Stock Images</b>. Add 2 pictures.', target: () => $q('.modal .stk') || on('Insert', '[data-cmd="stickers"]')(), begin: c => { c.n = objs().filter(o => o.t === 'sticker').length; }, check: c => objs().filter(o => o.t === 'sticker').length >= c.n + 2, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { [0, 1].forEach(i => { const o = Deck.makeSticker(S(), theme().cast[i], 200 + i * 520, 300, 180); S().objs.push(o); }); }, 'sticker'); } },
+      { say: 'Draw a <b>circle</b> (a head) and a <b>rectangle</b> (a body)', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="oval"]'), begin: c => { c.n = objs().filter(o => o.t === 'shape').length; }, check: c => objs().filter(o => o.t === 'shape').length >= c.n + 2, act: () => Ed.change(() => { const h = Deck.makeShape(S(), 'oval', 580, 320, 70, 70), b = Deck.makeShape(S(), 'rect', 570, 390, 90, 120); S().objs.push(h, b); E().sel = [h.id, b.id]; }, 'shape') },
+      { say: 'Click one. <b>Shift + click</b> the other.', key: 'Shift + click', spot: () => objs().filter(o => o.t === 'shape' && !big(o)).slice(-2)[0], check: () => Ed.selObjs().length >= 2 || objs().some(o => o.t === 'group'), act: () => { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); Ed.after({ noThumbs: true }); } },
+      { say: 'Press <b>Ctrl + G</b> to group them', key: 'Ctrl + G', check: () => objs().some(o => o.t === 'group'), act: () => { if (Ed.selObjs().length < 2) { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); } run('group'); } },
+      { say: 'Right-click a picture › <b>Bring to Front</b>', spot: () => objs().find(o => o.t === 'sticker'), check: () => ev('front') + ev('back') + ev('forward') + ev('backward') > 0, act: () => { select(objs().find(o => o.t === 'sticker') || castTop()); run('front'); } },
+      { say: 'Click <b>Arrange</b> › <b>Selection Pane</b>', target: menu('Home', '[data-menu="arrange"]', '[data-cmd="pane-sel"]'), check: () => E().pane === 'sel', act: () => { E().pane = 'sel'; Ed.after({ noThumbs: true }); } },
+      { say: 'Double-click a name. Type a new name. Do it 3 times.', target: () => [...document.querySelectorAll('.sel-pane .sp-name')].find(n => Deck.isDefaultName(n.textContent)) || null, check: () => objs().filter(o => o.t !== 'audio' && !Deck.isDefaultName(o.name)).length >= 3, act: () => Ed.change(() => { ['Hero', 'Friend', 'Target'].forEach((n, i) => { const o = objs().filter(q => Deck.isDefaultName(q.name) && !q.ph)[0]; if (o) o.name = n + (i ? '' : ''); }); }, 'rename') }
+    ],
+    4: [
+      { say: 'Click <b>Duplicate</b> 2 times', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: c => deck().slides.length >= c.n + 2, act: () => { run('dup-slide'); run('dup-slide'); } },
+      { say: 'Drag your character to a new place', spot: () => castTop(), check: () => { const i = E().cur; if (!i) return false; const prev = deck().slides[i - 1]; return objs().some(o => { const p = prev.objs.find(q => q.mk === o.mk); return p && (Math.abs(p.x - o.x) > 30 || Math.abs(p.y - o.y) > 30); }); }, act: () => { const o = castTop() || cast()[0]; if (o) Ed.change(() => { o.x = Math.min(SW - o.w, o.x + 300); }, 'move'); } },
+      { say: 'Drag a slide on the left up or down', target: () => $q('.ed-thumbs .ed-th.on'), check: () => ev('reorderSlide') > 0, act: () => run('slide-up') },
+      { say: 'Click <b>View</b> › <b>Slide Sorter</b>', target: on('View', '[data-cmd="view-sorter"]'), check: () => E().view === 'sorter', act: () => run('view-sorter') },
+      { say: 'Click <b>Normal</b> to go back', target: on('View', '[data-cmd="view-normal"]'), check: () => E().view === 'normal' && ev('sorter') > 0, act: () => run('view-normal') },
+      { say: 'Press <b>Shift + F5</b>. <b>Esc</b> stops.', key: 'Shift + F5', check: () => ev('showCur') > 0 && !Show.live, act: () => run('show-cur') }
+    ],
+    5: [
+      { say: 'Click <b>Duplicate</b> to copy your slide', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: c => { slidesBase(c); }, check: newSlide, act: () => { run('dup-slide'); ensureCast(3); } },
+      { say: 'Click a picture on the slide', spot: () => cast().find(o => !hasAnim(o)) || castTop(), check: () => !!sel1() && !big(sel1()), act: () => { ensureCast(3); select(cast().find(o => !hasAnim(o)) || castTop()); } },
+      { say: 'Click <b>Animations</b> › <b>Fly In</b>', target: on('Animations', '[data-cmd="effect"][data-arg="in:fly"]'), check: () => hasAnim(sel1(), 'in'), act: () => { if (!sel1()) select(castTop()); run('effect', 'in:fly'); } },
+      { say: 'Click <b>Effect Options</b> › <b>From Left</b>', target: menu('Animations', '[data-menu="effopt"]', '[data-cmd="eff-dir"][data-arg="left"]'), check: () => ev('effectOptions') > 0, act: () => run('eff-dir', 'left') },
+      { say: 'Click another picture › <b>Zoom</b>', target: () => (sel1() && !hasAnim(sel1()) ? on('Animations', '[data-cmd="effect"][data-arg="in:zoom"]')() : null), spot: () => (sel1() && !hasAnim(sel1()) ? null : cast().find(o => !hasAnim(o))), check: () => new Set(S().anims.filter(a => a.k === 'in').map(a => a.o)).size >= 2, act: () => { ensureCast(3); select(cast().find(o => !hasAnim(o))); run('effect', 'in:zoom'); } },
+      { say: 'Click one more picture › <b>Fade</b>', target: () => (sel1() && !hasAnim(sel1()) ? on('Animations', '[data-cmd="effect"][data-arg="in:fade"]')() : null), spot: () => (sel1() && !hasAnim(sel1()) ? null : cast().find(o => !hasAnim(o))), check: () => new Set(S().anims.filter(a => a.k === 'in').map(a => a.o)).size >= 3, act: () => { ensureCast(3); select(cast().find(o => !hasAnim(o))); run('effect', 'in:fade'); } },
+      { say: 'Click <b>Preview</b> to watch', target: on('Animations', '[data-cmd="anim-preview"]'), check: () => ev('preview') > 0, act: () => run('anim-preview') }
+    ],
+    6: [
+      { say: 'Click a picture that already has an animation', spot: () => cast().find(o => hasAnim(o, 'in')), check: () => hasAnim(sel1(), 'in'), act: () => { let o = cast().find(q => hasAnim(q, 'in')); if (!o) { ensureCast(1); o = castTop(); select(o); run('effect', 'in:fly'); } select(o); } },
+      { say: 'Click <b>Add Animation</b> › <b>Pulse</b> (yellow)', target: menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="em:pulse"]'), check: () => hasAnim(sel1(), 'em'), act: () => run('add-anim', 'em:pulse') },
+      { say: 'Click <b>Add Animation</b> › <b>Fade</b> in the red <b>Exit</b> row', target: menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="out:fadeout"]'), check: () => hasAnim(sel1(), 'out'), act: () => run('add-anim', 'out:fadeout') },
+      { say: 'Click <b>Preview</b>: in, pulse, out!', target: on('Animations', '[data-cmd="anim-preview"]'), begin: c => { c.n = ev('preview'); }, check: c => ev('preview') > c.n, act: () => run('anim-preview') }
+    ],
+    7: [
+      { say: 'Click the number <b>1</b> next to a picture', target: () => (E().tab === 'Animations' ? $q('.ed-num') : tabEl('Animations')), check: () => !!Ed.anim(), act: () => { E().tab = 'Animations'; if (!S().anims.length) { ensureCast(1); select(castTop()); run('effect', 'in:fly'); } E().selAnim = S().anims[0].id; E().sel = [S().anims[0].o]; Ed.after({ noThumbs: true }); } },
+      { say: '<b>Start</b> › <b>With Previous</b>', target: on('Animations', '[data-input="start"]'), check: () => S().anims.some(a => a.start === 'with'), act: () => { const a = Ed.anim() || S().anims[0]; Ed.change(() => { a.start = 'with'; }, 'timing'); } },
+      { say: 'Click the next number. <b>Start</b> › <b>After Previous</b>', target: () => (E().tab === 'Animations' ? ([...document.querySelectorAll('.ed-num')].find(n => n.dataset.anim !== E().selAnim) && Ed.anim() && Ed.anim().start === 'click' ? $q('.ed-bar [data-input="start"]') : [...document.querySelectorAll('.ed-num')].find(n => n.dataset.anim !== E().selAnim)) : tabEl('Animations')), check: () => S().anims.some(a => a.start === 'after'), act: () => { ensureTwoAnims(); const a = S().anims[1]; Ed.change(() => { a.start = 'after'; }, 'timing'); } },
+      { say: 'Type <b>2</b> in <b>Duration</b>', target: on('Animations', '[data-input="dur"]'), check: () => S().anims.some(a => Deck.DEF_DUR[a.fx] > 0 && Math.abs(a.dur - Deck.DEF_DUR[a.fx]) > 0.01), act: () => { const a = Ed.anim() || S().anims[0]; Ed.change(() => { a.dur = 2; }, 'timing'); } },
+      { say: 'Type <b>1</b> in <b>Delay</b>', target: on('Animations', '[data-input="delay"]'), check: () => S().anims.some(a => (a.delay || 0) > 0), act: () => { const a = Ed.anim() || S().anims[0]; Ed.change(() => { a.delay = 1; }, 'delay'); } },
+      { say: 'Set <b>every</b> number to With or After Previous', target: () => (E().tab === 'Animations' ? ([...document.querySelectorAll('.ed-num')].find(n => { const a = S().anims.find(q => q.id === n.dataset.anim); return a && a.start === 'click'; }) || null) : tabEl('Animations')), check: () => S().anims.length > 0 && !Anim.schedule(S().anims, {}).clickCount, act: () => Ed.change(() => S().anims.forEach((a, i) => { if (a.start === 'click') a.start = i ? 'after' : 'with'; }), 'timing') },
+      { say: 'Press <b>F5</b>. Don’t click: it plays by itself!', key: 'F5', begin: c => { c.n = ev('show') + ev('showCur'); }, check: c => ev('show') + ev('showCur') > c.n && !Show.live, act: () => run('show-cur') }
+    ],
+    8: [
+      { say: 'Click <b>Animation Pane</b>', target: on('Animations', '[data-cmd="pane-anim"]'), check: () => E().pane === 'anim', act: () => { E().pane = 'anim'; Ed.after({ noThumbs: true }); } },
+      { say: 'Make <b>5</b> animations on this slide (Add Animation)', target: () => (Ed.selObjs().length ? menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="em:spin"]')() : null), spot: () => (sel1() ? null : castTop()), check: () => S().anims.length >= 5, act: () => { ensureCast(2); let i = 0; while (S().anims.length < 5 && i < 8) { select(cast()[i % cast().length]); run('add-anim', ['em:pulse', 'em:spin', 'in:fade', 'em:teeter', 'out:fadeout'][i % 5]); i++; } } },
+      { say: 'Click a row in the pane. Click <b>▲</b>.', target: () => (Ed.anim() && $q('.ed-side .pane-row.sel') ? $q('.ed-side [data-cmd="move-earlier"]') : $q('.ed-side .pane-row:last-of-type') || $q('.ed-side .pane-row')), check: () => ev('paneReorder') > 0, act: () => { E().selAnim = S().anims[S().anims.length - 1].id; run('move-earlier'); } },
+      { say: 'Drag a coloured <b>bar</b> to the right', target: () => $q('.ed-side .pane-bar'), check: () => ev('barDrag') + ev('effectOptions') > 0, act: () => { const a = S().anims[0]; Ed.change(() => { a.delay = (a.delay || 0) + 0.5; }, 'barDrag'); } },
+      { say: 'Click <b>▶ Play</b> in the pane', target: () => $q('.ed-side [data-cmd="play-from"]'), check: () => ev('playFrom') + ev('playAll') > 0, act: () => run('play-from') }
+    ],
+    9: [
+      { say: 'Click your main character', spot: () => castTop(), check: () => !!sel1() && !big(sel1()), act: () => { ensureCast(1); select(castTop()); } },
+      { say: 'Click <b>Add Animation</b> › <b>Lines</b>', target: menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="path:line"]'), check: () => hasAnim(sel1(), 'path'), act: () => { if (!sel1()) select(castTop()); run('add-anim', 'path:line'); } },
+      { say: 'Drag the <b>red</b> end to where it should stop', target: () => $q('.ed-pend'), check: () => ev('pathEnd') + ev('reversePath') > 0, act: () => { const a = S().anims.filter(x => x.k === 'path').pop(); if (a) Ed.change(() => { a.pts[a.pts.length - 1] = [a.pts[a.pts.length - 1][0], -120]; a.edited = true; }, 'pathEnd'); } },
+      { say: 'Type <b>3</b> in <b>Duration</b>', target: on('Animations', '[data-input="dur"]'), check: () => S().anims.some(a => a.k === 'path' && Math.abs(a.dur - 2) > 0.01), act: () => { const a = S().anims.filter(x => x.k === 'path').pop(); Ed.change(() => { a.dur = 3; }, 'timing'); } },
+      { say: 'Click <b>Preview</b>', target: on('Animations', '[data-cmd="anim-preview"]'), begin: c => { c.n = ev('preview'); }, check: c => ev('preview') > c.n, act: () => run('anim-preview') }
+    ],
+    10: [
+      { say: 'Click a picture to move', spot: () => cast().find(o => !hasAnim(o, 'path')) || castTop(), check: () => !!sel1() && !big(sel1()), act: () => { ensureCast(1); select(cast().find(o => !hasAnim(o, 'path')) || castTop()); } },
+      { say: 'Click <b>Add Animation</b> › <b>Custom Path</b>', target: menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="path:custom"]'), check: () => !!(E().tool && E().tool.drawPath) || S().anims.some(a => a.fx === 'custom'), act: () => run('add-anim', 'path:custom') },
+      { say: 'Click <b>4 corners</b> on the slide. <b>Double-click</b> to finish.', spot: () => ({ x: 200, y: 120, w: 880, h: 420 }), check: () => S().anims.some(a => a.fx === 'custom' && Demos.countTurns(a.pts) >= 3) && !E().tool, act: () => { const o = sel1() || castTop(); E().tool = null; Ed.change(() => { const a = Deck.makeAnim(o.id, 'path', 'custom', { pts: [[0, 0], [150, -150], [300, 0], [450, -150], [600, 0]], curve: false }); S().anims.push(a); E().selAnim = a.id; }, 'customPath'); } },
+      { say: 'Click <b>Effect Options</b> › <b>Edit Points</b>', target: menu('Animations', '[data-menu="effopt"]', '[data-cmd="edit-points"]'), check: () => !!E().editPts || ev('editPoints') > 0, act: () => { E().selAnim = S().anims.filter(a => a.fx === 'custom').pop().id; run('edit-points'); } },
+      { say: 'Drag a black square. Then click <b>Done</b>.', target: () => (ev('editPoints') ? $q('.ed-pts-done') : $q('.ed-pt')), check: () => ev('editPoints') > 0 && !E().editPts, act: () => { const a = S().anims.filter(x => x.fx === 'custom').pop(); Ed.change(() => { a.pts[1] = [a.pts[1][0], a.pts[1][1] - 40]; a.edited = true; }, 'editPoints'); E().editPts = null; Ed.after({ noThumbs: true }); } },
+      { say: '<b>Effect Options</b> › <b>More options</b> › <b>Bounce end</b>', target: () => $q('.modal [data-f="ease"]') || menu('Animations', '[data-menu="effopt"]', '[data-cmd="anim-dialog"]')(), check: () => S().anims.some(a => a.k === 'path' && a.ease !== 'smooth'), act: () => { if (window.Modal) Modal.close(); const a = S().anims.filter(x => x.fx === 'custom').pop() || S().anims.filter(x => x.k === 'path').pop(); Ed.change(() => { a.ease = 'bounce'; }, 'effectOptions'); } }
+    ],
+    11: [
+      { say: 'Click a picture with a motion path', spot: () => cast().find(o => hasAnim(o, 'path')), check: () => hasAnim(sel1(), 'path'), act: () => { let o = cast().find(q => hasAnim(q, 'path')); if (!o) { ensureCast(1); o = castTop(); select(o); run('add-anim', 'path:arc'); } select(o); } },
+      { say: 'Click <b>Add Animation</b> › <b>Spin</b>', target: menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="em:spin"]'), check: () => animsOf(sel1()).some(a => a.fx === 'spin'), act: () => run('add-anim', 'em:spin') },
+      { say: '<b>Start</b> › <b>With Previous</b>', target: on('Animations', '[data-input="start"]'), check: () => S().anims.some(a => a.fx === 'spin' && a.start === 'with'), act: () => { const a = S().anims.filter(x => x.fx === 'spin').pop(); Ed.change(() => { a.start = 'with'; }, 'timing'); } },
+      { say: 'Give Spin the <b>same Duration</b> as the path', target: on('Animations', '[data-input="dur"]'), check: () => Ed.E.deck && S().anims.some(a => a.fx === 'spin' && S().anims.some(p => p.k === 'path' && p.o === a.o && Math.abs(p.dur - a.dur) < 0.01)), act: () => { const a = S().anims.filter(x => x.fx === 'spin').pop(), p = S().anims.find(x => x.k === 'path' && x.o === a.o); Ed.change(() => { a.dur = p.dur; }, 'timing'); } },
+      { say: 'Click <b>Animation Painter</b>', target: on('Animations', '[data-cmd="painter"]'), check: () => !!E().painter || ev('painter') > 0, act: () => { select(cast().find(o => animsOf(o).some(a => a.fx === 'spin'))); run('painter'); } },
+      { say: 'Click another picture: it gets the same moves', spot: () => cast().find(o => !hasAnim(o)) || cast()[0], check: () => ev('painter') > 0, act: () => { ensureCast(2); const from = cast().find(o => animsOf(o).some(a => a.fx === 'spin')), to = cast().find(o => o !== from); Ed.change(() => animsOf(from).forEach(a => { const c2 = JSON.parse(JSON.stringify(a)); c2.id = Deck.uid('a'); c2.o = to.id; S().anims.push(c2); }), 'painter'); E().painter = null; } }
+    ],
+    12: [
+      { say: 'Click <b>Duplicate</b> to start a new scene', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
+      { say: 'Open the <b>Animation Pane</b>: your script', target: on('Animations', '[data-cmd="pane-anim"]'), check: () => E().pane === 'anim', act: () => { E().tab = 'Animations'; E().pane = 'anim'; Ed.after({ noThumbs: true }); } }
+    ],
+    13: [
+      { say: 'Click <b>Duplicate</b>', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => { ensureCast(1); run('dup-slide'); } },
+      { say: 'Drag a picture to a new place. Make it bigger.', spot: () => castTop(), check: () => { const i = E().cur; if (!i) return false; const prev = deck().slides[i - 1]; return objs().some(o => { const p = prev.objs.find(q => q.mk === o.mk); return p && (Math.abs(p.x - o.x) > 30 || Math.abs(p.y - o.y) > 30 || Math.abs(p.w - o.w) > 20); }); }, act: () => { const o = castTop(); Ed.change(() => { o.x = Math.max(0, o.x - 250); o.w *= 1.6; o.h *= 1.6; }, 'move'); } },
+      { say: 'Click <b>Transitions</b> › <b>Morph</b>', target: on('Transitions', '[data-cmd="trans"][data-arg="morph"]'), check: () => S().trans && S().trans.fx === 'morph', act: () => run('trans', 'morph') },
+      { say: 'Type <b>2.5</b> in <b>Duration</b>', target: on('Transitions', '[data-input="trans-dur"]'), check: () => ev('transDur') > 0, act: () => Ed.change(() => { S().trans.dur = 2.5; }, 'transDur') },
+      { say: 'Click the slide before it. Pick <b>Fade</b>.', target: () => (E().cur > 0 && S().trans && S().trans.fx === 'morph' ? $q('.ed-thumbs [data-th="' + (E().cur - 1) + '"]') : on('Transitions', '[data-cmd="trans"][data-arg="fade"]')()), check: () => deck().slides.some(s => s.trans && ['fade', 'push', 'wipe', 'zoom'].indexOf(s.trans.fx) > -1), act: () => { const s = deck().slides[Math.max(1, E().cur - 1)] || S(); Ed.change(() => { s.trans = Object.assign({ dur: 1, click: true, after: null }, s.trans, { fx: 'fade' }); }, 'trans'); } }
+    ],
+    14: [
+      { say: 'Click <b>Transitions</b>. Tick <b>After</b>.', target: on('Transitions', '[data-input="trans-afterbox"]'), check: () => S().trans && S().trans.after != null, act: () => Ed.change(() => { S().trans = Object.assign({ fx: 'none', dur: 1, click: true }, S().trans, { after: 4 }); }, 'after') },
+      { say: 'Click another slide on the left. Tick <b>After</b> again.', target: () => (S().trans && S().trans.after != null ? $q('.ed-thumbs .ed-th:not(.on)') : on('Transitions', '[data-input="trans-afterbox"]')()), check: () => deck().slides.filter(s => s.trans && s.trans.after != null).length >= 2, act: () => Ed.change(() => deck().slides.slice(-3).forEach(s => { s.trans = Object.assign({ fx: 'none', dur: 1, click: true }, s.trans, { after: 4 }); }), 'after') },
+      { say: 'Click <b>Insert</b> › <b>Audio</b> › pick music', target: menu('Insert', '[data-menu="audio"]', '[data-cmd="audio"][data-arg="happy"]'), check: () => objs().some(o => o.t === 'audio') || deck().slides.some(s => s.objs.some(o => o.t === 'audio')), act: () => run('audio', 'happy') },
+      { say: 'On <b>Playback</b>, tick <b>Play Across Slides</b>', target: onCtx('[data-input="pb-across"]'), spot: () => (ctxTab() ? null : objs().find(o => o.t === 'audio')), check: () => deck().slides.some(s => s.objs.some(o => o.t === 'audio' && o.across)), act: () => { const o = deck().slides.map(s => s.objs.find(q => q.t === 'audio')).find(Boolean); if (o) Ed.change(() => { o.across = true; }, 'playback'); } },
+      { say: 'Click <b>File</b> › <b>Export</b> › <b>Create Video</b>. Wait.', target: () => $q('[data-fa="export"]') || $q('[data-fv="export"]') || $q('.ed-tab.file'), check: () => ev('export') > 0, act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('export'); } }
+    ],
+    15: [
+      { say: 'Click <b>New Slide</b> › <b>Blank</b>', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="blank"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'blank') },
+      { say: '<b>Shapes</b> › <b>Rounded Rectangle</b>. Draw a button.', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="round"]'), check: () => objs().some(o => o.shape === 'round'), act: () => Ed.change(() => { const o = Deck.makeShape(S(), 'round', 120, 520, 280, 100); o.text = 'OPEN'; S().objs.push(o); E().sel = [o.id]; }, 'shape') },
+      { say: '<b>Insert</b> › <b>Stock Images</b>. Pick a surprise.', target: () => $q('.modal .stk') || on('Insert', '[data-cmd="stickers"]')(), begin: c => { c.n = objs().filter(o => o.t === 'sticker').length; }, check: c => objs().filter(o => o.t === 'sticker').length > c.n, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { const o = Deck.makeSticker(S(), '🎁', 700, 220, 220); S().objs.push(o); E().sel = [o.id]; }, 'sticker'); } },
+      { say: 'Give the surprise <b>Zoom</b>', target: () => (sel1() && sel1().t === 'sticker' ? on('Animations', '[data-cmd="effect"][data-arg="in:zoom"]')() : null), spot: () => (sel1() && sel1().t === 'sticker' ? null : objs().filter(o => o.t === 'sticker').pop()), check: () => objs().some(o => o.t === 'sticker' && hasAnim(o, 'in')), act: () => { select(objs().filter(o => o.t === 'sticker').pop()); run('effect', 'in:zoom'); } },
+      { say: 'Click <b>Trigger</b> › pick your button', target: menu('Animations', '[data-menu="trigger"]', '[data-cmd="trigger"]:not([data-arg="none"])'), check: () => S().anims.some(a => a.trigger), act: () => { const b = objs().find(o => o.shape === 'round'); const s = objs().filter(o => o.t === 'sticker').pop(); select(s); run('trigger', b.id); } },
+      { say: 'Press <b>Shift + F5</b>. Click your button!', key: 'Shift + F5', check: () => ev('trigger') > 0, act: () => { run('show-cur'); setTimeout(pressButton, 1300); } },
+      { say: 'Click the button. <b>Insert</b> › <b>Link</b> › Slide 1.', target: () => (sel1() && sel1().shape === 'round' ? menu('Insert', '[data-menu="link"]', '[data-cmd="link"]:not([disabled])')() : null), spot: () => (sel1() && sel1().shape === 'round' ? null : objs().find(o => o.shape === 'round')), check: () => deck().slides.some(s => s.objs.some(o => o.link)) || new Set(S().anims.filter(a => a.trigger).map(a => a.trigger)).size >= 2, act: () => { const b = objs().find(o => o.shape === 'round'); select(b); run('link', deck().slides[0].id); } }
+    ]
+  };
+  /* "Show me" in the Slide Show: click the trigger button for them */
+  function pressButton() {
+    const b = objs().find(o => o.shape === 'round'), cv = document.querySelector('.slideshow canvas');
+    if (!b || !cv) return;
+    const r = cv.getBoundingClientRect();
+    cv.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: r.left + (b.x + b.w / 2) / SW * r.width, clientY: r.top + (b.y + b.h / 2) / SH * r.height }));
+  }
+  function ensureTwoAnims() { ensureCast(2); while (S().anims.length < 2) { select(cast()[S().anims.length % cast().length]); run('effect', 'in:fade'); } }
+
+  /* ---------- the engine ---------- */
+  let st = null;   /* { id, steps, i, mem, timer, doneAt } */
+  function stepsFor(id) {
+    return (G[id] || []).concat([{ kind: 'turn', check: turnCheck }, { kind: 'quiz' }, { kind: 'done' }]);
+  }
+  /* hooks: { onStep(i), onDone(i), quizOk() } from the app */
+  function start(id, at, hooks) {
+    stop();
+    const steps = stepsFor(id);
+    st = Object.assign({ id, steps, i: Math.max(0, Math.min(at || 0, steps.length - 1)), mem: {}, timer: 0, wait: false }, hooks || {});
+    if (st.quizOk) steps.find(x => x.kind === 'quiz').check = st.quizOk;
+    begin();
+    st.timer = setInterval(tick, 300);
+    return st;
+  }
+  function stop() { if (st) clearInterval(st.timer); st = null; clear(); }
+  function begin() {
+    const s = st.steps[st.i];
+    st.mem = {};
+    st.wait = false;
+    try { if (s.begin) s.begin(st.mem); } catch (e) { /* ok */ }
+    if (st.onStep) st.onStep(st.i);
+    paint();
+  }
+  function clear() {
+    document.querySelectorAll('.guide-glow').forEach(el => el.classList.remove('guide-glow'));
+    const sp = document.querySelector('.guide-spot');
+    if (sp) sp.remove();
+  }
+  function paint() {
+    if (Guide.render) Guide.render();
+    light();
+  }
+  /* light up the target and ring the spot (called often: the ribbon redraws itself) */
+  function light() {
+    if (!st) return;
+    const s = st.steps[st.i];
+    let el = null;
+    try { el = s.target ? s.target() : null; } catch (e) { el = null; }
+    document.querySelectorAll('.guide-glow').forEach(x => { if (x !== el) x.classList.remove('guide-glow'); });
+    if (el && !el.classList.contains('guide-glow')) { el.classList.add('guide-glow'); if (el.scrollIntoView && el.closest('.ed-bar, .ed-thumbs, .ed-side, .ed-menu')) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    let r = null;
+    try { r = s.spot ? s.spot() : null; } catch (e) { r = null; }
+    const stage = document.querySelector('.ed-stage');
+    let sp = document.querySelector('.guide-spot');
+    if (!r || !stage || E().view !== 'normal' || Show.live) { if (sp) sp.remove(); return; }
+    if (!sp) { sp = document.createElement('div'); sp.className = 'guide-spot'; stage.appendChild(sp); }
+    const k = E().k, pad = 10;
+    Object.assign(sp.style, { left: (r.x * k - pad) + 'px', top: (r.y * k - pad) + 'px', width: (r.w * k + pad * 2) + 'px', height: (r.h * k + pad * 2) + 'px' });
+  }
+  function tick() {
+    if (!st || !document.querySelector('.ed')) return;
+    light();
+    const s = st.steps[st.i];
+    if (st.wait || !s.check) return;
+    let ok = false;
+    try { ok = !!s.check(st.mem); } catch (e) { ok = false; }
+    if (!ok) return;
+    st.wait = true;
+    if (st.onDone) st.onDone(st.i);
+    Fx.sound('good');
+    setTimeout(() => { if (st && st.wait) next(); }, 650);
+  }
+  function next() { if (!st) return; if (st.i < st.steps.length - 1) { st.i++; begin(); } }
+  function back() { if (!st || !st.i) return; st.i--; begin(); }
+  function showMe() {
+    if (!st) return;
+    const s = st.steps[st.i];
+    if (s.act) { try { s.act(st.mem); } catch (e) { /* the student can still do it */ } }
+    else next();
+  }
+  /* "Your turn" step: the mission's automatic checklist */
+  function turnCheck() { return Chk.run(st.id, deck(), evOf(edKey)).every(c => c.ok); }
+
+  const say = s => (typeof s.say === 'function' ? s.say() : s.say || '');
+  return { G, start, stop, next, back, showMe, light, turnCheck, say, get st() { return st; }, render: null, tabEl, cast };
+})();
+
 /* ===== PowerPoint Animation Studio: app =====
    The lab PCs have no PowerPoint, so students work in the built-in Studio editor (editor.js), which has the same
-   tabs and buttons as PowerPoint. Each mission: LEARN (demo) → DO IT in the editor (steps, task, live checklist) → COMPLETE. */
+   tabs and buttons as PowerPoint. Each mission opens the editor with the guide (guide.js): one short instruction at a time,
+   the button to click lights up → Your turn (checklist that ticks itself) → one question → done. */
 const SAVE_KEY = 'computerLab.pptStudio.v1';
 const FAST = /[?&]fast=1/.test(window.location.search);
 /* The teacher types this to stamp a "Director check" (only a classroom stamp, never a grade). */
 const DIRECTOR_CODE = 'action';
 const FTABS = [['plan', '📝', 'Plan'], ['build', '🛠️', 'Build'], ['check', '🔍', 'Check'], ['hand', '📤', 'Hand in']];
-const TECH_REVIEW = [[7, 14], [4, 13], [5, 6], [9, 10], [11], [7, 8], [3], [1, 14]];
-/* The one ribbon place each mission is about (shown on the Learn tab). */
-const WHERE = { 1: 'Home › New Slide', 2: 'Insert › Shapes', 3: 'Home › Arrange', 4: 'View › Slide Sorter', 5: 'Animations › Effects', 6: 'Animations › Add Animation', 7: 'Animations › Start', 8: 'Animations › Animation Pane', 9: 'Animations › Effects', 10: 'Animations › Effects', 11: 'Animations › Add Animation', 12: 'Animations › Animation Pane', 13: 'Transitions › Morph', 14: 'File › Export', 15: 'Animations › Trigger' };
 const USE_CHIPS = ['Entrance', 'Emphasis', 'Exit', 'Motion path', 'Custom path', 'Combo', 'Morph', 'Transitions', 'Sound', 'Trigger'];
 
 function blank() {
@@ -5860,7 +6122,6 @@ function ideaFor(id) {
   if (th.id === 'custom' && data.idea) return th.ideas[id] + ' · <i>' + esc(data.idea) + '</i>';
   return th.ideas[id] || '';
 }
-function stripTags(s) { const d = document.createElement('div'); d.innerHTML = s; return d.textContent; }
 
 /* ---------- the two files: the Studio file (missions) and the final animation ---------- */
 let edKey = null, edOpen = false, dockMin = false;
@@ -5882,7 +6143,7 @@ function renderHome() {
     '<span class="who-chip">🎬 Animator: <b>' + esc(data.name || '—') + '</b> <button type="button" class="link-btn" data-act="rename">change</button></span>' +
     '<span class="who-chip">' + th.e + ' My idea: <b>' + esc(th.id === 'custom' && data.idea ? data.idea : th.name) + '</b> <button type="button" class="link-btn" data-act="theme">change</button></span>';
   const nm = nextMission();
-  $('#btn-continue').innerHTML = isDone(data, FINAL.id) ? '🏆 See my certificate' : doneCount() ? 'Continue: ' + (nm === FINAL.id ? 'Final project' : 'Mission ' + nm) + ' &rarr;' : 'Start Mission 1 &rarr;';
+  $('#btn-continue').innerHTML = isDone(data, FINAL.id) ? '🏆 My certificate' : '▶ ' + (nm === FINAL.id ? 'Final project' : 'Mission ' + nm);
   const n = doneCount(), all = MISSIONS.length + 1;
   $('#studio-progress').innerHTML = '<div class="sp-text"><b>' + n + ' / ' + all + '</b> missions · <span class="st-on">★</span> ' + totalStars() + '</div>' +
     '<div class="progress-bar"><span style="width:' + Math.round(n / all * 100) + '%"></span></div>';
@@ -5894,17 +6155,17 @@ function renderHome() {
     const core = ms.filter(m => !m.bonus);
     const done = core.filter(m => isDone(data, m.id)).length;
     const stamp = data.stamps[z.id];
-    html += '<section class="zone z' + z.id + '"><div class="zone-head"><span class="zone-ic">' + z.icon + '</span><div><h2>' + esc(z.name) + '</h2><p class="muted">' + esc(z.sub) + '</p></div>' +
+    html += '<section class="zone z' + z.id + '"><div class="zone-head"><span class="zone-ic">' + z.icon + '</span><div><h2>' + esc(z.name) + '</h2></div>' +
       '<span class="zone-count">' + done + ' / ' + core.length + '</span>' +
       (stamp ? '<span class="stamp" title="Director check passed">🎬 Director approved</span>'
         : done === core.length ? '<button type="button" class="btn btn-sm" data-act="director" data-zone="' + z.id + '">🎬 Director check</button>' : '') +
-      (z.id === 1 && !data.fast && done < core.length ? '<button type="button" class="btn btn-sm btn-fast" data-act="fasttrack">⚡ Know the basics? Fast track</button>' : '') +
+      (z.id === 1 && !data.fast && done < core.length ? '<button type="button" class="btn btn-sm btn-fast" data-act="fasttrack">⚡ Skip</button>' : '') +
       '</div><div class="mcards">' + ms.map(cardHtml).join('') + '</div></section>';
   });
   const fOpen = unlocked(FINAL.id), fDone = isDone(data, FINAL.id);
   html += '<section class="zone zone-final"><button type="button" class="final-card' + (fOpen ? '' : ' locked') + (fDone ? ' done' : '') + '" data-open="' + FINAL.id + '"' + (fOpen ? '' : ' aria-disabled="true"') + '>' +
-    '<span class="fc-ic">' + (fOpen ? '🏆' : '🔒') + '</span><span class="fc-txt"><span class="eyebrow">Final mission</span><b>' + FINAL.title + '</b><span>Your own 15–30 second animation. Your idea, your style.</span></span>' +
-    '<span class="fc-go">' + (fDone ? stars(3) : fOpen ? 'Open →' : 'Unlocks after Mission 14') + '</span></button></section>';
+    '<span class="fc-ic">' + (fOpen ? '🏆' : '🔒') + '</span><span class="fc-txt"><span class="eyebrow">Final mission</span><b>' + FINAL.title + '</b><span>Your own 15–30 s animation</span></span>' +
+    '<span class="fc-go">' + (fDone ? stars(3) : fOpen ? 'Open →' : '🔒') + '</span></button></section>';
   $('#zones').innerHTML = html;
 }
 
@@ -5913,48 +6174,22 @@ function cardHtml(m) {
   return '<button type="button" class="mcard' + (done ? ' done' : open ? ' open' : ' locked') + (m.bonus ? ' bonus' : '') + '" data-open="' + m.id + '"' + (open ? '' : ' aria-disabled="true"') + '>' +
     '<span class="mc-top"><span class="mc-num">' + (m.bonus ? 'BONUS' : m.id) + '</span><span class="mc-emoji" aria-hidden="true">' + (open ? m.icon : '🔒') + '</span>' + (done ? '<span class="mc-tick" aria-label="done">✓</span>' : '') + '</span>' +
     '<span class="mc-title">' + esc(m.title.replace('BONUS: ', '')) + '</span>' +
-    '<span class="mc-skill">' + esc(m.skill) + '</span>' +
-    '<span class="mc-foot"><span>⏱ ' + m.time + ' min</span><span class="mc-stars">' + (done ? stars(starsOf(m.id)) : m.level) + '</span></span></button>';
+    (done ? '<span class="mc-foot"><span class="mc-stars">' + stars(starsOf(m.id)) + '</span></span>' : '') + '</button>';
 }
 
-/* ================= MISSION: LEARN ================= */
+/* ================= MISSION = the editor + the guide ================= */
 let cur = null;   /* { m } while a mission is open */
 
-function openMission(id, where) {
+function openMission(id) {
   if (id === FINAL.id) { openFinal(); return; }
   const m = mission(id);
   if (!m) return;
-  if (!unlocked(id)) { toast('Finish Mission ' + (id === 15 ? 14 : id - 1) + ' first to unlock this one.'); Fx.sound('bad'); return; }
+  if (!unlocked(id)) { toast('🔒 Finish Mission ' + (id === 15 ? 14 : id - 1) + ' first.'); Fx.sound('bad'); return; }
   data.last = id; saveSoon();
   cur = { m };
-  if (where === 'editor' || (where !== 'learn' && lvl(id).seen.indexOf('learn') > -1)) { openEditor('studio'); return; }
-  leaveEditor();
-  showScreen('screen-mission');
-  renderMission();
+  openEditor('studio');
 }
-
-function renderMission() {
-  const m = cur.m, L = lvl(m.id), z = ZONES.find(q => q.id === m.zone);
-  if (L.seen.indexOf('learn') === -1) { L.seen.push('learn'); saveSoon(); }
-  $('#m-head').innerHTML = '<p class="eyebrow">' + (m.bonus ? 'Bonus mission' : 'Mission ' + m.id) + ' · ' + z.icon + ' ' + esc(z.name) + '</p>' +
-    '<h1><span class="mh-ic" aria-hidden="true">' + m.icon + '</span> ' + esc(m.title) + '</h1>' +
-    '<div class="mh-chips"><span class="chip chip-skill">🎓 ' + esc(m.skill) + '</span><span class="chip chip-neutral">⏱ ' + m.time + ' min</span><span class="chip chip-neutral">' + esc(m.level) + '</span>' + (L.done ? '<span class="chip chip-good">✓ Complete ' + stars(L.stars) + '</span>' : '') + '</div>';
-  $('#m-tabs').innerHTML = '<span role="tab" class="m-tab on" aria-selected="true"><span class="mt-n">1</span><span class="mt-ic" aria-hidden="true">📖</span><span class="mt-l">Learn</span></span>' +
-    '<button type="button" role="tab" class="m-tab" data-act="do-it" aria-selected="false"><span class="mt-n">2</span><span class="mt-ic" aria-hidden="true">🖥️</span><span class="mt-l">Do it in the editor</span></button>';
-  Demos.cleanup();
-  const where = WHERE[m.id];
-  $('#m-panel').innerHTML = '<p class="story">' + esc(m.story) + '</p>' +
-    '<div class="learn-goal"><div><span class="eyebrow">You will learn</span><b>' + esc(m.skill) + '</b></div><div><span class="eyebrow">Mission goal</span><b>' + esc(m.goal) + '</b></div></div>' +
-    '<div class="demo-box"><div class="demo-head"><b>👀 See it</b><small>A short picture of the skill, so you know what to look for</small></div><div id="demo-host" class="demo-host"></div></div>' +
-    (m.why ? '<div class="notice notice-info"><span class="notice-icon" aria-hidden="true">i</span><div>' + esc(m.why) + '</div></div>' : '') +
-    (where ? '<div class="where"><span class="eyebrow">📍 Where is it? Same place in the editor and in PowerPoint</span>' + Ribbon.html(where) + '<p class="muted small">' + esc(where) + '</p></div>' : '') +
-    '<div class="next-row"><button type="button" class="btn btn-primary btn-lg" data-act="do-it">🖥️ Now do it in the editor &rarr;</button></div>';
-  Demos.mount(m.demo, $('#demo-host'), theme(), { name: data.name });
-  $('#m-side').innerHTML = '<div class="side-card goal-card"><span class="eyebrow">🎯 Goal</span><p>' + esc(m.goal) + '</p></div>' +
-    '<div class="side-card"><b>🖥️ The Studio editor</b><p class="small">works like PowerPoint: same tabs, same buttons, same names. What you learn here works in PowerPoint too.</p></div>' +
-    '<div class="side-card"><b>✅ Automatic checklist</b><p class="small">The checklist ticks itself when your work is really in your file.</p></div>';
-  Nav.refresh();
-}
+function firstName() { return (String(data.name || '').trim().split(/\s+/)[0] || '').replace(/[^A-Za-z0-9-]/g, '') || 'Student'; }
 
 /* ================= THE EDITOR SCREEN ================= */
 
@@ -5962,6 +6197,7 @@ function openEditor(key) {
   Demos.cleanup();
   const deck = deckOf(key);
   if (!edOpen || edKey !== key) {
+    leaveEditor();
     edKey = key;
     showScreen('screen-editor');
     Ed.mount($('#ed-host'), deck, {
@@ -5970,60 +6206,82 @@ function openEditor(key) {
     });
     edOpen = true;
   } else showScreen('screen-editor');
-  renderDock();
+  if (key === 'studio' && cur) startGuide(); else { Guide.stop(); renderDock(); }
   Nav.refresh();
   setTimeout(() => Ed.draw(), 30);
 }
 function leaveEditor() {
+  Guide.stop();
   if (!edOpen) return;
   Show.stop();
   Ed.destroy();
   edOpen = false;
   save();
 }
+function startGuide() {
+  const m = cur.m, L = lvl(m.id);
+  const n = (Guide.G[m.id] || []).length + 3;
+  const at = L.done ? n - 1 : Math.min(L.gi || 0, n - 1);
+  Guide.start(m.id, at, {
+    onStep(i) { L.gi = i; saveSoon(); },
+    onDone() { const c = $('.gcard'); if (c) c.classList.add('is-ok'); },
+    quizOk: () => !!lvl(m.id).quiz
+  });
+}
 
+/* ---------- the guide card (right of the editor): one instruction at a time ---------- */
+function keysHtml(k) { return '<div class="g-key">' + k.split(' + ').map(x => '<kbd>' + esc(x) + '</kbd>').join('<span>+</span>') + '</div>'; }
 function renderDock() {
   const dock = $('#dock');
   $('.ed-screen').classList.toggle('dock-min', dockMin);
-  if (dockMin) { dock.innerHTML = '<button type="button" class="dock-open" data-act="dock-toggle" title="Show the mission panel">◀<span>Mission</span></button>'; return; }
+  if (dockMin) { dock.innerHTML = '<button type="button" class="dock-open" data-act="dock-toggle" title="Show the guide">◀<span>Guide</span></button>'; return; }
   if (edKey === 'final') { dock.innerHTML = finalDockHtml(); return; }
-  if (!cur) {
-    dock.innerHTML = dockHead('🖥️ Free practice', 'Your Studio file') + '<div class="dock-sec"><p class="small">Everything you make here is saved in your Studio file. Open a mission on the studio map to get steps and a checklist.</p><button type="button" class="btn btn-sm" data-act="home">← Studio map</button></div>';
+  const G = Guide.st;
+  if (!cur || !G) {
+    dock.innerHTML = '<div class="gcard">' + gHead('🖥️', 'My Studio file') + '<div class="g-body"><p class="g-say">Make anything you like. It saves by itself.</p></div>' +
+      '<div class="g-foot"><button type="button" class="btn" data-act="home">🏠 Map</button></div></div>';
     return;
   }
-  const m = cur.m, L = lvl(m.id), th = theme();
-  const others = THEMES.filter(t => t.id !== th.id && t.id !== 'custom');
-  const pick = [others[(m.id * 3) % others.length], others[(m.id * 3 + 3) % others.length]];
-  const steps = m.steps.map((s, i) => {
-    const done = L.steps.indexOf(i) > -1;
-    return '<li class="step' + (done ? ' done' : '') + '"><label class="step-main"><input type="checkbox" data-step="' + i + '"' + (done ? ' checked' : '') + '><span class="st-num">' + (i + 1) + '</span><span class="st-text">' + s[0] + '</span></label>' +
-      ((s[1] || s[2]) ? '<span class="st-chips">' + (s[1] ? '<button type="button" class="chip-where" data-goto="' + esc(s[1]) + '" title="Show me on the ribbon">📍 ' + esc(s[1]) + '</button>' : '') + (s[2] ? '<kbd class="kbd">' + esc(s[2]) + '</kbd>' : '') + '</span>' : '') + '</li>';
-  }).join('');
-  const hints = m.hints.slice(0, L.hints).map((h, i) => '<li><b>Hint ' + (i + 1) + '</b> ' + h + '</li>').join('');
-  const ord = order(m.quiz.a.length, m.id);
-  dock.innerHTML = dockHead((m.bonus ? 'Bonus' : 'Mission ' + m.id) + ' · ' + m.icon + ' ' + m.title, m.goal) +
-    '<details class="dock-sec" open><summary>🧭 Steps</summary>' + (m.id > 1 ? '<p class="small muted">📁 Work in your Studio file: add a new slide for this mission (or duplicate one).</p>' : '') + '<ol class="steps">' + steps + '</ol>' +
-    (m.note ? '<div class="notice notice-warn small"><span class="notice-icon" aria-hidden="true">!</span><div>' + esc(m.note) + '</div></div>' : '') + '</details>' +
-    '<details class="dock-sec"' + (L.steps.length >= Math.min(3, m.steps.length) ? ' open' : '') + '><summary>🎨 Your task & ideas</summary><p class="task-mini">' + esc(m.task) + '</p>' +
-    '<p class="small"><b>' + th.e + ' Idea:</b> ' + ideaFor(m.id) + '</p><p class="small muted"><b>Or:</b> ' + pick.map(t => t.e + ' ' + esc(t.ideas[m.id])).join(' · ') + '</p>' +
-    '<p class="small">✋ Same skill, <b>your own design</b>. <button type="button" class="link-btn" data-act="theme">Change my idea</button></p></details>' +
-    '<div class="dock-sec"><div class="dock-h">✅ Checklist <small>ticks itself</small></div><ul class="auto-checks" id="auto-checks">' + autoChecksHtml(m.id) + '</ul></div>' +
-    '<details class="dock-sec"><summary>⭐ Creative twists <small>+1 star each, max 2</small></summary><ul class="twists">' + m.twists.map((t, i) => '<li><label><input type="checkbox" data-twist="' + i + '"' + (L.twists.indexOf(i) > -1 ? ' checked' : '') + '><span>' + esc(t) + '</span></label></li>').join('') + '</ul></details>' +
-    '<div class="dock-sec help-card"><div class="dock-h">💡 Need help?</div>' + (hints ? '<ol class="hints">' + hints + '</ol>' : '<p class="muted small">Try first, then open a hint.</p>') +
-    '<div class="btn-row">' + (L.hints < 3 ? '<button type="button" class="btn btn-sm hint-btn" data-act="hint">' + ['💡 Hint 1', '💡 Hint 2', '💡 Hint 3'][L.hints] + '</button>' : '') + '<button type="button" class="btn btn-sm" data-act="stuck">🆘 I’m stuck</button><button type="button" class="btn btn-sm" data-act="learn-again">📖 Demo</button></div></div>' +
-    '<div class="dock-sec dock-done"><div class="dock-h">🎬 Complete</div>' +
-    '<div class="quiz' + (L.quiz ? ' ok' : '') + '"><p class="quiz-q"><span class="eyebrow">Quick check</span>' + esc(m.quiz.q) + '</p><div class="quiz-a">' +
-    ord.map(i => '<button type="button" class="quiz-opt' + (L.quiz && i === 0 ? ' right' : '') + '" data-quiz="' + i + '"' + (L.quiz ? ' disabled' : '') + '>' + esc(m.quiz.a[i]) + '</button>').join('') +
-    '</div><p class="quiz-fb" aria-live="polite">' + (L.quiz ? '✓ Correct! ' + esc(m.quiz.why) : '') + '</p></div>' +
-    '<label class="made" for="made"><span class="eyebrow">What did you make?</span><input type="text" id="made" maxlength="140" autocomplete="off" value="' + esc(L.made) + '" placeholder="e.g. ' + esc(stripTags(ideaFor(m.id))) + '"></label>' +
-    '<div class="complete-row"><button type="button" class="btn btn-primary" data-act="complete">' + (L.done ? '✓ Update' : '🎬 Complete mission') + '</button><span class="missing" id="missing" aria-live="polite"></span></div>' +
-    (L.done ? '<p class="small">✓ Complete ' + stars(L.stars) + ' · ' + nextLinkHtml(m.id) + '</p>' : '') + '</div>';
+  const m = cur.m, L = lvl(m.id), s = G.steps[G.i];
+  const dots = '<div class="g-dots" aria-label="Step ' + (G.i + 1) + ' of ' + G.steps.length + '">' + G.steps.map((x, i) => '<i class="' + (i < G.i ? 'd' : i === G.i ? 'c' : '') + (x.kind ? ' k' : '') + '"></i>').join('') + '</div>';
+  let body = '', foot = '';
+  const back = G.i ? '<button type="button" class="btn btn-sm" data-act="g-back" title="Back">‹</button>' : '';
+  const watch = '<button type="button" class="btn btn-sm" data-act="g-watch">▶ Watch</button>';
+  if (!s.kind) {
+    body = '<p class="g-say">' + Guide.say(s) + '</p>' + (s.key ? keysHtml(s.key) : '') +
+      (s.act ? '<button type="button" class="btn g-show" data-act="g-show">👆 Show me</button>' : '');
+    foot = back + watch + '<button type="button" class="btn btn-sm" data-act="g-next">Skip ›</button>';
+  } else if (s.kind === 'turn') {
+    const th = theme();
+    body = '<p class="g-say">🎨 <b>Your turn!</b> Make it yours.</p>' +
+      '<p class="g-idea">' + th.e + ' ' + ideaFor(m.id) + '</p>' +
+      '<ul class="auto-checks" id="auto-checks">' + autoChecksHtml(m.id) + '</ul>';
+    foot = back + watch;
+  } else if (s.kind === 'quiz') {
+    const ord = order(m.quiz.a.length, m.id);
+    body = '<p class="g-say">❓ ' + esc(m.quiz.q) + '</p><div class="g-quiz">' +
+      ord.map(i => '<button type="button" class="quiz-opt' + (L.quiz && i === 0 ? ' right' : '') + '" data-quiz="' + i + '"' + (L.quiz ? ' disabled' : '') + '>' + esc(m.quiz.a[i]) + '</button>').join('') + '</div>';
+    foot = back + watch;
+  } else {
+    if (!L.done) completeMission();
+    if (!L.done) {
+      body = '<p class="g-say">Almost! Finish these first:</p><ul class="auto-checks">' + autoChecksHtml(m.id) + '</ul>' + (L.quiz ? '' : '<p class="small">❓ and the question</p>');
+      foot = '<button type="button" class="btn btn-sm" data-act="g-turn">‹ Back</button>';
+    } else {
+      const n = m.id === 14 || m.id === 15 ? FINAL.id : m.id + 1;
+      body = '<div class="g-done"><span class="g-big">🎉</span><b>Mission complete!</b><div class="done-stars">' + stars(L.stars) + '</div></div>' +
+        '<button type="button" class="btn btn-primary g-show" data-open="' + n + '">' + (n === FINAL.id ? '🏆 Final project →' : 'Next mission →') + '</button>' +
+        '<details class="g-twists"' + (L.twists.length ? ' open' : '') + '><summary>⭐ More stars?</summary><ul class="twists">' + m.twists.map((t, i) => '<li><label><input type="checkbox" data-twist="' + i + '"' + (L.twists.indexOf(i) > -1 ? ' checked' : '') + '><span>' + t + '</span></label></li>').join('') + '</ul></details>';
+      foot = '<button type="button" class="btn btn-sm" data-act="g-again">↺ Again</button><button type="button" class="btn btn-sm" data-act="home">🏠 Map</button>';
+    }
+  }
+  dock.innerHTML = '<div class="gcard">' + gHead(m.icon, (m.bonus ? 'Bonus' : m.id) + '. ' + m.title.replace('BONUS: ', '')) + dots + '<div class="g-body">' + body + '</div><div class="g-foot">' + foot + '</div></div>';
 }
-function dockHead(title, sub) {
-  return '<div class="dock-head"><div><b>' + esc(title) + '</b><span>' + esc(sub || '') + '</span></div><button type="button" class="dock-x" data-act="dock-toggle" title="Hide the panel (more room for the slide)">▶</button></div>';
+function gHead(icon, title) {
+  return '<div class="g-head"><span class="g-ic" aria-hidden="true">' + icon + '</span><b>' + esc(title) + '</b><button type="button" class="dock-x" data-act="dock-toggle" title="Hide (more room for the slide)">▶</button></div>';
 }
 function autoChecksHtml(id) {
-  return checksFor(id).map(c => '<li class="' + (c.ok ? 'ok' : '') + '"><span class="ac-ic" aria-hidden="true">' + (c.ok ? '✓' : '○') + '</span><span>' + esc(c.label) + '</span></li>').join('');
+  return checksFor(id).map(c => '<li class="' + (c.ok ? 'ok' : '') + '"><span class="ac-ic" aria-hidden="true">' + (c.ok ? '✓' : '') + '</span><span>' + esc(c.label) + '</span></li>').join('');
 }
 let lastOk = {};
 function updateDockChecks() {
@@ -6037,95 +6295,43 @@ function updateDockChecks() {
   if (now > before) { Fx.sound('coin'); const li = box.querySelectorAll('li.ok'); if (li.length) Fx.glow(li[li.length - 1]); }
   lastOk[cur.m.id] = now;
 }
-function nextLinkHtml(id) {
-  const n = id === 14 ? FINAL.id : id === 15 ? FINAL.id : id + 1;
-  return '<button type="button" class="link-btn" data-open="' + n + '">' + (n === FINAL.id ? 'Go to the final project →' : 'Next: Mission ' + n + ' →') + '</button>';
+function watchDemo() {
+  const m = cur && cur.m;
+  if (!m) return;
+  Modal.open({ title: '▶ ' + m.title.replace('BONUS: ', ''), wide: true, html: '<div id="demo-host" class="demo-host"></div>',
+    onOpen() { Demos.mount(m.demo, $('#demo-host'), theme(), { name: data.name }); }, onClose: () => Demos.cleanup() });
 }
-/* 📍 chips: open that tab on the editor's ribbon and flash the button */
-function gotoRibbon(path) {
-  const parts = path.split('›').map(s => s.trim()), tab = parts[0], btn = parts[1] || '';
-  if (tab === 'File') { const t = $('.ed-tab.file'); if (t) t.click(); return; }
-  if (['Shape Format', 'Graphics Format', 'Picture Format', 'Playback'].indexOf(tab) > -1 && !$('.ed-tab.ctx')) { toast('Select ' + (tab === 'Playback' ? 'the 🔊 audio icon' : tab === 'Graphics Format' ? 'an icon' : 'a shape') + ' first: then the ' + tab + ' tab appears.'); return; }
-  Ed.E.tab = tab === 'Shape Format' || tab === 'Graphics Format' || tab === 'Picture Format' || tab === 'Playback' ? ($('.ed-tab.ctx') ? $('.ed-tab.ctx').dataset.tab : tab) : tab;
-  Ribbon2.render(); Ed.draw();
-  const want = btn.toLowerCase();
-  const el = $$('.ed-bar button, .ed-bar label, .ed-bar select').find(b => (b.textContent || b.getAttribute('aria-label') || '').toLowerCase().indexOf(want) > -1) ||
-    $$('.ed-bar .rb-gn').find(g => g.textContent.toLowerCase().indexOf(want) > -1);
-  if (el) { el.classList.add('flash'); el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); setTimeout(() => el.classList.remove('flash'), 2600); }
-}
+/* light up a place for a few seconds (final project panel) */
+function pointAt(el) { if (!el) return; el.classList.add('guide-glow'); setTimeout(() => el.classList.remove('guide-glow'), 3500); }
 
 /* ----- mission actions ----- */
-function showHint() {
-  const L = lvl(cur.m.id);
-  if (L.hints < 3) L.hints++;
-  save(); Fx.sound('click');
-  renderDock();
-  const last = $$('#dock .hints li').pop();
-  if (last) Fx.glow(last);
-}
-function showStuck(force) {
-  const m = cur.m, L = lvl(m.id);
-  if (!force && L.hints === 0) {
-    Modal.open({ title: 'Try a hint first?', html: '<p>Hints keep the fun of figuring it out yourself. Hint 1 is only a small clue.</p>',
-      actions: [{ label: 'Show Hint 1', variant: 'secondary', onClick: showHint }, { label: 'Show the full walkthrough', variant: 'primary', onClick: () => showStuck(true) }] });
-    return;
-  }
-  Modal.open({ title: '🆘 Walkthrough: ' + m.title, wide: true,
-    html: '<p class="muted">Do these in the editor, one at a time.</p><ol class="walk">' + m.stuck.map(s => '<li>' + s + '</li>').join('') + '</ol>' +
-      (m.note ? '<div class="notice notice-warn"><span class="notice-icon">!</span><div>' + esc(m.note) + '</div></div>' : '') +
-      '<p class="muted small">Still stuck? Raise your hand 🙋 and show your teacher which step.</p>',
-    actions: [{ label: 'Back to work', variant: 'primary' }] });
-}
 function answerQuiz(i, btn) {
-  const m = cur.m, L = lvl(m.id), fb = $('.quiz-fb');
+  const L = lvl(cur.m.id);
   if (i === 0) {
     L.quiz = true; save();
     btn.classList.add('right');
     $$('.quiz-opt').forEach(b => { b.disabled = true; });
-    $('.quiz').classList.add('ok');
-    fb.textContent = '✓ Correct! ' + m.quiz.why;
-    Fx.sound('good');
   } else {
     btn.classList.add('wrong'); btn.disabled = true;
-    fb.textContent = 'Not quite. Think about what you just did in the editor, and try again.';
     Fx.sound('bad'); Fx.shake(btn);
   }
 }
+/* Marks the mission done when the checklist is green and the question is answered. force = skip the checks (tests). */
 function completeMission(force) {
   const m = cur.m, L = lvl(m.id);
-  if ($('#made')) L.made = $('#made').value.trim();
-  const need = [];
-  const res = checksFor(m.id), missing = res.filter(c => !c.ok).length;
-  if (missing && !force) need.push(missing + ' checklist item' + (missing === 1 ? '' : 's') + ' still open (○)');
-  if (!L.quiz) need.push('answer the quick check');
-  if (words(L.made) < 3) need.push('describe what you made (3+ words)');
-  if (need.length) {
-    $('#missing').textContent = 'Still to do: ' + need.join(', ') + '.';
-    Fx.sound('bad'); Fx.shake($('#missing'));
-    save();
-    return;
-  }
+  const missing = checksFor(m.id).filter(c => !c.ok).length;
+  if (!force && (missing || !L.quiz)) return false;
   const before = BADGES.filter(b => b.test(data)).map(b => b.id);
   const first = !L.done;
   L.done = true;
   L.stars = 1 + Math.min(2, L.twists.length);
   L.at = Date.now();
   save();
-  const newBadges = BADGES.filter(b => b.test(data) && before.indexOf(b.id) === -1);
-  Fx.sound('win');
-  if (first) Fx.confetti();
-  const n = m.id === 14 || m.id === 15 ? FINAL.id : m.id + 1;
-  renderDock();
-  Modal.open({
-    title: first ? '🎬 Mission complete!' : 'Mission updated',
-    html: '<div class="done-pop"><div class="done-stars">' + stars(L.stars) + '</div>' +
-      '<p>You can now use <b>' + esc(m.skill) + '</b>, here and in PowerPoint.</p>' +
-      (L.stars < 3 ? '<p class="muted small">Want 3 stars? Do ' + (3 - L.stars) + ' more creative twist' + (3 - L.stars === 1 ? '' : 's') + '.</p>' : '') +
-      newBadges.map(b => '<div class="new-badge"><span>' + b.icon + '</span><div><b>Achievement: ' + esc(b.name) + '</b><small>' + esc(b.how) + '</small></div></div>').join('') +
-      (m.zone && MISSIONS.filter(q => q.zone === m.zone && !q.bonus).every(q => isDone(data, q.id)) && !data.stamps[m.zone] && !m.bonus ? '<p class="small">🎬 You finished the whole zone. Show your teacher your slides for a <b>Director check</b> (on the studio map).</p>' : '') +
-      '</div>',
-    actions: [{ label: 'Studio map', variant: 'secondary', onClick: goHome }, { label: n === FINAL.id ? 'Final project →' : 'Next mission →', variant: 'primary', onClick: () => openMission(n, 'learn') }]
-  });
+  if (first) {
+    Fx.sound('win'); Fx.confetti();
+    BADGES.filter(b => b.test(data) && before.indexOf(b.id) === -1).forEach(b => toast(b.icon + ' ' + b.name));
+  }
+  return true;
 }
 
 /* ================= FINAL PROJECT ================= */
@@ -6147,8 +6353,7 @@ function renderFinal() {
   Demos.cleanup();
   const F = FINAL, done = isDone(data, F.id);
   $('#f-head').innerHTML = '<p class="eyebrow">Final mission · 🏆</p><h1><span class="mh-ic" aria-hidden="true">🏆</span> ' + F.title + '</h1>' +
-    '<p class="story">' + esc(F.story) + '</p>' +
-    '<div class="mh-chips"><span class="chip chip-skill">🎓 Everything you learned</span><span class="chip chip-neutral">⏱ about 2 lessons</span>' + (done ? '<span class="chip chip-good">✓ Complete ' + stars(3) + '</span>' : '') + '</div>';
+    '<p class="story">' + esc(F.story) + '</p>' + (done ? '<div class="mh-chips"><span class="chip chip-good">✓ Complete ' + stars(3) + '</span></div>' : '');
   const fc = finalChecks();
   const ok = { plan: planFilled(), build: deckOf('final').slides.some(s => s.anims.length), check: fc.every(c => c.ok) && Object.keys(data.final.self).length === F.rubric.length, hand: done };
   $('#f-tabs').innerHTML = FTABS.map((t, i) => '<button type="button" role="tab" class="m-tab' + (ftab === t[0] ? ' on' : '') + (ok[t[0]] ? ' ok' : '') + '" aria-selected="' + (ftab === t[0]) + '" data-ftab="' + t[0] + '"><span class="mt-n">' + (ok[t[0]] ? '✓' : i + 1) + '</span><span class="mt-ic" aria-hidden="true">' + t[1] + '</span><span class="mt-l">' + t[2] + '</span></button>').join('');
@@ -6167,39 +6372,35 @@ function planHtml() {
       (p[0] === 'title' || p[0] === 'logline' ? '<input type="text" data-plan="' + p[0] + '" maxlength="' + (p[0] === 'title' ? 60 : 160) + '" value="' + esc(data.plan[p[0]] || '') + '" placeholder="' + esc(p[2]) + '">'
         : '<textarea data-plan="' + p[0] + '" rows="2" maxlength="300" placeholder="' + esc(p[2]) + '">' + esc(data.plan[p[0]] || '') + '</textarea>') + '</label>').join('') +
     '<div class="pf"><span class="eyebrow">Skills I will use</span><div class="use-chips">' + USE_CHIPS.map(u => '<button type="button" class="use-chip' + (data.uses.indexOf(u) > -1 ? ' on' : '') + '" data-use="' + esc(u) + '" aria-pressed="' + (data.uses.indexOf(u) > -1) + '">' + esc(u) + '</button>').join('') + '</div></div>' +
-    '</div><aside class="plan-side"><div class="side-card"><span class="eyebrow">' + th.e + ' Idea starter</span><p>' + ideaFor(16) + '</p>' +
-    '<p class="small muted">More ideas: ' + THEMES.filter(t => t.id !== 'custom' && t.id !== th.id).slice(0, 5).map(t => t.e + ' ' + esc(t.ideas[16])).join(' · ') + '</p></div>' +
-    '<div class="side-card"><b>Make it yours</b><p class="small">The best projects are ones only YOU would make. Two very different animations can both get full marks.</p></div>' +
+    '</div><aside class="plan-side"><div class="side-card"><span class="eyebrow">' + th.e + ' Idea</span><p>' + ideaFor(16) + '</p></div>' +
     '<div class="notice notice-warn"><span class="notice-icon">!</span><div class="small">' + esc(FINAL.safe) + '</div></div></aside></div>' +
-    '<div class="next-row"><span class="muted small" id="plan-state">' + (planFilled() ? '✓ Plan ready' : 'Fill in all 5 boxes (a few words each).') + '</span><button type="button" class="btn btn-primary btn-lg" data-ftab="build">Plan done → build it &rarr;</button></div>';
+    '<div class="next-row"><span class="muted small" id="plan-state">' + (planFilled() ? '✓ Plan ready' : 'Fill in all 5 boxes.') + '</span><button type="button" class="btn btn-primary btn-lg" data-ftab="build">Build it &rarr;</button></div>';
 }
 
 function buildHtml() {
-  return '<div class="switch-banner"><span class="sb-ic" aria-hidden="true">🖥️</span><div><b>Build it in the editor</b>, in a NEW file just for this project. Name it <b>Firstname_Lastname_Animation</b> (File › Info). The requirements tick themselves while you work.</div>' +
+  return '<div class="switch-banner"><span class="sb-ic" aria-hidden="true">🖥️</span><div><b>Build it in a new file.</b> The list ticks itself.</div>' +
     '<button type="button" class="btn btn-primary btn-lg" data-act="final-editor">Open my animation file &rarr;</button></div>' +
-    '<h3 class="sec-h">🛠️ Technical requirements <small>40 points · the editor checks them in your file</small></h3>' +
-    '<ul class="req-list">' + finalChecks().map((c, i) => '<li class="' + (c.ok ? 'ok' : '') + '"><span class="req-n">' + (c.ok ? '✓' : i + 1) + '</span><div><b>' + esc(c.name) + '</b> ' + esc(c.label) + (c.info ? ' <small class="muted">(' + esc(c.info) + ')</small>' : '') + '<span class="req-rev">Review: ' + TECH_REVIEW[i].map(id => '<button type="button" class="link-btn" data-review="' + id + '">Mission ' + id + '</button>').join(' ') + '</span></div></li>').join('') + '</ul>' +
-    '<h3 class="sec-h">✨ Optional extras</h3><ul class="opt-list">' + FINAL.optional.map(o => '<li>' + esc(o) + '</li>').join('') + '</ul>' +
-    '<h3 class="sec-h">⏱ A good order of work</h3><ol class="workflow"><li><b>Set & cast</b><span>backgrounds, shapes, pictures, names</span></li><li><b>Animate</b><span>entrances, paths, combos</span></li><li><b>Timing polish</b><span>Animation Pane, no clicks</span></li><li><b>Sound & video</b><span>Create a Video, watch it once</span></li></ol>' +
-    '<p class="muted small">Your own pictures? Only if your teacher allows it, and add a small credit on the last slide.</p>' +
-    '<div class="next-row"><button type="button" class="btn btn-primary btn-lg" data-ftab="check">It plays! → check it &rarr;</button></div>';
+    '<ul class="auto-checks big">' + finalChecksHtml() + '</ul>' +
+    '<p class="muted small">✨ Extras: ' + FINAL.optional.map(esc).join(' · ') + '</p>' +
+    '<div class="next-row"><button type="button" class="btn btn-primary btn-lg" data-ftab="check">Check it &rarr;</button></div>';
 }
 function finalChecksHtml() {
   const fc = finalChecks();
-  return fc.map(c => '<li class="' + (c.ok ? 'ok' : '') + '"><span class="ac-ic">' + (c.ok ? '✓' : '○') + '</span><span><b>' + esc(c.name) + ':</b> ' + esc(c.label) + (c.info ? ' <small>(' + esc(c.info) + ')</small>' : '') + '</span></li>').join('') +
+  return fc.map(c => '<li class="' + (c.ok ? 'ok' : '') + '"><span class="ac-ic">' + (c.ok ? '✓' : '') + '</span><span><b>' + esc(c.name) + ':</b> ' + esc(c.label) + (c.info ? ' <small>(' + esc(c.info) + ')</small>' : '') + '</span></li>').join('') +
     '<li class="ac-sum">Technical score: <b>' + fc.filter(c => c.ok).length * 5 + ' / 40</b></li>';
 }
 function finalDockHtml() {
-  return dockHead('🏆 Final project', data.plan.title ? '“' + data.plan.title + '”' : 'Your own animation') +
-    '<div class="dock-sec"><div class="dock-h">🛠️ Requirements <small>tick themselves</small></div><ul class="auto-checks" id="final-checks">' + finalChecksHtml() + '</ul></div>' +
-    (data.plan.b1 ? '<details class="dock-sec" open><summary>📝 My plan</summary><p class="small"><b>Beginning:</b> ' + esc(data.plan.b1 || '') + '</p><p class="small"><b>Middle:</b> ' + esc(data.plan.b2 || '') + '</p><p class="small"><b>Ending:</b> ' + esc(data.plan.b3 || '') + '</p></details>' : '') +
-    '<div class="dock-sec"><p class="small">Name it <b>Firstname_Lastname_Animation</b> (File › Info). At the end: <b>File › Save a Copy</b> and <b>File › Export › Create a Video</b>.</p><button type="button" class="btn btn-sm" data-act="final-back">← Back to the final project page</button></div>';
+  return '<div class="gcard">' + gHead('🏆', data.plan.title || 'My animation') + '<div class="g-body">' +
+    '<p class="g-say">Make your animation. These tick themselves:</p><ul class="auto-checks" id="final-checks">' + finalChecksHtml() + '</ul>' +
+    '<p class="g-tip"><button type="button" class="link-btn" data-act="glow-file">👆 File</button> › Info: name it <b>' + esc(firstName()) + '_Animation</b></p>' +
+    '<p class="g-tip"><button type="button" class="link-btn" data-act="glow-file">👆 File</button> › <b>Save a Copy</b> + <b>Export › Create a Video</b></p>' +
+    '</div><div class="g-foot"><button type="button" class="btn btn-sm" data-act="final-back">‹ Final project page</button></div></div>';
 }
 
 function checkHtml() {
   return '<h3 class="sec-h">🛠️ Technical requirements <small>5 points each · checked in your file</small></h3>' +
     '<ul class="auto-checks big">' + finalChecksHtml() + '</ul>' +
-    '<p class="small"><button type="button" class="link-btn" data-act="final-editor">Open my animation file</button> to fix anything with ○.</p>' +
+    '<p class="small"><button type="button" class="link-btn" data-act="final-editor">Open my animation file</button> to fix anything that is not ticked.</p>' +
     '<h3 class="sec-h">🎨 Creative quality: rate yourself honestly <small>4 × 15 points</small></h3>' +
     '<div class="table-wrap"><table class="rubric"><thead><tr><th></th>' + FINAL.levelNames.map((n, i) => '<th>' + n + ' <small>' + FINAL.points[i] + '</small></th>').join('') + '</tr></thead><tbody>' +
     FINAL.rubric.map(r => '<tr><th>' + r.icon + ' ' + esc(r.name) + '</th>' + r.levels.map((d, i) => '<td><label class="rb-cell' + (data.final.self[r.key] === i ? ' on' : '') + '"><input type="radio" name="self-' + r.key + '" data-self="' + r.key + '" value="' + i + '"' + (data.final.self[r.key] === i ? ' checked' : '') + '><span>' + esc(d) + '</span></label></td>').join('') + '</tr>').join('') +
@@ -6273,7 +6474,7 @@ function renderTeacher() {
     '<div class="btn-row no-print"><button type="button" class="btn" data-act="print-teacher">🖨️ Print this guide</button><button type="button" class="btn" data-act="home">Back to the studio map</button></div></div>' +
 
     '<div class="t-cards"><div class="side-card"><b>🖥️ Works like PowerPoint</b><p class="small">The Studio editor has PowerPoint’s tabs and button names (Insert › Shapes, Animations › Add Animation, Animation Pane, Start / Duration / Delay, Motion Paths, Morph, Slide Show), so the skills carry over to real PowerPoint.</p></div>' +
-    '<div class="side-card"><b>✅ Checks itself</b><p class="small">Each mission’s checklist ticks itself only when the work is really in the student’s file (e.g. “a slide that plays without clicks”). Students also answer a quick question and describe what they made.</p></div>' +
+    '<div class="side-card"><b>✅ Checks itself</b><p class="small">Each mission’s checklist ticks itself only when the work is really in the student’s file (e.g. “a slide that plays without clicks”). A guide lights up every button to click (👆 Show me does a step); then students make their own version and answer one question.</p></div>' +
     '<div class="side-card"><b>📁 Two files</b><p class="small">All missions go into the student’s Studio file; the final project is a second file. File › Save a Copy downloads a .slides file; File › Export › Create a Video makes a .webm video.</p></div>' +
     '<div class="side-card"><b>🎬 Director checks</b><p class="small">After each zone, students play their slides for you (F5). Type the director code on their screen to stamp it. It is a stamp only, not a grade.</p></div></div>' +
 
@@ -6299,7 +6500,7 @@ function renderTeacher() {
     '<li><b>Pictures:</b> Insert › Icons and Insert › Stock Images are built in and safe. Insert › Pictures adds a picture from the computer, only if you allow it, with a credit on the last slide.</li>' +
     '<li><b>Video</b> export needs Microsoft Edge or Google Chrome. The video is recorded in real time, so a 20-second animation takes about 20 seconds.</li>' +
     '<li><b>Progress and files</b> are saved in this browser on this computer. Moving PCs: the Save button (top right) › Save to a file, then Load from a file on the other PC.</li>' +
-    '<li><b>Hints</b> come in 3 levels (clue → feature → exact steps), then a full walkthrough. Hints never cost stars.</li>' +
+    '<li><b>The guide</b> shows one short instruction at a time and lights up the button to click. 👆 Show me does that step for a student who is stuck; ▶ Watch plays a short demo.</li>' +
     '</ul>' +
     '<div class="t-pc no-print"><h2>This computer</h2><div class="btn-row">' +
     (data.unlockAll ? '<button type="button" class="btn" data-act="lockall">🔒 Lock missions again (normal order)</button>' : '<button type="button" class="btn" data-act="unlockall">🔓 Unlock all missions on this computer</button>') +
@@ -6317,8 +6518,8 @@ function askName(then) {
   Modal.open({
     title: '🎬 Welcome to your animation studio',
     dismissible: false,
-    html: '<p>Learn <b>real PowerPoint skills</b> (shapes, animations, motion paths, Morph, video) in an editor that works like PowerPoint. Every mission ends with something <b>you</b> designed.</p>' +
-      '<label class="pf"><span class="eyebrow">Your animator name</span><input type="text" id="who" maxlength="32" autocomplete="off" data-autofocus value="' + esc(data.name) + '" placeholder="First name and last name"></label>' +
+    html: '<p>Make animations. Learn PowerPoint.</p>' +
+      '<label class="pf"><span class="eyebrow">Your name</span><input type="text" id="who" maxlength="32" autocomplete="off" data-autofocus value="' + esc(data.name) + '" placeholder="First name and last name"></label>' +
       '<p class="small muted" id="who-msg"></p>',
     actions: [{ label: 'Next: choose my idea →', variant: 'primary', keepOpen: true, onClick: () => {
       const v = $('#who').value.trim();
@@ -6334,7 +6535,7 @@ function pickTheme(first) {
     title: first ? '🎨 What would you like to animate?' : '🎨 Change my idea',
     wide: true,
     dismissible: !first,
-    html: '<p>This changes the examples and ideas you see, never what you learn. You can change it any time.</p>' +
+    html: '' +
       '<div class="theme-grid">' + THEMES.map(t => '<button type="button" class="theme-btn' + (t.id === data.theme ? ' on' : '') + '" data-theme="' + t.id + '"><span class="tb-e" aria-hidden="true">' + t.e + '</span><b>' + esc(t.name) + '</b><small>' + esc(t.sub) + '</small></button>').join('') + '</div>' +
       '<label class="pf" id="idea-box"' + (data.theme === 'custom' ? '' : ' hidden') + '><span class="eyebrow">My own idea</span><input type="text" id="idea" maxlength="60" value="' + esc(data.idea) + '" placeholder="e.g. a robot that learns to dance"></label>' +
       '<p class="small muted">Keep it classroom-appropriate.</p>',
@@ -6365,20 +6566,16 @@ function showCheat() {
 }
 function showHelp() {
   data.seenHelp = true; save();
-  Modal.open({ title: '❓ How the studio works', wide: true,
-    html: '<ol class="flow flow-modal"><li><span>📖</span><b>Learn</b><small>see the skill in a short demo</small></li><li><span>🖥️</span><b>Do it</b><small>in the editor, step by step</small></li><li><span>🎨</span><b>Create</b><small>use it for YOUR idea</small></li><li><span>✅</span><b>Complete</b><small>checklist + quick check</small></li><li><span>🔓</span><b>Unlock</b><small>the next mission</small></li></ol>' +
-      '<ul class="small"><li>The <b>Studio editor</b> works like PowerPoint: same tabs, same buttons, same keys (Ctrl + M, Ctrl + D, F5…).</li>' +
-      '<li>All missions go into your <b>Studio file</b>, slide after slide. Your teacher can play it.</li>' +
-      '<li>The checklist <b>ticks itself</b> when your work is really in the file.</li>' +
-      '<li>Everyone learns the same skill, but nobody should make the same thing. Ideas are only a start.</li>' +
-      '<li>Hints: Hint 1 → Hint 2 → Hint 3 → I’m stuck. Try first, then ask the hints.</li>' +
-      '<li>Creative twists give extra stars ⭐. After each zone, ask your teacher for a 🎬 Director check.</li></ul>' });
+  Modal.open({ title: '❓ How it works', wide: true,
+    html: '<ol class="flow flow-modal"><li><span>👆</span><b>Follow the glow</b><small>click what lights up</small></li><li><span>🎨</span><b>Your turn</b><small>make it yours</small></li><li><span>✅</span><b>Done</b><small>next mission</small></li></ol>' +
+      '<ul class="small"><li>Stuck? <b>👆 Show me</b> does the step for you. <b>▶ Watch</b> shows a short demo.</li>' +
+      '<li>The editor works like PowerPoint: same tabs, same buttons, same keys.</li></ul>' });
 }
 function directorCheck(zone) {
   const z = ZONES.find(q => q.id === zone), ms = MISSIONS.filter(m => m.zone === zone && !m.bonus);
   Modal.open({ title: '🎬 Director check: ' + z.name, wide: true,
     html: '<p><b>' + esc(data.name) + '</b>: open your Studio file and play these slides for your teacher (F5).</p>' +
-      '<ul class="dc-list">' + ms.map(m => '<li><span>' + m.icon + '</span><b>' + esc(m.title) + '</b><i>' + esc(lvl(m.id).made || '') + '</i></li>').join('') + '</ul>' +
+      '<ul class="dc-list">' + ms.map(m => '<li><span>' + m.icon + '</span><b>' + esc(m.title) + '</b></li>').join('') + '</ul>' +
       '<label class="pf"><span class="eyebrow">Teacher: director code</span><input type="password" id="dc-code" autocomplete="off" data-autofocus></label><p class="small" id="dc-msg"></p>',
     actions: [{ label: 'Cancel', variant: 'secondary' }, { label: 'Approve ✓', variant: 'primary', keepOpen: true, onClick: () => {
       if (($('#dc-code').value || '').trim().toLowerCase() !== DIRECTOR_CODE) { $('#dc-msg').textContent = 'That is not the code.'; Fx.shake($('#dc-code')); Fx.sound('bad'); return; }
@@ -6404,7 +6601,6 @@ function goHome() { Demos.cleanup(); leaveEditor(); cur = null; showScreen('scre
 function refresh() {
   const s = $$('.screen').find(x => !x.hidden);
   if (!s || s.id === 'screen-home') renderHome();
-  else if (s.id === 'screen-mission' && cur) renderMission();
   else if (s.id === 'screen-editor') renderDock();
   else if (s.id === 'screen-final') renderFinal();
 }
@@ -6413,13 +6609,9 @@ document.addEventListener('click', e => {
   const t = e.target;
   if (t.closest('.ed') || t.closest('.ed-menu') || t.closest('.slideshow')) return;
   const open = t.closest('[data-open]');
-  if (open && !open.closest('.modal')) { Fx.sound('click'); openMission(Number(open.dataset.open), 'learn'); return; }
-  const rv = t.closest('[data-review]');
-  if (rv) { openMission(Number(rv.dataset.review), 'learn'); return; }
+  if (open && !open.closest('.modal')) { Fx.sound('click'); openMission(Number(open.dataset.open)); return; }
   const ft = t.closest('[data-ftab]');
   if (ft) { ftab = ft.dataset.ftab; renderFinal(); window.scrollTo(0, 0); Fx.sound('click'); return; }
-  const go = t.closest('[data-goto]');
-  if (go) { gotoRibbon(go.dataset.goto); return; }
   const q = t.closest('[data-quiz]');
   if (q && cur) { answerQuiz(Number(q.dataset.quiz), q); return; }
   const use = t.closest('[data-use]');
@@ -6434,11 +6626,13 @@ document.addEventListener('click', e => {
   const act = t.closest('[data-act]');
   if (!act || act.closest('.modal')) return;
   const a = act.dataset.act;
-  if (a === 'hint') showHint();
-  else if (a === 'stuck') showStuck(false);
-  else if (a === 'complete') completeMission();
-  else if (a === 'do-it') openEditor('studio');
-  else if (a === 'learn-again') { leaveEditor(); showScreen('screen-mission'); renderMission(); }
+  if (a === 'g-show') Guide.showMe();
+  else if (a === 'g-next') Guide.next();
+  else if (a === 'g-back') Guide.back();
+  else if (a === 'g-watch') watchDemo();
+  else if (a === 'g-turn') { const G = Guide.st; if (G) { G.i = G.steps.findIndex(x => x.kind === 'turn') + 1; Guide.back(); } }
+  else if (a === 'g-again') { lvl(cur.m.id).gi = 0; startGuide(); }
+  else if (a === 'glow-file') pointAt($('.ed-tab.file'));
   else if (a === 'dock-toggle') { dockMin = !dockMin; renderDock(); setTimeout(() => Ed.draw(), 30); }
   else if (a === 'theme') pickTheme(false);
   else if (a === 'rename') askName(() => refresh());
@@ -6458,20 +6652,14 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.closest('.ed')) return;
-  if (cur && t.matches('[data-step]')) {
-    const L = lvl(cur.m.id), i = Number(t.dataset.step), k = L.steps.indexOf(i);
-    if (t.checked && k === -1) L.steps.push(i); else if (!t.checked && k > -1) L.steps.splice(k, 1);
-    t.closest('.step').classList.toggle('done', t.checked);
-    if (t.checked) Fx.sound('click');
-    save();
-    return;
-  }
   if (cur && t.matches('[data-twist]')) {
     const L = lvl(cur.m.id), i = Number(t.dataset.twist), k = L.twists.indexOf(i);
     if (t.checked && k === -1) L.twists.push(i); else if (!t.checked && k > -1) L.twists.splice(k, 1);
     if (L.done) L.stars = 1 + Math.min(2, L.twists.length);
     if (t.checked) Fx.sound('coin');
     save();
+    const ds = $('#dock .done-stars');
+    if (ds) ds.innerHTML = stars(L.stars);
     return;
   }
   if (t.matches('[data-self]')) {
@@ -6488,11 +6676,11 @@ document.addEventListener('input', e => {
   if (t.matches('[data-plan]')) {
     data.plan[t.dataset.plan] = t.value; saveSoon();
     const st = $('#plan-state');
-    if (st) st.textContent = planFilled() ? '✓ Plan ready' : 'Fill in all 5 boxes (a few words each).';
-  } else if (t.id === 'made' && cur) { lvl(cur.m.id).made = t.value; saveSoon(); }
+    if (st) st.textContent = planFilled() ? '✓ Plan ready' : 'Fill in all 5 boxes.';
+  }
 });
 
-$('#btn-continue').addEventListener('click', () => { if (isDone(data, FINAL.id)) showCert(); else openMission(nextMission(), 'learn'); });
+$('#btn-continue').addEventListener('click', () => { if (isDone(data, FINAL.id)) showCert(); else openMission(nextMission()); });
 $('#btn-idea').addEventListener('click', () => pickTheme(false));
 $('#btn-cheat').addEventListener('click', showCheat);
 $('#btn-help').addEventListener('click', showHelp);
@@ -6505,14 +6693,14 @@ Nav.setup({
   tool: 'PowerPoint Animation Studio',
   screens: {
     'screen-home': { label: 'Studio map', go: goHome },
-    'screen-mission': { label: () => (cur ? (cur.m.bonus ? 'Bonus' : 'Mission ' + cur.m.id) + ': ' + cur.m.title.replace('BONUS: ', '') : 'Mission'), parent: 'screen-home', go: () => { if (cur) openMission(cur.m.id, 'learn'); } },
     /* the editor's breadcrumb depends on what it was opened from */
-    'screen-editor': { label: () => (edKey === 'final' ? 'My animation file' : 'Studio editor'), get parent() { return edKey === 'final' ? 'screen-final' : cur ? 'screen-mission' : 'screen-home'; }, go: () => {} },
+    'screen-editor': { label: () => (edKey === 'final' ? 'My animation file' : cur ? (cur.m.bonus ? 'Bonus' : 'Mission ' + cur.m.id) + ': ' + cur.m.title.replace('BONUS: ', '') : 'Studio file'), get parent() { return edKey === 'final' ? 'screen-final' : 'screen-home'; }, go: () => {} },
     'screen-final': { label: 'Final project', parent: 'screen-home', go: () => openFinal() },
     'screen-teacher': { label: 'Teacher guide', parent: 'screen-home', go: () => {} },
     'screen-cert': { label: 'Certificate', parent: 'screen-home', go: () => {} }
   }
 });
+Guide.render = renderDock;
 SaveBar.setup({ id: 'ppt-studio', key: SAVE_KEY, name: 'PowerPoint Animation Studio', what: 'your missions, stars, plan, achievements and both slide files', save });
 /* Header buttons show only their icon on a half-width window, so give each one a spoken/hover name. */
 function nameButtons() { $$('.header-actions .btn').forEach(b => { const t = b.textContent.trim(); if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', t); b.title = t; }); }
@@ -6531,19 +6719,21 @@ if (!FAST) {
 
 if (FAST) {
   window.PAS = {
-    MISSIONS, FINAL, THEMES, WHERE, Anim, Demos, Deck, Ed, Ribbon2, Render, Show, Sound, Chk,
+    MISSIONS, FINAL, THEMES, Guide, Anim, Demos, Deck, Ed, Ribbon2, Render, Show, Sound, Chk,
     data: () => data, cur: () => cur, deck: k => deckOf(k || 'studio'), ev: k => evOf(k || 'studio'),
     setup(name, th) { data.name = name; data.theme = th; save(); renderHome(); },
     open: openMission, editor: openEditor, final: openFinal, home: goHome, cert: showCert, teacher: () => $('#btn-teacher').click(),
     checks: id => checksFor(id), finalChecks,
-    /* Complete a mission through the real panel (quiz, text, Complete). force = skip the file checks (unlock tests). */
+    /* Complete a mission through the guide card (question card, done card, twists). force = skip the file checks (unlock tests). */
     complete(id, twists, force) {
-      openMission(id, 'editor');
-      $$('[data-twist]').slice(0, twists || 0).forEach(c => { c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); });
-      const right = $$('[data-quiz]').find(b => b.dataset.quiz === '0');
+      openMission(id);
+      const G = Guide.st, jump = k => { G.i = G.steps.findIndex(x => x.kind === k) + 1; Guide.back(); };
+      jump('quiz');
+      const right = $$('#dock [data-quiz]').find(b => b.dataset.quiz === '0');
       if (right && !right.disabled) right.click();
-      $('#made').value = 'My own test version of it';
-      completeMission(force);
+      if (force) completeMission(true);
+      jump('done');
+      $$('#dock [data-twist]').slice(0, twists || 0).forEach(c => { c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); });
       Modal.close();
       return isDone(data, id);
     },
