@@ -252,6 +252,20 @@
       <span class="play" aria-hidden="true">SING &rarr;</span>
     </div>
   </a>
+  <a data-week="5" class="card t-island" href="Tool_G6-7_Island_Escape.html">
+    <div class="badge b-island" aria-hidden="true">
+      <svg class="scene" viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="8" fill="#4dabf7"/><circle cx="50" cy="14" r="6" fill="#ffe066"/><rect x="2" y="40" width="60" height="22" fill="#1c7ed6"/><path d="M8 44c8-7 26-7 34 0z" fill="#f3e0a8"/><path d="M22 42c0-9 2-17 5-23" stroke="#8b5a2b" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M27 19c-6-3-12-1-15 3M27 19c-2-6-8-8-12-7M27 19c4-5 10-5 13-2M27 19c5 0 9 3 10 7" stroke="#2f9e44" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M38 52h18l-3 5H41z" fill="#a0703c"/><path d="M47 52V36" stroke="#7cb342" stroke-width="2"/><path d="M47 37l8 13h-8z" fill="#fff"/></svg>
+    </div>
+    <div>
+      <span class="grade">Grade 6–7</span>
+      <h2>Island Escape <span class="extra">3D</span></h2>
+      <p>Shipwrecked! Explore a jungle island, solve 10 computer challenges to collect boat materials, restore the rescue signal and sail away. Grade 6 or Grade 7, hints with H, saves as you go.</p>
+      <span class="progress" data-progress="island67"></span>
+      <span class="pbar" aria-hidden="true"><span data-bar="island67"></span></span>
+      <span class="play" aria-hidden="true">PLAY &rarr;</span>
+    </div>
+  </a>
+
 
   <a data-week="5" class="card t-pixel" href="Tool_G10-12_PowerPoint_Animation_Studio.html">
     <div class="badge b-pixel" aria-hidden="true">
@@ -580,6 +594,7 @@
     song: 'computerLab.songStar.v1',
     agent: 'computerLab.secretAgent.v1',
     shrunk67: 'gk.shrunk-inside.best',
+    island67: 'gk.island-escape.best',
     shrunk89: 'gk.shrunk-virus.best',
     web: 'computerLab.webRescue.v1',
     sheet: 'computerLab.sheetDetective.v1',
@@ -599,9 +614,9 @@
     builder: 'practicum.builder.v1',
     rover: 'practicum.rover.v1'
   };
-  var ALSO_CLEAR = ['computerLab.songStar.top', 'gk.shrunk-inside.history', 'gk.shrunk-inside.unlocked', 'gk.shrunk-virus.history', 'gk.shrunk-virus.unlocked', 'gk.shrunk-inside.leaders', 'gk.shrunk-virus.leaders', 'gk.shrunk-inside.resume', 'gk.shrunk-virus.resume'];
+  var ALSO_CLEAR = ['computerLab.songStar.top', 'gk.shrunk-inside.history', 'gk.shrunk-inside.unlocked', 'gk.shrunk-virus.history', 'gk.shrunk-virus.unlocked', 'gk.shrunk-inside.leaders', 'gk.shrunk-virus.leaders', 'gk.shrunk-inside.resume', 'gk.shrunk-virus.resume', 'gk.island-escape.history', 'gk.island-escape.unlocked', 'gk.island-escape.leaders', 'gk.island-escape.resume'];
   /* 3D game-kit games save only their best winning score (a number). */
-  var BEST_ONLY = { shrunk67: 1, shrunk89: 1 };
+  var BEST_ONLY = { shrunk67: 1, shrunk89: 1, island67: 1 };
 
   /* Save versions each tool still accepts; older saves are started fresh by the tool, so they count as not started here. */
   var VERSIONS = { music: [1], code: [2, 3], career: [2] };
