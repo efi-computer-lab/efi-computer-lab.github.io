@@ -438,7 +438,7 @@ body { background: #f6f0ff; }
 .step-n { margin: 0 0 2px; font-size: .8rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 .goal .goal-say { font-size: 1.2rem; font-weight: 600; }
 .karaoke { background: linear-gradient(135deg, #2b1055, #7b2ff7); color: #fff; border-radius: 18px; padding: 14px 18px; font-size: 1.7rem; font-weight: 800; line-height: 1.5; text-align: center; box-shadow: var(--shadow); }
-.kp { color: #ffffff88; transition: color .1s, transform .1s; display: inline-block; }
+.kp { color: #ffffff88; transition: color .1s, transform .1s; display: inline-block; margin: 0 .14em; }
 .kp.now { color: #ffd166; transform: scale(1.25); }
 .piece.now { background: #ffd166; color: #3b2300; }
 .help-row { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -448,7 +448,34 @@ body { background: #f6f0ff; }
 .big-btn { font: inherit; font-size: 1.15rem; font-weight: 900; border: 0; border-radius: 14px; padding: 10px 18px; cursor: pointer; color: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .18); transition: transform .1s; }
 .big-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, .18); }
 .big-btn.play { background: #2fa84f; }
-.big-btn.sing { background: var(--accent); }
+.big-btn.rec { background: #e03131; }
+.voice-chip { display: inline-flex; gap: 4px; align-items: center; }
+.vchip { font: inherit; font-weight: 800; border: 2px solid #e03131; color: #e03131; background: #fff5f5; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.vchip.on { background: #e03131; color: #fff; }
+.vdel { font-size: 1.1rem; border: 0; background: transparent; cursor: pointer; padding: 4px; }
+.lb-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.lb-head .lb-title { margin: 0; }
+.lb-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.bot-btn { background: #ede9fe; border-color: #c4b5fd; color: #4c1d95; font-weight: 800; }
+.count { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 950; font-size: 5rem; font-weight: 900; color: #fff; background: rgba(36, 18, 74, .85); border-radius: 28px; padding: 10px 40px; pointer-events: none; }
+.count.pop { animation: count-pop .5s ease-out; }
+@keyframes count-pop { 0% { transform: translate(-50%, -50%) scale(1.6); opacity: .2; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+.bot-hi { font-size: 1.05rem; margin-top: 0; }
+.bot-topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.bot-t { font: inherit; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 14px; border: 2px solid var(--line); background: #fff; cursor: pointer; }
+.bot-t span { font-size: 1.8rem; line-height: 1.1; }
+.bot-t.on, .bot-t:hover { border-color: #7c3aed; background: #f5f3ff; }
+.bot-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; }
+.bot-idea { display: flex; gap: 8px; align-items: center; font-weight: 700; flex: 1; min-width: 240px; }
+.bot-idea input { flex: 1; font: inherit; padding: 6px 10px; border: 2px solid var(--line-strong); border-radius: 10px; }
+.bot-len { display: flex; gap: 10px; font-weight: 700; }
+.bot-out { background: #f5f3ff; border-radius: 14px; padding: 12px 14px; min-height: 80px; }
+.bot-say { margin: 0 0 6px; font-weight: 700; }
+.bot-lyrics { font-size: 1.3rem; font-weight: 800; color: #4c1d95; line-height: 1.5; }
+.how-list { padding-left: 22px; font-size: 1.05rem; }
+.mic-bar { display: inline-block; width: 160px; height: 12px; background: #eee; border-radius: 999px; overflow: hidden; vertical-align: middle; margin-left: 8px; }
+.mic-bar i { display: block; height: 100%; width: 0; background: #2fa84f; transition: width .06s; }
+.mk-bar { width: 0; transition: width .2s; }
 .big-btn.listen { background: #1e88e5; }
 .big-btn.active { background: #172033; }
 .big-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -587,14 +614,16 @@ body { background: #f6f0ff; }
       <div class="deck">
         <div class="transport">
           <button type="button" class="big-btn play" id="btn-play" aria-label="Play">▶ <span>Play</span></button>
-          <button type="button" class="big-btn sing" id="btn-sing" aria-label="Sing">🎤 <span>Sing</span></button>
+          <button type="button" class="big-btn rec" id="btn-rec" aria-label="Record my voice">🎙️ <span>Record</span></button>
+          <span class="voice-chip" id="voice-chip" hidden></span>
           <button type="button" class="big-btn listen" id="btn-listen" hidden>👂 <span>Listen</span></button>
           <div class="pickers" id="pickers"></div>
         </div>
         <div class="karaoke" id="karaoke" hidden aria-live="off"></div>
         <div class="grid-wrap" id="grid-wrap"><div class="grid" id="grid" role="grid" aria-label="Song grid"></div></div>
         <div class="lyrics-box" id="lyrics-box">
-          <label for="lyrics" class="lb-title">✍️ Lyrics <small>one note sings one piece</small></label>
+          <div class="lb-head"><label for="lyrics" class="lb-title">✍️ Lyrics <small>one note = one piece</small></label>
+            <div class="lb-tools" id="lb-tools"><button type="button" class="btn btn-sm bot-btn" data-act="bot">🤖 Lyric Bot</button><button type="button" class="btn btn-sm" data-act="notes">🎹 Notes for my words</button></div></div>
           <textarea id="lyrics" rows="2" maxlength="200" spellcheck="true" placeholder="Type your words here…"></textarea>
           <div class="lyric-info" id="lyric-info" aria-live="polite"></div>
         </div>
@@ -609,6 +638,7 @@ body { background: #f6f0ff; }
   </section>
 </main>
 
+<div class="count" id="count" hidden aria-live="assertive"></div>
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <noscript><p style="padding:20px">Song Star Studio needs JavaScript to run. Please use Microsoft Edge, Google Chrome or Firefox.</p></noscript>
@@ -1397,18 +1427,17 @@ const MOODS = {
 };
 const TEMPOS = [{ bpm: 80, icon: '🐢', name: 'Slow' }, { bpm: 100, icon: '🚶', name: 'Medium' }, { bpm: 125, icon: '🏃', name: 'Fast' }];
 const INSTRUMENTS = { piano: { icon: '🎹', name: 'Piano' }, guitar: { icon: '🎸', name: 'Guitar' }, bells: { icon: '🔔', name: 'Bells' }, synth: { icon: '🎺', name: 'Synth' } };
-const SINGERS = { star: { icon: '👧', name: 'Star', low: 0.9, high: 1.9 }, rock: { icon: '👦', name: 'Rocky', low: 0.35, high: 1.15 }, robo: { icon: '🤖', name: 'Robo', low: 0.1, high: 0.6 } };
 const NOTE_COLORS = ['#e53935', '#fb8c00', '#f9c80e', '#43a047', '#00acc1', '#1e88e5', '#8e24aa', '#d81b60'];
 
 function blankSong() {
-  return { drums: DRUMS.map(() => Array(STEPS).fill(false)), mel: Array(STEPS).fill(-1), lyrics: '', mood: 'happy', tempo: 100, inst: 'piano', singer: 'star', bass: true };
+  return { drums: DRUMS.map(() => Array(STEPS).fill(false)), mel: Array(STEPS).fill(-1), lyrics: '', mood: 'happy', tempo: 100, inst: 'piano', bass: true };
 }
 /* drums from step lists: { boom: [0, 8], clap: [4] } */
 function songWith(o) {
   const s = blankSong();
   DRUMS.forEach((d, r) => (o[d.id] || []).forEach(i => { s.drums[r][i] = true; }));
   (o.mel || []).forEach(([i, n]) => { s.mel[i] = n; });
-  ['lyrics', 'mood', 'tempo', 'inst', 'singer'].forEach(k => { if (o[k] != null) s[k] = o[k]; });
+  ['lyrics', 'mood', 'tempo', 'inst'].forEach(k => { if (o[k] != null) s[k] = o[k]; });
   return s;
 }
 const BEAT = { boom: [0, 8, 16, 24], clap: [4, 12, 20, 28], tss: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30] };
@@ -1444,10 +1473,32 @@ function syllablesOf(text) {
   return out;
 }
 const lyricLines = text => String(text || '').split(/\n/).map(l => l.trim()).filter(l => /[a-z]/i.test(l));
-function rhymeKey(word) { const w = String(word || '').toLowerCase().replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1'); const m = w.match(/[aeiouy]+[^aeiouy]*$/); return m ? m[0] : w; }
+/* Rhymes by sound, not spelling: go · grow, new · too, sun · one, care · air, beat · feet, me · family.
+   Long vowel sounds become capital letters: A (day), I (me), Y (sky), O (go), U (too). */
+const SAY_AS = { one: 'wun', done: 'dun', come: 'kum', some: 'sum', love: 'luv', above: 'abuv', again: 'agen', said: 'sed', you: 'yU', do: 'dU', to: 'tU', two: 'tU', who: 'hU', i: 'Y', eye: 'Y', bye: 'bY', by: 'bY', the: 'thuh', of: 'uv', was: 'wuz', are: 'ar', have: 'hav', give: 'giv', live: 'liv', there: 'thAr', where: 'wAr', their: 'thAr', view: 'vyU', through: 'thrU', true: 'trU', friend: 'frend', friends: 'frend', heart: 'hart' };
+function rhymeKey(word) {
+  let w = String(word || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (w.length > 3 && /[^s]s$/.test(w) && !SAY_AS[w]) w = w.slice(0, -1);            /* snacks → snack */
+  w = SAY_AS[w] || w;
+  w = w.replace(/(every|some|any|no)one$/, '$1wun').replace(/^y/, 'j').replace(/igh/g, 'Y').replace(/ough$/, 'O').replace(/oul$/, 'Ol').replace(/ead$/, 'ed').replace(/ce$/, 'se');
+  w = w.replace(/([^aeiou])y$/, (m, c) => c + (/[aeiou]/.test(w.slice(0, -2)) ? 'I' : 'Y'));   /* happy → I, sky → Y */
+  w = w.replace(/([aeiou])([^aeiouwyAEIOUY])e$/, (m, v, c) => ({ a: 'A', e: 'I', i: 'Y', o: 'O', u: 'U' }[v] + c));   /* game, these, bite, home, cute */
+  w = w.replace(/e[ae]/g, 'I').replace(/ai|ay|ey$/g, 'A').replace(/oa/g, 'O').replace(/(ow|oe)$/, 'O').replace(/(ew|ue|ou)$/, 'U').replace(/oo/g, 'U').replace(/ie$/, 'Y');
+  w = w.replace(/^([^aeiouAEIOUY]+)e$/, '$1I').replace(/^([^aeiouAEIOUY]+)o$/, '$1O').replace(/(.)\1+/g, '$1');
+  const m = w.match(/[aeiouAEIOUY]+[^aeiouAEIOUY]*$/);
+  return m ? m[0] : w;
+}
+/* near rhymes count too when the vowel is the same: sun · come, time · line */
+function soundsAlike(a, b) {
+  const x = rhymeKey(a), y = rhymeKey(b);
+  if (x === y) return true;
+  const v = k => (k.match(/^[aeiouAEIOUY]+/) || [''])[0], c = k => k.slice(v(k).length);
+  const CLASS = ['mn', 'td', 'pb', 'kg', 'sz', 'fv'];
+  return v(x) === v(y) && !!c(x) && !!c(y) && CLASS.some(g => g.indexOf(c(x).slice(-1)) > -1 && g.indexOf(c(y).slice(-1)) > -1);
+}
 function linesRhyme(text) {
   const ends = lyricLines(text).map(l => l.split(/\s+/).pop());
-  for (let i = 1; i < ends.length; i++) if (ends[i].toLowerCase() !== ends[i - 1].toLowerCase() && rhymeKey(ends[i]) === rhymeKey(ends[i - 1])) return true;
+  for (let i = 1; i < ends.length; i++) if (ends[i].toLowerCase() !== ends[i - 1].toLowerCase() && soundsAlike(ends[i], ends[i - 1])) return true;
   return false;
 }
 
@@ -1487,7 +1538,7 @@ const WordGuard = (() => {
 })();
 
 /* ---------- levels ----------
-   show: which parts of the studio are open. steps: [instruction, (song, ctx) => done, button to light up]. ctx = { sylls, played, listened, sung, judged }.
+   show: which parts of the studio are open. steps: [instruction, (song, ctx) => done, button to light up]. ctx = { sylls, played, listened, sang, recorded, judged }.
    need(song) → cells still to click, for 👆 Show me: [{ r: 'boom'|'clap'|'tss'|'mel', i: step, n: row }]. fix(song) = 🪄 Do it for me. */
 const need = (s, r, steps) => steps.filter(i => !s.drums[r][i]).map(i => ({ r: DRUMS[r].id, i }));
 const COPY_BEAT = { boom: [0, 6, 8, 16, 22, 24], clap: [4, 12, 20, 28], tss: [2, 6, 10, 14, 18, 22, 26, 30] };
@@ -1538,24 +1589,25 @@ const LEVELS = [
       ['Find the <b>same notes</b>. Listen again as often as you like!', s => s.mel.every((n, i) => n === ((COPY_TUNE.find(x => x[0] === i) || [0, -1])[1]))]],
     need: s => { const out = []; s.mel.forEach((n, i) => { const want = (COPY_TUNE.find(x => x[0] === i) || [0, -1])[1]; if (n !== want) out.push(want < 0 ? { r: 'mel', i, n, wrong: true } : { r: 'mel', i, n: want }); }); return out; },
     fix: s => { s.mel.fill(-1); COPY_TUNE.forEach(([i, n]) => { s.mel[i] = n; }); } },
-  { id: 9, zone: 3, icon: '🎤', title: 'Hello, Singer!', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
+  { id: 9, zone: 3, icon: '🎤', title: 'Sing Along', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
     steps: [['Click the <b>✍️ Lyrics</b> box and type: <b>I love to sing</b>', (s, c) => c.sylls.length >= 4, 'lyrics'],
-      ['Press <b>🎤 Sing</b>. The computer sings your words!', (s, c) => c.sung, 'sing']],
+      ['Press <b>▶ Play</b>. The words light up on their notes: <b>sing along!</b>', (s, c) => c.sang, 'play']],
     fix: s => { s.lyrics = 'I love to sing all day'; } },
   { id: 10, zone: 3, icon: '✂️', title: 'Syllable Split', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
     steps: [['Type more lyrics: <b>8 pink pieces</b> or more. Long words split: sun · shine.', (s, c) => c.sylls.length >= 8, 'lyrics'],
       ['A <b>grey</b> piece has no note. Click more notes until <b>no piece is grey</b>.', (s, c) => c.sylls.length > 0 && notesOf(s).length >= c.sylls.length],
-      ['Press <b>🎤 Sing</b>!', (s, c) => c.sung, 'sing']],
+      ['Press <b>▶ Play</b> and <b>sing along</b> with the words!', (s, c) => c.sang, 'play']],
     fix: s => { s.lyrics = 'Sunshine on my happy day\nMusic takes my blues away'; while (notesOf(s).length < syllablesOf(s.lyrics).length) { const i = s.mel.findIndex(n => n < 0); if (i < 0) break; s.mel[i] = 3; } } },
   { id: 11, zone: 3, icon: '🎯', title: 'Rhyme Time', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
     steps: [['Type <b>line 1</b>. End it with a word like <b>day</b>, <b>night</b> or <b>star</b>. Then press <b>Enter</b>.', s => lyricLines(s.lyrics).length >= 1 && /\n/.test(s.lyrics), 'lyrics'],
       ['Type <b>line 2</b>. Its last word must <b>rhyme</b>: day · play, night · light, star · car.', s => linesRhyme(s.lyrics), 'lyrics'],
-      ['Press <b>🎤 Sing</b>!', (s, c) => c.sung, 'sing']],
+      ['Press <b>▶ Play</b> and <b>sing</b> your two lines!', (s, c) => c.sang, 'play']],
     fix: s => { s.lyrics = 'We sing all night\nUnder the stars so bright'; } },
   { id: 12, zone: 4, icon: '⭐', title: 'Hit Song', show: ['drums', 'melody', 'lyrics'], final: true, start: () => JSON.parse(JSON.stringify(BEAT_ONLY)),
     steps: [['Make <b>your beat</b>: use <b>🥁 Boom</b>, <b>👏 Clap</b> and <b>✨ Tss</b>.', s => [0, 1, 2].every(r => drumCount(s, r) > 0)],
-      ['Make <b>your melody</b>: 8 notes or more.', s => notesOf(s).length >= 8],
-      ['Write <b>your own lyrics</b>: 8 pink pieces or more.', (s, c) => c.sylls.length >= 8, 'lyrics'],
+      ['Write <b>your lyrics</b>: 8 pink pieces or more. Need ideas? Ask <b>🤖 Lyric Bot</b>!', (s, c) => c.sylls.length >= 8, 'bot'],
+      ['Give every piece a note. Click notes, or press <b>🎹 Notes for my words</b>.', (s, c) => notesOf(s).length >= 8 && notesOf(s).length >= c.sylls.length, 'notes'],
+      ['Press <b>🎙️ Record</b> and sing your song! <small>(No microphone? Press ▶ Play and sing along.)</small>', (s, c) => c.recorded || c.sang, 'rec'],
       ['Press <b>🏆 Judge my song</b>. Get <b>50</b> or more to win!', (s, c) => (c.judged || 0) >= 50, 'judge']] }
 ];
 const ZONES = [{ id: 1, icon: '🥁', name: 'Beat Basics' }, { id: 2, icon: '🎹', name: 'Melody Makers' }, { id: 3, icon: '🎤', name: 'Lyrics & Voice' }, { id: 4, icon: '⭐', name: 'Superstar' }];
@@ -1577,15 +1629,166 @@ function judge(s, sylls) {
     judges: [
       { icon: '🎧', name: 'DJ Beat', score: Math.round(Math.min(30, beat)), max: 30, say: tip(beat, 30) ? 'That beat makes me dance!' : drumCount(s, 1) < 3 ? 'Add more 👏 Claps for a strong beat.' : 'Add ✨ Tss sounds to make it busier.' },
       { icon: '🎹', name: 'Melody Max', score: Math.round(Math.min(30, melody)), max: 30, say: tip(melody, 30) ? 'What a catchy tune!' : notes.length < 10 ? 'Add more notes to your melody.' : !hook ? 'Repeat your best bar: a hook makes songs catchy.' : 'Go up AND down, like a roller coaster.' },
-      { icon: '🎤', name: 'Lyric Lou', score: Math.round(Math.min(25, words)), max: 25, say: tip(words, 25) ? 'Great words, and they fit the notes!' : sylls.length < 8 ? 'Write more lyrics.' : fit < 1 ? 'Some words have no note. Add more notes.' : 'Try two lines that rhyme.' },
+      { icon: '🎤', name: 'Lyric Lou', score: Math.round(Math.min(25, words)), max: 25, say: tip(words, 25) ? 'Great words, and they fit the notes!' : sylls.length < 8 ? 'Write more lyrics, or ask 🤖 Lyric Bot.' : fit < 1 ? 'Some words have no note. Press 🎹 Notes for my words.' : 'Try two lines that rhyme.' },
       { icon: '🏠', name: 'Ending', score: ending + 5, max: 15, say: ending ? 'Your song ends at home. Nice!' : 'End your melody on a red or blue note: it sounds finished.' }
     ]
   };
 }
 
+/* ===== Song Star Studio: 🤖 Lyric Bot =====
+   Writes short rhyming lyrics about a topic. It works offline: it builds songs from a bank of kid-safe lines
+   (no internet, so nothing unkind can come back). The student's own idea word is checked by WordGuard first. */
+const LyricBot = (() => {
+  /* each topic: rhyming pairs of lines (about 5–8 pieces per line, so 4 lines fit the 32 notes) */
+  const TOPICS = {
+    school: { icon: '🏫', name: 'School', words: ['school', 'class', 'teacher', 'lesson', 'homework', 'book', 'books', 'study', 'learn', 'pencil', 'classroom', 'exam', 'test', 'student'], pairs: [
+      ['Books in my bag and a pen in my hand', 'Learning new things is the best in the land'],
+      ['The bell rings out, it is time to go', 'Into my class where I learn and grow'],
+      ['My teacher smiles when I try my best', 'I learn a lot and I pass the test'],
+      ['Reading and writing, numbers too', 'Every day there is something new'],
+      ['Friends at my table, we work as a team', 'School is the place where we follow our dream'],
+      ['Raise your hand and ask away', 'We learn together every day']] },
+    plants: { icon: '🌱', name: 'Plants', words: ['plant', 'plants', 'tree', 'trees', 'flower', 'flowers', 'garden', 'leaf', 'leaves', 'seed', 'grass', 'forest', 'rose', 'sunflower'], pairs: [
+      ['A tiny seed under the ground', 'Waits for the rain to come around'],
+      ['Green little leaves reach for the sun', 'Growing up slowly, one by one'],
+      ['Flowers of red and yellow and blue', 'Bloom in the garden, fresh with dew'],
+      ['Tall green trees give us the air', 'Plant a tree and show you care'],
+      ['Water the roots and watch them grow', 'Up through the soil, row by row'],
+      ['The forest is quiet, the leaves are green', 'The prettiest place that I have seen']] },
+    animals: { icon: '🐶', name: 'Animals', words: ['animal', 'animals', 'dog', 'dogs', 'cat', 'cats', 'pet', 'pets', 'bird', 'birds', 'fish', 'lion', 'tiger', 'elephant', 'monkey', 'rabbit', 'horse', 'puppy', 'kitten', 'zoo', 'cow', 'duck'], pairs: [
+      ['My little puppy runs and plays', 'Wagging its tail on sunny days'],
+      ['The lion roars, the monkeys swing', 'The birds wake up and start to sing'],
+      ['A kitten sleeps upon my bed', 'A soft warm pillow for its head'],
+      ['Elephants walk so big and slow', 'Through the jungle, off they go'],
+      ['Fish in the river swim along', 'Splashing and dancing to my song'],
+      ['Animals big and animals small', 'We love and care for them all']] },
+    friends: { icon: '👫', name: 'Friends', words: ['friend', 'friends', 'friendship', 'buddy', 'together', 'play', 'team'], pairs: [
+      ['You are my friend through thick and thin', 'Together we play, together we win'],
+      ['When I am sad you make me smile', 'You walk with me for every mile'],
+      ['We laugh out loud, we share our snacks', 'A friend like you has got my back'],
+      ['Hand in hand we run outside', 'With you, my friend, I feel such pride'],
+      ['Best friends forever, me and you', 'There is nothing that we cannot do'],
+      ['Call my name and I will be there', 'A friend is someone who will care']] },
+    family: { icon: '👨‍👩‍👧', name: 'Family', words: ['family', 'mom', 'mum', 'mother', 'dad', 'father', 'sister', 'brother', 'grandma', 'grandpa', 'home', 'parents'], pairs: [
+      ['We cook and clean and play all day', 'My family helps in every way'],
+      ['Mom and Dad, I love you so', 'You help me learn, you help me grow'],
+      ['Home is the place where I feel glad', 'Hugs from my mom and hugs from my dad'],
+      ['My little brother runs to me', 'We are a happy family'],
+      ['Grandma bakes and Grandpa sings', 'Family is the best of things'],
+      ['When the day is done and the stars are bright', 'My family hugs me and says good night']] },
+    ocean: { icon: '🌊', name: 'Ocean', words: ['ocean', 'sea', 'beach', 'wave', 'waves', 'whale', 'shark', 'island', 'sand', 'boat', 'swim', 'dolphin', 'shell'], pairs: [
+      ['Blue waves dance upon the shore', 'The ocean sings forevermore'],
+      ['Dolphins jump up high and free', 'Playing in the deep blue sea'],
+      ['Shells and sand beneath my feet', 'The ocean breeze is cool and sweet'],
+      ['A big blue whale swims far away', 'Singing songs at the end of the day'],
+      ['We sail our boat across the bay', 'The seagulls fly and lead the way'],
+      ['Keep the ocean clean and blue', 'The fish will say a big thank you']] },
+    space: { icon: '🚀', name: 'Space', words: ['space', 'star', 'stars', 'moon', 'sun', 'planet', 'planets', 'rocket', 'astronaut', 'galaxy', 'sky', 'mars', 'earth', 'alien'], pairs: [
+      ['Up in the sky the stars shine bright', 'Twinkle, twinkle, through the night'],
+      ['My rocket flies up to the moon', 'I will be back home very soon'],
+      ['Planets spin around the sun', 'Space adventure, here we come'],
+      ['Floating high above the ground', 'In space there is no single sound'],
+      ['Mars is red and Earth is blue', 'There are so many worlds to view'],
+      ['Count to three and blast away', 'To the stars and the Milky Way']] },
+    sports: { icon: '⚽', name: 'Sports', words: ['sport', 'sports', 'football', 'soccer', 'basketball', 'ball', 'game', 'run', 'race', 'win', 'goal', 'swimming', 'badminton', 'volleyball'], pairs: [
+      ['Kick the ball and score a goal', 'Running fast is good for the soul'],
+      ['Bounce the ball and take the shot', 'Give the game everything you got'],
+      ['On your marks and ready, go', 'Run as fast as the wind can blow'],
+      ['We win together, we lose as one', 'Playing as a team is so much fun'],
+      ['Jump up high and try again', 'Practice makes us champions then'],
+      ['Shake my hand, it was a great game', 'Win or lose, we are friends the same']] },
+    food: { icon: '🍕', name: 'Food', words: ['food', 'pizza', 'rice', 'fruit', 'apple', 'banana', 'mango', 'cake', 'lunch', 'breakfast', 'dinner', 'snack', 'noodles', 'chocolate', 'vegetables', 'cook'], pairs: [
+      ['Rice and noodles, fruit and bread', 'Healthy food will keep me fed'],
+      ['A big red apple, crunchy and sweet', 'Is my favourite thing to eat'],
+      ['Pizza night is so much fun', 'Sharing slices with everyone'],
+      ['Mango, banana, a yummy treat', 'Fruit is the snack I love to eat'],
+      ['We cook together, stir the pot', 'Our lunch is yummy, warm and hot'],
+      ['Eat your veggies, green and bright', 'They make you strong and feeling right']] },
+    weather: { icon: '🌦️', name: 'Weather', words: ['weather', 'rain', 'sunny', 'sun', 'cloud', 'clouds', 'wind', 'storm', 'rainbow', 'snow', 'hot', 'cold'], pairs: [
+      ['Pitter patter, here comes the rain', 'Splashing on my window pane'],
+      ['The sun comes out, the sky is blue', 'A rainbow smiles at me and you'],
+      ['Whoosh goes the wind across the hill', 'Then everything is calm and still'],
+      ['Grey clouds float across the sky', 'Rainy days will soon pass by'],
+      ['Sunny days are warm and bright', 'We play outside until the night'],
+      ['Thunder rumbles, lightning flash', 'Then the rain comes down, splash splash']] },
+    holiday: { icon: '🎉', name: 'Holiday', words: ['holiday', 'vacation', 'party', 'birthday', 'christmas', 'trip', 'travel', 'celebrate', 'gift', 'present', 'festival'], pairs: [
+      ['Holiday time, no school today', 'We pack our bags and fly away'],
+      ['Happy birthday, blow the candles out', 'Make a wish and give a shout'],
+      ['Lights and music, let us dance', 'A party is a happy chance'],
+      ['Visiting places far and near', 'Holidays are the best time of the year'],
+      ['Wrap the gifts with ribbons bright', 'Celebrate with all our might'],
+      ['Family, friends and yummy food', 'Holidays put us in a happy mood']] },
+    music: { icon: '🎵', name: 'Music', words: ['music', 'song', 'songs', 'sing', 'dance', 'band', 'guitar', 'piano', 'drum', 'drums', 'beat', 'rhythm', 'concert'], pairs: [
+      ['Turn it up and feel the beat', 'Music moves my dancing feet'],
+      ['I sing my song for all to hear', 'Loud and happy, bright and clear'],
+      ['Boom, clap, boom, the drums go round', 'I love the rhythm of the sound'],
+      ['Play the piano, strum the guitar', 'Together we sound like a star'],
+      ['When I am sad I sing a song', 'And then my smile comes back along'],
+      ['Clap your hands and stomp your feet', 'Everybody feel the beat']] }
+  };
+  /* the student's own idea: a word that is no topic → these lines (with the word in them) */
+  const FREE = [
+    ['I love {w}, it makes me smile', 'I think of {w} all the while'],
+    ['{W} here and {w} there', 'I see {w} everywhere'],
+    ['Oh {w}, oh {w}, you are the best', 'Better than all of the rest'],
+    ['Every morning when I wake', 'A song of {w} is what I make'],
+    ['Sing about {w} with me today', 'Sing it loud and clap away'],
+    ['Let us sing about {w} now', 'Clap your hands and take a bow']
+  ];
+  const pickN = (arr, n, seed) => { const a = arr.slice(), out = []; let x = seed; while (out.length < n && a.length) { x = (x * 9301 + 49297) % 233280; out.push(a.splice(Math.floor(x / 233280 * a.length), 1)[0]); } return out; };
+  /* which topic does a typed idea mean? */
+  function topicFor(idea) {
+    const w = String(idea || '').toLowerCase().split(/[^a-z]+/).filter(Boolean);
+    return Object.keys(TOPICS).find(k => k === w.join('') || w.some(x => TOPICS[k].words.indexOf(x) > -1)) || null;
+  }
+  /* write lyrics. idea = a topic key or a word typed by the student. lines = 2 or 4 */
+  function write(idea, lines, seed) {
+    seed = seed || Date.now() % 233280;
+    const n = lines >= 4 ? 2 : 1;
+    const key = TOPICS[idea] ? idea : topicFor(idea);
+    if (key) {
+      /* 4 lines must fit the 32 notes of the song */
+      for (let t = 0; t < 12; t++) {
+        const got = pickN(TOPICS[key].pairs, n, seed + t * 7919).map(p => p.join('\n')).join('\n');
+        if (syllablesOf(got).length <= STEPS) return got;
+      }
+      return pickN(TOPICS[key].pairs, 1, seed).map(p => p.join('\n')).join('\n');
+    }
+    const word = String(idea || '').trim().toLowerCase().replace(/[^a-z ]/g, '').split(/\s+/).slice(0, 2).join(' ');
+    if (!word) return '';
+    const cap = word.charAt(0).toUpperCase() + word.slice(1);
+    return pickN(FREE, n, seed).map(p => p.join('\n')).join('\n').replace(/\{w\}/g, word).replace(/\{W\}/g, cap);
+  }
+  return { TOPICS, write, topicFor };
+})();
+
+/* 🎹 Make notes for my words: one note per lyric piece, each line goes up and comes home at the end */
+function notesForWords(song, sylls) {
+  const n = Math.min(STEPS, sylls.length);
+  if (!n) return;
+  const gap = n <= 16 ? 2 : 1;
+  const SHAPES = [[2, 3, 4, 4, 3, 2, 3, 0], [4, 5, 6, 5, 4, 3, 4, 5], [2, 3, 4, 5, 4, 3, 2, 0], [5, 4, 3, 4, 5, 4, 3, 0]];
+  song.mel = Array(STEPS).fill(-1);
+  let step = 0, k = 0;
+  const lines = [];
+  sylls.slice(0, n).forEach(p => { (lines[p.line] = lines[p.line] || []).push(p); });
+  lines.filter(Boolean).forEach((line, li) => {
+    const shape = SHAPES[li % SHAPES.length];
+    line.forEach((p, j) => {
+      if (step >= STEPS || k >= n) return;
+      const last = j === line.length - 1;
+      song.mel[step] = last ? (li % 2 ? 5 : 0) : shape[j % shape.length];
+      step += gap; k++;
+    });
+    /* a small rest at the end of a line, when there is room */
+    if (gap === 2 && step < STEPS - (n - k) * 2) step += 2;
+  });
+}
+
 /* ===== Song Star Studio: sound =====
-   Everything is made with Web Audio (no sound files). The singer = a soft "aah/ooh" voice on the exact note
-   + the computer's own speaking voice saying each word piece at a high or low pitch (Windows voices work offline). */
+   The music is made with Web Audio (no sound files). The singing is the STUDENT'S OWN VOICE:
+   recorded with the headset microphone while the music plays, then played back in time with the music.
+   Song + voice can be saved as one audio file (.webm) to hand in. */
 const Sound = (() => {
   let ctx = null, master = null, noiseBuf = null;
   function ac() {
@@ -1645,76 +1848,44 @@ const Sound = (() => {
     env(g, t, 0.3, 0.01, dur);
     o.connect(f).connect(g).connect(master); o.start(t); o.stop(t + dur + 0.1);
   }
-  /* a soft sung vowel on the exact note (so the tune is clear even if the speaking voice is not exact) */
-  const FORMANTS = { a: [730, 1090], e: [530, 1840], i: [300, 2200], o: [570, 840], u: [320, 870] };
-  function vowel(midi, t, dur, v, loud) {
-    const o = ctx.createOscillator(), g = ctx.createGain(), mix = ctx.createGain();
-    o.type = 'sawtooth'; o.frequency.value = hz(midi);
-    const vib = ctx.createOscillator(), vg = ctx.createGain(); vib.frequency.value = 5.5; vg.gain.value = 4; vib.connect(vg).connect(o.frequency);
-    (FORMANTS[v] || FORMANTS.a).forEach((f, k) => { const b = ctx.createBiquadFilter(); b.type = 'bandpass'; b.frequency.value = f; b.Q.value = 6; o.connect(b).connect(mix); if (k) mix.gain.value = 1; });
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(loud || 0.5, t + 0.04); g.gain.setValueAtTime(loud || 0.5, t + Math.max(0.05, dur - 0.06)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    mix.connect(g).connect(master);
-    o.start(t); vib.start(t); o.stop(t + dur + 0.05); vib.stop(t + dur + 0.05);
+  function click(t, high) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = high ? 1320 : 880; env(g, t, 0.35, 0.002, 0.08);
+    o.connect(g).connect(master); o.start(t); o.stop(t + 0.12);
   }
-  const vowelOf = piece => ((String(piece).toLowerCase().match(/[aeiou]/) || ['a'])[0]);
-
-  /* ---------- the speaking voice (offline Windows voices) ---------- */
-  const synth = window.speechSynthesis || null;
-  let voices = [];
-  function loadVoices() { try { voices = synth ? synth.getVoices().filter(v => /^en/i.test(v.lang)) : []; } catch (e) { voices = []; } }
-  if (synth) { loadVoices(); try { synth.addEventListener('voiceschanged', loadVoices); } catch (e) { /* old browser */ } }
-  const canSpeak = () => !!(synth && voices.length);
-  function pickVoice(kind) {
-    if (!voices.length) return null;
-    const local = voices.filter(v => v.localService);
-    const list = local.length ? local : voices;
-    const female = list.find(v => /zira|female|hazel|susan|eva|aria|jenny/i.test(v.name));
-    const male = list.find(v => /david|male|mark|george|guy/i.test(v.name));
-    return (kind === 'rock' ? male : female) || list[0];
-  }
-  function say(text, pitch, rate, kind) {
-    if (!synth || !text) return;
-    try {
-      const u = new SpeechSynthesisUtterance(text);
-      u.pitch = Math.max(0, Math.min(2, pitch)); u.rate = rate; u.volume = 1;
-      const v = pickVoice(kind); if (v) u.voice = v;
-      synth.cancel();
-      synth.speak(u);
-    } catch (e) { /* no voice */ }
-  }
-  function hush() { try { if (synth) synth.cancel(); } catch (e) { /* ok */ } }
 
   /* ---------- play a song ----------
-     opts: { sing: true, loops: 1 (0 = until stop), onStep(i), onEnd(), lyrics: [pieces] } → { stop() } */
+     opts: { loops (0 = until stop), onStep(i), onEnd(), voice: AudioBuffer of the student's singing, countIn: true }
+     The voice starts together with the first step (it was recorded the same way). */
   let current = null;
+  const LATENCY = () => (ctx.outputLatency || 0.03) + (ctx.baseLatency || 0.01) + 0.05;   /* mic + speaker delay, so the voice is not late */
   function play(song, opts) {
     stop();
     if (!ac()) return null;
     opts = opts || {};
     const mood = MOODS[song.mood] || MOODS.happy, stepDur = 60 / (song.tempo || 100) / 2;
-    const notes = song.mel.map((n, i) => [i, n]).filter(x => x[1] >= 0);
-    const pieceAt = {};
-    if (opts.sing) notes.forEach((x, k) => { if (opts.lyrics && opts.lyrics[k]) pieceAt[x[0]] = opts.lyrics[k]; });
-    const singer = SINGERS[song.singer] || SINGERS.star;
-    const run = { step: 0, loop: 0, next: ctx.currentTime + 0.12, timers: [], stopped: false };
+    const beat = stepDur * 2, lead = opts.countIn ? beat * 4 : 0;
+    const run = { step: 0, loop: 0, next: ctx.currentTime + 0.15 + lead, timers: [], stopped: false, voiceSrc: null };
+    run.startAt = run.next;
+    if (opts.countIn) for (let b = 0; b < 4; b++) {
+      click(run.next - lead + b * beat, b === 0);
+      if (opts.onCount) run.timers.push(setTimeout(() => { if (!run.stopped) opts.onCount(4 - b); }, Math.max(0, (run.next - lead + b * beat - ctx.currentTime) * 1000)));
+    }
+    if (opts.voice) {
+      const src = ctx.createBufferSource(), g = ctx.createGain();
+      src.buffer = opts.voice.buffer; g.gain.value = 1.4;
+      src.connect(g).connect(master);
+      const off = Math.max(0, (opts.voice.offset || 0) + LATENCY());
+      src.start(run.startAt, Math.min(off, src.buffer.duration));
+      run.voiceSrc = src;
+    }
     function noteLen(i) { let k = 1; while (k < 4 && i + k < STEPS && song.mel[i + k] < 0) k++; return k * stepDur; }
     function schedule() {
       while (!run.stopped && run.next < ctx.currentTime + 0.25) {
         const i = run.step, t = run.next;
         DRUMS.forEach((d, r) => { if (song.drums[r][i]) drum(d.id, t); });
-        if (song.bass && i % 4 === 0) bass(mood.bass[Math.floor(i / 8)] , t, stepDur * 3.5);
-        const n = song.mel[i];
-        if (n >= 0) {
-          const len = noteLen(i), piece = pieceAt[i];
-          if (piece) {
-            vowel(mood.notes[n] , t, len * 0.95, vowelOf(piece), song.singer === 'robo' ? 0.7 : 0.35);
-            note(mood.notes[n], t, len, song.inst === 'bells' ? 'bells' : song.inst);
-            if (song.singer !== 'robo' || canSpeak()) {
-              const pitch = singer.low + (singer.high - singer.low) * n / 7;
-              run.timers.push(setTimeout(() => say(piece, pitch, song.singer === 'robo' ? 1.6 : 1.25, song.singer), Math.max(0, (t - ctx.currentTime) * 1000 - 40)));
-            }
-          } else note(mood.notes[n], t, len, song.inst);
-        }
+        if (song.bass && i % 4 === 0) bass(mood.bass[Math.floor(i / 8)], t, stepDur * 3.5);
+        if (song.mel[i] >= 0) note(mood.notes[song.mel[i]], t, noteLen(i), song.inst);
         if (opts.onStep) run.timers.push(setTimeout(() => { if (!run.stopped) opts.onStep(i); }, Math.max(0, (t - ctx.currentTime) * 1000)));
         run.next += stepDur;
         run.step++;
@@ -1722,25 +1893,100 @@ const Sound = (() => {
           run.step = 0; run.loop++;
           if (opts.loops && run.loop >= opts.loops) {
             run.stopped = true;
-            run.timers.push(setTimeout(() => { if (current === run) { current = null; if (opts.onEnd) opts.onEnd(); } }, Math.max(0, (run.next - ctx.currentTime) * 1000)));
+            run.timers.push(setTimeout(() => { if (current === run) { current = null; if (opts.onEnd) opts.onEnd(); } }, Math.max(0, (run.next - ctx.currentTime) * 1000 + 300)));
           }
         }
       }
     }
     run.iv = setInterval(schedule, 25);
     schedule();
-    run.stop = () => { run.stopped = true; clearInterval(run.iv); run.timers.forEach(clearTimeout); hush(); };
+    run.stop = () => { run.stopped = true; clearInterval(run.iv); run.timers.forEach(clearTimeout); if (run.voiceSrc) { try { run.voiceSrc.stop(); } catch (e) { /* not started */ } } };
     current = run;
     return run;
   }
   function stop() { if (current) { const c = current; current = null; c.stop(); } }
-  /* one sound when a cell is clicked */
   function tap(kind, row, song) {
     if (!ac()) return;
     const t = ctx.currentTime + 0.01;
     if (kind === 'mel') note((MOODS[song.mood] || MOODS.happy).notes[row], t, 0.3, song.inst); else drum(kind, t);
   }
-  return { play, stop, tap, canSpeak, say, playing: () => !!current, ctx: () => ctx };
+
+  /* ---------- the microphone ---------- */
+  const micOk = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  function getMic() { return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+  /* record the voice while the song plays (after a 4-beat count-in). opts: { onStep, onCount, onEnd(result | {error}) } → { stop() } */
+  async function recordVoice(song, opts) {
+    stop();
+    if (!ac()) return opts.onEnd({ error: 'sound' });
+    if (!micOk()) return opts.onEnd({ error: 'nomic' });
+    let stream;
+    try { stream = await getMic(); } catch (e) { return opts.onEnd({ error: 'nomic' }); }
+    const chunks = [], rec = new MediaRecorder(stream);
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    let recStart = 0, run = null, cancelled = false;
+    const finish = () => { try { if (rec.state !== 'inactive') rec.stop(); } catch (e) { /* stopped */ } };
+    rec.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (cancelled) return opts.onEnd({ error: 'cancel' });
+      const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+      /* the voice file starts at recStart; the music started at run.startAt */
+      const offset = run ? Math.max(0, run.startAtPerf - recStart) / 1000 : 0;
+      opts.onEnd({ blob, offset });
+    };
+    rec.onstart = () => {
+      recStart = performance.now();
+      run = play(song, { loops: 2, countIn: true, onStep: opts.onStep, onCount: opts.onCount, onEnd: () => setTimeout(finish, 250) });
+      run.startAtPerf = performance.now() + (run.startAt - ctx.currentTime) * 1000;
+    };
+    rec.start();
+    return { stop(cancel) { cancelled = !!cancel; stop(); finish(); } };
+  }
+  async function decode(blob) {
+    if (!ac()) return null;
+    const buf = await blob.arrayBuffer();
+    return new Promise((res) => { ctx.decodeAudioData(buf, b => res(b), () => res(null)); });
+  }
+  /* the music + the voice as one audio file (real time: a 10 second song takes 10 seconds) */
+  function exportSong(song, voice, onDone) {
+    if (!ac() || !window.MediaRecorder || !ctx.createMediaStreamDestination) { onDone({ error: 'Your browser cannot save audio. Use Microsoft Edge or Google Chrome.' }); return; }
+    const dest = ctx.createMediaStreamDestination();
+    master.connect(dest);
+    const chunks = [], rec = new MediaRecorder(dest.stream);
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = () => { try { master.disconnect(dest); } catch (e) { /* gone */ } onDone({ blob: new Blob(chunks, { type: rec.mimeType || 'audio/webm' }) }); };
+    rec.start();
+    play(song, { loops: 2, voice, onEnd: () => setTimeout(() => { try { rec.requestData(); } catch (e) { /* ok */ } setTimeout(() => rec.stop(), 300); }, 400) });
+    return { cancel() { stop(); try { rec.stop(); } catch (e) { /* ok */ } } };
+  }
+  return { play, stop, tap, micOk, getMic, recordVoice, decode, exportSong, playing: () => !!current, ac };
+})();
+
+/* ---------- the student's recordings: kept in this browser (IndexedDB), one per level and one for the Free Studio ---------- */
+const Voices = (() => {
+  let dbp = null;
+  function db() {
+    if (!dbp) dbp = new Promise((res) => {
+      try {
+        const r = indexedDB.open('songStarVoices', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('v');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res(null);
+      } catch (e) { res(null); }
+    });
+    return dbp;
+  }
+  async function op(mode, fn) {
+    const d = await db();
+    if (!d) return null;
+    return new Promise(res => {
+      try { const tx = d.transaction('v', mode), st = tx.objectStore('v'), r = fn(st); tx.oncomplete = () => res(r && r.result); tx.onerror = () => res(null); } catch (e) { res(null); }
+    });
+  }
+  return {
+    get: key => op('readonly', st => st.get(key)),
+    set: (key, val) => op('readwrite', st => st.put(val, key)),
+    del: key => op('readwrite', st => st.delete(key))
+  };
 })();
 
 /* ===== Song Star Studio: app ===== */
@@ -1803,7 +2049,7 @@ function renderHome() {
 
 /* ================= STUDIO ================= */
 let cur = null;   /* { L (level or null), song, sung, judged, showing: [cells] } */
-const ctxOf = () => ({ sylls: syllablesOf(cur.song.lyrics), played: cur.played, listened: cur.listened, sung: cur.sung, judged: cur.judged });
+const ctxOf = () => ({ sylls: syllablesOf(cur.song.lyrics), played: cur.played, listened: cur.listened, sang: cur.sang, recorded: !!cur.voice, judged: cur.judged });
 
 function openLevel(id) {
   const L = LEVELS.find(x => x.id === id);
@@ -1811,13 +2057,15 @@ function openLevel(id) {
   if (!unlocked(id)) { toast('🔒 Finish level ' + (id - 1) + ' first'); Fx.sound('bad'); return; }
   const st = lvl(id);
   if (!st.song) st.song = L.start();
-  cur = { L, song: st.song, played: false, listened: false, sung: false, judged: 0, showing: [], finished: st.done, step: null };
+  cur = { L, song: st.song, played: false, listened: false, sang: false, voice: null, voiceOn: true, judged: 0, showing: [], finished: st.done, step: null };
   openStudio();
+  loadVoice();
 }
 function openFree() {
   data.studio = data.studio || blankSong();
-  cur = { L: null, song: data.studio, sung: false, judged: 0, showing: [] };
+  cur = { L: null, song: data.studio, sang: false, voice: null, voiceOn: true, judged: 0, showing: [] };
   openStudio();
+  loadVoice();
 }
 function openStudio() {
   Sound.stop();
@@ -1831,11 +2079,13 @@ const shows = part => !cur.L || cur.L.show.indexOf(part) > -1;
 function renderStudio() {
   const L = cur.L;
   $('#btn-listen').hidden = !(L && L.target);
-  $('#btn-sing').hidden = !shows('lyrics');
+  $('#btn-rec').hidden = !shows('lyrics');
   $('#lyrics-box').hidden = !shows('lyrics');
+  $('#lb-tools').hidden = !!(L && !L.final);   /* 🤖 Lyric Bot and 🎹 Notes: in the Hit Song and the Free Studio */
   renderPickers();
   renderGrid();
   renderTools();
+  renderVoice();
   update();
 }
 function pick(group, opts, value) {
@@ -1849,7 +2099,6 @@ function renderPickers() {
     h += pick('Mood', Object.keys(MOODS).map(k => ({ v: k, icon: MOODS[k].icon, name: MOODS[k].name })), s.mood);
     h += pick('Sound', Object.keys(INSTRUMENTS).map(k => ({ v: k, icon: INSTRUMENTS[k].icon, name: INSTRUMENTS[k].name })), s.inst);
   }
-  if (shows('lyrics')) h += pick('Singer', Object.keys(SINGERS).map(k => ({ v: k, icon: SINGERS[k].icon, name: SINGERS[k].name })), s.singer);
   $('#pickers').innerHTML = h;
 }
 function renderGrid() {
@@ -1891,7 +2140,7 @@ function renderTools() {
   let h = '';
   if (!L || L.final) h += '<button type="button" class="btn btn-primary" data-act="judge">🏆 Judge my song</button>';
   h += '<button type="button" class="btn" data-act="clear">🧹 Clear</button>';
-  if (!L || L.final) h += '<button type="button" class="btn" data-act="file-save">💾 Save song</button>';
+  if (!L || L.final) h += '<button type="button" class="btn" data-act="download">🎧 Download my song</button><button type="button" class="btn" data-act="file-save">💾 Save song</button>';
   if (!L) h += '<button type="button" class="btn" data-act="file-open">📂 Open song</button>';
   $('#tools-row').innerHTML = h;
 }
@@ -1930,10 +2179,10 @@ function lyricInfo(sylls) {
   const bad = WordGuard.check($('#lyrics').value);
   if (bad.length) {
     box.innerHTML = '<p class="bad-word">🚫 <b>' + esc(bad[0]) + '</b> is not OK in a school song. Please choose kind words.</p>';
-    $('#btn-sing').disabled = true;
+    $('#btn-rec').disabled = true;
     return;
   }
-  $('#btn-sing').disabled = false;
+  $('#btn-rec').disabled = false;
   const notes = notesOf(cur.song).length;
   box.innerHTML = sylls.length ? '<div class="chips">' + sylls.map((p, k) => '<span class="chip' + (k < notes ? '' : ' no-note') + '">' + esc(p.text) + '</span>').join('') + '</div>' +
     (sylls.length > notes ? '<p class="warn">🎵 ' + (sylls.length - notes) + ' piece' + (sylls.length - notes === 1 ? ' has' : 's have') + ' no note yet. Add more notes!</p>' : '')
@@ -2023,10 +2272,10 @@ function markStep(i) {
 }
 function setPlaying(which) {
   $('#btn-play').classList.toggle('active', which === 'play');
-  $('#btn-sing').classList.toggle('active', which === 'sing');
+  $('#btn-rec').classList.toggle('active', which === 'rec');
   $('#btn-listen').classList.toggle('active', which === 'listen');
   $('#btn-play').innerHTML = which === 'play' ? '■ <span>Stop</span>' : '▶ <span>Play</span>';
-  $('#btn-sing').innerHTML = which === 'sing' ? '■ <span>Stop</span>' : '🎤 <span>Sing</span>';
+  $('#btn-rec').innerHTML = which === 'rec' ? '■ <span>Stop</span>' : '🎙️ <span>Record</span>';
   $('#btn-listen').innerHTML = which === 'listen' ? '■ <span>Stop</span>' : '👂 <span>Listen</span>';
 }
 let playingNow = null;
@@ -2037,26 +2286,174 @@ function stopAll() {
 function start(which) {
   if (playingNow === which) { stopAll(); return; }
   stopAll();
-  const sing = which === 'sing';
-  if (sing) {
-    if (!WordGuard.ok($('#lyrics').value)) return;
-    const sylls = syllablesOf(cur.song.lyrics);
-    if (!sylls.length) { toast('✍️ Type some lyrics first'); Fx.shake($('#lyrics')); return; }
-    if (!notesOf(cur.song).length) { toast('🎹 Click some notes first: the singer sings on the notes'); return; }
-    cur.sung = true;
-    if (!Sound.canSpeak() && !cur.warnedVoice) { cur.warnedVoice = true; toast('🤖 This computer has no speaking voice: the singer sings “aah”'); }
-  }
-  if (which === 'play') cur.played = true;
+  if (which === 'play') { cur.played = true; if (syllablesOf(cur.song.lyrics).length) cur.sang = true; }
   if (which === 'listen') cur.listened = true;
   const song = which === 'listen' ? cur.L.target() : cur.song;
+  const voice = which === 'play' && cur.voice && cur.voiceOn ? cur.voice : null;
   playingNow = which;
   setPlaying(which);
-  Sound.play(song, { sing, lyrics: syllablesOf(cur.song.lyrics).map(p => p.text), loops: which === 'listen' ? 1 : 2, onStep: i => { if (which !== 'listen') markStep(i); }, onEnd: stopAll });
-  karaoke(true);
+  Sound.play(song, { voice, loops: which === 'listen' ? 1 : 2, onStep: i => { if (which !== 'listen') markStep(i); }, onEnd: stopAll });
+  if (which !== 'listen') karaoke(true);
   update();
 }
+
+/* ---------- 🎙️ the student's own voice ---------- */
+const voiceKey = () => (cur.L ? 'level-' + cur.L.id : 'free');
+async function useVoice(rec) {
+  if (!rec || !rec.blob) { cur.voice = null; renderVoice(); return; }
+  const buffer = await Sound.decode(rec.blob);
+  if (!buffer || !cur) return;
+  cur.voice = { buffer, offset: rec.offset || 0, blob: rec.blob };
+  renderVoice(); update();
+}
+async function loadVoice() { const c = cur; const rec = await Voices.get(voiceKey()); if (cur === c) useVoice(rec); }
+function renderVoice() {
+  const chip = $('#voice-chip');
+  chip.hidden = !cur.voice || !shows('lyrics');
+  chip.innerHTML = cur.voice ? '<button type="button" class="vchip' + (cur.voiceOn ? ' on' : '') + '" data-act="voice-toggle" aria-pressed="' + cur.voiceOn + '" title="Play my voice with the music">🎙️ My voice ' + (cur.voiceOn ? '✓' : '✕') + '</button><button type="button" class="vdel" data-act="voice-del" title="Delete my recording" aria-label="Delete my recording">🗑️</button>' : '';
+}
+function showCount(text) {
+  const c = $('#count');
+  c.textContent = text; c.hidden = false;
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+  clearTimeout(showCount.t); showCount.t = setTimeout(() => { c.hidden = true; }, 900);
+}
+async function record() {
+  if (playingNow === 'rec') { if (cur.recCtl) cur.recCtl.stop(true); return; }
+  stopAll();
+  if (!WordGuard.ok($('#lyrics').value)) return;
+  if (!syllablesOf(cur.song.lyrics).length) toast('✍️ Tip: type your lyrics first, then sing them!');
+  playingNow = 'rec'; setPlaying('rec'); karaoke(true); showCount('🎙️ Get ready…');
+  const c = cur;
+  cur.recCtl = await Sound.recordVoice(cur.song, {
+    onStep: i => markStep(i),
+    onCount: n => showCount(n),
+    onEnd: async res => {
+      if (playingNow === 'rec') { playingNow = null; setPlaying(null); karaoke(false); markStep(-1); }
+      if (cur !== c) return;
+      cur.recCtl = null;
+      if (res.error === 'nomic') { cur.noMic = true; noMic(); return; }
+      if (res.error) { toast('🎙️ Recording stopped'); return; }
+      await Voices.set(voiceKey(), { blob: res.blob, offset: res.offset });
+      cur.voiceOn = true;
+      await useVoice(res);
+      Fx.sound('win');
+      toast('🎉 Recorded! Press ▶ Play to hear your voice with the music.');
+      glow($('#btn-play'));
+    }
+  });
+}
+function noMic() {
+  Modal.open({ title: '🎙️ No microphone found',
+    html: '<ol class="how-list"><li>Plug in your <b>headset</b> (the one with a microphone).</li><li>Press <b>🎙️ Record</b> again.</li><li>When the browser asks, click <b>Allow</b>.</li></ol>' +
+      '<p class="small">No microphone? That is OK: press <b>▶ Play</b> and <b>sing along</b> with the words!</p>',
+    actions: [{ label: 'OK', variant: 'primary' }] });
+}
+async function deleteVoice() {
+  confirmBox('🗑️ Delete your recording?', 'Your voice for this song is deleted. You can record again.', 'Delete', async () => {
+    await Voices.del(voiceKey()); cur.voice = null; renderVoice(); update();
+  }, true);
+}
+
+/* ---------- 🤖 Lyric Bot ---------- */
+let bot = { topic: null, text: '', seed: 1 };
+function lyricBot() {
+  const T = LyricBot.TOPICS;
+  bot = { topic: null, text: '', seed: Date.now() % 9973 };
+  Modal.open({ title: '🤖 Lyric Bot', wide: true,
+    html: '<p class="bot-hi">Hi! What is your song about? Pick one, or type your own idea.</p>' +
+      '<div class="bot-topics">' + Object.keys(T).map(k => '<button type="button" class="bot-t" data-topic="' + k + '"><span>' + T[k].icon + '</span>' + T[k].name + '</button>').join('') + '</div>' +
+      '<div class="bot-row"><label class="bot-idea"><span>✏️ My own idea:</span><input id="bot-idea" maxlength="30" autocomplete="off" placeholder="e.g. my cat, rainbows, robots"></label>' +
+      '<span class="bot-len"><label><input type="radio" name="bot-len" value="2" checked> 2 lines</label><label><input type="radio" name="bot-len" value="4"> 4 lines</label></span></div>' +
+      '<div class="bot-out" id="bot-out" aria-live="polite"><p class="muted">Pick a topic, then press ✨ Write!</p></div>',
+    actions: [{ label: '✨ Write', variant: 'secondary', keepOpen: true, onClick: botWrite }, { label: '✅ Use these lyrics', variant: 'primary', keepOpen: true, onClick: botUse }],
+    onOpen(box) {
+      box.addEventListener('click', e => {
+        const t = e.target.closest('[data-topic]');
+        if (!t) return;
+        bot.topic = t.dataset.topic;
+        $$('.bot-t', box).forEach(b => b.classList.toggle('on', b === t));
+        $('#bot-idea').value = '';
+        botWrite();
+      });
+      setTimeout(() => { const i = $('#bot-idea'); if (i) i.addEventListener('keydown', e => { if (e.key === 'Enter') botWrite(); }); }, 0);
+    } });
+}
+function botWrite() {
+  const idea = ($('#bot-idea').value || '').trim(), out = $('#bot-out');
+  if (!idea && !bot.topic) { out.innerHTML = '<p class="bad-word">👆 Pick a topic first, or type your own idea.</p>'; return; }
+  if (idea && !WordGuard.ok(idea)) { out.innerHTML = '<p class="bad-word">🚫 Let’s pick a kind idea for a school song.</p>'; return; }
+  if (idea) $$('.bot-t').forEach(b => b.classList.remove('on'));
+  const lines = +(($('input[name="bot-len"]:checked') || {}).value || 2);
+  bot.seed += 7;
+  bot.text = LyricBot.write(idea || bot.topic, lines, bot.seed);
+  if (!bot.text) { out.innerHTML = '<p class="bad-word">Type a word, for example <b>rainbows</b>.</p>'; return; }
+  const name = idea || LyricBot.TOPICS[bot.topic].name;
+  out.innerHTML = '<p class="bot-say">🤖 Here is a song about <b>' + esc(name) + '</b>:</p><div class="bot-lyrics">' + esc(bot.text).replace(/\n/g, '<br>') + '</div>' +
+    '<p class="small muted">Want different words? Press ✨ Write again. You can change any word afterwards.</p>';
+  Fx.sound('good');
+}
+function botUse() {
+  if (!bot.text) { botWrite(); if (!bot.text) return; }
+  Modal.close();
+  cur.song.lyrics = bot.text;
+  $('#lyrics').value = bot.text;
+  changed();
+  if (notesOf(cur.song).length < syllablesOf(bot.text).length) { toast('🎹 Now press “Notes for my words” to give every word a note'); glow($('[data-act="notes"]')); }
+}
+function notesForMyWords() {
+  const sylls = syllablesOf(cur.song.lyrics);
+  if (!sylls.length) { toast('✍️ Type your lyrics first (or ask 🤖 Lyric Bot)'); glow($('#lyrics')); return; }
+  notesForWords(cur.song, sylls);
+  changed();
+  toast('🎹 Every word has a note now. Press ▶ Play!');
+  glow($('#btn-play'));
+}
+
+/* ---------- 🎧 song + voice as one audio file ---------- */
+function downloadSong() {
+  stopAll();
+  const secs = Math.round(2 * STEPS * 60 / (cur.song.tempo || 100) / 2) + 1;
+  Modal.open({ title: '🎧 Making your song file…', dismissible: false, html: '<p>Your song plays once while it is saved: about <b>' + secs + ' seconds</b>. Please wait.</p><div class="meter-bar"><span class="mk-bar" id="mk-bar"></span></div>', actions: [] });
+  const t0 = Date.now(), iv = setInterval(() => { const b = $('#mk-bar'); if (b) b.style.width = Math.min(100, (Date.now() - t0) / secs / 10) + '%'; }, 200);
+  Sound.exportSong(cur.song, cur.voice && cur.voiceOn ? cur.voice : null, res => {
+    clearInterval(iv);
+    Modal.close();
+    if (res.error || !res.blob || res.blob.size < 500) { Modal.open({ title: 'The song file did not work', html: '<p>' + esc(res.error || 'Please try again in Microsoft Edge or Google Chrome.') + '</p>' }); return; }
+    const name = (data.name || 'My').replace(/[^A-Za-z0-9]+/g, '_') + '_Song.webm';
+    downloadBlob(res.blob, name);
+    toast('🎧 Saved to your Downloads folder: ' + name);
+  });
+}
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/* ---------- 🎙️ microphone test (Teacher page) ---------- */
+async function testMic() {
+  const msg = $('#mic-msg');
+  if (!Sound.micOk()) { msg.innerHTML = '⚠️ This browser cannot use a microphone. Use Microsoft Edge or Google Chrome.'; return; }
+  let stream;
+  try { stream = await Sound.getMic(); } catch (e) { msg.innerHTML = '⚠️ No microphone found, or it was blocked. Plug in a headset with a microphone and click <b>Allow</b> when the browser asks.'; return; }
+  const ctx = Sound.ac(), an = ctx.createAnalyser(), src = ctx.createMediaStreamSource(stream), buf = new Uint8Array(an.fftSize);
+  src.connect(an);
+  msg.innerHTML = '🎙️ Say something into the microphone… <span class="mic-bar"><i id="mic-lvl"></i></span>';
+  let peak = 0;
+  const t0 = Date.now(), iv = setInterval(() => {
+    an.getByteTimeDomainData(buf);
+    let m = 0; for (let i = 0; i < buf.length; i++) m = Math.max(m, Math.abs(buf[i] - 128));
+    peak = Math.max(peak, m);
+    const el = $('#mic-lvl'); if (el) el.style.width = Math.min(100, m * 1.6) + '%';
+    if (Date.now() - t0 > 5000) {
+      clearInterval(iv); stream.getTracks().forEach(t => t.stop()); src.disconnect();
+      msg.innerHTML = peak > 8 ? '✅ The microphone works! Students can record their voice.' : '⚠️ The microphone is on, but it heard almost nothing. Check the headset plug and Windows › Sound › Input.';
+    }
+  }, 60);
+}
 $('#btn-play').addEventListener('click', () => start('play'));
-$('#btn-sing').addEventListener('click', () => start('sing'));
+$('#btn-rec').addEventListener('click', record);
 $('#btn-listen').addEventListener('click', () => start('listen'));
 
 /* ---------- lyrics: only kind words reach the song ---------- */
@@ -2086,11 +2483,11 @@ function judgeSong() {
 function showMe() {
   const L = cur.L;
   if (!L) return;
-  const step = L.steps[cur.step || 0], BTN = { play: '#btn-play', listen: '#btn-listen', sing: '#btn-sing', judge: '[data-act="judge"]', lyrics: '#lyrics' };
+  const step = L.steps[cur.step || 0], BTN = { play: '#btn-play', listen: '#btn-listen', rec: '#btn-rec', judge: '[data-act="judge"]', lyrics: '#lyrics', bot: '[data-act="bot"]', notes: '[data-act="notes"]' };
   if (step && step[2] && BTN[step[2]]) { glow($(BTN[step[2]])); return; }
   if (L.need) {
     cur.showing = L.need(cur.song).slice(0, 4);
-    if (!cur.showing.length && shows('lyrics')) glow($('#btn-sing'));
+    if (!cur.showing.length && shows('lyrics')) glow($('#btn-play'));
     showCells();
     const first = $('#grid .cell.show');
     if (first) first.scrollIntoView({ block: 'nearest', inline: 'center' });
@@ -2098,7 +2495,7 @@ function showMe() {
     const r = judge(cur.song, syllablesOf(cur.song.lyrics));
     toast('💡 ' + r.judges.slice().sort((a, b) => a.score / a.max - b.score / b.max)[0].say);
   } else {
-    glow(syllablesOf(cur.song.lyrics).length < 4 || !lyricLines(cur.song.lyrics).length ? $('#lyrics') : $('#btn-sing'));
+    glow(syllablesOf(cur.song.lyrics).length < 4 || !lyricLines(cur.song.lyrics).length ? $('#lyrics') : $('#btn-play'));
   }
 }
 function glow(el) { if (!el) return; el.classList.add('glow'); setTimeout(() => el.classList.remove('glow'), 3500); }
@@ -2108,7 +2505,7 @@ function doIt() {
   L.fix(cur.song);
   $('#lyrics').value = cur.song.lyrics || '';
   cur.showing = [];
-  if (shows('lyrics')) glow($('#btn-sing'));
+  if (shows('lyrics')) glow($('#btn-play'));
   changed();
 }
 function resetLevel() {
@@ -2116,7 +2513,8 @@ function resetLevel() {
   confirmBox('↺ Start level ' + L.id + ' again?', 'Your notes for this level are cleared. Do it yourself to get ★★★!', 'Start again', () => {
     const st = lvl(L.id);
     st.song = L.start(); st.help = 0;
-    cur.song = st.song; cur.played = cur.listened = cur.sung = false; cur.judged = 0; cur.showing = []; cur.finished = false; cur.step = null;
+    cur.song = st.song; cur.played = cur.listened = cur.sang = false; cur.judged = 0; cur.showing = []; cur.finished = false; cur.step = null;
+    Voices.del(voiceKey()); cur.voice = null;
     $('#lyrics').value = cur.song.lyrics || '';
     save(); renderStudio();
   });
@@ -2124,7 +2522,8 @@ function resetLevel() {
 function clearSong() {
   confirmBox('🧹 Clear the whole song?', 'All beats, notes and lyrics are removed.', 'Clear', () => {
     const keep = cur.song, s = blankSong();
-    ['mood', 'tempo', 'inst', 'singer'].forEach(k => { s[k] = keep[k]; });
+    ['mood', 'tempo', 'inst'].forEach(k => { s[k] = keep[k]; });
+    Voices.del(voiceKey()); cur.voice = null;
     cur.song = s; if (cur.L) lvl(cur.L.id).song = s; else data.studio = s;
     $('#lyrics').value = '';
     stopAll(); renderStudio(); save();
@@ -2134,11 +2533,21 @@ function clearSong() {
 /* ---------- song files ---------- */
 function saveFile() {
   const name = (data.name || 'My').replace(/[^A-Za-z0-9]+/g, '_') + '_Song.song';
-  const blob = new Blob([JSON.stringify({ app: 'songStar', v: 1, name: data.name, song: cur.song })], { type: 'application/json' });
-  const url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-  toast('💾 Saved to your Downloads folder: ' + name);
+  const write = voice => {
+    downloadBlob(new Blob([JSON.stringify({ app: 'songStar', v: 1, name: data.name, song: cur.song, voice })], { type: 'application/json' }), name);
+    toast('💾 Saved to your Downloads folder: ' + name);
+  };
+  if (!cur.voice || !cur.voice.blob) { write(null); return; }
+  const rd = new FileReader();
+  rd.onload = () => write({ data: rd.result, offset: cur.voice.offset });
+  rd.readAsDataURL(cur.voice.blob);
+}
+function blobFromDataUrl(url) {
+  const m = String(url || '').match(/^data:([^;]+);base64,(.*)$/);
+  if (!m) return null;
+  const bin = atob(m[2]), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: m[1] });
 }
 function openFile(then) {
   const inp = document.createElement('input');
@@ -2153,7 +2562,8 @@ function openFile(then) {
       if (!s || !Array.isArray(s.mel) || !Array.isArray(s.drums)) { Modal.open({ title: 'That file cannot be opened', html: '<p>Choose a <b>.song</b> file made with 💾 Save song.</p>' }); return; }
       const song = Object.assign(blankSong(), s);
       if (!WordGuard.ok(song.lyrics)) song.lyrics = '';
-      then(song, d.name);
+      const vb = d.voice && blobFromDataUrl(d.voice.data);
+      then(song, d.name, vb ? { blob: vb, offset: d.voice.offset || 0 } : null);
     };
     rd.readAsText(f);
   });
@@ -2169,9 +2579,10 @@ function renderTeacher() {
     '<div class="t-cards">' +
     '<div class="t-card"><b>⭐ Stars</b><p>★★★ for doing a level alone. 👆 Show me is free (it rings the squares to click). 🪄 Do it for me makes that level ★★. ↺ Start again lets a student redo it for ★★★.</p></div>' +
     '<div class="t-card"><b>🏆 Judges</b><p>The Hit Meter (0–100) scores the beat, the melody, the lyrics and the ending, with one tip from each judge. Level 12 needs 50 or more.</p></div>' +
-    '<div class="t-card"><b>🛡️ Kind words only</b><p>Lyrics and names are checked for bad, rude, violent and adult words (English, plus common Tagalog and Indonesian ones), also when written as f*ck, sh1t or f u c k. A blocked word is never sung or saved.</p></div>' +
-    '<div class="t-card"><b>🎤 The singer</b><p>No microphone needed: students type, the computer sings through the speakers or headphones. It uses the Windows voices (offline) and sounds like a robot pop singer. A PC with no voice sings “aah” on the notes instead. 🎤 Karaoke: the words light up while the song plays, so the class can sing along.</p>' +
-    '<button type="button" class="btn btn-sm" data-act="test-voice">🔊 Test the singer on this PC</button><p class="small" id="voice-msg"></p></div></div>' +
+    '<div class="t-card"><b>🛡️ Kind words only</b><p>Lyrics, names and Lyric Bot ideas are checked for bad, rude, violent and adult words (English, plus common Tagalog and Indonesian ones), also when written as f*ck, sh1t or f u c k. A blocked word never reaches the song.</p></div>' +
+    '<div class="t-card"><b>🎙️ Their own voice</b><p>Students sing with their own voice: 🎙️ Record gives a 3-2-1 count-in, plays the music with the words lighting up (karaoke) and records the headset microphone. ▶ Play then plays music + voice together; they can record again any time. 🎧 Download my song saves music + voice as one audio file (.webm) to hand in. No microphone? They press ▶ Play and sing along.</p>' +
+    '<button type="button" class="btn btn-sm" data-act="test-mic">🎙️ Test the microphone on this PC</button><p class="small" id="mic-msg"></p></div>' +
+    '<div class="t-card"><b>🤖 Lyric Bot</b><p>In the Hit Song and the Free Studio, students pick a topic (school, plants, animals, friends, space…) or type their own idea, and Lyric Bot writes 2 or 4 rhyming lines. 🎹 Notes for my words then gives every word a note. It works offline from a bank of kid-safe lines, so it can never write anything unkind.</p></div></div>' +
     '<h2>Lessons</h2><div class="table-wrap"><table class="table"><thead><tr><th>Lesson</th><th>Levels</th><th>Students learn</th></tr></thead><tbody>' +
     '<tr><td>1</td><td>1–4 🥁 Beat Basics</td><td>Steady beat, bars, a pattern of Boom and Clap, listening and copying a beat</td></tr>' +
     '<tr><td>2</td><td>5–8 🎹 Melody Makers</td><td>Notes going up and down, a hook that repeats, copying a tune by ear</td></tr>' +
@@ -2207,7 +2618,7 @@ function showHelp() {
   Modal.open({ title: '🎵 How to play', wide: true,
     html: '<ol class="how"><li><span>🟩</span><b>Click squares</b><small>to make a beat and notes</small></li><li><span>▶</span><b>Play</b><small>to hear your song</small></li><li><span>✍️</span><b>Write lyrics</b><small>then 🎤 Sing</small></li><li><span>⭐</span><b>Get 3 stars</b><small>do it yourself!</small></li></ol>' +
       '<p class="small">Follow the <b>steps</b> on the left. 👆 <b>Show me</b> helps (free). 🪄 <b>Do it for me</b> costs a star.</p>' +
-      '<p class="small">🎧 No microphone needed: you <b>type</b> the words and the computer <b>sings</b> them. Kind words only!</p>',
+      '<p class="small">🎙️ <b>Record</b> sings with <b>your own voice</b> (headset microphone). No microphone? Press ▶ Play and sing along. 🤖 <b>Lyric Bot</b> helps you write words. Kind words only!</p>',
     actions: [{ label: 'Let’s go!', variant: 'primary' }] });
 }
 
@@ -2220,10 +2631,9 @@ document.addEventListener('click', e => {
   const pk = t.closest('[data-pick]');
   if (pk && cur) {
     const g = pk.dataset.pick, v = pk.dataset.v;
-    if (g === 'Speed') cur.song.tempo = +v; else if (g === 'Mood') cur.song.mood = v; else if (g === 'Sound') cur.song.inst = v; else cur.song.singer = v;
+    if (g === 'Speed') cur.song.tempo = +v; else if (g === 'Mood') cur.song.mood = v; else if (g === 'Sound') cur.song.inst = v;
     renderPickers(); changed();
     if (g === 'Sound' || g === 'Mood') Sound.tap('mel', 4, cur.song);
-    if (g === 'Singer' && Sound.canSpeak()) Sound.say('Hello', (SINGERS[v].low + SINGERS[v].high) / 2, 1.2, v);
     return;
   }
   const act = t.closest('[data-act]');
@@ -2235,17 +2645,18 @@ document.addEventListener('click', e => {
   else if (a === 'judge') judgeSong();
   else if (a === 'clear') clearSong();
   else if (a === 'file-save') saveFile();
-  else if (a === 'file-open') openFile(song => { cur.song = song; data.studio = song; $('#lyrics').value = song.lyrics; save(); renderStudio(); });
+  else if (a === 'file-open') openFile((song, n, voice) => { cur.song = song; data.studio = song; $('#lyrics').value = song.lyrics; save(); renderStudio(); if (voice) Voices.set('free', voice).then(() => useVoice(voice)); else { Voices.del('free'); cur.voice = null; renderVoice(); } });
   else if (a === 'name') askName(false);
-  else if (a === 'test-voice') {
-    const ok = Sound.canSpeak();
-    if (ok) Sound.say('Hello! I am your song star singer!', 1.3, 1.1, 'star');
-    $('#voice-msg').innerHTML = ok ? '✅ This PC has a voice: you should hear “Hello, I am your song star singer”. No sound? Check the speakers or headphones.' : '⚠️ No Windows voice found on this PC. The singer will sing “aah” on the notes (the words still show in 🎤 Karaoke). To add a voice: Windows Settings › Time & language › Speech › Add voices.';
-  }
+  else if (a === 'bot') lyricBot();
+  else if (a === 'notes') notesForMyWords();
+  else if (a === 'download') downloadSong();
+  else if (a === 'voice-toggle') { cur.voiceOn = !cur.voiceOn; renderVoice(); }
+  else if (a === 'voice-del') deleteVoice();
+  else if (a === 'test-mic') testMic();
   else if (a === 'home') goHome();
   else if (a === 'print') window.print();
   else if (a === 'save-words') { const list = $('#t-words').value.split(/[,\n]/).map(w => w.trim()).filter(Boolean); store.set(WORDS_KEY, list); WordGuard.setExtra(list); toast('🛡️ Saved: ' + list.length + ' extra word' + (list.length === 1 ? '' : 's')); }
-  else if (a === 'open-student') openFile((song, name) => { cur = { L: null, song, sung: false, judged: 0, showing: [], visitor: name }; showScreen('screen-studio'); $('#lyrics').value = song.lyrics; renderStudio(); toast('🎵 ' + (name || 'Student') + '’s song: press ▶ Play'); });
+  else if (a === 'open-student') openFile((song, name, voice) => { cur = { L: null, song, sang: false, voice: null, voiceOn: true, judged: 0, showing: [], visitor: name }; showScreen('screen-studio'); $('#lyrics').value = song.lyrics; renderStudio(); if (voice) useVoice(voice); toast('🎵 ' + (name || 'Student') + '’s song: press ▶ Play'); });
   else if (a === 'unlockall') { data.unlockAll = true; save(); renderTeacher(); }
   else if (a === 'lockall') { data.unlockAll = false; save(); renderTeacher(); }
   else if (a === 'clear-top') confirmBox('Clear the Top 10?', 'All names and scores on the board are removed from this computer.', 'Clear', () => { store.set(TOP_KEY, []); toast('Top 10 cleared'); }, true);
@@ -2288,7 +2699,6 @@ if (FAST) {
       if (L.steps.some(st => st[2] === 'listen')) { $('#btn-listen').click(); stopAll(); }
       if (L.fix) { $('[data-act="doit"]').click(); }
       if (L.steps.some(st => st[2] === 'play')) { $('#btn-play').click(); stopAll(); }
-      if (L.steps.some(st => st[2] === 'sing')) { $('#btn-sing').click(); stopAll(); }
       Modal.close();
       return isDone(id);
     }
