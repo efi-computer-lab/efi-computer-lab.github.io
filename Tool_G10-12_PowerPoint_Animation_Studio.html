@@ -6070,30 +6070,58 @@ const Guide = (() => {
   const allAnims = () => [].concat(...deck().slides.map(s2 => s2.anims));
   const fileTarget = (fv, fa) => () => $q('[data-fa="' + fa + '"]') || $q('[data-fv="' + fv + '"]') || $q('.ed-tab.file');
   const numOf = a => (a ? $q('.ed-num[data-anim="' + a.id + '"]') : null);
-  const pickCast = test => cast().find(test) || castTop();
+  const left = n => (n ? ' <span class="g-count">' + n + ' left</span>' : '');
+  const addAnim = arg => menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg' + arg + ']');
+  const pathless = () => cast().find(o => !hasAnim(o, 'path')) || castTop();
+  const clickLeft = () => deck().slides.reduce((n, s2) => n + s2.anims.filter(a => a.start === 'click' && !a.trigger).length, 0);
+  const noAfter = () => deck().slides.filter((s2, i) => i < deck().slides.length - 1 && (!s2.trans || s2.trans.after == null));
+  const unnamed = () => { const ids = new Set(allAnims().map(a => a.o)); return deck().slides.reduce((n, s2) => n + s2.objs.filter(o => ids.has(o.id) && Deck.isDefaultName(o.name)).length, 0); };
+  const lastA = () => S().anims.slice(-1)[0];
+  const objOf = a => (a ? objs().find(o => o.id === a.o) : null);
+  const thumb = i => $q('.ed-thumbs [data-th="' + i + '"]');
+  /* the slide that still needs something: point at its thumbnail first */
+  const onSlide = (i, then) => () => (i < 0 ? null : E().cur !== i ? thumb(i) : then());
   G.final = [
-    { say: () => 'Click <b>File</b>. Name the file <b>' + esc(animFileName()) + '</b>.', target: () => $q('.ef-name') || $q('.ed-tab.file'), check: () => /_animation$/i.test(deck().title), act: () => Ed.change(() => { deck().title = animFileName(); }, 'rename-file') },
-    { say: 'Click <b>Design</b>. Pick a background for your set.', target: on('Design', '.bgsw'), check: () => deck().slides.some(s2 => s2.bg && (s2.bg.t === 'grad' || (s2.bg.c || '').toLowerCase() !== '#ffffff')) },
-    { say: 'Add your cast: <b>Insert</b> › <b>Stock Images</b>, <b>Icons</b> or <b>Shapes</b>. Add 3 or more.', target: () => $q('.modal .stk') || on('Insert', '[data-cmd="stickers"]')(), check: () => deck().slides.some(s2 => s2.objs.filter(o => !o.ph && o.t !== 'audio').length >= 3) },
-    { req: 2, say: () => { const a = allAnims(); return 'Click a picture › <b>Animations</b> › <b>Add Animation</b>. Use green, yellow AND red stars. <span class="g-count">' + a.length + ' of 10</span>'; },
-      target: () => { if (!sel1()) return null; const a = allAnims(); const k = !a.some(x => x.k === 'in') ? 'in' : !a.some(x => x.k === 'em') ? 'em' : !a.some(x => x.k === 'out') ? 'out' : 'em'; return menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg^="' + k + ':"]')(); },
-      spot: () => (sel1() ? null : pickCast(o => animsOf(o).length < 2)), check: () => finOk(2) },
-    { req: 3, say: () => 'Click a picture › <b>Add Animation</b> › <b>Custom Path</b>. Click corners, double-click to end. Make 2 paths. <span class="g-count">' + allAnims().filter(a => a.k === 'path').length + ' of 2</span>',
-      target: () => (sel1() ? menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="path:custom"]')() : null), spot: () => (sel1() || (E().tool && E().tool.drawPath) ? null : pickCast(o => !hasAnim(o, 'path'))), check: () => finOk(3) },
-    { req: 4, say: 'Click a picture that moves. <b>Add Animation</b> › <b>Spin</b>. Then <b>Start</b> › <b>With Previous</b>.',
-      target: () => { const o = sel1(); if (!o) return null; return animsOf(o).some(a => a.k === 'em') ? on('Animations', '[data-input="start"]')() : menu('Animations', '[data-menu="addanim"]', '[data-cmd="add-anim"][data-arg="em:spin"]')(); },
-      spot: () => (sel1() ? null : pickCast(o => hasAnim(o, 'path'))), check: () => finOk(4) },
-    { req: 5, say: () => { const a = allAnims(); return !a.some(x => x.start === 'after') ? 'Click an animation number. <b>Start</b> › <b>After Previous</b>.' : !a.some(x => x.start === 'with') ? 'Click an animation number. <b>Start</b> › <b>With Previous</b>.' : 'Click an animation number. Type <b>1</b> in <b>Delay</b>.'; },
-      target: () => { if (E().tab !== 'Animations') return tabEl('Animations'); if (!Ed.anim()) return $q('.ed-num'); const a = allAnims(); return $q('.ed-bar [data-input="' + (a.some(x => x.start === 'after') && a.some(x => x.start === 'with') ? 'delay' : 'start') + '"]'); }, check: () => finOk(5) },
-    { req: 1, say: () => (deck().slides.length < 2 ? 'Click <b>Home</b> › <b>Duplicate</b> for a 2nd slide. Move things on it.' : 'Click slide 2 on the left. Click <b>Transitions</b> › <b>Morph</b>.'),
-      target: () => (deck().slides.length < 2 ? on('Home', '[data-cmd="dup-slide"]')() : E().cur === 0 ? $q('.ed-thumbs [data-th="1"]') : on('Transitions', '[data-cmd="trans"][data-arg="morph"]')()), check: () => finOk(1) },
-    { req: 0, say: () => { const r = Show.duration(deck()); return r.needsClicks ? 'It still needs clicks. Click each number and set <b>Start</b> to <b>With</b> or <b>After Previous</b>.' : 'Make it <b>15–30 seconds</b>. Now: <b>' + Math.round(r.seconds) + ' s</b>. Change <b>Duration</b> and <b>Delay</b>, or <b>Transitions</b> › <b>After</b>.'; },
-      target: () => { const r = Show.duration(deck()); if (r.needsClicks) { if (E().tab !== 'Animations') return tabEl('Animations'); const a = Ed.anim(); return a && a.start === 'click' ? $q('.ed-bar [data-input="start"]') : numOf(S().anims.find(x => x.start === 'click' && !x.trigger)); } return on('Animations', '[data-input="dur"]')(); }, check: () => finOk(0) },
-    { req: 6, say: 'Click <b>Arrange</b> › <b>Selection Pane</b>. Double-click each name. Type a real name.',
-      target: () => (E().pane === 'sel' ? [...document.querySelectorAll('.sel-pane .sp-name')].find(n => Deck.isDefaultName(n.textContent)) || null : menu('Home', '[data-menu="arrange"]', '[data-cmd="pane-sel"]')()), check: () => finOk(6) },
-    { say: 'Click <b>Slide Show</b> › <b>From Beginning</b>. Watch it all. Don’t click!', target: on('Slide Show', '[data-cmd="show-start"]'), begin: c => { c.n = ev('show'); }, check: c => ev('show') > c.n && !Show.live },
-    { say: 'Click <b>File</b> › <b>Save a Copy</b> › <b>⬇ Save a Copy</b>', target: fileTarget('copy', 'copy'), check: () => ev('saveCopy') > 0, act: () => run('savecopy') },
-    { req: 7, say: 'Click <b>File</b> › <b>Export</b> › <b>🎞️ Create Video</b>. Wait until it finishes.', target: fileTarget('export', 'export'), check: () => finOk(7), act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('export'); } }
+    { say: () => 'Click <b>File</b> (top left). In <b>File name</b>, type <b>' + esc(animFileName()) + '</b> and press Enter.', target: () => $q('.ef-name') || $q('.ed-tab.file'), check: () => /_animation$/i.test(deck().title), act: () => Ed.change(() => { deck().title = animFileName(); }, 'rename-file') },
+    { prep: true, soft: true, say: 'On the left of the File page, click <b>← Back</b> to go back to your slide.', target: () => $q('[data-fv="back"]'), check: () => !$q('.ed-file') },
+    { prep: true, say: 'On the <b>Home</b> tab, click <b>Layout</b> › <b>Blank</b>: an empty stage for your story.', target: menu('Home', '[data-menu="layout"]', '[data-cmd="layout"][data-arg="blank"]'), check: () => deck().slides[0].layout === 'blank' || deck().slides.length > 1 },
+    { say: 'Click the <b>Design</b> tab. Click a coloured background: the place where your story happens.', target: on('Design', '.bgsw'), check: () => deck().slides.some(s2 => s2.bg && (s2.bg.t === 'grad' || (s2.bg.c || '').toLowerCase() !== '#ffffff')) },
+    { say: () => 'Add your cast: click <b>Insert</b> › <b>Stock Images</b> (or <b>Icons</b>), then click a picture. Add <b>3 pictures</b>.' + cnt(cast().length, 3), target: stickerTarget, check: () => deck().slides.some(s2 => s2.objs.filter(o => !o.ph && o.t !== 'audio' && o.t !== 'text').length >= 3) },
+    { soft: true, say: () => 'Give every picture an entrance: click ' + who(cast().find(o => !hasAnim(o, 'in'))) + ', then the <b>Animations</b> tab › <b>Fly In</b>, <b>Zoom</b> or <b>Fade</b> (green stars).' + cnt(new Set(S().anims.filter(a => a.k === 'in').map(a => a.o)).size, 3),
+      target: () => (selPic() && !hasAnim(selPic(), 'in') ? on('Animations', '[data-cmd="effect"][data-arg="in:fly"]')() : null), spot: () => (selPic() && !hasAnim(selPic(), 'in') ? null : cast().find(o => !hasAnim(o, 'in'))),
+      check: () => deck().slides.some(s2 => new Set(s2.anims.filter(a => a.k === 'in').map(a => a.o)).size >= 3) },
+    { say: () => 'Click ' + who(cast()[0]) + '. Click <b>Add Animation</b> › <b>Pulse</b> or <b>Spin</b> in the yellow <b>Emphasis</b> row.', target: () => (selPic() ? addAnim('="em:pulse"')() : null), spot: () => (selPic() ? null : cast()[0]), check: () => allAnims().some(a => a.k === 'em') },
+    { say: () => 'Click ' + who(cast()[1] || cast()[0]) + '. Click <b>Add Animation</b> › an effect in the red <b>Exit</b> row, for example <b>Fade</b>.', target: () => (selPic() ? addAnim('="out:fadeout"')() : null), spot: () => (selPic() ? null : cast()[1] || cast()[0]), check: () => allAnims().some(a => a.k === 'out') },
+    { say: () => 'Click ' + who(castTop()) + '. Click <b>Add Animation</b> › <b>Lines</b> or <b>Arcs</b> in the <b>Motion Paths</b> row: it moves across the slide.', target: () => (selPic() ? addAnim('="path:arc"')() : null), spot: () => (selPic() ? null : castTop()), check: () => allAnims().some(a => a.k === 'path') },
+    { req: 3, say: () => 'Click ' + who(pathless()) + '. Click <b>Add Animation</b> › <b>Custom Path</b>. Click 3 or 4 corners on the slide, then <b>double-click</b> to finish.' + cnt(allAnims().filter(a => a.k === 'path').length, 2),
+      target: () => (selPic() && !(E().tool && E().tool.drawPath) ? addAnim('="path:custom"')() : null), spot: () => (E().tool && E().tool.drawPath ? { x: 200, y: 120, w: 880, h: 420 } : selPic() ? null : pathless()), check: () => finOk(3) },
+    /* Spin With Previous only plays together with the path when the path is the animation just before it */
+    { req: 4, say: () => { const a = lastA(); return a && a.fx === 'spin' && a.start !== 'with' ? 'Change <b>Start</b> to <b>With Previous</b>: it spins while it moves.'
+        : a && a.k === 'path' ? 'Click ' + who(objOf(a)) + ' (it moves). Click <b>Add Animation</b> › <b>Spin</b>. Then change <b>Start</b> to <b>With Previous</b>: it spins while it moves.'
+        : 'Click ' + who(castTop()) + '. Click <b>Add Animation</b> › <b>Lines</b>. Then <b>Add Animation</b> › <b>Spin</b> and change <b>Start</b> to <b>With Previous</b>: it spins while it moves.'; },
+      target: () => { const a = lastA(), o = selPic(); if (a && a.fx === 'spin' && a.start !== 'with') return on('Animations', '[data-input="start"]')(); if (!o) return null; return a && a.k === 'path' && a.o === o.id ? addAnim('="em:spin"')() : addAnim('="path:line"')(); },
+      spot: () => { const a = lastA(); if ((a && a.fx === 'spin') || selPic()) return null; return a && a.k === 'path' ? objOf(a) : castTop(); }, check: () => finOk(4) },
+    { req: 2, say: () => 'Add more animations until you have <b>10</b>: click a picture › <b>Add Animation</b> › any effect.' + cnt(allAnims().length, 10), target: () => (selPic() ? addAnim('="em:pulse"')() : null), spot: () => (selPic() ? null : cast()[0]), check: () => finOk(2) },
+    { soft: true, say: () => 'Make it play by itself: click every number that starts <b>On Click</b> and change its <b>Start</b> to <b>After Previous</b>.' + left(clickLeft()),
+      target: () => { const i = deck().slides.findIndex(s2 => s2.anims.some(a => a.start === 'click' && !a.trigger)); return onSlide(i, () => { if (E().tab !== 'Animations') return tabEl('Animations'); const a = Ed.anim(); if (a && a.start === 'click') return $q('.ed-bar [data-input="start"]'); return numOf(clickAnims()[0]); })(); }, check: () => clickLeft() === 0 },
+    { req: 5, say: 'Click one number. In <b>Delay</b> (right side of the Animations tab) type <b>1</b> and press Enter: a little pause.', target: () => { if (E().tab !== 'Animations') return tabEl('Animations'); return Ed.anim() ? $q('.ed-bar [data-input="delay"]') : $q('.ed-num'); }, check: () => finOk(5) },
+    { say: 'On the <b>Home</b> tab, click <b>Duplicate</b>. Slide 2 is the next part of your story.', target: on('Home', '[data-cmd="dup-slide"]'), check: () => deck().slides.length >= 2 },
+    { say: () => 'On slide 2, drag ' + who(castTop()) + ' to a new place. Then drag a corner ○ to make it bigger.', spot: () => (E().cur > 0 ? castTop() : null), target: () => (E().cur === 0 ? thumb(1) : null),
+      check: () => deck().slides.some((s2, i) => i > 0 && s2.objs.some(o => { const p = deck().slides[i - 1].objs.find(q => q.mk === o.mk); return p && (Math.abs(p.x - o.x) > 30 || Math.abs(p.y - o.y) > 30 || Math.abs(p.w - o.w) > 20); })) },
+    { req: 1, say: 'Keep slide 2 selected. Click the <b>Transitions</b> tab › <b>Morph</b>: your pictures glide to their new places.', target: () => (E().cur === 0 && deck().slides.length > 1 ? thumb(1) : on('Transitions', '[data-cmd="trans"][data-arg="morph"]')()), check: () => finOk(1) },
+    { soft: true, say: () => { const s0 = noAfter()[0]; return 'Every slide except the last must move on by itself. Click slide <b>' + (s0 ? deck().slides.indexOf(s0) + 1 : 1) + '</b> on the left, then the <b>Transitions</b> tab › tick <b>After</b>.' + left(noAfter().length); },
+      target: () => { const s0 = noAfter()[0]; return onSlide(s0 ? deck().slides.indexOf(s0) : -1, on('Transitions', '[data-input="trans-afterbox"]'))(); }, check: () => noAfter().length === 0 },
+    { req: 0, say: () => { const r = Show.duration(deck()), t = Math.round(r.seconds);
+        if (r.needsClicks) return 'Your animation still waits for a click. Check that every number starts <b>With</b> or <b>After Previous</b>, and that every slide except the last has <b>After</b> ticked.';
+        if (t < 15) return 'Your animation lasts <b>' + t + ' s</b>: too short. Make it <b>15–30 s</b>: click a number and type a bigger <b>Duration</b> or <b>Delay</b>, or type more seconds in <b>Transitions</b> › <b>After</b>.';
+        if (t > 30) return 'Your animation lasts <b>' + t + ' s</b>: too long. Make it <b>15–30 s</b>: click a number and type a smaller <b>Duration</b> or <b>Delay</b>, or fewer seconds in <b>Transitions</b> › <b>After</b>.';
+        return 'Your animation lasts <b>' + t + ' s</b>. ✓'; },
+      target: () => (Show.duration(deck()).needsClicks ? null : on('Animations', '[data-input="dur"]')()), soft: true, check: () => finOk(0) },
+    { req: 6, say: () => 'Give every animated picture a real name: click <b>Arrange</b> › <b>Selection Pane</b>. Double-click a name like “Picture 2”, type a real name, press Enter. Do it on every slide.' + left(unnamed()),
+      target: () => (E().pane === 'sel' ? [...document.querySelectorAll('.sel-pane .sp-name')].find(n => Deck.isDefaultName(n.textContent)) || null : menu('Home', '[data-menu="arrange"]', '[data-cmd="pane-sel"]')()), soft: true, check: () => finOk(6) },
+    { say: 'Click the <b>Slide Show</b> tab › <b>From Beginning</b>. Watch your whole animation. Don’t click! At the end click <b>✕ End Show</b>.', target: on('Slide Show', '[data-cmd="show-start"]'), begin: c => { c.n = ev('show'); }, check: c => ev('show') > c.n && !Show.live },
+    { say: 'Click <b>File</b> › <b>Save a Copy</b> › the <b>⬇ Save a Copy</b> button. The .slides file goes to your <b>Downloads</b> folder.', target: fileTarget('copy', 'copy'), check: () => ev('saveCopy') > 0, act: () => run('savecopy') },
+    { req: 7, say: 'Click <b>File</b> › <b>Export</b> › the <b>🎞️ Create Video</b> button. Wait until it finishes: the video goes to your <b>Downloads</b> folder.', target: fileTarget('export', 'export'), check: () => finOk(7), act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('export'); } }
   ];
   function ensureTwoAnims() { ensureCast(2); while (S().anims.length < 2) { select(cast()[S().anims.length % cast().length]); run('effect', 'in:fade'); } }
 
