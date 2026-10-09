@@ -431,6 +431,16 @@ body { background: #f6f0ff; }
 .checks-list li.ok { background: var(--good-soft); color: var(--good); }
 .ck { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-weight: 900; font-size: .8rem; }
 .checks-list li.ok .ck { background: var(--good); border-color: var(--good); color: #fff; }
+.step-dots { display: flex; gap: 6px; margin: 4px 0 8px; }
+.step-dots i { width: 14px; height: 14px; border-radius: 50%; background: #e3e6ef; }
+.step-dots i.d { background: var(--good); }
+.step-dots i.c { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .3); }
+.step-n { margin: 0 0 2px; font-size: .8rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.goal .goal-say { font-size: 1.2rem; font-weight: 600; }
+.karaoke { background: linear-gradient(135deg, #2b1055, #7b2ff7); color: #fff; border-radius: 18px; padding: 14px 18px; font-size: 1.7rem; font-weight: 800; line-height: 1.5; text-align: center; box-shadow: var(--shadow); }
+.kp { color: #ffffff88; transition: color .1s, transform .1s; display: inline-block; }
+.kp.now { color: #ffd166; transform: scale(1.25); }
+.piece.now { background: #ffd166; color: #3b2300; }
 .help-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .help-row small { color: var(--bad); font-weight: 800; }
 .deck { display: grid; gap: 12px; min-width: 0; }
@@ -581,6 +591,7 @@ body { background: #f6f0ff; }
           <button type="button" class="big-btn listen" id="btn-listen" hidden>👂 <span>Listen</span></button>
           <div class="pickers" id="pickers"></div>
         </div>
+        <div class="karaoke" id="karaoke" hidden aria-live="off"></div>
         <div class="grid-wrap" id="grid-wrap"><div class="grid" id="grid" role="grid" aria-label="Song grid"></div></div>
         <div class="lyrics-box" id="lyrics-box">
           <label for="lyrics" class="lb-title">✍️ Lyrics <small>one note sings one piece</small></label>
@@ -1476,7 +1487,7 @@ const WordGuard = (() => {
 })();
 
 /* ---------- levels ----------
-   show: which parts of the studio are open. checks: [label, (song, ctx) => bool]. ctx = { sylls, sung }.
+   show: which parts of the studio are open. steps: [instruction, (song, ctx) => done, button to light up]. ctx = { sylls, played, listened, sung, judged }.
    need(song) → cells still to click, for 👆 Show me: [{ r: 'boom'|'clap'|'tss'|'mel', i: step, n: row }]. fix(song) = 🪄 Do it for me. */
 const need = (s, r, steps) => steps.filter(i => !s.drums[r][i]).map(i => ({ r: DRUMS[r].id, i }));
 const COPY_BEAT = { boom: [0, 6, 8, 16, 22, 24], clap: [4, 12, 20, 28], tss: [2, 6, 10, 14, 18, 22, 26, 30] };
@@ -1487,56 +1498,65 @@ const BEAT_ONLY = songWith({ boom: BEAT.boom, clap: BEAT.clap, tss: range(0, 32,
 
 const LEVELS = [
   { id: 1, zone: 1, icon: '🥁', title: 'Boom Boom', show: ['drums'], start: blankSong,
-    say: 'Click the <b>🥁 Boom</b> row at the start of every bar. The bars are the big boxes.',
-    checks: [['A Boom at the start of all 4 bars', s => hasDrum(s, 0, [0, 8, 16, 24])]],
+    steps: [['Click the first <b>🥁 Boom</b> square in <b>Bar 1</b>.', s => s.drums[0][0]],
+      ['Now click <b>🥁 Boom</b> at the start of <b>Bar 2, 3 and 4</b>.', s => hasDrum(s, 0, [0, 8, 16, 24])],
+      ['Press <b>▶ Play</b> to hear your beat!', (s, c) => c.played, 'play']],
     need: s => need(s, 0, [0, 8, 16, 24]), fix: s => { [0, 8, 16, 24].forEach(i => { s.drums[0][i] = true; }); } },
   { id: 2, zone: 1, icon: '👏', title: 'Clap Back', show: ['drums'], start: () => songWith({ boom: BEAT.boom }),
-    say: 'Put a <b>👏 Clap</b> in the middle of every bar, between the Booms.',
-    checks: [['Booms at the start of the bars', s => hasDrum(s, 0, [0, 8, 16, 24])], ['Claps in the middle of the bars', s => hasDrum(s, 1, [4, 12, 20, 28])]],
+    steps: [['Click <b>👏 Clap</b> in the <b>middle of Bar 1</b>, between two Booms.', s => s.drums[1][4]],
+      ['Add a <b>👏 Clap</b> in the middle of <b>every bar</b>.', s => hasDrum(s, 0, [0, 8, 16, 24]) && hasDrum(s, 1, [4, 12, 20, 28])],
+      ['Press <b>▶ Play</b>: Boom… Clap… Boom… Clap!', (s, c) => c.played, 'play']],
     need: s => need(s, 0, [0, 8, 16, 24]).concat(need(s, 1, [4, 12, 20, 28])), fix: s => { [0, 8, 16, 24].forEach(i => { s.drums[0][i] = true; }); [4, 12, 20, 28].forEach(i => { s.drums[1][i] = true; }); } },
   { id: 3, zone: 1, icon: '✨', title: 'Tss Tss', show: ['drums'], start: () => songWith({ boom: BEAT.boom, clap: BEAT.clap }),
-    say: 'Add <b>✨ Tss</b> sounds to make it busy. Tip: hold the mouse down and drag along the row!',
-    checks: [['At least 8 Tss sounds', s => drumCount(s, 2) >= 8]],
+    steps: [['Click a <b>✨ Tss</b> square. Tip: hold the mouse down and <b>drag</b> along the row!', s => drumCount(s, 2) >= 1],
+      ['Make <b>8 Tss</b> or more.', s => drumCount(s, 2) >= 8],
+      ['Press <b>▶ Play</b>. Busy beat!', (s, c) => c.played, 'play']],
     need: s => (drumCount(s, 2) >= 8 ? [] : range(0, 32, 2).filter(i => !s.drums[2][i]).map(i => ({ r: 'tss', i }))), fix: s => { range(0, 32, 2).forEach(i => { s.drums[2][i] = true; }); } },
   { id: 4, zone: 1, icon: '👂', title: 'Copy the Beat', show: ['drums'], start: blankSong, target: () => songWith(COPY_BEAT),
-    say: 'Press <b>👂 Listen</b> to hear a secret beat. Make the same beat!',
-    checks: [['Your beat is the same as the secret beat', s => DRUMS.every((d, r) => s.drums[r].every((v, i) => v === !!(COPY_BEAT[d.id].indexOf(i) > -1)))]],
+    steps: [['Press <b>👂 Listen</b> to hear a secret beat.', (s, c) => c.listened, 'listen'],
+      ['Make the <b>same beat</b>. Listen again as often as you like!', s => DRUMS.every((d, r) => s.drums[r].every((v, i) => v === !!(COPY_BEAT[d.id].indexOf(i) > -1)))]],
     need: s => { const out = []; DRUMS.forEach((d, r) => s.drums[r].forEach((v, i) => { if (v !== (COPY_BEAT[d.id].indexOf(i) > -1)) out.push({ r: d.id, i, wrong: v }); })); return out; },
     fix: s => { const t = songWith(COPY_BEAT); s.drums = t.drums; } },
   { id: 5, zone: 2, icon: '🪜', title: 'Stairs Up', show: ['drums', 'melody'], start: () => songWith({ boom: BEAT.boom, clap: BEAT.clap }),
-    say: 'Click coloured notes that go <b>up like stairs</b>: each note higher than the one before. Make 5.',
-    checks: [['5 notes going up, one after another', s => longestRise(s) >= 5]],
+    steps: [['Click a <b>low note</b> (orange) in <b>Bar 1</b>.', s => notesOf(s).length >= 1],
+      ['Click <b>4 more notes</b> to the right, each one <b>higher</b>, like stairs.', s => longestRise(s) >= 5],
+      ['Press <b>▶ Play</b>. Up, up, up!', (s, c) => c.played, 'play']],
     need: s => [0, 2, 4, 6, 8].map((i, k) => ({ r: 'mel', i, n: k + 1 })).filter(c => s.mel[c.i] !== c.n), fix: s => { s.mel.fill(-1); [0, 2, 4, 6, 8].forEach((i, k) => { s.mel[i] = k + 1; }); } },
   { id: 6, zone: 2, icon: '🎢', title: 'Roller Coaster', show: ['drums', 'melody'], start: () => songWith({ boom: BEAT.boom, clap: BEAT.clap }),
-    say: 'Make a melody like a roller coaster: <b>up, down, up again</b>. Use 8 notes or more.',
-    checks: [['8 notes or more', s => notesOf(s).length >= 8], ['It goes up and down at least 2 times', s => turns(s) >= 2]],
+    steps: [['Click <b>8 notes</b> or more.', s => notesOf(s).length >= 8],
+      ['Make them go <b>up and down</b>, like a roller coaster.', s => turns(s) >= 2],
+      ['Press <b>▶ Play</b>. Wheee!', (s, c) => c.played, 'play']],
     need: s => [[0, 1], [2, 3], [4, 5], [6, 3], [8, 1], [10, 3], [12, 6], [14, 4]].map(([i, n]) => ({ r: 'mel', i, n })).filter(c => s.mel[c.i] !== c.n),
     fix: s => { s.mel.fill(-1); [[0, 1], [2, 3], [4, 5], [6, 3], [8, 1], [10, 3], [12, 6], [14, 4]].forEach(([i, n]) => { s.mel[i] = n; }); } },
   { id: 7, zone: 2, icon: '🔁', title: 'Catchy Hook', show: ['drums', 'melody'], start: () => songWith({ boom: BEAT.boom, clap: BEAT.clap, mel: HOOK }),
-    say: 'Songs repeat the best part: the <b>hook</b>. Bar 1 has a hook. Copy the same notes into <b>bar 3</b>.',
-    checks: [['Bar 1 has 3 notes or more', s => barNotes(s, 0).filter(n => n >= 0).length >= 3], ['Bar 3 is the same as bar 1', s => sameBar(s, 0, 2)]],
+    steps: [['Press <b>▶ Play</b>. The notes in <b>Bar 1</b> are a <b>hook</b>: the catchy part.', (s, c) => c.played, 'play'],
+      ['Click the <b>same notes</b> in <b>Bar 3</b>.', s => barNotes(s, 0).filter(n => n >= 0).length >= 3 && sameBar(s, 0, 2)]],
     need: s => range(0, 8).filter(k => s.mel[16 + k] !== s.mel[k]).map(k => (s.mel[k] >= 0 ? { r: 'mel', i: 16 + k, n: s.mel[k] } : { r: 'mel', i: 16 + k, n: s.mel[16 + k], wrong: true })),
     fix: s => { range(0, 8).forEach(i => { s.mel[16 + i] = s.mel[i]; }); if (barNotes(s, 0).filter(n => n >= 0).length < 3) { HOOK.forEach(([i, n]) => { s.mel[i] = n; s.mel[16 + i] = n; }); } } },
   { id: 8, zone: 2, icon: '👂', title: 'Copy the Tune', show: ['drums', 'melody'], start: () => songWith({ boom: BEAT.boom, clap: BEAT.clap }), target: () => songWith({ boom: BEAT.boom, clap: BEAT.clap, mel: COPY_TUNE }),
-    say: 'Press <b>👂 Listen</b> to hear a secret tune. Find the same notes!',
-    checks: [['Your tune is the same as the secret tune', s => s.mel.every((n, i) => n === ((COPY_TUNE.find(x => x[0] === i) || [0, -1])[1]))]],
+    steps: [['Press <b>👂 Listen</b> to hear a secret tune.', (s, c) => c.listened, 'listen'],
+      ['Find the <b>same notes</b>. Listen again as often as you like!', s => s.mel.every((n, i) => n === ((COPY_TUNE.find(x => x[0] === i) || [0, -1])[1]))]],
     need: s => { const out = []; s.mel.forEach((n, i) => { const want = (COPY_TUNE.find(x => x[0] === i) || [0, -1])[1]; if (n !== want) out.push(want < 0 ? { r: 'mel', i, n, wrong: true } : { r: 'mel', i, n: want }); }); return out; },
     fix: s => { s.mel.fill(-1); COPY_TUNE.forEach(([i, n]) => { s.mel[i] = n; }); } },
   { id: 9, zone: 3, icon: '🎤', title: 'Hello, Singer!', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
-    say: 'Type some words in <b>✍️ Lyrics</b>, for example <i>I love to sing</i>. Then press <b>🎤 Sing</b>!',
-    checks: [['4 or more lyric pieces', (s, c) => c.sylls.length >= 4], ['You pressed 🎤 Sing', (s, c) => c.sung]],
+    steps: [['Click the <b>✍️ Lyrics</b> box and type: <b>I love to sing</b>', (s, c) => c.sylls.length >= 4, 'lyrics'],
+      ['Press <b>🎤 Sing</b>. The computer sings your words!', (s, c) => c.sung, 'sing']],
     fix: s => { s.lyrics = 'I love to sing all day'; } },
   { id: 10, zone: 3, icon: '✂️', title: 'Syllable Split', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
-    say: 'Each <b>note</b> sings one <b>piece</b> of a word: sun · shine. Write lyrics with <b>8 pieces</b> or more, and give every piece a note.',
-    checks: [['8 or more lyric pieces', (s, c) => c.sylls.length >= 8], ['Every piece has a note', (s, c) => c.sylls.length > 0 && notesOf(s).length >= c.sylls.length], ['You pressed 🎤 Sing', (s, c) => c.sung]],
+    steps: [['Type more lyrics: <b>8 pink pieces</b> or more. Long words split: sun · shine.', (s, c) => c.sylls.length >= 8, 'lyrics'],
+      ['A <b>grey</b> piece has no note. Click more notes until <b>no piece is grey</b>.', (s, c) => c.sylls.length > 0 && notesOf(s).length >= c.sylls.length],
+      ['Press <b>🎤 Sing</b>!', (s, c) => c.sung, 'sing']],
     fix: s => { s.lyrics = 'Sunshine on my happy day\nMusic takes my blues away'; while (notesOf(s).length < syllablesOf(s.lyrics).length) { const i = s.mel.findIndex(n => n < 0); if (i < 0) break; s.mel[i] = 3; } } },
   { id: 11, zone: 3, icon: '🎯', title: 'Rhyme Time', show: ['drums', 'melody', 'lyrics'], start: () => JSON.parse(JSON.stringify(SING_SONG)),
-    say: 'Write <b>2 lines</b> (press Enter between them). The last words must <b>rhyme</b>: day · play, night · light.',
-    checks: [['2 lines of lyrics', s => lyricLines(s.lyrics).length >= 2], ['The last words rhyme', s => linesRhyme(s.lyrics)], ['You pressed 🎤 Sing', (s, c) => c.sung]],
+    steps: [['Type <b>line 1</b>. End it with a word like <b>day</b>, <b>night</b> or <b>star</b>. Then press <b>Enter</b>.', s => lyricLines(s.lyrics).length >= 1 && /\n/.test(s.lyrics), 'lyrics'],
+      ['Type <b>line 2</b>. Its last word must <b>rhyme</b>: day · play, night · light, star · car.', s => linesRhyme(s.lyrics), 'lyrics'],
+      ['Press <b>🎤 Sing</b>!', (s, c) => c.sung, 'sing']],
     fix: s => { s.lyrics = 'We sing all night\nUnder the stars so bright'; } },
   { id: 12, zone: 4, icon: '⭐', title: 'Hit Song', show: ['drums', 'melody', 'lyrics'], final: true, start: () => JSON.parse(JSON.stringify(BEAT_ONLY)),
-    say: 'Make <b>your own song</b>: a beat, a melody and your own lyrics. Then press <b>🏆 Judge my song</b>. Score 50 or more to win!',
-    checks: [['A beat with Boom, Clap and Tss', s => [0, 1, 2].every(r => drumCount(s, r) > 0)], ['A melody with 8 notes or more', s => notesOf(s).length >= 8], ['Your own lyrics with 8 pieces or more', (s, c) => c.sylls.length >= 8], ['The judges gave 50 or more', (s, c) => (c.judged || 0) >= 50]] }
+    steps: [['Make <b>your beat</b>: use <b>🥁 Boom</b>, <b>👏 Clap</b> and <b>✨ Tss</b>.', s => [0, 1, 2].every(r => drumCount(s, r) > 0)],
+      ['Make <b>your melody</b>: 8 notes or more.', s => notesOf(s).length >= 8],
+      ['Write <b>your own lyrics</b>: 8 pink pieces or more.', (s, c) => c.sylls.length >= 8, 'lyrics'],
+      ['Press <b>🏆 Judge my song</b>. Get <b>50</b> or more to win!', (s, c) => (c.judged || 0) >= 50, 'judge']] }
 ];
 const ZONES = [{ id: 1, icon: '🥁', name: 'Beat Basics' }, { id: 2, icon: '🎹', name: 'Melody Makers' }, { id: 3, icon: '🎤', name: 'Lyrics & Voice' }, { id: 4, icon: '⭐', name: 'Superstar' }];
 
@@ -1783,7 +1803,7 @@ function renderHome() {
 
 /* ================= STUDIO ================= */
 let cur = null;   /* { L (level or null), song, sung, judged, showing: [cells] } */
-const ctxOf = () => ({ sylls: syllablesOf(cur.song.lyrics), sung: cur.sung, judged: cur.judged });
+const ctxOf = () => ({ sylls: syllablesOf(cur.song.lyrics), played: cur.played, listened: cur.listened, sung: cur.sung, judged: cur.judged });
 
 function openLevel(id) {
   const L = LEVELS.find(x => x.id === id);
@@ -1791,7 +1811,7 @@ function openLevel(id) {
   if (!unlocked(id)) { toast('🔒 Finish level ' + (id - 1) + ' first'); Fx.sound('bad'); return; }
   const st = lvl(id);
   if (!st.song) st.song = L.start();
-  cur = { L, song: st.song, sung: false, judged: 0, showing: [], finished: st.done };
+  cur = { L, song: st.song, played: false, listened: false, sung: false, judged: 0, showing: [], finished: st.done, step: null };
   openStudio();
 }
 function openFree() {
@@ -1876,22 +1896,33 @@ function renderTools() {
   $('#tools-row').innerHTML = h;
 }
 
-/* the goal card + checks; finishing a level */
+/* the step card: one short instruction at a time; it ticks itself and moves on */
+function stepState() {
+  const c = ctxOf();
+  return cur.L.steps.map(st => { let ok = false; try { ok = !!st[1](cur.song, c); } catch (e) { ok = false; } return ok; });
+}
 function update() {
   const L = cur.L, c = ctxOf();
   lyricInfo(c.sylls);
   if (!L) {
-    $('#goal').innerHTML = '<div class="goal-head"><span class="gh-ic">🎛️</span><div><b>Free Studio</b><span>Make any song you like. Then ask the judges!</span></div></div>';
+    $('#goal').innerHTML = '<div class="goal-head"><span class="gh-ic">🎛️</span><div><b>Free Studio</b><span>Make any song you like!</span></div></div>' +
+      '<p class="goal-say">Then press <b>🏆 Judge my song</b> to get your Hit Meter score.</p>';
     return;
   }
-  const st = lvl(L.id), res = L.checks.map(ch => { let ok = false; try { ok = !!ch[1](cur.song, c); } catch (e) { ok = false; } return { label: ch[0], ok }; });
+  const st = lvl(L.id), oks = stepState();
+  /* the current step = the first one that is not done yet */
+  let k = oks.indexOf(false);
+  if (k < 0) k = oks.length;
+  if (cur.step != null && k > cur.step && k < oks.length) Fx.sound('good');
+  cur.step = k;
+  const step = L.steps[Math.min(k, L.steps.length - 1)];
   $('#goal').innerHTML = '<div class="goal-head"><span class="gh-ic">' + L.icon + '</span><div><b>Level ' + L.id + ': ' + esc(L.title) + '</b>' + (st.done ? '<span class="gh-done">' + starHtml(st.stars) + '</span>' : '') + '</div></div>' +
-    '<p class="goal-say">' + L.say + '</p>' +
-    '<ul class="checks-list">' + res.map(r => '<li class="' + (r.ok ? 'ok' : '') + '"><span class="ck">' + (r.ok ? '✓' : '') + '</span>' + esc(r.label) + '</li>').join('') + '</ul>' +
+    '<div class="step-dots" aria-label="Step ' + Math.min(k + 1, oks.length) + ' of ' + oks.length + '">' + oks.map((ok, i) => '<i class="' + (ok ? 'd' : i === k ? 'c' : '') + '"></i>').join('') + '</div>' +
+    (k < oks.length ? '<p class="step-n">Step ' + (k + 1) + ' of ' + oks.length + '</p><p class="goal-say">' + step[0] + '</p>' : '<p class="goal-say">🎉 All done!</p>') +
     '<div class="help-row"><button type="button" class="btn btn-sm" data-act="show">👆 Show me</button>' +
     (L.fix ? '<button type="button" class="btn btn-sm" data-act="doit">🪄 Do it for me' + (st.help ? '' : ' <small>−1 ★</small>') + '</button>' : '') +
     '<button type="button" class="btn btn-sm btn-ghost" data-act="reset-level">↺ Start again</button></div>';
-  if (res.every(r => r.ok) && !cur.finished) finishLevel();
+  if (k >= oks.length && !cur.finished) finishLevel();
 }
 function lyricInfo(sylls) {
   const box = $('#lyric-info');
@@ -1918,13 +1949,15 @@ function finishLevel() {
   save(); updateTop();
   Fx.sound('win'); Fx.confetti();
   const next = LEVELS.find(x => x.id === L.id + 1);
-  setTimeout(() => Modal.open({
+  const pop = () => Modal.open({
     title: '🎉 Level ' + L.id + ' complete!',
     html: '<div class="done-pop"><div class="done-stars">' + starHtml(stars) + '</div><p class="done-pts">+' + stars * 100 + ' points</p>' +
       (stars < 3 && !L.final ? '<p class="small">You used 🪄 Do it for me. Press <b>↺ Start again</b> and do it yourself for ★★★!</p>' : '') +
       (L.final ? '<p>You are a <b>Song Star</b>! Keep making songs in the 🎛️ Free Studio.</p>' : '') + '</div>',
     actions: [{ label: '🗺️ Map', variant: 'secondary', onClick: goHome }].concat(next ? [{ label: 'Next level ▶', variant: 'primary', onClick: () => openLevel(next.id) }] : [{ label: '🎛️ Free Studio', variant: 'primary', onClick: openFree }])
-  }), first ? 600 : 300);
+  });
+  /* let the song finish first: the pop-up comes when the music stops */
+  if (playingNow) cur.afterPlay = pop; else setTimeout(pop, first ? 600 : 300);
 }
 
 /* ---------- editing the grid (click or drag) ---------- */
@@ -1969,7 +2002,21 @@ document.addEventListener('pointerup', () => { paint = null; });
 
 /* ---------- play, sing, listen ---------- */
 let playhead = -1;
+function karaoke(on) {
+  const k = $('#karaoke');
+  if (!k) return;
+  const sylls = cur ? syllablesOf(cur.song.lyrics) : [];
+  k.hidden = !on || !sylls.length || $('#lyrics-box').hidden;
+  if (!k.hidden) k.innerHTML = sylls.map((p, i) => (i && p.line !== sylls[i - 1].line ? '<br>' : '') + '<span class="kp" data-k="' + i + '">' + esc(p.text) + '</span>').join(' ');
+}
 function markStep(i) {
+  if (i >= 0 && cur && cur.song.mel[i] >= 0) {
+    const k = notesOf(cur.song).findIndex(x => x[0] === i);
+    $$('#karaoke .kp.now, #grid .piece.now').forEach(e => e.classList.remove('now'));
+    const kp = $('#karaoke .kp[data-k="' + k + '"]'), gp = $$('#grid .piece')[k];
+    if (kp) kp.classList.add('now');
+    if (gp) gp.classList.add('now');
+  }
   if (playhead >= 0) $$('#grid .cell[data-i="' + playhead + '"]').forEach(c => c.classList.remove('now'));
   playhead = i;
   if (i >= 0) $$('#grid .cell[data-i="' + i + '"]').forEach(c => { c.classList.add('now'); if (c.classList.contains('on')) { c.classList.remove('hit'); void c.offsetWidth; c.classList.add('hit'); } });
@@ -1983,7 +2030,10 @@ function setPlaying(which) {
   $('#btn-listen').innerHTML = which === 'listen' ? '■ <span>Stop</span>' : '👂 <span>Listen</span>';
 }
 let playingNow = null;
-function stopAll() { Sound.stop(); markStep(-1); playingNow = null; setPlaying(null); }
+function stopAll() {
+  Sound.stop(); markStep(-1); playingNow = null; setPlaying(null); karaoke(false);
+  if (cur && cur.afterPlay) { const f = cur.afterPlay; cur.afterPlay = null; setTimeout(f, 300); }
+}
 function start(which) {
   if (playingNow === which) { stopAll(); return; }
   stopAll();
@@ -1996,11 +2046,14 @@ function start(which) {
     cur.sung = true;
     if (!Sound.canSpeak() && !cur.warnedVoice) { cur.warnedVoice = true; toast('🤖 This computer has no speaking voice: the singer sings “aah”'); }
   }
+  if (which === 'play') cur.played = true;
+  if (which === 'listen') cur.listened = true;
   const song = which === 'listen' ? cur.L.target() : cur.song;
   playingNow = which;
   setPlaying(which);
   Sound.play(song, { sing, lyrics: syllablesOf(cur.song.lyrics).map(p => p.text), loops: which === 'listen' ? 1 : 2, onStep: i => { if (which !== 'listen') markStep(i); }, onEnd: stopAll });
-  if (sing) update();
+  karaoke(true);
+  update();
 }
 $('#btn-play').addEventListener('click', () => start('play'));
 $('#btn-sing').addEventListener('click', () => start('sing'));
@@ -2033,6 +2086,8 @@ function judgeSong() {
 function showMe() {
   const L = cur.L;
   if (!L) return;
+  const step = L.steps[cur.step || 0], BTN = { play: '#btn-play', listen: '#btn-listen', sing: '#btn-sing', judge: '[data-act="judge"]', lyrics: '#lyrics' };
+  if (step && step[2] && BTN[step[2]]) { glow($(BTN[step[2]])); return; }
   if (L.need) {
     cur.showing = L.need(cur.song).slice(0, 4);
     if (!cur.showing.length && shows('lyrics')) glow($('#btn-sing'));
@@ -2061,7 +2116,7 @@ function resetLevel() {
   confirmBox('↺ Start level ' + L.id + ' again?', 'Your notes for this level are cleared. Do it yourself to get ★★★!', 'Start again', () => {
     const st = lvl(L.id);
     st.song = L.start(); st.help = 0;
-    cur.song = st.song; cur.sung = false; cur.judged = 0; cur.showing = []; cur.finished = false;
+    cur.song = st.song; cur.played = cur.listened = cur.sung = false; cur.judged = 0; cur.showing = []; cur.finished = false; cur.step = null;
     $('#lyrics').value = cur.song.lyrics || '';
     save(); renderStudio();
   });
@@ -2115,7 +2170,8 @@ function renderTeacher() {
     '<div class="t-card"><b>⭐ Stars</b><p>★★★ for doing a level alone. 👆 Show me is free (it rings the squares to click). 🪄 Do it for me makes that level ★★. ↺ Start again lets a student redo it for ★★★.</p></div>' +
     '<div class="t-card"><b>🏆 Judges</b><p>The Hit Meter (0–100) scores the beat, the melody, the lyrics and the ending, with one tip from each judge. Level 12 needs 50 or more.</p></div>' +
     '<div class="t-card"><b>🛡️ Kind words only</b><p>Lyrics and names are checked for bad, rude, violent and adult words (English, plus common Tagalog and Indonesian ones), also when written as f*ck, sh1t or f u c k. A blocked word is never sung or saved.</p></div>' +
-    '<div class="t-card"><b>🎤 The singer</b><p>Uses the computer’s own Windows voices, which work offline. It sounds like a robot pop singer. A PC with no voice sings “aah” on the notes instead.</p></div></div>' +
+    '<div class="t-card"><b>🎤 The singer</b><p>No microphone needed: students type, the computer sings through the speakers or headphones. It uses the Windows voices (offline) and sounds like a robot pop singer. A PC with no voice sings “aah” on the notes instead. 🎤 Karaoke: the words light up while the song plays, so the class can sing along.</p>' +
+    '<button type="button" class="btn btn-sm" data-act="test-voice">🔊 Test the singer on this PC</button><p class="small" id="voice-msg"></p></div></div>' +
     '<h2>Lessons</h2><div class="table-wrap"><table class="table"><thead><tr><th>Lesson</th><th>Levels</th><th>Students learn</th></tr></thead><tbody>' +
     '<tr><td>1</td><td>1–4 🥁 Beat Basics</td><td>Steady beat, bars, a pattern of Boom and Clap, listening and copying a beat</td></tr>' +
     '<tr><td>2</td><td>5–8 🎹 Melody Makers</td><td>Notes going up and down, a hook that repeats, copying a tune by ear</td></tr>' +
@@ -2150,7 +2206,8 @@ function showHelp() {
   data.seenHelp = true; save();
   Modal.open({ title: '🎵 How to play', wide: true,
     html: '<ol class="how"><li><span>🟩</span><b>Click squares</b><small>to make a beat and notes</small></li><li><span>▶</span><b>Play</b><small>to hear your song</small></li><li><span>✍️</span><b>Write lyrics</b><small>then 🎤 Sing</small></li><li><span>⭐</span><b>Get 3 stars</b><small>do it yourself!</small></li></ol>' +
-      '<p class="small">👆 <b>Show me</b> rings the squares to click (free). 🪄 <b>Do it for me</b> costs a star. Kind words only: the singer will not sing bad words.</p>',
+      '<p class="small">Follow the <b>steps</b> on the left. 👆 <b>Show me</b> helps (free). 🪄 <b>Do it for me</b> costs a star.</p>' +
+      '<p class="small">🎧 No microphone needed: you <b>type</b> the words and the computer <b>sings</b> them. Kind words only!</p>',
     actions: [{ label: 'Let’s go!', variant: 'primary' }] });
 }
 
@@ -2180,6 +2237,11 @@ document.addEventListener('click', e => {
   else if (a === 'file-save') saveFile();
   else if (a === 'file-open') openFile(song => { cur.song = song; data.studio = song; $('#lyrics').value = song.lyrics; save(); renderStudio(); });
   else if (a === 'name') askName(false);
+  else if (a === 'test-voice') {
+    const ok = Sound.canSpeak();
+    if (ok) Sound.say('Hello! I am your song star singer!', 1.3, 1.1, 'star');
+    $('#voice-msg').innerHTML = ok ? '✅ This PC has a voice: you should hear “Hello, I am your song star singer”. No sound? Check the speakers or headphones.' : '⚠️ No Windows voice found on this PC. The singer will sing “aah” on the notes (the words still show in 🎤 Karaoke). To add a voice: Windows Settings › Time & language › Speech › Add voices.';
+  }
   else if (a === 'home') goHome();
   else if (a === 'print') window.print();
   else if (a === 'save-words') { const list = $('#t-words').value.split(/[,\n]/).map(w => w.trim()).filter(Boolean); store.set(WORDS_KEY, list); WordGuard.setExtra(list); toast('🛡️ Saved: ' + list.length + ' extra word' + (list.length === 1 ? '' : 's')); }
@@ -2223,8 +2285,10 @@ if (FAST) {
     solve(id) {
       openLevel(id);
       const L = cur.L;
+      if (L.steps.some(st => st[2] === 'listen')) { $('#btn-listen').click(); stopAll(); }
       if (L.fix) { $('[data-act="doit"]').click(); }
-      if (L.show.indexOf('lyrics') > -1 && L.checks.some(c => /Sing/.test(c[0]))) { $('#btn-sing').click(); stopAll(); }
+      if (L.steps.some(st => st[2] === 'play')) { $('#btn-play').click(); stopAll(); }
+      if (L.steps.some(st => st[2] === 'sing')) { $('#btn-sing').click(); stopAll(); }
       Modal.close();
       return isDone(id);
     }
