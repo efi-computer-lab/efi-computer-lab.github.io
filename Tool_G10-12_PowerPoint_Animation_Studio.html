@@ -1003,6 +1003,8 @@ body { background: var(--bg); }
 /* Slide Show + video */
 .slideshow { position: fixed; inset: 0; z-index: 900; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
 .slideshow canvas { display: block; background: #000; }
+.show-end { position: absolute; top: 12px; right: 14px; z-index: 2; font: 700 .95rem/1 inherit; padding: 9px 14px; border-radius: 8px; border: 1px solid #666; background: rgba(30, 30, 30, .9); color: #fff; cursor: pointer; opacity: .85; }
+.show-end:hover, .show-end:focus-visible { opacity: 1; background: #c43e1c; border-color: #c43e1c; }
 .show-hint { position: absolute; bottom: 8px; right: 14px; color: #666; font-size: .78rem; pointer-events: none; }
 .slideshow.recording { cursor: default; }
 .rec-bar { display: flex; align-items: center; gap: 12px; color: #fff; padding: 10px; font-size: .95rem; }
@@ -2022,7 +2024,7 @@ const MISSIONS = [
       'Look on the <b>Home</b> tab: <b>New Slide</b> and <b>Layout</b> are next to each other.',
       'Click the small ▾ under <b>New Slide</b> to choose a layout straight away. For a text box: <b>Insert › Text Box</b>, click once on the slide, then type.'],
     stuck: ['Look at slide 1: it has two dashed boxes.', 'Click inside “Click to add title”. Type e.g. <i>Nova Studios</i>.', 'Click inside “Click to add subtitle”. Type your name and class.', 'Press <b>Ctrl + M</b>. A second slide appears on the left.', 'On the Home tab click <b>Layout</b> → <b>Blank</b>.', 'Click <b>Insert</b> → <b>Text Box</b>. Click on the slide and type <i>Coming soon…</i>', 'Select the text (drag over it). On the Home tab change the font and size.', 'Click <b>File</b> (top left) → <b>Info</b> → type <b>Firstname_Studio</b> as the file name → <b>← Back</b> → press <b>Ctrl + S</b>.', 'Press <b>F5</b>. Click to go through the slides. <b>Esc</b> to stop.'],
-    quiz: { q: 'Which key starts the Slide Show from the first slide?', a: ['F5', 'F2', 'Ctrl + S', 'Esc'], why: 'F5 plays from the start. Shift + F5 plays from the slide you are on.' } },
+    quiz: { q: 'Where do you click to play your slides from the first slide?', a: ['Slide Show › From Beginning', 'Insert › Text Box', 'File › Save', 'View › Slide Sorter'], why: 'From Beginning plays from slide 1. From Current Slide plays from the slide you are on.' } },
 
   { id: 2, zone: 1, icon: '🏗️', title: 'Build the Set', time: 12, level: 'Starter',
     story: 'No set, no show. Build the place where your animation happens, using only shapes.',
@@ -2065,7 +2067,7 @@ const MISSIONS = [
       'Layer order is in the right-click menu (Bring to Front / Send to Back). Names are in the <b>Selection Pane</b> (Home › Arrange).',
       'Right-click the object that should be in front → <b>Bring to Front</b>. <b>Home › Arrange › Selection Pane</b> → double-click a name → type a new name → Enter.'],
     stuck: ['Right-click your set slide on the left → <b>Duplicate Slide</b>. Work on the copy.', 'Click <b>Insert › Icons</b>. Type a word in the search box (e.g. <i>car</i>) and click an icon.', 'Want colour? Use <b>Insert › Stock Images</b>, or build the object from shapes.', 'Draw a head (circle) and a body (rectangle). Click one, Shift + click the other → <b>Ctrl + G</b>.', 'Right-click your character → <b>Bring to Front</b>.', 'Click <b>Home › Arrange › Selection Pane</b>. Double-click “Group 5” → type <i>Hero</i> → Enter. Do the same for 2 more.'],
-    quiz: { q: 'Your rocket is hidden behind the moon. What do you do?', a: ['Right-click the rocket › Bring to Front', 'Delete the moon', 'Press Ctrl + G', 'Design › Format Background'], why: 'Bring to Front puts the selected object on the top layer.' } },
+    quiz: { q: 'Your rocket is hidden behind the moon. What do you do?', a: ['Right-click the rocket › Bring to Front', 'Delete the moon', 'Arrange › Group', 'Design › Format Background'], why: 'Bring to Front puts the selected object on the top layer.' } },
 
   { id: 4, zone: 1, icon: '🎞️', title: 'Storyboard', time: 10, level: 'Starter',
     story: 'Animators plan before they animate. A storyboard is 3 pictures: beginning, middle and end.',
@@ -2086,7 +2088,7 @@ const MISSIONS = [
       'Copying a slide is <b>Duplicate Slide</b> (right-click the thumbnail). The overview of all slides is <b>View › Slide Sorter</b>.',
       'Click a thumbnail → <b>Ctrl + D</b> makes a copy right after it. Drag thumbnails to reorder. <b>View › Slide Sorter</b> → double-click a slide to return.'],
     stuck: ['On the left, click your cast slide thumbnail.', 'Press <b>Ctrl + D</b> twice. Now you have 3 copies.', 'On the 2nd copy, move your character to the middle of the action.', 'On the 3rd copy, show the ending (e.g. the rocket is on the Moon).', 'Drag the last thumbnail to the top, then drag it back.', 'Click <b>View › Slide Sorter</b>, look, then double-click the first slide.', 'Press <b>Shift + F5</b> and click through.'],
-    quiz: { q: 'What is the quickest way to copy a whole slide?', a: ['Select its thumbnail and press Ctrl + D', 'Press Ctrl + M', 'Insert › Text Box', 'Press F5'], why: 'Ctrl + D duplicates what is selected. With a thumbnail selected, that is the whole slide. (Ctrl + M makes a new empty slide.)' } },
+    quiz: { q: 'What is the quickest way to copy a whole slide?', a: ['Click its thumbnail, then Home › Duplicate', 'Home › New Slide', 'Insert › Text Box', 'Slide Show › From Beginning'], why: 'Duplicate makes a copy of the selected slide right after it. (New Slide makes a new empty slide.)' } },
 
   { id: 5, zone: 2, icon: '🌟', title: 'Make an Entrance', time: 10, level: 'Core',
     story: 'Nothing should just sit there. Make your cast enter the stage.',
@@ -2204,7 +2206,7 @@ const MISSIONS = [
       '<b>Custom Path</b> is the last item in the Motion Paths list. <b>Edit Points</b> is in the right-click menu of the path.',
       'Click → click → click → double-click. Then Animation Pane → ▾ → Effect Options… → Start and end: Bounce end.'],
     stuck: ['Click your object.', 'Animations → <b>▾ More</b> → Motion Paths → <b>Custom Path</b>.', 'The path starts at your object: click 3–5 corners on the slide.', '<b>Double-click</b> at the end point.', 'Not right? Right-click the object → <b>Edit Points</b> → drag the squares → Done.', 'Animation Pane → ▾ on the row → <b>Effect Options…</b> → Start and end: <b>Bounce end</b> → OK.'],
-    quiz: { q: 'How do you finish drawing a Custom Path?', a: ['Double-click', 'Press F5', 'Right-click › Group', 'Press Ctrl + S'], why: 'Double-click (or press Enter) ends the path where you are.' } },
+    quiz: { q: 'How do you finish drawing a Custom Path?', a: ['Double-click', 'Click Slide Show', 'Right-click › Group', 'Click File › Save'], why: 'Double-click (or press Enter) ends the path where you are.' } },
 
   { id: 11, zone: 3, icon: '🌀', title: 'Combo Moves', time: 12, level: 'Challenge',
     story: 'Pro animators layer moves: a ball spins WHILE it flies, a plane shrinks as it disappears into the sky.',
@@ -2244,7 +2246,7 @@ const MISSIONS = [
       'Use the <b>Animation Pane</b> as your script. Everything should be With Previous or After Previous.',
       'First animation: With Previous. Main moves: After Previous. Things happening together: With Previous. Add Delays for pauses.'],
     stuck: ['Duplicate your cast slide.', 'Animation 1: the main character enters (Fly In, With Previous).', 'Animation 2: it moves on a path (After Previous).', 'Animation 3: a second object reacts: Pulse or Teeter (After Previous).', 'Animations 4–6: the ending: something exits, something enters (After Previous / With Previous).', 'Open the Animation Pane, check the order, press F5.'],
-    quiz: { q: 'Your scene waits for a click before anything happens. How do you fix it?', a: ['Set the first animation to With Previous', 'Add a Delay to the last animation', 'Press F5 twice', 'Close the Animation Pane'], why: 'The first animation starts On Click by default. With Previous (or After Previous) makes it start by itself.' } },
+    quiz: { q: 'Your scene waits for a click before anything happens. How do you fix it?', a: ['Set the first animation to With Previous', 'Add a Delay to the last animation', 'Play the Slide Show twice', 'Close the Animation Pane'], why: 'The first animation starts On Click by default. With Previous (or After Previous) makes it start by itself.' } },
 
   { id: 13, zone: 4, icon: '🪄', title: 'Morph Magic', time: 12, level: 'Challenge',
     story: 'Morph is PowerPoint’s secret animation engine: it moves everything between two slides for you.',
@@ -2265,7 +2267,7 @@ const MISSIONS = [
       'Morph is a <b>transition</b>, so it is on the <b>Transitions</b> tab, and it goes on the SECOND slide.',
       'Ctrl + D → move the object on the copy → select the copy → <b>Transitions › Morph</b> → Duration 02.00 → Preview.'],
     stuck: ['Click your slide thumbnail → <b>Ctrl + D</b>.', 'On the new slide, drag your character to the other side and make it bigger.', 'Keep the new slide selected → click the <b>Transitions</b> tab → <b>Morph</b>.', 'Set <b>Duration</b> to 02.00.', 'Click <b>Preview</b>. The character glides and grows.', 'On another slide try <b>Fade</b> or <b>Push</b>.'],
-    quiz: { q: 'Morph moves objects smoothly when…', a: ['the same object is on both slides in different places', 'there are lots of transitions', 'the slide is empty', 'you press Ctrl + M'], why: 'Morph matches the same object on two slides and animates the change.' } },
+    quiz: { q: 'Morph moves objects smoothly when…', a: ['the same object is on both slides in different places', 'there are lots of transitions', 'the slide is empty', 'you click New Slide'], why: 'Morph matches the same object on two slides and animates the change.' } },
 
   { id: 14, zone: 4, icon: '🍿', title: 'Sound & Premiere', time: 12, level: 'Challenge',
     story: 'Premiere night! Add sound and turn your slides into a real video file.',
@@ -2379,14 +2381,14 @@ const BADGES = [
 /* Fast track: students who already know the basics skip Studio Basics (questions about slides, shapes, layers, saving). */
 const FAST_TRACK = [
   MISSIONS[0].quiz, MISSIONS[1].quiz, MISSIONS[2].quiz, MISSIONS[3].quiz,
-  { q: 'Your picture should stay in front of a big rectangle. The rectangle keeps covering it. What do you do?', a: ['Right-click the rectangle › Send to Back', 'Press F5', 'Ctrl + M', 'Delete the picture'], why: 'Send to Back puts the rectangle behind everything else.' },
+  { q: 'Your picture should stay in front of a big rectangle. The rectangle keeps covering it. What do you do?', a: ['Right-click the rectangle › Send to Back', 'Click Slide Show', 'Click New Slide', 'Delete the picture'], why: 'Send to Back puts the rectangle behind everything else.' },
   { q: 'Where do you rename objects, so the Animation Pane shows “Rocket” instead of “Oval 12”?', a: ['Selection Pane (Home › Arrange)', 'File › Save As', 'Design › Format Background', 'View › Slide Sorter'], why: 'Double-click a name in the Selection Pane to rename it.' }
 ];
 
 /* Things PowerPoint calls by name: the cheat sheet. */
 const CHEAT = [
-  ['Slides', [['New slide', 'Ctrl + M'], ['Duplicate slide / object', 'Ctrl + D'], ['Slide Show from start', 'F5'], ['Slide Show from this slide', 'Shift + F5'], ['Stop the show', 'Esc'], ['Save', 'Ctrl + S'], ['Undo', 'Ctrl + Z']]],
-  ['Objects', [['Perfect circle/square', 'Shift + drag'], ['Copy by dragging', 'Ctrl + drag'], ['Group / ungroup', 'Ctrl + G / Ctrl + Shift + G'], ['Select several', 'Shift + click'], ['Selection Pane', 'Alt + F10'], ['Nudge a little', 'Arrow keys']]],
+  ['Slides', [['New slide', 'Home › New Slide'], ['Copy a slide', 'Home › Duplicate'], ['Play from the start', 'Slide Show › From Beginning'], ['Play from this slide', 'Slide Show › From Current Slide'], ['Stop the show', '✕ End Show (top right)'], ['Save', 'File › Save'], ['Undo', '↶ (top right of the ribbon)']]],
+  ['Objects', [['Copy an object', 'Home › Copy, then Paste'], ['Group', 'Home › Arrange › Group'], ['Select several', 'Shift + click'], ['Perfect circle/square', 'Shift + drag'], ['Selection Pane', 'Home › Arrange › Selection Pane'], ['Bring to front', 'Right-click › Bring to Front']]],
   ['Animation colours', [['Entrance: comes in', '🟢 green'], ['Emphasis: shows off', '🟡 yellow'], ['Exit: leaves', '🔴 red'], ['Motion path', '〰 line: green start, red end']]],
   ['Timing words', [['On Click', 'waits for a click'], ['With Previous', 'same time as the one before'], ['After Previous', 'when the one before ends'], ['Duration', 'how long it takes'], ['Delay', 'wait before starting']]]
 ];
@@ -4273,7 +4275,7 @@ const Show = (() => {
     wrap.setAttribute('aria-label', opts.record ? 'Creating a video' : 'Slide Show');
     wrap.innerHTML = '<canvas width="1280" height="720"></canvas>' +
       (opts.record ? '<div class="rec-bar"><span class="rec-dot"></span><span class="rec-text">Creating your video…</span><span class="rec-prog"><i></i></span><button type="button" class="btn btn-sm" data-cancel>Cancel</button></div>'
-        : '<div class="show-hint">Click / Space = next · ← = back · Esc = end</div>');
+        : '<button type="button" class="show-end" data-end>✕ End Show</button><div class="show-hint">Click = next · ← = back · Esc = end</div>');
     document.body.appendChild(wrap);
     const cv = wrap.querySelector('canvas'), ctx = cv.getContext('2d');
     const fit = () => {
@@ -4360,6 +4362,7 @@ const Show = (() => {
     function onClick(e) {
       if (live !== S || opts.record) return;
       if (e.target.closest('[data-cancel]')) return;
+      if (e.target.closest('[data-end]')) { stop(); return; }
       const r = S.r;
       if (r && S.phase === 'play' && e.target === cv) {
         const box = cv.getBoundingClientRect();
@@ -5681,19 +5684,19 @@ const Chk = (() => {
       ['A title slide with your studio name and your name', d => d.slides.some(s => realText((s.objs.find(o => o.ph === 'title') || {}).text) && realText((s.objs.find(o => o.ph === 'sub') || {}).text))],
       ['A new slide with the Blank layout', d => d.slides.length >= 2 && d.slides.some(s => s.layout === 'blank')],
       ['Your own text box with a changed font, size or colour', d => all(d).some(o => o.t === 'text' && !o.ph && realText(o.text) && (o.font !== 'Segoe UI' || o.size !== 32 || o.color !== '#262626' || o.bold || o.italic || o.ul))],
-      ['File named Firstname_Studio (File › Info) and saved with Ctrl + S', (d, ev) => !/^my_studio$/i.test(d.title) && /_studio$/i.test(d.title) && used(ev, 'save')],
-      ['Played it with F5 (Slide Show)', (d, ev) => used(ev, 'show', 'showCur')]
+      ['File named Firstname_Studio (File › Info) and saved (File › Save)', (d, ev) => !/^my_studio$/i.test(d.title) && /_studio$/i.test(d.title) && used(ev, 'save')],
+      ['Played it (Slide Show › From Beginning)', (d, ev) => used(ev, 'show', 'showCur')]
     ],
     2: [
       ['A slide with at least 5 shapes', d => d.slides.some(s => shapesOn(s) >= 5)],
       ['Shape colours changed (Shape Fill)', d => all(d).some(o => isShape(o) && o.fill && (o.fill.t !== 'solid' || o.fill.c !== '#4472c4'))],
       ['Slide background changed (Format Background)', d => d.slides.some(s => s.bg && (s.bg.t === 'grad' || (s.bg.c || '').toLowerCase() !== '#ffffff'))],
       ['A shape resized and rotated', (d, ev) => used(ev, 'resize') && all(d).some(o => (o.rot || 0) !== 0)],
-      ['A shape copied with Ctrl + D or Ctrl + drag', (d, ev) => used(ev, 'dupObj', 'ctrlDrag', 'paste')]
+      ['A shape copied (Copy + Paste)', (d, ev) => used(ev, 'dupObj', 'ctrlDrag', 'paste')]
     ],
     3: [
       ['3 cast members: icons, stock images or pictures', d => all(d).filter(o => o.t === 'icon' || o.t === 'sticker' || o.t === 'image').length >= 3],
-      ['A character made of 2+ shapes and grouped (Ctrl + G)', d => all(d).some(o => o.t === 'group' && (o.kids || []).length >= 2)],
+      ['A character made of 2+ shapes and grouped (Arrange › Group)', d => all(d).some(o => o.t === 'group' && (o.kids || []).length >= 2)],
       ['Used Bring to Front or Send to Back', (d, ev) => used(ev, 'front', 'back', 'forward', 'backward')],
       ['3 objects renamed in the Selection Pane', d => all(d).filter(o => o.t !== 'audio' && !Deck.isDefaultName(o.name)).length >= 3]
     ],
@@ -5702,13 +5705,13 @@ const Chk = (() => {
       ['A 3-slide storyboard made from the same set (copies)', d => { const n = {}; d.slides.forEach(s => { const seen = {}; s.objs.forEach(o => { if (!seen[o.mk]) { seen[o.mk] = 1; n[o.mk] = (n[o.mk] || 0) + 1; } }); }); return Object.keys(n).some(k => n[k] >= 3); }],
       ['Changed the order of the slides', (d, ev) => used(ev, 'reorderSlide')],
       ['Looked at the slides in Slide Sorter', (d, ev) => used(ev, 'sorter')],
-      ['Played it from the current slide (Shift + F5)', (d, ev) => used(ev, 'showCur')]
+      ['Played it (Slide Show › From Current Slide)', (d, ev) => used(ev, 'showCur')]
     ],
     5: [
       ['A slide with 3 objects that have entrance effects', d => d.slides.some(s => new Set(kinds(s, 'in').map(a => a.o)).size >= 3)],
       ['At least 2 different entrance effects', d => new Set(anims(d).filter(a => a.k === 'in').map(a => a.fx)).size >= 2],
       ['Changed Effect Options (e.g. the direction)', (d, ev) => used(ev, 'effectOptions')],
-      ['Watched it with Preview or F5', (d, ev) => used(ev, 'preview', 'show', 'showCur', 'playAll', 'playFrom')]
+      ['Watched it (Preview or Slide Show)', (d, ev) => used(ev, 'preview', 'show', 'showCur', 'playAll', 'playFrom')]
     ],
     6: [
       ['An emphasis (yellow) effect', d => anims(d).some(a => a.k === 'em')],
@@ -5734,7 +5737,7 @@ const Chk = (() => {
       ['An object that moves on a motion path', d => anims(d).some(a => a.k === 'path')],
       ['Dragged the red end point or changed the direction', (d, ev) => used(ev, 'pathEnd', 'effectOptions', 'reversePath')],
       ['Changed the path’s Duration', d => anims(d).some(a => a.k === 'path' && Math.abs(a.dur - 2) > 0.01)],
-      ['Watched it with Preview or F5', (d, ev) => used(ev, 'preview', 'show', 'showCur', 'playAll', 'playFrom')]
+      ['Watched it (Preview or Slide Show)', (d, ev) => used(ev, 'preview', 'show', 'showCur', 'playAll', 'playFrom')]
     ],
     10: [
       ['A Custom Path you drew yourself', d => anims(d).some(a => a.fx === 'custom')],
@@ -5848,14 +5851,14 @@ const Guide = (() => {
       { say: 'Click <b>Click to add title</b>', spot: () => objs().find(o => o.ph === 'title'), check: () => E().editing || String((objs().find(o => o.ph === 'title') || {}).text || '').trim(), act: () => Ed.startText(objs().find(o => o.ph === 'title')) },
       { say: 'Type a name for your studio. Then click the grey area.', spot: () => objs().find(o => o.ph === 'title'), check: () => notTyping() && String((objs().find(o => o.ph === 'title') || {}).text || '').trim().length >= 2, act: () => { const t = objs().find(o => o.ph === 'title'); Ed.change(() => { t.text = 'Nova Studios'; }); Ed.endText(); } },
       { say: 'Click <b>Click to add subtitle</b>. Type your name.', spot: () => objs().find(o => o.ph === 'sub'), check: () => notTyping() && String((objs().find(o => o.ph === 'sub') || {}).text || '').trim().length >= 2, act: () => { const t = objs().find(o => o.ph === 'sub'); Ed.change(() => { t.text = 'by ' + (data.name || 'me'); }); Ed.endText(); } },
-      { say: 'Click <b>New Slide</b> › <b>Title and Content</b>', key: 'Ctrl + M', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="titleText"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'titleText') },
+      { say: 'Click <b>New Slide</b> › <b>Title and Content</b>', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="titleText"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'titleText') },
       { say: 'Click <b>Layout</b>, then <b>Blank</b>', target: menu('Home', '[data-menu="layout"]', '[data-cmd="layout"][data-arg="blank"]'), check: () => S().layout === 'blank', act: () => run('layout', 'blank') },
       { say: 'Click <b>Insert</b>, then <b>Text Box</b>', target: on('Insert', '[data-cmd="textbox"]'), check: () => (E().tool && E().tool.insert === 'text') || objs().some(o => o.t === 'text' && !o.ph && o.text), act: () => run('textbox') },
       { say: 'Click on the slide and type <b>Coming soon</b>. Click the grey area.', spot: () => ({ x: 340, y: 300, w: 600, h: 120 }), check: () => notTyping() && objs().some(o => o.t === 'text' && !o.ph && String(o.text || '').trim()), act: () => { E().tool = null; Ed.change(() => { const o = Deck.makeText(S(), 400, 320, 480, 60, 'Coming soon'); S().objs.push(o); E().sel = [o.id]; }); } },
       { say: 'Click your text. Pick a bigger <b>size</b>.', target: () => (sel1() && sel1().t === 'text' ? on('Home', '[data-input="size"]')() : null), spot: () => (sel1() && sel1().t === 'text' ? null : objs().find(o => o.t === 'text' && !o.ph)), check: () => objs().some(o => o.t === 'text' && !o.ph && o.size !== 32), act: () => { select(objs().find(o => o.t === 'text' && !o.ph)); run('size', '54'); } },
       { say: () => 'Click <b>File</b>. Name the file <b>' + esc(firstName()) + '_Studio</b>.', target: () => $q('.ef-name') || $q('.ed-tab.file'), check: () => /_studio$/i.test(deck().title) && !/^my_studio$/i.test(deck().title), act: () => Ed.change(() => { deck().title = firstName() + '_Studio'; }) },
-      { say: () => ($q('.ed-file') ? 'Click <b>← Back</b>. Then press <b>Ctrl + S</b> to save.' : 'Press <b>Ctrl + S</b> to save.'), key: 'Ctrl + S', soft: true, target: () => $q('[data-fv="back"]'), check: () => !$q('.ed-file') && ev('save') > 0, act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('save'); } },
-      { say: 'Press <b>F5</b> to play your slides. <b>Esc</b> stops.', key: 'F5', check: () => ev('show') > 0 && !Show.live, act: () => run('show-start') }
+      { say: 'Click <b>File</b> › <b>Save</b> › <b>💾 Save now</b>', target: () => $q('[data-fa="save"]') || $q('[data-fv="save"]') || $q('.ed-tab.file'), check: () => !$q('.ed-file') && ev('save') > 0, act: () => { const b = $q('[data-fv="back"]'); if (b) b.click(); run('save'); } },
+      { say: () => (Show.live ? 'Click to go on. At the end click <b>✕ End Show</b> (top right).' : 'Click <b>Slide Show</b> › <b>From Beginning</b>'), target: on('Slide Show', '[data-cmd="show-start"]'), check: () => ev('show') > 0 && !Show.live, act: () => run('show-start') }
     ],
     2: [
       { say: 'Click <b>New Slide</b> › <b>Blank</b>', target: menu('Home', '[data-menu="newslide"]', '[data-cmd="new-slide"][data-arg="blank"]'), begin: slidesBase, check: newSlide, act: () => run('new-slide', 'blank') },
@@ -5864,33 +5867,34 @@ const Guide = (() => {
       { say: 'Click <b>Insert</b> › <b>Shapes</b> › <b>Rectangle</b>', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="rect"]'), check: () => !!(E().tool && E().tool.insert === 'shape'), act: () => run('shape', 'rect') },
       { say: 'Drag across the bottom of the slide: the ground', spot: () => ({ x: 0, y: 560, w: 1280, h: 160 }), begin: c => { c.n = objs().length; }, check: c => objs().length > c.n, act: () => { E().tool = null; Ed.change(() => { const o = Deck.makeShape(S(), 'rect', 0, 560, 1280, 160); S().objs.push(o); E().sel = [o.id]; }); } },
       { say: 'Click <b>Shape Fill</b>. Pick a colour.', target: onCtx('[data-menu="fill"]'), spot: () => (sel1() ? null : objs().find(o => o.t === 'shape')), check: () => objs().some(o => o.t === 'shape' && o.fill && o.fill.c !== '#4472c4'), act: () => { select(objs().filter(o => o.t === 'shape').pop()); run('fill', theme().ground); } },
-      { say: '<b>Shapes</b› › <b>Oval</b>. Hold <b>Shift</b> and drag: a circle.'.replace('</b›', '</b>'), key: 'Shift', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="oval"]'), check: () => objs().some(o => o.shape === 'oval'), act: () => Ed.change(() => { const o = Deck.makeShape(S(), 'oval', 1020, 60, 140, 140); o.fill = { t: 'solid', c: '#ffd54a' }; S().objs.push(o); E().sel = [o.id]; }) },
+      { say: 'Click <b>Shapes</b> › <b>Oval</b>. Hold <b>Shift</b> and drag: a round sun.', key: 'Shift + drag', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="oval"]'), check: () => objs().some(o => o.shape === 'oval'), act: () => Ed.change(() => { const o = Deck.makeShape(S(), 'oval', 1020, 60, 140, 140); o.fill = { t: 'solid', c: '#ffd54a' }; S().objs.push(o); E().sel = [o.id]; }) },
       { say: 'Drag the round arrow <b>⟳</b> to turn a shape', target: () => $q('.ed-rot'), spot: () => (sel1() ? null : objs().filter(o => o.t === 'shape').pop()), check: () => objs().some(o => (o.rot || 0) !== 0), act: () => { const o = sel1() || objs().filter(o2 => o2.t === 'shape').pop(); select(o); run('rot-right'); } },
       { say: 'Drag a corner <b>○</b> to make it bigger', target: () => $q('.ed-h.h-se'), begin: c => { c.n = ev('resize'); }, check: c => ev('resize') > c.n, act: () => { const o = sel1() || objs().filter(o2 => o2.t === 'shape').pop(); select(o); Ed.change(() => { o.w = Math.round(o.w * 1.3); o.h = Math.round(o.h * 1.3); }, 'resize'); } },
-      { say: 'Press <b>Ctrl + D</b> to copy it', key: 'Ctrl + D', spot: () => (sel1() ? null : objs().filter(o => o.t === 'shape').pop()), check: () => ev('dupObj') + ev('ctrlDrag') + ev('paste') > 0, act: () => { if (!sel1()) select(objs().filter(o => o.t === 'shape').pop()); run('dup-obj'); } }
+      { say: 'Click a shape. Click <b>Home</b> › <b>Copy</b>.', target: () => (sel1() ? on('Home', '[data-cmd="copy"]')() : null), spot: () => (sel1() ? null : objs().filter(o => o.t === 'shape').pop()), begin: c => { c.clip = E().clip; }, check: c => (E().clip && E().clip !== c.clip) || ev('dupObj') + ev('ctrlDrag') + ev('paste') > 0, act: () => { if (!sel1()) select(objs().filter(o => o.t === 'shape').pop()); run('copy'); } },
+      { say: 'Click <b>Paste</b>. Drag the copy to a new place.', target: on('Home', '[data-cmd="paste"]'), check: () => ev('dupObj') + ev('ctrlDrag') + ev('paste') > 0, act: () => run('paste') }
     ],
     3: [
-      { say: 'Click <b>Duplicate</b> to copy your slide', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
+      { say: 'Click <b>Duplicate</b> to copy your slide', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
       { say: 'Click <b>Insert</b> › <b>Icons</b>. Pick one.', target: () => $q('.modal .ig') || on('Insert', '[data-cmd="icons"]')(), begin: c => { c.n = objs().filter(o => o.t === 'icon').length; }, check: c => objs().filter(o => o.t === 'icon').length > c.n, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { const o = Deck.makeIcon(S(), 'star', 560, 100, 160); S().objs.push(o); E().sel = [o.id]; }, 'icon'); } },
       { say: 'Click <b>Graphics Fill</b>. Pick a colour.', target: onCtx('[data-menu="iconfill"]'), spot: () => (sel1() && sel1().t === 'icon' ? null : objs().find(o => o.t === 'icon')), check: () => objs().some(o => o.t === 'icon' && o.color !== '#262626'), act: () => { select(objs().filter(o => o.t === 'icon').pop()); run('icon-color', '#ffc000'); } },
       { say: 'Click <b>Insert</b> › <b>Stock Images</b>. Add 2 pictures.', target: () => $q('.modal .stk') || on('Insert', '[data-cmd="stickers"]')(), begin: c => { c.n = objs().filter(o => o.t === 'sticker').length; }, check: c => objs().filter(o => o.t === 'sticker').length >= c.n + 2, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { [0, 1].forEach(i => { const o = Deck.makeSticker(S(), theme().cast[i], 200 + i * 520, 300, 180); S().objs.push(o); }); }, 'sticker'); } },
       { say: 'Draw a <b>circle</b> (a head) and a <b>rectangle</b> (a body)', target: menu('Insert', '[data-menu="shapes"]', '[data-cmd="shape"][data-arg="oval"]'), begin: c => { c.n = objs().filter(o => o.t === 'shape').length; }, check: c => objs().filter(o => o.t === 'shape').length >= c.n + 2, act: () => Ed.change(() => { const h = Deck.makeShape(S(), 'oval', 580, 320, 70, 70), b = Deck.makeShape(S(), 'rect', 570, 390, 90, 120); S().objs.push(h, b); E().sel = [h.id, b.id]; }, 'shape') },
-      { say: 'Click one. <b>Shift + click</b> the other.', key: 'Shift + click', spot: () => objs().filter(o => o.t === 'shape' && !big(o)).slice(-2)[0], check: () => Ed.selObjs().length >= 2 || objs().some(o => o.t === 'group'), act: () => { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); Ed.after({ noThumbs: true }); } },
-      { say: 'Press <b>Ctrl + G</b> to group them', key: 'Ctrl + G', check: () => objs().some(o => o.t === 'group'), act: () => { if (Ed.selObjs().length < 2) { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); } run('group'); } },
+      { say: 'Click one. Hold <b>Shift</b> and click the other.', key: 'Shift + click', spot: () => objs().filter(o => o.t === 'shape' && !big(o)).slice(-2)[0], check: () => Ed.selObjs().length >= 2 || objs().some(o => o.t === 'group'), act: () => { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); Ed.after({ noThumbs: true }); } },
+      { say: 'Click <b>Arrange</b> › <b>Group</b>', target: menu('Home', '[data-menu="arrange"]', '[data-cmd="group"]'), check: () => objs().some(o => o.t === 'group'), act: () => { if (Ed.selObjs().length < 2) { const two = objs().filter(o => o.t === 'shape' && !big(o)).slice(-2); E().sel = two.map(o => o.id); } run('group'); } },
       { say: 'Right-click a picture › <b>Bring to Front</b>', spot: () => objs().find(o => o.t === 'sticker'), check: () => ev('front') + ev('back') + ev('forward') + ev('backward') > 0, act: () => { select(objs().find(o => o.t === 'sticker') || castTop()); run('front'); } },
       { say: 'Click <b>Arrange</b> › <b>Selection Pane</b>', target: menu('Home', '[data-menu="arrange"]', '[data-cmd="pane-sel"]'), check: () => E().pane === 'sel', act: () => { E().pane = 'sel'; Ed.after({ noThumbs: true }); } },
       { say: 'Double-click a name. Type a new name. Do it 3 times.', target: () => [...document.querySelectorAll('.sel-pane .sp-name')].find(n => Deck.isDefaultName(n.textContent)) || null, check: () => objs().filter(o => o.t !== 'audio' && !Deck.isDefaultName(o.name)).length >= 3, act: () => Ed.change(() => { ['Hero', 'Friend', 'Target'].forEach((n, i) => { const o = objs().filter(q => Deck.isDefaultName(q.name) && !q.ph)[0]; if (o) o.name = n + (i ? '' : ''); }); }, 'rename') }
     ],
     4: [
-      { say: 'Click <b>Duplicate</b> 2 times', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: c => deck().slides.length >= c.n + 2, act: () => { run('dup-slide'); run('dup-slide'); } },
+      { say: 'Click <b>Duplicate</b> 2 times', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: c => deck().slides.length >= c.n + 2, act: () => { run('dup-slide'); run('dup-slide'); } },
       { say: 'Drag your character to a new place', spot: () => castTop(), check: () => { const i = E().cur; if (!i) return false; const prev = deck().slides[i - 1]; return objs().some(o => { const p = prev.objs.find(q => q.mk === o.mk); return p && (Math.abs(p.x - o.x) > 30 || Math.abs(p.y - o.y) > 30); }); }, act: () => { const o = castTop() || cast()[0]; if (o) Ed.change(() => { o.x = Math.min(SW - o.w, o.x + 300); }, 'move'); } },
       { say: 'Drag a slide on the left up or down', target: () => $q('.ed-thumbs .ed-th.on'), check: () => ev('reorderSlide') > 0, act: () => run('slide-up') },
       { say: 'Click <b>View</b> › <b>Slide Sorter</b>', target: on('View', '[data-cmd="view-sorter"]'), check: () => E().view === 'sorter', act: () => run('view-sorter') },
       { say: 'Click <b>Normal</b> to go back', target: on('View', '[data-cmd="view-normal"]'), check: () => E().view === 'normal' && ev('sorter') > 0, act: () => run('view-normal') },
-      { say: 'Press <b>Shift + F5</b>. <b>Esc</b> stops.', key: 'Shift + F5', check: () => ev('showCur') > 0 && !Show.live, act: () => run('show-cur') }
+      { say: () => (Show.live ? 'Click to go on. At the end click <b>✕ End Show</b> (top right).' : 'Click <b>Slide Show</b> › <b>From Current Slide</b>'), target: on('Slide Show', '[data-cmd="show-cur"]'), check: () => ev('showCur') > 0 && !Show.live, act: () => run('show-cur') }
     ],
     5: [
-      { say: 'Click <b>Duplicate</b> to copy your slide', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: c => { slidesBase(c); }, check: newSlide, act: () => { run('dup-slide'); ensureCast(3); } },
+      { say: 'Click <b>Duplicate</b> to copy your slide', target: on('Home', '[data-cmd="dup-slide"]'), begin: c => { slidesBase(c); }, check: newSlide, act: () => { run('dup-slide'); ensureCast(3); } },
       { say: 'Click a picture on the slide', spot: () => cast().find(o => !hasAnim(o)) || castTop(), check: () => !!sel1() && !big(sel1()), act: () => { ensureCast(3); select(cast().find(o => !hasAnim(o)) || castTop()); } },
       { say: 'Click <b>Animations</b> › <b>Fly In</b>', target: on('Animations', '[data-cmd="effect"][data-arg="in:fly"]'), check: () => hasAnim(sel1(), 'in'), act: () => { if (!sel1()) select(castTop()); run('effect', 'in:fly'); } },
       { say: 'Click <b>Effect Options</b> › <b>From Left</b>', target: menu('Animations', '[data-menu="effopt"]', '[data-cmd="eff-dir"][data-arg="left"]'), check: () => ev('effectOptions') > 0, act: () => run('eff-dir', 'left') },
@@ -5911,7 +5915,7 @@ const Guide = (() => {
       { say: 'Type <b>2</b> in <b>Duration</b>', target: on('Animations', '[data-input="dur"]'), check: () => S().anims.some(a => Deck.DEF_DUR[a.fx] > 0 && Math.abs(a.dur - Deck.DEF_DUR[a.fx]) > 0.01), act: () => { const a = Ed.anim() || S().anims[0]; Ed.change(() => { a.dur = 2; }, 'timing'); } },
       { say: 'Type <b>1</b> in <b>Delay</b>', target: on('Animations', '[data-input="delay"]'), check: () => S().anims.some(a => (a.delay || 0) > 0), act: () => { const a = Ed.anim() || S().anims[0]; Ed.change(() => { a.delay = 1; }, 'delay'); } },
       { say: 'Set <b>every</b> number to With or After Previous', target: () => (E().tab === 'Animations' ? ([...document.querySelectorAll('.ed-num')].find(n => { const a = S().anims.find(q => q.id === n.dataset.anim); return a && a.start === 'click'; }) || null) : tabEl('Animations')), check: () => S().anims.length > 0 && !Anim.schedule(S().anims, {}).clickCount, act: () => Ed.change(() => S().anims.forEach((a, i) => { if (a.start === 'click') a.start = i ? 'after' : 'with'; }), 'timing') },
-      { say: 'Press <b>F5</b>. Don’t click: it plays by itself!', key: 'F5', begin: c => { c.n = ev('show') + ev('showCur'); }, check: c => ev('show') + ev('showCur') > c.n && !Show.live, act: () => run('show-cur') }
+      { say: () => (Show.live ? 'Don’t click: it plays by itself! Then click <b>✕ End Show</b>.' : 'Click <b>Slide Show</b> › <b>From Current Slide</b>. Don’t click: it plays by itself!'), target: on('Slide Show', '[data-cmd="show-cur"]'), begin: c => { c.n = ev('show') + ev('showCur'); }, check: c => ev('show') + ev('showCur') > c.n && !Show.live, act: () => run('show-cur') }
     ],
     8: [
       { say: 'Click <b>Animation Pane</b>', target: on('Animations', '[data-cmd="pane-anim"]'), check: () => E().pane === 'anim', act: () => { E().pane = 'anim'; Ed.after({ noThumbs: true }); } },
@@ -5944,11 +5948,11 @@ const Guide = (() => {
       { say: 'Click another picture: it gets the same moves', spot: () => cast().find(o => !hasAnim(o)) || cast()[0], check: () => ev('painter') > 0, act: () => { ensureCast(2); const from = cast().find(o => animsOf(o).some(a => a.fx === 'spin')), to = cast().find(o => o !== from); Ed.change(() => animsOf(from).forEach(a => { const c2 = JSON.parse(JSON.stringify(a)); c2.id = Deck.uid('a'); c2.o = to.id; S().anims.push(c2); }), 'painter'); E().painter = null; } }
     ],
     12: [
-      { say: 'Click <b>Duplicate</b> to start a new scene', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
+      { say: 'Click <b>Duplicate</b> to start a new scene', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => run('dup-slide') },
       { say: 'Open the <b>Animation Pane</b>: your script', target: on('Animations', '[data-cmd="pane-anim"]'), check: () => E().pane === 'anim', act: () => { E().tab = 'Animations'; E().pane = 'anim'; Ed.after({ noThumbs: true }); } }
     ],
     13: [
-      { say: 'Click <b>Duplicate</b>', key: 'Ctrl + D', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => { ensureCast(1); run('dup-slide'); } },
+      { say: 'Click <b>Duplicate</b>', target: on('Home', '[data-cmd="dup-slide"]'), begin: slidesBase, check: newSlide, act: () => { ensureCast(1); run('dup-slide'); } },
       { say: 'Drag a picture to a new place. Make it bigger.', spot: () => castTop(), check: () => { const i = E().cur; if (!i) return false; const prev = deck().slides[i - 1]; return objs().some(o => { const p = prev.objs.find(q => q.mk === o.mk); return p && (Math.abs(p.x - o.x) > 30 || Math.abs(p.y - o.y) > 30 || Math.abs(p.w - o.w) > 20); }); }, act: () => { const o = castTop(); Ed.change(() => { o.x = Math.max(0, o.x - 250); o.w *= 1.6; o.h *= 1.6; }, 'move'); } },
       { say: 'Click <b>Transitions</b> › <b>Morph</b>', target: on('Transitions', '[data-cmd="trans"][data-arg="morph"]'), check: () => S().trans && S().trans.fx === 'morph', act: () => run('trans', 'morph') },
       { say: 'Type <b>2.5</b> in <b>Duration</b>', target: on('Transitions', '[data-input="trans-dur"]'), check: () => ev('transDur') > 0, act: () => Ed.change(() => { S().trans.dur = 2.5; }, 'transDur') },
@@ -5967,7 +5971,7 @@ const Guide = (() => {
       { say: '<b>Insert</b> › <b>Stock Images</b>. Pick a surprise.', target: () => $q('.modal .stk') || on('Insert', '[data-cmd="stickers"]')(), begin: c => { c.n = objs().filter(o => o.t === 'sticker').length; }, check: c => objs().filter(o => o.t === 'sticker').length > c.n, act: () => { if (window.Modal) Modal.close(); Ed.change(() => { const o = Deck.makeSticker(S(), '🎁', 700, 220, 220); S().objs.push(o); E().sel = [o.id]; }, 'sticker'); } },
       { say: 'Give the surprise <b>Zoom</b>', target: () => (sel1() && sel1().t === 'sticker' ? on('Animations', '[data-cmd="effect"][data-arg="in:zoom"]')() : null), spot: () => (sel1() && sel1().t === 'sticker' ? null : objs().filter(o => o.t === 'sticker').pop()), check: () => objs().some(o => o.t === 'sticker' && hasAnim(o, 'in')), act: () => { select(objs().filter(o => o.t === 'sticker').pop()); run('effect', 'in:zoom'); } },
       { say: 'Click <b>Trigger</b> › pick your button', target: menu('Animations', '[data-menu="trigger"]', '[data-cmd="trigger"]:not([data-arg="none"])'), check: () => S().anims.some(a => a.trigger), act: () => { const b = objs().find(o => o.shape === 'round'); const s = objs().filter(o => o.t === 'sticker').pop(); select(s); run('trigger', b.id); } },
-      { say: 'Press <b>Shift + F5</b>. Click your button!', key: 'Shift + F5', check: () => ev('trigger') > 0, act: () => { run('show-cur'); setTimeout(pressButton, 1300); } },
+      { say: () => (Show.live ? 'Click your <b>button</b> on the slide!' : 'Click <b>Slide Show</b> › <b>From Current Slide</b>. Then click your button!'), target: on('Slide Show', '[data-cmd="show-cur"]'), check: () => ev('trigger') > 0, act: () => { run('show-cur'); setTimeout(pressButton, 1300); } },
       { say: 'Click the button. <b>Insert</b> › <b>Link</b> › Slide 1.', target: () => (sel1() && sel1().shape === 'round' ? menu('Insert', '[data-menu="link"]', '[data-cmd="link"]:not([disabled])')() : null), spot: () => (sel1() && sel1().shape === 'round' ? null : objs().find(o => o.shape === 'round')), check: () => deck().slides.some(s => s.objs.some(o => o.link)) || new Set(S().anims.filter(a => a.trigger).map(a => a.trigger)).size >= 2, act: () => { const b = objs().find(o => o.shape === 'round'); select(b); run('link', deck().slides[0].id); } }
     ]
   };
@@ -6476,7 +6480,7 @@ function renderTeacher() {
     '<div class="t-cards"><div class="side-card"><b>🖥️ Works like PowerPoint</b><p class="small">The Studio editor has PowerPoint’s tabs and button names (Insert › Shapes, Animations › Add Animation, Animation Pane, Start / Duration / Delay, Motion Paths, Morph, Slide Show), so the skills carry over to real PowerPoint.</p></div>' +
     '<div class="side-card"><b>✅ Checks itself</b><p class="small">Each mission’s checklist ticks itself only when the work is really in the student’s file (e.g. “a slide that plays without clicks”). A guide lights up every button to click (👆 Show me does a step); then students make their own version and answer one question.</p></div>' +
     '<div class="side-card"><b>📁 Two files</b><p class="small">All missions go into the student’s Studio file; the final project is a second file. File › Save a Copy downloads a .slides file; File › Export › Create a Video makes a .webm video.</p></div>' +
-    '<div class="side-card"><b>🎬 Director checks</b><p class="small">After each zone, students play their slides for you (F5). Type the director code on their screen to stamp it. It is a stamp only, not a grade.</p></div></div>' +
+    '<div class="side-card"><b>🎬 Director checks</b><p class="small">After each zone, students play their slides for you (Slide Show › From Beginning). Type the director code on their screen to stamp it. It is a stamp only, not a grade.</p></div></div>' +
 
     '<h2>Lesson plan</h2><div class="table-wrap"><table class="table"><thead><tr><th>Lesson</th><th>Zone</th><th>Missions</th><th>PowerPoint skills</th><th>End with</th></tr></thead><tbody>' +
     lessons.map(l => '<tr><td><b>' + l[0] + '</b></td><td>' + l[1] + '</td><td>' + l[2] + '</td><td>' + l[3] + '</td><td>' + l[4] + '</td></tr>').join('') + '</tbody></table></div>' +
@@ -6559,8 +6563,8 @@ function pickTheme(first) {
   });
 }
 function showCheat() {
-  Modal.open({ title: '📋 Cheat sheet (same keys in PowerPoint)', wide: true,
-    html: '<div class="cheat">' + CHEAT.map(g => '<div><h3>' + esc(g[0]) + '</h3><table class="table">' + g[1].map(r => '<tr><td>' + esc(r[0]) + '</td><td><kbd class="kbd">' + esc(r[1]) + '</kbd></td></tr>').join('') + '</table></div>').join('') + '</div>' +
+  Modal.open({ title: '📋 Cheat sheet: where to click (same in PowerPoint)', wide: true,
+    html: '<div class="cheat">' + CHEAT.map(g => '<div><h3>' + esc(g[0]) + '</h3><table class="table">' + g[1].map(r => '<tr><td>' + esc(r[0]) + '</td><td><b>' + esc(r[1]) + '</b></td></tr>').join('') + '</table></div>').join('') + '</div>' +
       '<h3 style="margin-top:14px">Where are the animation buttons?</h3>' + Ribbon.html('Animations › Add Animation') +
       '<p class="small muted">The gallery (Effects) <b>replaces</b> an animation. <b>Add Animation</b> adds one more.</p>' });
 }
@@ -6569,12 +6573,12 @@ function showHelp() {
   Modal.open({ title: '❓ How it works', wide: true,
     html: '<ol class="flow flow-modal"><li><span>👆</span><b>Follow the glow</b><small>click what lights up</small></li><li><span>🎨</span><b>Your turn</b><small>make it yours</small></li><li><span>✅</span><b>Done</b><small>next mission</small></li></ol>' +
       '<ul class="small"><li>Stuck? <b>👆 Show me</b> does the step for you. <b>▶ Watch</b> shows a short demo.</li>' +
-      '<li>The editor works like PowerPoint: same tabs, same buttons, same keys.</li></ul>' });
+      '<li>The editor works like PowerPoint: same tabs, same buttons.</li></ul>' });
 }
 function directorCheck(zone) {
   const z = ZONES.find(q => q.id === zone), ms = MISSIONS.filter(m => m.zone === zone && !m.bonus);
   Modal.open({ title: '🎬 Director check: ' + z.name, wide: true,
-    html: '<p><b>' + esc(data.name) + '</b>: open your Studio file and play these slides for your teacher (F5).</p>' +
+    html: '<p><b>' + esc(data.name) + '</b>: open your Studio file and play these slides for your teacher (<b>Slide Show › From Beginning</b>).</p>' +
       '<ul class="dc-list">' + ms.map(m => '<li><span>' + m.icon + '</span><b>' + esc(m.title) + '</b></li>').join('') + '</ul>' +
       '<label class="pf"><span class="eyebrow">Teacher: director code</span><input type="password" id="dc-code" autocomplete="off" data-autofocus></label><p class="small" id="dc-msg"></p>',
     actions: [{ label: 'Cancel', variant: 'secondary' }, { label: 'Approve ✓', variant: 'primary', keepOpen: true, onClick: () => {
