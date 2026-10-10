@@ -1,0 +1,10 @@
+Kenney · Starter Kit 3D Platformer — models used here: grass.glb, grass-small.glb, Textures/colormap.png
+
+Source:  https://github.com/KenneyNL/Starter-Kit-3D-Platformer  (official Kenney repository)
+Commit:  3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0  (files from models/ and models/Textures/)
+
+The repository README states: "Assets included in this package (2D sprites, 3D models and sound effects) are
+CC0 licensed" — https://creativecommons.org/publicdomain/zero/1.0/
+(The kit's code is MIT licensed; no code from it is used here.)
+
+Credit is not required. Thank you, Kenney — www.kenney.nl
