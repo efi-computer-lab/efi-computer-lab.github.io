@@ -27,6 +27,8 @@ window.GAME_CONTENT = {
   characters: {
     title: 'Your explorer',
     leo: 'Leo', leoText: 'Map reader', kai: 'Kai', kaiText: 'Fast climber', mia: 'Mia', miaText: 'Problem solver', zara: 'Zara', zaraText: 'Signal expert',
+    max: 'Max', maxText: 'Strong swimmer', ravi: 'Ravi', raviText: 'Animal tracker', jun: 'Jun', junText: 'Sharp archer',
+    aiko: 'Aiko', aikoText: 'Plant expert', nia: 'Nia', niaText: 'Fire maker', sofia: 'Sofia', sofiaText: 'Star navigator',
   },
   acts: { coast: 'Act 1: Shipwreck Coast', caves: 'Act 2: The Crystal Caverns', peak: 'Act 3: Storm Peak' },
   items: {
@@ -684,7 +686,7 @@ window.GAME_CONTENT = {
     description: C.intro,
     grade: '6-7',
     subject: 'Computing · hardware · algorithms · patterns · files · reliable sources · online safety · input-process-output · troubleshooting',
-    player: { health: 100, respawnOnDeath: true, sprintSpeed: 7.5 },
+    player: { health: 100, respawnOnDeath: true, sprintSpeed: 7.5, sprintTime: 5, sprintRest: 4 },   // 5 s of running, then walk to rest (the meter shows it)
     vars: { playerName: 'Explorer', totems: 0, totems2: 0 },
     resume: { checkpoints: true },
     traversal: { swimStamina: 22 },
@@ -697,6 +699,13 @@ window.GAME_CONTENT = {
       { id: 'kai', label: C.characters.kai, text: C.characters.kaiText, look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#2f9e44', pants: '#495057', shoes: '#e03131', accent: '#ffd166' } },
       { id: 'mia', label: C.characters.mia, text: C.characters.miaText, look: { body: 'f', skin: '#e0ac69', hair: '#6b3e26', hairStyle: 'long', shirt: '#1c7ed6', pants: '#5c4a2e', shoes: '#f8f9fa', accent: '#ffd166' } },
       { id: 'zara', label: C.characters.zara, text: C.characters.zaraText, look: { body: 'f', skin: '#c68642', hair: '#d9a441', hairStyle: 'ponytail', shirt: '#ae3ec9', pants: '#343a40', shoes: '#fab005', accent: '#ffd166', skirt: true } },
+      // the other six racers from Cyber Rush, in island clothes
+      { id: 'max', label: C.characters.max, text: C.characters.maxText, look: { body: 'm', skin: '#ffdbac', hair: '#d4a017', hairStyle: 'spiky', shirt: '#f59f00', pants: '#5c4a2e', shoes: '#ecf0f1', accent: '#ffd166' } },
+      { id: 'ravi', label: C.characters.ravi, text: C.characters.raviText, look: { body: 'm', skin: '#a0662d', hair: '#111111', hairStyle: 'short', shirt: '#c92a2a', pants: '#343a40', shoes: '#f5f6fa', accent: '#ffd166' } },
+      { id: 'jun', label: C.characters.jun, text: C.characters.junText, look: { body: 'm', skin: '#f0c08a', hair: '#222222', hairStyle: 'long', shirt: '#0ca678', pants: '#495057', shoes: '#ffd166', accent: '#ffd166' } },
+      { id: 'aiko', label: C.characters.aiko, text: C.characters.aikoText, look: { body: 'f', skin: '#f6d2b0', hair: '#1b1b1b', hairStyle: 'ponytail', shirt: '#15aabf', pants: '#5c4a2e', shoes: '#ff6b6b', accent: '#ffd166', skirt: true } },
+      { id: 'nia', label: C.characters.nia, text: C.characters.niaText, look: { body: 'f', skin: '#6b3e26', hair: '#2b1a10', hairStyle: 'long', shirt: '#fab005', pants: '#5f3dc4', shoes: '#ffffff', accent: '#ffd166' } },
+      { id: 'sofia', label: C.characters.sofia, text: C.characters.sofiaText, look: { body: 'f', skin: '#e8b98a', hair: '#8e3b1f', hairStyle: 'long', shirt: '#74b816', pants: '#5c4a2e', shoes: '#e64980', accent: '#ffd166', skirt: true } },
     ] },
     music: { bpm: 104, root: 196, mode: 'major', prog: [0, 4, 5, 3], wave: 'triangle', arpWave: 'sine', drums: true, volume: 0.05 },
 
@@ -765,7 +774,7 @@ window.GAME_CONTENT = {
           { id: 'radio', type: 'terminal', model: 'radioPanel', at: 'radioSpot', scale: 0.6, name: 'emergency radio', look: { on: true }, light: { color: '#3bc9db', range: 4, intensity: 0.6 },
             interact: { type: 'activate', prompt: 'Listen to the', actions: [{ do: 'message', title: C.story.radioTitle, text: C.story.radio }, { do: 'flag', set: 'heardRadio' }] } },
           station('crate', 'crateSpot', 'supplyBox', 'm1', { name: 'supply crate', color: '#2f6f4f' }),
-          { id: 'wreckSign', model: 'sign', name: 'your boat', pos: [14, 0, 86], rot: 'n', color: '#8b5a2b', interact: { type: 'inspect', title: C.signs.wreck.title, text: C.signs.wreck.text } },
+          { id: 'wreckSign', model: 'noticeBoard', name: 'your boat', pos: [14, 0, 86], rot: 'n', color: '#8b5a2b', interact: { type: 'inspect', title: C.signs.wreck.title, text: C.signs.wreck.text } },
           crab('crab1', { route: 'crabRun1' }, { tags: ['beachCrab', 'enemy'], visible: false }), crab('crab2', { route: 'crabRun2' }, { tags: ['beachCrab', 'enemy'], visible: false }),
           crab('crab3', { pos: [40, 0, 80] }, { tags: ['beachCrab', 'enemy'], visible: false, look: { color: '#c92a2a' } }), crab('crab4', { pos: [32, 0, 74] }, { tags: ['beachCrab', 'enemy'], visible: false }),
           target('slingT1', 'target1', 'slingTarget'), target('slingT2', 'target2', 'slingTarget'), target('slingT3', 'target3', 'slingTarget'),
@@ -785,7 +794,7 @@ window.GAME_CONTENT = {
           pad('cpCamp', [22, 0, 47]),
           boar('boar1', [16, 0, 36], { visible: false }), boar('boar2', [36, 0, 44], { visible: false, look: { color: '#5d4037' } }), boar('boar3', [32, 0, 33], { visible: false }),
           station('campBox', 'campBox', 'supplyBox', 'm2', { name: 'camp supply box', color: '#1c5d99' }),
-          { id: 'campNote', model: 'sign', name: 'note', pos: [36, 0, 37], rot: 'w', color: '#f08c00', interact: { type: 'inspect', title: C.signs.camp.title, text: C.signs.camp.text } },
+          { id: 'campNote', model: 'noticeBoard', name: 'note', pos: [36, 0, 37], rot: 'w', interact: { type: 'inspect', title: C.signs.camp.title, text: C.signs.camp.text } },
           target('bowT1', 'bowTarget1', 'bowTarget'), target('bowT2', 'bowTarget2', 'bowTarget'), target('bowT3', 'bowTarget3', 'bowTarget'), target('bowT4', 'bowTarget4', 'bowTarget'),
           { id: 'branches', model: 'fallenLogs', name: 'fallen branches', at: 'branches', look: { w: 8.4 }, solid: true },
           cache('cache2', 'cache2'), lootCrate('crateCamp', [44, 0, 46]), ammo([12, 0, 31]), fruit([44, 0, 31]),
@@ -802,7 +811,7 @@ window.GAME_CONTENT = {
           // ---- the deep river: stepping stones, Bamboo Isle, the bridge ----
           pad('cpRiver', [66, 0, 18]), pad('cpIsle', [82, 0, 15]),
           abyss('deep1', [74, -4, 18], [8, 2.6, 24]), abyss('deep2', [90, -4, 18], [8, 2.6, 24]),
-          { id: 'bridgePlan', type: 'terminal', model: 'sign', at: 'bridgePlan', name: 'bridge plan board', color: '#7cb342', interact: { type: 'puzzle', puzzle: 'm4', prompt: 'Read the' } },
+          { id: 'bridgePlan', type: 'terminal', model: 'noticeBoard', at: 'bridgePlan', name: 'bridge plan board', color: '#558b2f', look: { paper: '#e7f5ff' }, interact: { type: 'puzzle', puzzle: 'm4', prompt: 'Read the' } },
           { id: 'bridge', model: 'plankBridge', at: 'bridgeMid', look: { len: 10, w: 3.6 }, solid: false, visible: false },
           { id: 'bridgeDeck', model: 'box', pos: [90, -0.32, 18], look: { size: [9.2, 0.3, 4] }, color: '#8b5a2b', solid: true, visible: false },
           // ---- the east bank and the delta: King Claw ----
@@ -1023,7 +1032,7 @@ window.GAME_CONTENT = {
     scoring: { objective: 0, hint: 0, wrongAnswer: 0, respawn: 0, stars: [50, 75, 90], labels: C.labels },
     winText: C.winText,
     ui: { accent: '#2fb344', winTitle: 'Rescued!', labelRange: 9, showHintKey: false,
-      controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Click', 'Attack'], ['1-6', 'Weapons'], ['R', 'Reload'], ['E', 'Use / talk'], ['Space', 'Jump / swim up'], ['Shift', 'Run'], ['H', 'Hint'], ['V', 'Camera'], ['Esc', 'Pause']],
+      controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Click', 'Attack'], ['Right click', 'Aim'], ['1-6', 'Weapons'], ['R', 'Reload'], ['E', 'Use / talk'], ['Space', 'Jump / swim up'], ['Shift', 'Run'], ['H', 'Hint'], ['V', 'Camera'], ['Esc', 'Pause']],
       askName: true, leaderboard: true, minimap: true, vignette: true, menuUrl: '../../index.html', menuLabel: 'All games' },
   };
 })();
@@ -1046,6 +1055,12 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 /* crosshair */
 .gk-crosshair { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.35); transition: transform .12s, background .12s; }
 .gk-hud.no-crosshair .gk-crosshair { display: none; }
+.gk-hud.gk-aiming .gk-crosshair { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: transparent; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.35); }
+.gk-hud.gk-aiming .gk-crosshair::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: #ff6b6b; }
+.gk-chars.many { max-width: 600px; }
+.gk-chars.many .gk-char { width: 100px; padding: 6px 4px; }
+.gk-chars.many .gk-avatar { width: 50px; height: 50px; }
+.gk-chars.many .gk-char span { font-size: 11px; }
 .gk-hud.aiming .gk-crosshair { transform: scale(2.2); background: var(--gk-accent); }
 
 /* objectives */
@@ -1816,11 +1831,11 @@ GK_LIBRARY.worlds = {
         mousedown: e => {
           if (e.target !== this.el) return;
           if (e.button === 0) this.mouse = true;   // held: e.g. automatic fire
-          if (e.button === 2) this.rightClicks = (this.rightClicks || 0) + 1;   // takeRight(): e.g. punch
+          if (e.button === 2) { this.rightClicks = (this.rightClicks || 0) + 1; this.mouseR = true; }   // takeRight(): e.g. punch; mouseR: held (aim)
           if (!this.locked) this.drag = [e.clientX, e.clientY];
           if (e.button === 0 && this.onClick) this.onClick(this.locked);
         },
-        mouseup: () => { this.drag = null; this.mouse = false; },
+        mouseup: e => { this.drag = null; if (!e || e.button !== 2) this.mouse = false; if (!e || e.button === 2) this.mouseR = false; },
         contextmenu: e => { if (e.target === this.el || this.locked) e.preventDefault(); },   // right click is a game button
         wheel: e => { if (this.locked || e.target === this.el) this.wheel += e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0; },
         lockchange: () => {
@@ -1852,7 +1867,7 @@ GK_LIBRARY.worlds = {
     /** Mouse movement since the last call. */
     takeMouse() { const d = [this.dx, this.dy]; this.dx = 0; this.dy = 0; return d; }
     endFrame() { this.hits.clear(); }
-    clear() { this.keys.clear(); this.hits.clear(); this.dx = this.dy = 0; this.drag = null; this.mouse = false; }
+    clear() { this.keys.clear(); this.hits.clear(); this.dx = this.dy = 0; this.drag = null; this.mouse = false; this.mouseR = false; }
     /** Hold an action from code (tests, on-screen buttons): input.force('forward', true). */
     force(action, on) { this.forced[action] = !!on; }
     lock() {
@@ -2338,7 +2353,7 @@ GK_LIBRARY.worlds = {
       const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
       // characters (config.characters) and the camera (ui.views, kept per computer in GK.Settings 'view')
       const chars = this.game.characterChoices(), clabels = (cfg.characters && cfg.characters.choices) || chars;
-      const who = chars ? '<div class="gk-chars"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
+      const who = chars ? '<div class="gk-chars' + (clabels.length > 6 ? ' many' : '') + '"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
         clabels.map(c => '<button type="button" class="gk-char' + (c.id === this.game.character ? ' on' : '') + '" data-char="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.character) + '">' +
           this.avatar(c.look || {}) + '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
       const cam = this.viewsHtml(cfg);
@@ -4500,7 +4515,7 @@ GK_LIBRARY.worlds = {
       const l = Math.hypot(f, s);
       if (l > 1) { f /= l; s /= l; }
       const world = c.steering === 'world';
-      this.sprinting = c.canSprint && (world ? l > 0 : f > 0) && input.down('sprint');
+      this.sprinting = c.canSprint && (world ? l > 0 : f > 0) && input.down('sprint') && !this.aiming;   // aiming: a mechanic (weapons) is looking down the sight
       // sprintTime (s, 0 = no limit): stamina. Sprint up to sprintTime, then rest; empty = tired until it is full again
       // (it refills in sprintRest seconds). E.g. 2 / 3 = at most 2 s of sprint in every 5 s.
       if (c.sprintTime) {
@@ -4509,7 +4524,7 @@ GK_LIBRARY.worlds = {
         if (this.sprinting) { this.stamina -= dt; if (this.stamina <= 0) { this.stamina = 0; this.tired = true; this.sprinting = false; } }
         else { this.stamina = Math.min(c.sprintTime, this.stamina + dt * c.sprintTime / (c.sprintRest || 3)); if (this.tired && this.stamina >= c.sprintTime) this.tired = false; }
       }
-      const speed = (this.sprinting ? c.sprintSpeed : c.walkSpeed) * (this.speedMul || 1);   // speedMul: power-ups
+      const speed = (this.sprinting ? c.sprintSpeed : c.walkSpeed) * (this.speedMul || 1) * (this.aiming ? 0.55 : 1);   // speedMul: power-ups
       let tx, tz;
       if (world) {
         tx = s * speed; tz = -f * speed;
@@ -5714,8 +5729,8 @@ GK_LIBRARY.worlds = {
     update(dt, mode) {
       const g = this.game;
       if (mode === 'playing') {
-        const m = g.input.takeMouse();
-        g.player.look(m[0], m[1]);
+        const m = g.input.takeMouse(), z = 1 - (g.zoom || 0);   // looking down a sight: the mouse turns slower
+        g.player.look(m[0] * z, m[1] * z);
       }
       const fall = g.player && !g.player.grounded ? g.player.vel[1] : 0;
       GK.Spatial.update(g, dt, g.input);
@@ -5755,7 +5770,7 @@ GK_LIBRARY.worlds = {
         else { eye = c.pos; look = c.dir; }
       }
       this.camPos = eye;
-      r.setCamera(eye, look, g.player.cfg.fov + (g.fovKick || 0));   // game.fovKick: a mechanic widens the view (speed)
+      r.setCamera(eye, look, (g.player.cfg.fov + (g.fovKick || 0)) * (1 - (g.zoom || 0)));   // game.fovKick: a mechanic widens the view (speed); game.zoom: a sight
       // anything further than the end of the fog cannot be seen: skip those chunks and entities (big worlds stay fast)
       const fogEnd = (g.cfg.environment.fog && g.cfg.environment.fog[1]) || r.far, cull = Math.min(r.far, fogEnd + 6), cull2 = cull * cull;
       const items = [];
@@ -5885,7 +5900,7 @@ GK_LIBRARY.worlds = {
       const air = p.grounded ? 0 : U.clamp(-p.vel[1] * 0.006, -0.035, 0.045);   // in a jump the tool lags behind
       const raise = vm.raise || 0, rk = vm.reload;
       let along, side, down, pitch, yo = 0;
-      let roll = 0;
+      let roll = 0, aim = 0;
       if (vm.melee && vm.anim === 'thrust') {
         // spear: held low, pointing ahead; a thrust pulls back a little, then stabs straight out and comes back
         const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t);
@@ -5907,11 +5922,19 @@ GK_LIBRARY.worlds = {
         along = 0.44 - k * 0.1; side = 0.19 - lo * 0.06; down = -0.18 + sway + air - k * 0.02 - lo * 0.2 - raise * 0.3;
         pitch = p.pitch + k * 0.15 - lo * 0.5 - raise * 0.7;
         if (rk != null) roll = Math.sin(Math.PI * rk) * 0.75;   // reloading: dip and tilt the tool toward you, then back
+        aim = vm.aim || 0;
         if (vm.anim === 'bow' || vm.anim === 'sling') {   // held out in front, the arrow / pebble lined up with the crosshair
           const bow = vm.anim === 'bow';
           side = bow ? 0.07 : 0.05; down += bow ? 0.04 : 0.04; along += 0.06; roll += bow ? 0.2 : 0.08; pitch -= k * 0.1 - (bow ? 0.06 : 0);
           yo = bow ? 0.22 : 0.1;   // turned in a little, so the arrow is seen pointing at the crosshair
         }
+      }
+      if (aim > 0) {   // the sight: the tool comes up to the middle, lined up under the crosshair
+        const e = aim * aim * (3 - 2 * aim);
+        const to = vm.anim === 'sling' ? [-0.2, 0.58] : vm.anim === 'bow' ? [-0.1, 0.52] : [-0.13, 0.5];   // [down, along]: the target stays visible above the tool
+        const bow = vm.anim === 'bow';   // a bow stays a little left and tilted, so its string is not across the target
+        side += ((bow ? -0.075 : 0) - side) * e; down += (to[0] - down) * e; along += (to[1] - along) * e;
+        roll += ((bow ? 0.38 : 0) - roll) * e; yo += ((bow ? -0.1 : 0) - yo) * e; pitch += (p.pitch - pitch) * e;
       }
       const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
       const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
@@ -5957,6 +5980,7 @@ GK_LIBRARY.worlds = {
       const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
       const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
       const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (vm && !vm.melee && vm.aim > 0.3) { const e = p.eye(), fw = p.forward(); this.aimAt = [e[0] + fw[0] * 20, e[1] + fw[1] * 20, e[2] + fw[2] * 20]; this.aimT = Math.max(this.aimT, 0.15); }
       if (g.climbing) {   // arms up on the vines, hand over hand; legs step
         const ph = g.climbPhase || 0;
         out.armR = 2.75 + Math.sin(ph) * 0.35; out.armL = 2.75 - Math.sin(ph) * 0.35; out.sw = Math.sin(ph) * 0.45; out.air = 0;
@@ -6964,7 +6988,7 @@ GK_LIBRARY.worlds = {
    Nature:  palm · bush · fern · driftwood · fallenLogs · vines · bamboo · seaRock · caveArch · cliffRock
    Props:   wreck · bambooBundle · ropeCoil · trailMarker {symbol} · backpack · supplyBox {open} · locker {open}
             generator {on} · waterWheel · signalTower {on} · radioPanel {on} · ropeBarrier · plankBridge {len}
-            brokenPosts · campfire · tent · cache (hidden supply bag) · compassStand
+            brokenPosts · campfire · tent (A-frame) · noticeBoard {paper} · cache (hidden supply bag) · compassStand
    Story:   escapeBoat {parts: 0..9} (grows as you build it) · rescueShip · parrot · crab · bat · seaPlane (big water sheet) */
 (function () {
   'use strict';
@@ -7151,10 +7175,34 @@ GK_LIBRARY.worlds = {
     if (o.lit !== false) g.cone(0, 0.1, 0, 0.32, 0.8, '#ff922b', { seg: 6, glow: 1 }).cone(0.05, 0.1, 0.05, 0.18, 0.55, '#ffe066', { seg: 6, glow: 1 });
     return g;
   });
-  M.add('tent', o => {   // a torn expedition tent
-    const c = o.color || '#f08c00', g = G();
-    g.add(G().box(0, 0, 0, 0.06, 2.2, 3, c).rotZ(0.75).move(-0.75, 0, 0)).add(G().box(0, 0, 0, 0.06, 2.2, 3, dk(c, 0.85)).rotZ(-0.75).move(0.75, 0, 0));
-    return g.box(0, 1.55, 0, 0.1, 0.1, 3.2, WOOD);
+  M.add('tent', o => {   // an A-frame expedition tent: canvas sides up to a ridge pole, a closed back, a dark doorway at the
+    // front (+z), poles, guy ropes and pegs, a groundsheet and a backpack. A soft canvas colour (bright orange glowed in the sun).
+    const c = o.color || '#b8722e', g = G(), b = 1.3, h = 1.7, d = 3, a = Math.atan2(b, h), L = Math.hypot(b, h);
+    g.box(0, 0, 0, 2 * b + 0.3, 0.03, d + 0.3, '#6d5a3a');                                          // groundsheet
+    g.add(G().box(0, 0, 0, 0.06, L, d, c).rotZ(-a).move(-b, 0, 0));                                   // left side, up to the ridge
+    g.add(G().box(0, 0, 0, 0.06, L, d, dk(c, 0.82)).rotZ(a).move(b, 0, 0));                            // right side
+    const tri = (z, k, col) => { for (let i = 0; i < 7; i++) g.box(0, i * h / 7, z, 2 * b * k * (1 - (i + 0.5) / 7), h / 7 + 0.01, 0.05, col); };
+    tri(-d / 2 + 0.03, 0.98, dk(c, 0.72));                                                            // the closed back
+    tri(d / 2 - 0.12, 0.9, '#2a1d12');                                                                // the dark doorway
+    g.add(G().box(0, 0, 0, 0.05, L * 0.92, 0.05, dk(c, 0.6)).rotZ(-a).move(-b * 0.92, 0, d / 2 + 0.02));   // door flaps, tied back
+    g.add(G().box(0, 0, 0, 0.05, L * 0.92, 0.05, dk(c, 0.6)).rotZ(a).move(b * 0.92, 0, d / 2 + 0.02));
+    g.box(0, h - 0.02, 0, 0.08, 0.08, d + 0.5, WOOD);                                                 // ridge pole
+    for (const z of [-1, 1]) {
+      g.box(0, 0, z * (d / 2 + 0.2), 0.07, h, 0.07, WOOD);                                            // end poles
+      const zp = z * (d / 2 + 1.1), len = Math.hypot(h, 0.9);
+      g.add(G().box(0, 0, 0, 0.02, len, 0.02, '#e9d8a6').rotX(Math.atan2(-z * 0.9, h)).move(0, 0, zp));   // guy rope
+      g.box(0, 0, zp, 0.06, 0.18, 0.06, WOOD);                                                         // peg
+    }
+    return g.box(b + 0.45, 0, 0.7, 0.42, 0.55, 0.3, '#3d6b35', { top: '#4f8a45' }).box(b + 0.45, 0.4, 0.86, 0.3, 0.12, 0.04, '#2b4d26');   // backpack
+  });
+  M.add('noticeBoard', o => {   // a wooden notice board on two posts, with a little roof and a pinned paper note (front +z)
+    const g = G(), w = WOOD, frame = o.color || '#6d4c41';
+    g.box(-0.55, 0, 0, 0.1, 1.75, 0.1, w).box(0.55, 0, 0, 0.1, 1.75, 0.1, w);                          // posts
+    g.box(0, 0.85, 0, 1.25, 0.8, 0.07, frame, { top: dk(frame, 1.1) });                                 // board
+    g.box(0, 1.72, 0.02, 1.45, 0.06, 0.4, dk(w, 0.85)).box(0, 1.66, 0.02, 1.35, 0.06, 0.32, w);        // little roof
+    g.box(-0.05, 0.95, 0.04, 0.62, 0.55, 0.02, o.paper || '#f8f1dc');                                  // the paper note
+    for (let i = 0; i < 4; i++) g.box(-0.08 - (i % 2) * 0.05, 1.36 - i * 0.11, 0.055, 0.42 - (i % 2) * 0.1, 0.03, 0.01, '#5c4a2e');   // lines of writing
+    return g.sphere(-0.05, 1.47, 0.06, 0.035, '#e03131', { seg: 6, rings: 4 });                        // red pin
   });
   M.add('cache', o => {   // a hidden supply bag with a bright ribbon (easy to spot once you look)
     const c = o.color || '#c49a6c';
@@ -9547,6 +9595,7 @@ GK_LIBRARY.worlds = {
                    melee: true, reach: 2.6, arc: 90, maxTargets: 3, swing: 0.3, // a sword: no ammo, hits what is in front
                    viewScale: 0.55,                                        // size of the tool drawn in the hand (first person)
                    anim: 'bow' | 'sling' | 'load' | 'thrust',              // how it moves in the hand (below)
+                   zoom: 0.35,                                             // hold the RIGHT mouse button: look down the sight (0 = no sight)
                    projectile: 'arrowShot', drop: 0,                       // the model that flies (default a glowing bolt);
                                                                            // drop: m/s² of fall, aimed so it still lands on the crosshair
                    owned: true, always: true }, …],                        // owned from the start; usable before `requires`
@@ -9574,7 +9623,10 @@ GK_LIBRARY.worlds = {
    Animation (game.viewModel, drawn by the view): a new weapon comes up from below (raise), a shot kicks, a reload dips
    and tilts it. `anim` also sets the model's look: 'bow' {draw, arrow} and 'sling' {pull, pebble} lose the arrow/pebble
    when they shoot, fit a new one and pull back (arms pose 'bow' / 'sling'); 'load' {loaded} is empty until reloaded;
-   'thrust' (melee) stabs forward instead of slashing. No firing while game.handsBusy() (climbing, swimming). */
+   'thrust' (melee) stabs forward instead of slashing. No firing while game.handsBusy() (climbing, swimming).
+   SIGHT: hold the right mouse button (or the 'aim' key, default Z) with a shooting weapon: the view zooms in by `zoom`, the
+   tool comes up to the middle of the screen, the mouse turns slower, you walk slower and cannot sprint, and shots do not
+   spread. game.aimK (0..1) is how far the sight is up; game.zoom is the zoom the view uses. */
 (function () {
   'use strict';
   const V = GK.vec, Ph = GK.Physics, U = GK.util;
@@ -9664,6 +9716,8 @@ GK_LIBRARY.worlds = {
       const M = game.input.map;
       if (!M.fire) M.fire = ['KeyQ'];
       if (!M.reload) M.reload = ['KeyR'];
+      if (!M.aim) M.aim = ['KeyZ'];
+      game.aimK = 0; game.zoom = 0;
       const add = (kind, n, model, look, type) => {
         const out = [];
         for (let i = 1; i <= n; i++) out.push(game.world.add({ id: 'fx-' + kind + i, type: type || 'fx', model, look, visible: false }));
@@ -9787,7 +9841,8 @@ GK_LIBRARY.worlds = {
           const b = take(fx.bolts);
           if (!b) break;
           let d = dir;
-          if (w.spread) d = V.norm([dir[0] + (Math.random() - 0.5) * w.spread * 2, dir[1] + (Math.random() - 0.5) * w.spread * 2, dir[2] + (Math.random() - 0.5) * w.spread * 2]);
+          const sp = w.spread * (1 - 0.75 * (game.aimK || 0));   // the sight steadies the shot
+          if (sp) d = V.norm([dir[0] + (Math.random() - 0.5) * sp * 2, dir[1] + (Math.random() - 0.5) * sp * 2, dir[2] + (Math.random() - 0.5) * sp * 2]);
           if (b.model !== pm) b.setModel(pm, pm === 'bolt' ? { color: w.color, size: w.boltSize } : {});
           else if (pm === 'bolt' && (b.look.color !== w.color || b.look.size !== w.boltSize)) b.setLook({ color: w.color, size: w.boltSize });
           b.pos = start.slice(); b.v = V.scale(d, w.speed); b.v[1] += lift; b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
@@ -9973,6 +10028,13 @@ GK_LIBRARY.worlds = {
       }
       inp.wheel = 0;
       game.clickFire = false;
+      // the sight: right mouse held (or Z) with a shooting weapon, while nothing else is going on
+      const cur = A.byId[s.cur], canAim = armed && cur && !cur.melee && (cur.zoom == null ? 0.35 : cur.zoom) > 0 && game.state.mode === 'playing' && !(game.handsBusy && game.handsBusy()) && game.reloadT <= 0;
+      const aiming = canAim && (inp.mouseR || inp.down('aim'));
+      game.aimK = U.clamp(game.aimK + (aiming ? dt : -dt) * 7, 0, 1);
+      game.zoom = canAim ? game.aimK * (cur.zoom == null ? 0.35 : cur.zoom) : 0;
+      if (game.player) game.player.aiming = aiming;
+      if (game.ui.hud) game.ui.hud.classList.toggle('gk-aiming', game.aimK > 0.6);
       if (game.cool > 0) game.cool -= dt;
       if (game.emptyT > 0) game.emptyT -= dt;
       if (game.reloadT > 0) { game.reloadT -= dt; if (game.reloadT <= 0) { game.reloadT = 0; game.reload(true); game.audio.play('click'); } }
@@ -9984,7 +10046,7 @@ GK_LIBRARY.worlds = {
       const rk = game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null;
       const lower = rk != null ? Math.sin(Math.PI * rk) : 0;
       game.viewModel = armed ? { model: w.model, look: animLook(game, w, o, rk), scale: w.viewScale, kick: w.melee ? 0 : game.kick, glow: w.projectile ? 0 : game.kick * 0.25, lower, melee: !!w.melee,
-        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0, anim: w.anim || null, reload: rk, raise: game.drawT / 0.3 } : null;
+        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0, anim: w.anim || null, reload: rk, raise: game.drawT / 0.3, aim: game.aimK } : null;
       if (game.viewModel && (w.anim === 'bow' || w.anim === 'sling')) game.viewModel.arms = { pose: w.anim, draw: game.viewModel.look.draw || 0, pull: game.viewModel.look.pull || 0 };
       game.ui.setWeapon(armed ? {
         name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')), melee: !!w.melee,
@@ -10063,7 +10125,7 @@ GK_LIBRARY.worlds = {
     },
     restore(game) {
       if (!game.state.arsenal) { game.state.arsenal = fresh(game.arsenalCfg); game.state.arsenal.coins = 0; }
-      game.reloadT = 0; game.swingT = 0; game.gunsWere = undefined;
+      game.reloadT = 0; game.swingT = 0; game.gunsWere = undefined; game.aimK = 0; game.zoom = 0;
       if (game.fx) for (const k in game.fx) if (Array.isArray(game.fx[k])) for (const e of game.fx[k]) e.hide();
     },
     answers(game) {
@@ -10651,13 +10713,14 @@ GK_LIBRARY.worlds = {
         S.stamina = Math.min(cfg.swimStamina, S.stamina + dt * 4);
       }
       if (game.swimming !== wasSwim) game.emit('traversal:swim', { on: game.swimming });
-      // ---- meter ----
-      const m = game.ui.trMeter, show = game.swimming || game.climbing || S.stamina < cfg.swimStamina;
+      // ---- meter (also the sprint bar when player.sprintTime limits running) ----
+      const run = pl.cfg.sprintTime && pl.stamina != null && !game.swimming && !game.climbing && (pl.sprinting || pl.stamina < pl.cfg.sprintTime) && S.stamina >= cfg.swimStamina;
+      const m = game.ui.trMeter, show = game.swimming || game.climbing || S.stamina < cfg.swimStamina || run;
       if (m) {
-        m.classList.toggle('show', show && S.mode === 'playing');
+        m.classList.toggle('show', !!show && S.mode === 'playing');
         if (show) {
-          m.querySelector('.gk-tr-label').textContent = game.climbing ? '🧗 Climbing · hold W' : game.swimming ? '🏊 Swimming' : '💨 Resting';
-          const k = S.stamina / cfg.swimStamina;
+          m.querySelector('.gk-tr-label').textContent = run ? (pl.tired ? '😮‍💨 Tired · walk to rest' : '🏃 Running') : game.climbing ? '🧗 Climbing · hold W' : game.swimming ? '🏊 Swimming' : '💨 Resting';
+          const k = run ? pl.stamina / pl.cfg.sprintTime : S.stamina / cfg.swimStamina;
           const b = m.querySelector('b');
           b.style.width = Math.round(k * 100) + '%';
           b.style.background = k < 0.3 ? '#ff6b6b' : k < 0.6 ? '#ffd166' : '#4cc9f0';
