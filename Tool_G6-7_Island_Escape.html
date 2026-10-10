@@ -637,13 +637,13 @@ window.GAME_CONTENT = {
   const gate = (id, at, flag, text, extra) => Object.assign({ id, type: 'door', at, width: 4.2, height: 3.4, slide: 'up', speed: 1.6, color: '#7a5232', name: 'gate', locked: { flag, text } }, extra);
   const HURT = [say('hurt', 'bad')];
   // ---- creatures (they give shells, not points) ----
-  const crab = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'crab', name: 'crab', speed: 1.4, wait: 0.5, damage: 8, knockback: 5, bob: 0, hp: 2, chase: 7, chaseSpeed: 2.4, squash: true, points: 0, coins: 10, tags: ['crab', 'enemy'], onHit: HURT }, where, extra);
-  const boar = (id, pos, extra) => Object.assign({ id, type: 'hazard', model: 'boar', name: 'wild boar', pos, speed: 1.6, damage: 12, knockback: 7, bob: 0, hp: 3, chase: 14, chaseSpeed: 3.4, points: 0, coins: 15, tags: ['boar', 'enemy'], onHit: HURT }, extra);
-  const monkey = (id, at, tag, extra) => Object.assign({ id, type: 'hazard', model: 'monkey', name: 'coconut monkey', at, damage: 0, bob: 0, faceTravel: false, hp: 3, points: 0, coins: 20,
+  const crab = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'crab', name: 'crab', gait: 'waddle', speed: 1.4, wait: 0.5, damage: 8, knockback: 5, bob: 0, hp: 2, chase: 7, chaseSpeed: 2.4, squash: true, points: 0, coins: 10, tags: ['crab', 'enemy'], onHit: HURT }, where, extra);
+  const boar = (id, pos, extra) => Object.assign({ id, type: 'hazard', model: 'boar', name: 'wild boar', gait: 'trot', pos, speed: 1.6, damage: 12, knockback: 7, bob: 0, hp: 3, chase: 14, chaseSpeed: 3.4, points: 0, coins: 15, tags: ['boar', 'enemy'], onHit: HURT }, extra);
+  const monkey = (id, at, tag, extra) => Object.assign({ id, type: 'hazard', model: 'monkey', name: 'coconut monkey', gait: 'hop', at, damage: 0, bob: 0, faceTravel: false, hp: 3, points: 0, coins: 20,
     shoots: { every: 2.6, range: 20, speed: 9, damage: 8, color: '#6b4a2b' }, tags: [tag, 'enemy'], onHit: HURT }, extra);
-  const snake = (id, route, extra) => Object.assign({ id, type: 'hazard', model: 'snake', name: 'snake', route, speed: 2.2, wait: 0.3, damage: 8, knockback: 4, bob: 0, hp: 1, chase: 5, chaseSpeed: 2.8, points: 0, coins: 8, tags: ['snake', 'enemy'], onHit: HURT }, extra);
-  const bat = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'bat', name: 'bat', speed: 2.4, wait: 0.1, damage: 6, knockback: 4, bob: 0.25, hp: 1, chase: 6, chaseSpeed: 3, points: 0, coins: 6, tags: ['caveBug', 'enemy'], onHit: HURT }, where, extra);
-  const spider = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'spider', name: 'cave spider', speed: 1.6, damage: 10, knockback: 5, bob: 0, hp: 2, chase: 9, chaseSpeed: 2.8, points: 0, coins: 12, tags: ['caveBug', 'enemy'], onHit: HURT }, where, extra);
+  const snake = (id, route, extra) => Object.assign({ id, type: 'hazard', model: 'snake', name: 'snake', gait: 'slither', route, speed: 2.2, wait: 0.3, damage: 8, knockback: 4, bob: 0, hp: 1, chase: 5, chaseSpeed: 2.8, points: 0, coins: 8, tags: ['snake', 'enemy'], onHit: HURT }, extra);
+  const bat = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'bat', name: 'bat', gait: 'flap', speed: 2.4, wait: 0.1, damage: 6, knockback: 4, bob: 0.25, hp: 1, chase: 6, chaseSpeed: 3, points: 0, coins: 6, tags: ['caveBug', 'enemy'], onHit: HURT }, where, extra);
+  const spider = (id, where, extra) => Object.assign({ id, type: 'hazard', model: 'spider', name: 'cave spider', gait: 'hop', speed: 1.6, damage: 10, knockback: 5, bob: 0, hp: 2, chase: 9, chaseSpeed: 2.8, points: 0, coins: 12, tags: ['caveBug', 'enemy'], onHit: HURT }, where, extra);
   const target = (id, at, tag) => ({ id, type: 'hazard', model: 'archeryTarget', name: 'target', at, hp: 1, damage: 0, bob: 0, faceTravel: false, points: 0, coins: 5, tags: [tag] });
   // ---- traps ----
   const spikes = (id, pos, phase) => ({ id, type: 'hazard', model: 'spikeTrap', name: 'spike trap', pos, pulse: [1.3, 1.7], phase: phase || 0, damage: 15, bob: 0, faceTravel: false, knockback: 6, points: 0, onHit: HURT });
@@ -703,12 +703,12 @@ window.GAME_CONTENT = {
     arsenal: {
       start: 'spear', objectiveCoins: 10, dropChance: 0.3, coinsName: 'shells', coinIcon: '🐚', shopTitle: C.shop.title,
       weapons: [
-        Object.assign(W('spear'), { id: 'spear', icon: '🗡️', model: 'spear', viewScale: 0.4, color: '#9ccc65', melee: true, owned: true, always: true, damage: 2, cooldown: 0.42, reach: 2.8, arc: 100, maxTargets: 3, swing: 0.38, price: 0 }),
-        Object.assign(W('slingshot'), { id: 'slingshot', icon: '🎯', model: 'slingshot', viewScale: 0.7, color: '#ced4da', damage: 1, cooldown: 0.3, speed: 30, range: 40, mag: 10, reserve: 40, maxReserve: 100, reload: 1.0, ammoPack: 20, ammoPrice: 15, boltSize: 0.08 }),
-        Object.assign(W('bow'), { id: 'bow', icon: '🏹', model: 'bow', viewScale: 0.5, color: '#d9b77a', damage: 2, cooldown: 0.55, speed: 44, range: 60, mag: 6, reserve: 24, maxReserve: 60, reload: 1.3, ammoPack: 12, ammoPrice: 20, boltSize: 0.07 }),
-        Object.assign(W('blowpipe'), { id: 'blowpipe', icon: '🎋', model: 'blowpipe', viewScale: 0.55, color: '#51cf66', damage: 1, cooldown: 0.1, speed: 36, range: 35, mag: 20, reserve: 60, maxReserve: 160, reload: 1.4, price: 150, ammoPack: 40, ammoPrice: 25, boltSize: 0.06 }),
-        Object.assign(W('harpoon'), { id: 'harpoon', icon: '🔱', model: 'harpoonGun', viewScale: 0.6, color: '#ced4da', damage: 4, pierce: true, cooldown: 0.85, speed: 60, range: 55, mag: 3, reserve: 12, maxReserve: 30, reload: 1.6, price: 300, ammoPack: 6, ammoPrice: 30, boltSize: 0.08 }),
-        Object.assign(W('coconut'), { id: 'coconut', icon: '🥥', model: 'coconutLauncher', color: '#8b5a2b', damage: 3, splash: 3, cooldown: 1.0, speed: 18, range: 35, mag: 3, reserve: 9, maxReserve: 24, reload: 1.8, price: 450, ammoPack: 6, ammoPrice: 40, boltSize: 0.2 }),
+        Object.assign(W('spear'), { id: 'spear', icon: '🗡️', model: 'spear', anim: 'thrust', viewScale: 0.4, color: '#9ccc65', melee: true, owned: true, always: true, damage: 2, cooldown: 0.42, reach: 2.8, arc: 100, maxTargets: 3, swing: 0.38, price: 0 }),
+        Object.assign(W('slingshot'), { id: 'slingshot', icon: '🎯', model: 'slingshot', anim: 'sling', projectile: 'pebbleShot', drop: 3, viewScale: 0.7, color: '#ced4da', damage: 1, cooldown: 0.3, speed: 30, range: 40, mag: 10, reserve: 40, maxReserve: 100, reload: 1.0, ammoPack: 20, ammoPrice: 15, boltSize: 0.08 }),
+        Object.assign(W('bow'), { id: 'bow', icon: '🏹', model: 'bow', anim: 'bow', projectile: 'arrowShot', drop: 2, viewScale: 0.5, color: '#d9b77a', damage: 2, cooldown: 0.55, speed: 44, range: 60, mag: 6, reserve: 24, maxReserve: 60, reload: 1.3, ammoPack: 12, ammoPrice: 20, boltSize: 0.07 }),
+        Object.assign(W('blowpipe'), { id: 'blowpipe', icon: '🎋', model: 'blowpipe', projectile: 'dartShot', viewScale: 0.55, color: '#51cf66', damage: 1, cooldown: 0.1, speed: 36, range: 35, mag: 20, reserve: 60, maxReserve: 160, reload: 1.4, price: 150, ammoPack: 40, ammoPrice: 25, boltSize: 0.06 }),
+        Object.assign(W('harpoon'), { id: 'harpoon', icon: '🔱', model: 'harpoonGun', anim: 'load', projectile: 'harpoonShot', viewScale: 0.6, color: '#ced4da', damage: 4, pierce: true, cooldown: 0.85, speed: 60, range: 55, mag: 3, reserve: 12, maxReserve: 30, reload: 1.6, price: 300, ammoPack: 6, ammoPrice: 30, boltSize: 0.08 }),
+        Object.assign(W('coconut'), { id: 'coconut', icon: '🥥', model: 'coconutLauncher', anim: 'load', projectile: 'coconutShot', drop: 7, color: '#8b5a2b', damage: 3, splash: 3, cooldown: 1.0, speed: 18, range: 35, mag: 3, reserve: 9, maxReserve: 24, reload: 1.8, price: 450, ammoPack: 6, ammoPrice: 40, boltSize: 0.2 }),
       ],
       extras: [
         { id: 'fruit', name: C.shop.fruit, desc: C.shop.fruitDesc, icon: '🍌', price: 40, actions: [{ do: 'heal', amount: 50 }] },
@@ -807,7 +807,7 @@ window.GAME_CONTENT = {
           { id: 'bridgeDeck', model: 'box', pos: [90, -0.32, 18], look: { size: [9.2, 0.3, 4] }, color: '#8b5a2b', solid: true, visible: false },
           // ---- the east bank and the delta: King Claw ----
           pad('cpEast', [100, 0, 18]),
-          { id: 'kingClaw', type: 'hazard', model: 'crab', name: 'MINI-BOSS · KING CLAW', at: 'crabLair', visible: false, scale: 3.4, bodyRadius: 1.4, boss: true, engage: 28,
+          { id: 'kingClaw', type: 'hazard', model: 'crab', name: 'MINI-BOSS · KING CLAW', gait: 'stomp', at: 'crabLair', visible: false, scale: 3.4, bodyRadius: 1.4, boss: true, engage: 28,
             hp: 16, damage: 18, speed: 1.4, chase: 28, chaseSpeed: 1.9, knockback: 9, bob: 0, points: 0, coins: 120, look: { color: '#e8590c' }, tags: ['kingClaw', 'enemy'],
             shoots: { every: 2.6, range: 22, speed: 8, damage: 10, color: '#74c0fc' }, onHit: HURT,
             onDefeat: [{ do: 'flag', set: 'clawDown' }, say('clawDown')] },
@@ -869,7 +869,7 @@ window.GAME_CONTENT = {
           { id: 'ladder', type: 'climb', model: 'ropeLadder', pos: [71.6, 0, 16], rot: 'w', size: [2.2, 3.6, 1.0] },
           pad('cpLedge', [76, 3, 16]),
           ...[[80, 8], [96, 8], [80, 28], [96, 28]].map(([x, z], i) => ({ id: 'ledgeTorch' + i, model: 'tikiTorch', pos: [x, 3, z], solid: false, light: { color: '#be4bdb', range: 10, intensity: 0.9 } })),
-          { id: 'spiderQueen', type: 'hazard', model: 'spider', name: 'MINI-BOSS · SPIDER QUEEN', at: 'throne', visible: false, scale: 2.6, look: { crown: true, color: '#3b2f4a', eyes: '#be4bdb' }, bodyRadius: 1.2, boss: true, engage: 26,
+          { id: 'spiderQueen', type: 'hazard', model: 'spider', name: 'MINI-BOSS · SPIDER QUEEN', gait: 'stomp', at: 'throne', visible: false, scale: 2.6, look: { crown: true, color: '#3b2f4a', eyes: '#be4bdb' }, bodyRadius: 1.2, boss: true, engage: 26,
             hp: 22, damage: 16, speed: 1.5, chase: 26, chaseSpeed: 2.0, knockback: 8, bob: 0, points: 0, coins: 150, tags: ['spiderQueen', 'enemy'],
             shoots: { every: 2.4, range: 22, speed: 8, damage: 10, color: '#f1f3f5' }, summon: { every: 9, ids: ['qs1', 'qs2', 'qs3'], max: 2, first: 4 }, rage: { below: 0.34, speed: 1.4 }, onHit: HURT,
             onDefeat: [{ do: 'flag', set: 'queenDown' }, { do: 'show', target: 'exitPortal' }, say('queenDown')] },
@@ -913,7 +913,7 @@ window.GAME_CONTENT = {
           pad('cpCove', [92, 0, 18]),
           { id: 'kikoCove', type: 'npc', model: 'parrot', name: 'Kiko', at: 'coveKiko', faceRange: 8, visible: false, interact: [kikoTalk('kikoCove')] },
           totem(1, 'totem1'), totem(2, 'totem2'), totem(3, 'totem3'),
-          { id: 'tiki', type: 'hazard', model: 'tikiGuardian', name: 'FINAL BOSS · TIKI GUARDIAN', at: 'arena', visible: false, bodyRadius: 1.4, boss: true, engage: 40,
+          { id: 'tiki', type: 'hazard', model: 'tikiGuardian', name: 'FINAL BOSS · TIKI GUARDIAN', gait: 'stomp', at: 'arena', visible: false, bodyRadius: 1.4, boss: true, engage: 40,
             hp: 40, damage: 22, speed: 1.2, chase: 40, chaseSpeed: 1.4, knockback: 10, bob: 0, points: 0, coins: 300, faceTravel: true, tags: ['tiki', 'enemy'],
             armor: { not: 'shieldsDown' }, shoots: { every: 2.2, range: 30, speed: 9, damage: 12, color: '#ff922b' },
             summon: { every: 9, ids: ['sc1', 'sc2', 'sc3', 'sc4'], max: 3, first: 4 }, rage: { below: 0.34, speed: 1.4 }, onHit: HURT,
@@ -1824,6 +1824,9 @@ GK_LIBRARY.worlds = {
         contextmenu: e => { if (e.target === this.el || this.locked) e.preventDefault(); },   // right click is a game button
         wheel: e => { if (this.locked || e.target === this.el) this.wheel += e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0; },
         lockchange: () => {
+          // the browser grants a lock a moment after it is asked: if a story card or panel opened in that moment
+          // (unlock() was called), give the mouse straight back instead of hiding it over the card
+          if (document.pointerLockElement === this.el && !this.wantLock) { document.exitPointerLock(); return; }
           this.locked = document.pointerLockElement === this.el;
           this.drag = null;
           if (this.onLockChange) this.onLockChange(this.locked);
@@ -1853,10 +1856,11 @@ GK_LIBRARY.worlds = {
     /** Hold an action from code (tests, on-screen buttons): input.force('forward', true). */
     force(action, on) { this.forced[action] = !!on; }
     lock() {
+      this.wantLock = true;
       if (this.locked || !this.el.requestPointerLock) return;
       try { const p = this.el.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* fallback: drag to look */ }
     }
-    unlock() { if (document.pointerLockElement) document.exitPointerLock(); }
+    unlock() { this.wantLock = false; if (document.pointerLockElement) document.exitPointerLock(); }
     destroy() {
       document.removeEventListener('keydown', this.handlers.keydown);
       document.removeEventListener('keyup', this.handlers.keyup);
@@ -4187,8 +4191,11 @@ GK_LIBRARY.worlds = {
                  look.part = 'torso' (origin at the feet) | 'head' (origin at the neck) | 'armL' / 'armR' (at the shoulder) |
                  'legL' / 'legR' (at the hip). Arms and legs hang straight down (−y) from the joint.
      'fpArms'    first-person sleeves and hands in WEAPON space (drawn with the weapon's own transform):
-                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt)
+                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt) |
+                 'bow' | 'sling' (the left hand holds it out in front; the drawing hand is at the cheek, out of view) |
+                 'spear' (one hand on a melee tool pitched forward to stab)
      'fpFist'    a first-person punching arm (fist at the origin, sleeve back toward the camera) in weapon space
+     'fpHand'    a first-person open hand (palm down, fingers forward; look.grip curls them): climbing and swimming
      'sword'     a sword pointing UP (+y) from the hilt at the origin: look.color blade, look.glow edge, look.guard, look.grip
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail',
                        shirt, pants, shoes, accent (a small glowing badge), skirt: true }
@@ -4292,7 +4299,13 @@ GK_LIBRARY.worlds = {
       g.add(G().box(0, -0.06, 0, 0.12, 0.12, 0.13, sk, { top: dk(sk, 1.08) }).move(hand[0], hand[1], hand[2]));
     };
     if (o.pose === 'sword') arm([0, -0.02, 0], [-0.09, -0.2, -0.2], [-0.16, -0.4, -0.5]);
-    else {
+    else if (o.pose === 'spear') arm([0, -0.02, 0], [-0.07, -0.26, 0.1], [-0.14, -0.55, 0.22]);   // tool pitched forward: back = −y, down = +z
+    else if (o.pose === 'bow' || o.pose === 'sling') {
+      // the holding hand round the bow's grip / the slingshot's handle, the arm reaching out from the lower left; the
+      // drawing hand is back at the cheek, out of view (the string or band is seen stretched back toward you)
+      const y = o.pose === 'bow' ? -0.04 : -0.16, z = o.pose === 'bow' ? 0.1 : 0;
+      arm([0, y, z], [0.1, y - 0.16, z - 0.12], [0.2, y - 0.34, z - 0.3]);
+    } else {
       arm([-0.05, -0.07, -0.11], [-0.11, -0.2, -0.26], [-0.17, -0.34, -0.42]);   // right hand round the grip
       arm([0.05, -0.06, 0.07], [0.13, -0.17, -0.08], [0.22, -0.3, -0.26]);       // left hand under the barrel
     }
@@ -4307,6 +4320,21 @@ GK_LIBRARY.worlds = {
     g.box(0, -0.11, 0, 0.22, 0.2, 0.22, sk, { top: dk(sk, 1.08) });                                    // fist
     for (const x of [-0.075, -0.025, 0.025, 0.075]) g.box(x, 0.02, 0.1, 0.045, 0.06, 0.035, dk(sk, 0.88));   // knuckles
     return g.box(0.12, -0.08, 0.02, 0.05, 0.1, 0.12, dk(sk, 0.95));                                    // thumb
+  });
+
+  /* A first-person OPEN hand (climbing, swimming): the palm at the origin facing down (−y), fingers forward (+z), the
+     sleeve going back (−z) toward the camera. look.grip: fingers curled (holding a vine). */
+  M.add('fpHand', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    segment(g, [0, -0.02, -0.8], [0, 0, -0.1], 0.16, 0.15, sl);
+    g.box(0, -0.075, -0.12, 0.17, 0.15, 0.05, dk(sl, 0.8));                                            // cuff
+    g.box(0, -0.05, 0, 0.19, 0.09, 0.2, dk(sk, 0.86), { top: dk(sk, 0.92) });                          // palm (a little dark: it is close to the eye)
+    const curl = o.grip ? 1 : 0;
+    for (const x of [-0.07, -0.023, 0.023, 0.07]) {                                                    // fingers
+      if (curl) g.box(x, -0.09, 0.1, 0.04, 0.09, 0.05, dk(sk, 0.92));
+      else g.box(x, -0.04, 0.1, 0.04, 0.05, 0.13, dk(sk, 0.92));
+    }
+    return g.box(0.115, -0.05, 0.0, 0.05, 0.06, 0.12, dk(sk, 0.95));                                   // thumb
   });
 
   /* Swords: hilt at the origin, blade up. */
@@ -4591,7 +4619,7 @@ GK_LIBRARY.worlds = {
     }
     setLook(changes) { this.setModel(this.model, U.merge(this.look, changes)); }
     get active() { return this.visible && !this.removed; }
-    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }
+    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.lift || 0) + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }   // lift: a drawn-only hop (e.g. a creature's gait)
     /** World-space box around the model (rotated bounds). */
     box(noAnim) {
       const b = this.shape ? this.shape.bounds : { min: [-0.25, 0, -0.25], max: [0.25, 0.5, 0.25] };
@@ -5531,6 +5559,9 @@ GK_LIBRARY.worlds = {
    Camera: first person, or THIRD PERSON (ui.views; the title screen and the V key switch it, kept per computer in
    GK.Settings 'view'): the camera sits behind the right shoulder (pulled in by walls) and the character is drawn
    walking, aiming the gun or swinging the sword. Aiming, shooting and E still work from the player's eyes.
+   Animation: the held tool follows game.viewModel (kick, reload dip + tilt, raise after a switch, bow / sling draw,
+   spear thrust); while game.climbing / game.swimming (mechanics/traversal) both hands climb hand over hand or swim
+   breaststroke instead (game.climbPhase / swimPhase), in third person too. A hard landing dips the camera.
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
@@ -5686,7 +5717,12 @@ GK_LIBRARY.worlds = {
         const m = g.input.takeMouse();
         g.player.look(m[0], m[1]);
       }
+      const fall = g.player && !g.player.grounded ? g.player.vel[1] : 0;
       GK.Spatial.update(g, dt, g.input);
+      // a landing after a fall dips the camera a little (bigger fall, bigger dip)
+      if (g.player && g.player.grounded && this.fallV < -4 && mode === 'playing') { this.landT = 0.28; this.landAmp = U.clamp(-this.fallV * 0.011, 0.04, 0.14); }
+      this.fallV = g.player && !g.player.grounded ? Math.min(fall, g.player.vel[1]) : 0;
+      if (this.landT > 0) this.landT -= dt;
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
       if (this.aimT > 0) this.aimT -= dt;
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
@@ -5701,6 +5737,7 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer;
       r.resize();
       let eye = g.player.eye();
+      if (this.landT > 0) eye = [eye[0], eye[1] - this.landAmp * Math.sin(Math.PI * this.landT / 0.28), eye[2]];
       if (g.shakeT > 0 && g.state.mode === 'playing') {
         const a = g.shakeAmp * Math.min(1, g.shakeT * 4);
         eye = [eye[0] + (Math.random() - 0.5) * a, eye[1] + (Math.random() - 0.5) * a, eye[2] + (Math.random() - 0.5) * a];
@@ -5764,8 +5801,10 @@ GK_LIBRARY.worlds = {
         }
       }
       const vm = g.viewModel;
+      const live = g.state.mode === 'playing' || g.state.mode === 'paused';
       if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
-      else if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) this.drawHeld(items, vm, eye);
+      else if ((g.climbing || g.swimming) && live) this.drawLimbs(items, eye);
+      else if (vm && vm.model && live) this.drawHeld(items, vm, eye);
       else if (g.player.punchK >= 0 && g.state.mode === 'playing') this.drawPunch(items, eye);
       r.render(items);
 
@@ -5812,6 +5851,30 @@ GK_LIBRARY.worlds = {
       const look = this.heroLook(), mesh = r.cached('fpFist' + JSON.stringify(look), () => GK.Models.shape('fpFist', look, 'arms').geo);
       items.push({ mesh, pos, yaw: yaw + Math.PI - sd * (0.35 - k * 0.3), pitch: p.pitch + 0.18 - k * 0.12, roll: sd * 0.25, scale: 1, front: true });
     }
+    /** First person while climbing or swimming: both hands, no tool. Climbing = hand over hand up the vines (the hands
+        move with game.climbPhase); swimming = breaststroke (game.swimPhase): together in front, out wide, back in. */
+    drawLimbs(items, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const at = (along, side, down) => [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const look = this.heroLook();
+      for (const sd of [1, -1]) {   // 1 = right hand, −1 = left hand
+        let pos, pitch, roll, grip = false;
+        if (g.climbing) {
+          // one hand reaches up while the other pulls down; a reaching hand is open, a pulling hand grips
+          const ph = (g.climbPhase || 0) + (sd < 0 ? Math.PI : 0), h = Math.sin(ph);
+          grip = Math.cos(ph) < 0;
+          pos = at(0.6 - Math.max(0, h) * 0.04, sd * 0.2, -0.1 + h * 0.17);
+          pitch = p.pitch + 1.15 + h * 0.15; roll = sd * 0.15;
+        } else {
+          const s = (g.swimPhase || 0) % (Math.PI * 2), out = Math.max(0, Math.sin(s)), fwd = Math.cos(s);
+          pos = at(0.6 + fwd * 0.14, sd * (0.1 + out * 0.3), -0.3 - out * 0.03);
+          pitch = p.pitch + 0.22; roll = sd * (0.35 + out * 0.45);
+        }
+        const hl = Object.assign({ grip }, look), mesh = r.cached('fpHand' + JSON.stringify(hl), () => GK.Models.shape('fpHand', hl, 'arms').geo);
+        items.push({ mesh, pos, yaw: yaw + Math.PI - sd * 0.12, pitch, roll, scale: 0.45, front: true });
+      }
+    }
     /** The chosen character's look (a default one for games without characters). */
     heroLook() { const l = this.game.characterLook ? this.game.characterLook() : null; return l || {}; }
     /** First person: the tool in the hand, with the player's sleeves and hands. Guns kick back; swords swing. */
@@ -5819,9 +5882,17 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
       const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
       const sway = p.moving ? Math.sin((p.bobT || 0) * 2) * 0.012 : 0, look = this.heroLook();
+      const air = p.grounded ? 0 : U.clamp(-p.vel[1] * 0.006, -0.035, 0.045);   // in a jump the tool lags behind
+      const raise = vm.raise || 0, rk = vm.reload;
       let along, side, down, pitch, yo = 0;
       let roll = 0;
-      if (vm.melee) {
+      if (vm.melee && vm.anim === 'thrust') {
+        // spear: held low, pointing ahead; a thrust pulls back a little, then stabs straight out and comes back
+        const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t);
+        const reach = k <= 0 ? 0 : k < 0.2 ? -0.35 * ease(k / 0.2) : k < 0.5 ? -0.35 + 1.35 * ease((k - 0.2) / 0.3) : 1 - ease((k - 0.5) / 0.5);
+        along = 0.42 + reach * 0.32; side = 0.2 - Math.max(0, reach) * 0.1; down = -0.24 + sway + air - raise * 0.3 + Math.max(0, reach) * 0.06;
+        pitch = p.pitch - 1.3 - Math.max(0, reach) * 0.22; roll = 0.1;
+      } else if (vm.melee) {
         // sword: rest with the blade up at the right; a swing winds up, slashes across and down to the left, then recovers
         const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t), mix = (a, b, t) => a + (b - a) * t;
         let ang = -0.3, sideK = 0;
@@ -5832,16 +5903,22 @@ GK_LIBRARY.worlds = {
         along = 0.4; side = 0.25 - sideK * 0.24; down = -0.21 + sway - sideK * 0.04 - (vm.lower || 0) * 0.22;
         pitch = p.pitch + ang;
       } else {
-        const k = vm.kick || 0;
-        along = 0.44 - k * 0.1; side = 0.19; down = -0.18 + sway - k * 0.02 - (vm.lower || 0) * 0.22;
-        pitch = p.pitch + k * 0.15 - (vm.lower || 0) * 0.6;
+        const k = vm.kick || 0, lo = vm.lower || 0;
+        along = 0.44 - k * 0.1; side = 0.19 - lo * 0.06; down = -0.18 + sway + air - k * 0.02 - lo * 0.2 - raise * 0.3;
+        pitch = p.pitch + k * 0.15 - lo * 0.5 - raise * 0.7;
+        if (rk != null) roll = Math.sin(Math.PI * rk) * 0.75;   // reloading: dip and tilt the tool toward you, then back
+        if (vm.anim === 'bow' || vm.anim === 'sling') {   // held out in front, the arrow / pebble lined up with the crosshair
+          const bow = vm.anim === 'bow';
+          side = bow ? 0.07 : 0.05; down += bow ? 0.04 : 0.04; along += 0.06; roll += bow ? 0.2 : 0.08; pitch -= k * 0.1 - (bow ? 0.06 : 0);
+          yo = bow ? 0.22 : 0.1;   // turned in a little, so the arrow is seen pointing at the crosshair
+        }
       }
       const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
       const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
       const it = { pos, yaw: yaw + Math.PI + yo, pitch, roll, scale: vm.scale || (vm.melee ? 0.55 : 0.75), front: true };
       items.push(Object.assign({ mesh, hi: vm.glow || 0 }, it));
       if (GK.Models.has && !GK.Models.has('fpArms')) return;
-      const arms = Object.assign({ pose: vm.melee ? 'sword' : 'gun' }, look);
+      const arms = Object.assign({ pose: vm.melee ? (vm.anim === 'thrust' ? 'spear' : 'sword') : 'gun' }, vm.arms || {}, look);
       items.push(Object.assign({ mesh: r.cached('fpArms' + JSON.stringify(arms), () => GK.Models.shape('fpArms', arms, 'arms').geo) }, it));
     }
     /** Third person: the camera behind the right shoulder, looking where the player aims; walls pull it in. */
@@ -5880,6 +5957,16 @@ GK_LIBRARY.worlds = {
       const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
       const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
       const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (g.climbing) {   // arms up on the vines, hand over hand; legs step
+        const ph = g.climbPhase || 0;
+        out.armR = 2.75 + Math.sin(ph) * 0.35; out.armL = 2.75 - Math.sin(ph) * 0.35; out.sw = Math.sin(ph) * 0.45; out.air = 0;
+        return out;
+      }
+      if (g.swimming) {   // front crawl: the arms turn over, the legs kick fast
+        const ph = g.swimPhase || 0;
+        out.armR = ph % (Math.PI * 2); out.armL = (ph + Math.PI) % (Math.PI * 2); out.sw = Math.sin(ph * 3) * 0.3; out.air = 0.25;
+        return out;
+      }
       if (p.punchK >= 0 && !vm) { const k = GK.punchReach(p.punchK); if (p.punchSide < 0) out.armL = lerp(out.armL, 1.65, k); else out.armR = lerp(out.armR, 1.65, k); }
       if (!vm) return out;
       if (vm.melee) {
@@ -7137,7 +7224,9 @@ GK_LIBRARY.worlds = {
 /* Game Kit · assets/models/wild.js — island / jungle WEAPONS, CREATURES, TRAPS and PROPS (loaded with the wild worlds,
    after assets/models/island.js). Held weapons follow the kit's convention: guns face +z with the grip at the origin;
    melee weapons have the grip at the origin and the tip up (+y).
-   Weapons:   spear · slingshot · bow · blowpipe · harpoonGun · coconutLauncher
+   Weapons:   spear · slingshot {pull, pebble} · bow {draw, arrow} · blowpipe · harpoonGun {loaded} · coconutLauncher {loaded}
+              (the look keys animate them: mechanics/weapons sets them from the weapon's `anim`)
+   Shots:     arrowShot · pebbleShot · dartShot · harpoonShot · coconutShot (a weapon's `projectile`, pointing +z)
    Creatures: boar · monkey (sits on a stump, throws coconuts) · snake · spider {crown, eyes} · tikiGuardian (boss) ·
               totem {off} (a shield totem)
    Traps:     spikeTrap {off} · quicksand {r} · steamVent {off}
@@ -7149,6 +7238,14 @@ GK_LIBRARY.worlds = {
   const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
   const WOOD = '#8b5a2b', WOOD2 = '#a0703c', ROPE = '#d9b77a';
   const AZ = g => g.rotX(Math.PI / 2);   // a cylinder along +y → along +z
+  /** A thin square rod from a to b (strings, bands). */
+  const seg = (g, a, b, w, col) => {
+    const d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], len = Math.hypot(d[0], d[1], d[2]) || 0.001;
+    const rod = G().box(0, -w / 2, len / 2, w, w, len, col);   // along +z from the origin
+    const pitch = Math.asin(d[1] / len), yaw = Math.atan2(d[0], d[2]);
+    g.add(rod.rotX(-pitch).rotY(yaw).move(a[0], a[1], a[2]));
+    return g;
+  };
 
   // ----- weapons -----
   M.add('spear', o => {   // bamboo spear with a stone tip, tied with rope
@@ -7159,21 +7256,30 @@ GK_LIBRARY.worlds = {
     if (o.glow) g.cone(0, 0.8, 0, 0.03, 0.14, o.glow, { seg: 4, glow: 0.6 });
     return g;
   });
-  M.add('slingshot', o => {   // a Y-shaped wooden slingshot with a rubber band and a pebble in the pouch
-    const c = o.color || '#8b5a2b', g = G().box(0, -0.2, 0, 0.04, 0.2, 0.04, c);
+  M.add('slingshot', o => {   // a Y-shaped wooden slingshot; look.pull (0..1) stretches the band back, look.pebble: false = empty
+    const c = o.color || '#8b5a2b', g = G().box(0, -0.2, 0, 0.04, 0.2, 0.04, c), back = 0.25 * (o.pull || 0);
     g.add(G().box(0, 0, 0, 0.035, 0.16, 0.035, c).rotZ(0.45).move(-0.035, 0, 0.02)).add(G().box(0, 0, 0, 0.035, 0.16, 0.035, c).rotZ(-0.45).move(0.035, 0, 0.02));
-    g.box(-0.07, 0.13, 0.02, 0.012, 0.012, 0.12, '#e03131').box(0.07, 0.13, 0.02, 0.012, 0.012, 0.12, '#e03131').box(0, 0.13, -0.05, 0.13, 0.012, 0.03, '#e03131');
-    return g.sphere(0, 0.135, -0.06, 0.025, '#adb5bd', { seg: 6, rings: 4 });
+    const pz = -0.05 - back;
+    seg(g, [-0.07, 0.135, 0.02], [-0.03, 0.135, pz], 0.012, '#e03131');                   // the band, to the pouch
+    seg(g, [0.07, 0.135, 0.02], [0.03, 0.135, pz], 0.012, '#e03131');
+    g.box(0, 0.125, pz - 0.015, 0.07, 0.02, 0.03, '#6d4c41');                              // leather pouch
+    if (o.pebble !== false) g.sphere(0, 0.14, pz, 0.025, '#adb5bd', { seg: 6, rings: 4 });
+    return g;
   });
-  M.add('bow', o => {   // a curved wooden hunting bow with its string and a nocked arrow
-    const c = o.color || '#8b5a2b', g = G();
-    const seg = (y0, y1, z0, z1) => { const len = Math.hypot(y1 - y0, z1 - z0), a = Math.atan2(z1 - z0, y1 - y0); g.add(G().box(0, 0, 0, 0.03, len, 0.035, c).rotX(a).move(0, y0, z0)); };
-    seg(-0.06, 0.18, 0.12, 0.08); seg(0.18, 0.36, 0.08, -0.02); seg(0.06, -0.18, 0.12, 0.08); seg(-0.18, -0.36, 0.08, -0.02);
+  M.add('bow', o => {   // a curved hunting bow; look.draw (0..1) pulls the string and arrow back, look.arrow: false = no arrow
+    const c = o.color || '#8b5a2b', g = G(), d = o.draw || 0, back = 0.16 * d, tip = -0.02 + 0.03 * d;
+    const limb = (y0, y1, z0, z1) => { const len = Math.hypot(y1 - y0, z1 - z0), a = Math.atan2(z1 - z0, y1 - y0); g.add(G().box(0, 0, 0, 0.03, len, 0.035, c).rotX(a).move(0, y0, z0)); };
+    limb(-0.06, 0.18, 0.12, 0.08); limb(0.18, 0.34 - 0.02 * d, 0.08, tip); limb(0.06, -0.18, 0.12, 0.08); limb(-0.18, -0.34 + 0.02 * d, 0.08, tip);
     g.box(0, -0.07, 0.1, 0.04, 0.14, 0.05, '#4e342e');                                   // grip
-    g.box(0, -0.36, -0.02, 0.006, 0.72, 0.006, '#f1f3f5');                               // string
-    g.add(AZ(G().cyl(0, -0.02, 0, 0.008, 0.5, '#d9b77a', { seg: 5 })));                   // arrow shaft
-    g.add(AZ(G().cone(0, 0, 0, 0.018, 0.05, '#adb5bd', { seg: 4 })).move(0, 0, 0.48));
-    return g.box(0, 0, -0.02, 0.05, 0.03, 0.05, o.fletch || '#e03131');
+    const nock = [0, 0, -0.02 - back];
+    seg(g, [0, 0.34 - 0.02 * d, tip], nock, 0.006, '#f1f3f5');                            // string, bent to the nock
+    seg(g, [0, -0.34 + 0.02 * d, tip], nock, 0.006, '#f1f3f5');
+    if (o.arrow !== false) {
+      g.add(AZ(G().cyl(0, 0, 0, 0.008, 0.5, '#d9b77a', { seg: 5 })).move(0, 0, nock[2]));  // arrow shaft
+      g.add(AZ(G().cone(0, 0, 0, 0.018, 0.05, '#adb5bd', { seg: 4 })).move(0, 0, nock[2] + 0.5));
+      g.box(0, -0.015, nock[2] + 0.02, 0.05, 0.03, 0.05, o.fletch || '#e03131');
+    }
+    return g;
   });
   M.add('blowpipe', o => {   // a long bamboo blowpipe
     const g = AZ(G().cyl(0, -0.2, 0, 0.022, 0.85, '#9ccc65', { seg: 7 }));
@@ -7182,16 +7288,36 @@ GK_LIBRARY.worlds = {
   });
   M.add('harpoonGun', o => {   // a wooden spear-gun with a metal harpoon
     const g = G().box(0, -0.05, -0.06, 0.07, 0.07, 0.42, '#6d4c41', { top: '#8d6e63' }).box(0, -0.17, -0.14, 0.05, 0.13, 0.06, '#4e342e');
-    g.add(AZ(G().cyl(0, -0.05, 0, 0.012, 0.6, '#ced4da', { seg: 6 })).move(0, 0.01, 0));
-    g.add(AZ(G().cone(0, 0, 0, 0.03, 0.08, '#e9ecef', { seg: 4 })).move(0, 0.01, 0.55));
+    if (o.loaded !== false) {   // look.loaded: false = fired, the harpoon is gone
+      g.add(AZ(G().cyl(0, -0.05, 0, 0.012, 0.6, '#ced4da', { seg: 6 })).move(0, 0.01, 0));
+      g.add(AZ(G().cone(0, 0, 0, 0.03, 0.08, '#e9ecef', { seg: 4 })).move(0, 0.01, 0.55));
+    }
     return g.box(0, 0, 0.16, 0.12, 0.012, 0.02, '#e03131').box(0, -0.1, 0.02, 0.02, 0.05, 0.05, '#212529');
   });
   M.add('coconutLauncher', o => {   // a thick bamboo tube that lobs coconut bombs
     const g = AZ(G().cyl(0, -0.15, 0, 0.07, 0.5, '#7cb342', { seg: 9 }));
     g.add(AZ(G().cyl(0, 0, 0, 0.078, 0.03, '#558b2f', { seg: 9 })).move(0, 0, 0.12)).add(AZ(G().cyl(0, 0, 0, 0.078, 0.03, '#558b2f', { seg: 9 })).move(0, 0, 0.3));
-    g.sphere(0, 0, 0.38, 0.06, '#6b4a2b', { seg: 7, rings: 5 }).box(0, 0.06, 0.38, 0.015, 0.05, 0.015, '#ff922b', { glow: 1 });
+    if (o.loaded !== false) g.sphere(0, 0, 0.38, 0.06, '#6b4a2b', { seg: 7, rings: 5 }).box(0, 0.06, 0.38, 0.015, 0.05, 0.015, '#ff922b', { glow: 1 });
     return g.box(0, -0.13, -0.05, 0.05, 0.13, 0.06, '#4e342e');
   });
+
+  // ----- projectiles in flight (weapon `projectile`): centred on the origin, pointing +z -----
+  M.add('arrowShot', o => {
+    const g = AZ(G().cyl(0, -0.3, 0, 0.012, 0.6, '#d9b77a', { seg: 5 }));
+    g.add(AZ(G().cone(0, 0, 0, 0.026, 0.08, '#adb5bd', { seg: 4 })).move(0, 0, 0.3));
+    return g.box(0, -0.02, -0.27, 0.07, 0.04, 0.07, o.fletch || '#e03131').box(-0.02, 0, -0.27, 0.04, 0.07, 0.07, o.fletch || '#e03131');
+  });
+  M.add('pebbleShot', o => G().sphere(0, 0, 0, 0.06, '#adb5bd', { seg: 6, rings: 4 }));
+  M.add('dartShot', o => {
+    const g = AZ(G().cyl(0, -0.12, 0, 0.007, 0.24, '#f1f3f5', { seg: 4 }));
+    return g.add(AZ(G().cone(0, 0, 0, 0.03, 0.06, '#51cf66', { seg: 5, glow: 0.5 })).move(0, 0, -0.14));
+  });
+  M.add('harpoonShot', o => {
+    const g = AZ(G().cyl(0, -0.45, 0, 0.016, 0.9, '#ced4da', { seg: 6 }));
+    g.add(AZ(G().cone(0, 0, 0, 0.04, 0.12, '#e9ecef', { seg: 4 })).move(0, 0, 0.45));
+    return g.box(0, 0, 0.36, 0.12, 0.012, 0.02, '#e03131');
+  });
+  M.add('coconutShot', o => G().sphere(0, 0, 0, 0.14, '#6b4a2b', { seg: 8, rings: 6 }).box(0, 0.12, 0, 0.03, 0.08, 0.03, '#ff922b', { glow: 1 }));
 
   // ----- creatures (front +z, standing on y = 0) -----
   M.add('boar', o => {   // a wild boar: chunky body, snout, tusks, short legs
@@ -9100,6 +9226,29 @@ GK_LIBRARY.worlds = {
     }
   }
 
+  /** gait: how a creature moves (drawn only, nothing changes in the game): 'waddle' (rocks side to side: crabs),
+      'trot' (bounces and nods: boars), 'hop' (jumps along), 'flap' (flutters up and down: bats), 'slither' (sways:
+      snakes), 'stomp' (heavy steps: big bosses). Shooters lean back before they throw and forward as they throw;
+      a hit knocks them back a little. */
+  function gait(ent, dt, moved) {
+    const g = ent.def.gait, t = ent.t || 0;
+    ent.gaitK = U.lerp(ent.gaitK || 0, moved > 0.001 ? 1 : 0, Math.min(1, dt * 8));
+    ent.gaitPh = (ent.gaitPh || 0) + moved * (g === 'hop' ? 3.2 : g === 'stomp' ? 2.4 : 6.5);
+    const k = ent.gaitK, ph = ent.gaitPh;
+    let lift = 0, roll = 0, pitch = 0;
+    if (g === 'waddle') { roll = Math.sin(ph) * 0.2 * k; lift = Math.abs(Math.sin(ph)) * 0.05 * k; }
+    else if (g === 'trot') { pitch = Math.sin(ph * 2) * 0.09 * k; lift = Math.abs(Math.sin(ph)) * 0.1 * k; }
+    else if (g === 'hop') lift = Math.abs(Math.sin(ph)) * 0.35 * k;
+    else if (g === 'flap') { lift = Math.sin(t * 11) * 0.1; roll = Math.sin(t * 5.5) * 0.18; }
+    else if (g === 'slither') { roll = Math.sin(t * 7) * 0.12 * (0.4 + k); lift = 0; }
+    else if (g === 'stomp') { roll = Math.sin(ph) * 0.07 * k; lift = Math.abs(Math.sin(ph)) * 0.16 * k; }
+    // throwing: lean back while about to shoot, snap forward when the shot leaves
+    if (ent.def.shoots && ent.sees && ent.shootT < 0.45) pitch -= (0.45 - Math.max(0, ent.shootT)) / 0.45 * 0.35;
+    if (ent.throwT > 0) { ent.throwT -= dt; pitch += ent.throwT / 0.3 * 0.4; }
+    if (ent.hurtT > 0) { ent.hurtT -= dt; pitch -= ent.hurtT / 0.25 * 0.3; lift += ent.hurtT * 0.3; }
+    ent.lift = lift; ent.roll = roll; ent.pitch = pitch;
+  }
+
   P.add('hazard', {
     defaults: { model: 'virus', solid: false, speed: 2, wait: 0.3, damage: 25, bob: 0.12, faceTravel: true, points: 50, hp: 0, contactEvery: 1, knockback: 5 },
     init(ent, game) {
@@ -9140,6 +9289,7 @@ GK_LIBRARY.worlds = {
         }
       }
       if (ent.touching && !ent.state.off) { ent.contactT -= dt; if (ent.contactT <= 0) contact(ent, g); }
+      const x0 = ent.pos[0], z0 = ent.pos[2];
 
       // senses: distance to the player and line of sight, a few times a second
       const pl = g.player, eye = pl.eye();
@@ -9197,8 +9347,10 @@ GK_LIBRARY.worlds = {
           ent.shootT = (d.shoots.every || 2) * (0.85 + Math.random() * 0.3);
           const c = eyeOf(ent);
           g.enemyFire(ent, c, [eye[0], eye[1] - 0.25, eye[2]], d.shoots);   // the same line it saw you along
+          ent.throwT = 0.3;
         }
       }
+      if (d.gait) gait(ent, dt, Math.hypot(ent.pos[0] - x0, ent.pos[2] - z0));
 
       // bosses bring their minions back
       if (d.summon && ent.state.engaged && !(d.armor !== undefined && d.summon.whileArmored === false && GK.test(g, d.armor))) {
@@ -9280,6 +9432,7 @@ GK_LIBRARY.worlds = {
         if (d.boss) ent.state.engaged = true;
         game.emit('hazard:damaged', { id: ent.id });
         if (ent.state.hp <= 0) { defeat(ent, game, 'shot'); return 'defeated'; }
+        if (ent.def.gait) ent.hurtT = 0.25;
         game.audio.play('hit');
         return 'hit';
       };
@@ -9393,6 +9546,9 @@ GK_LIBRARY.worlds = {
                    price: 0, ammoPrice: 20, ammoPack: 24,                  // shop: buy it, buy a pack of ammo
                    melee: true, reach: 2.6, arc: 90, maxTargets: 3, swing: 0.3, // a sword: no ammo, hits what is in front
                    viewScale: 0.55,                                        // size of the tool drawn in the hand (first person)
+                   anim: 'bow' | 'sling' | 'load' | 'thrust',              // how it moves in the hand (below)
+                   projectile: 'arrowShot', drop: 0,                       // the model that flies (default a glowing bolt);
+                                                                           // drop: m/s² of fall, aimed so it still lands on the crosshair
                    owned: true, always: true }, …],                        // owned from the start; usable before `requires`
        start: 'zapper', requires: {has: 'zapper'},                         // owned at the start; usable once true
        coins: 0, objectiveCoins: 15, dropChance: 0.35,                     // coins for each objective; ammo drops
@@ -9414,7 +9570,11 @@ GK_LIBRARY.worlds = {
    game.addCoins(n), game.coins(), game.buy(id), game.openShop(), game.armed(), game.weaponState().
    Conditions {coins: {gte}}, {weapon: 'id'}; actions {do:'coins', add}, {do:'giveWeapon', weapon}, {do:'ammo', amount},
    {do:'shop'}. Events weapon:fire / hit / reload / switch, shop:open, shop:buy {id}, coins.
-   Bolts, sparks and loot come from small pools made once per scene (ids fx-…), so snapshot/restore keep working. */
+   Bolts, sparks and loot come from small pools made once per scene (ids fx-…), so snapshot/restore keep working.
+   Animation (game.viewModel, drawn by the view): a new weapon comes up from below (raise), a shot kicks, a reload dips
+   and tilts it. `anim` also sets the model's look: 'bow' {draw, arrow} and 'sling' {pull, pebble} lose the arrow/pebble
+   when they shoot, fit a new one and pull back (arms pose 'bow' / 'sling'); 'load' {loaded} is empty until reloaded;
+   'thrust' (melee) stabs forward instead of slashing. No firing while game.handsBusy() (climbing, swimming). */
 (function () {
   'use strict';
   const V = GK.vec, Ph = GK.Physics, U = GK.util;
@@ -9455,6 +9615,18 @@ GK_LIBRARY.worlds = {
     return best;
   }
   function take(list) { return list.find(e => !e.visible) || null; }
+  /** The held weapon's look this frame (weapon `anim`): after a shot the arrow / pebble / harpoon is gone, then a new
+      one is fitted and (bow, sling) pulled back. Steps of 0.1 so only a few shapes are ever built. */
+  function animLook(game, w, o, rk) {
+    if (!w.anim || w.anim === 'thrust') return w.look;
+    const k = U.clamp(game.sinceFire / Math.max(0.15, game.lastCool || w.cooldown), 0, 1);
+    const has = o.mag > 0 || !!(game.hasPower && game.hasPower('rapid'));
+    const q = x => Math.round(x * 10) / 10;
+    if (w.anim === 'load') return Object.assign({}, w.look, { loaded: rk != null ? rk > 0.55 : has && k > 0.7 });
+    const ready = rk != null ? rk > 0.6 : has && k > 0.4;
+    const pull = rk == null && ready ? q(U.clamp((k - 0.55) / 0.45, 0, 1) * 0.7) : 0;
+    return Object.assign({}, w.look, w.anim === 'bow' ? { draw: pull, arrow: ready } : { pull, pebble: ready });
+  }
 
   function config(game) {
     const c = game.cfg;
@@ -9503,7 +9675,7 @@ GK_LIBRARY.worlds = {
         sparks: add('spark', POOL.spark, 'spark', { color: '#ffffff' }),
         loot: add('loot', POOL.loot, 'ammoBox', {}, 'pickup'),
       };
-      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3;
+      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3; game.sinceFire = 9; game.lastCool = 0.3; game.drawT = 0;
       game.ui.setWeapon(null);
       const st = () => game.state.arsenal;
       const gunsReady = () => A.requires === undefined || GK.test(game, A.requires);
@@ -9535,7 +9707,7 @@ GK_LIBRARY.worlds = {
       game.selectWeapon = ref => {
         const id = typeof ref === 'number' ? (A.weapons[ref - 1] || {}).id : ref;
         if (!id || !st().owned[id] || id === st().cur || !usable(A.byId[id])) return false;
-        st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 1;
+        st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 0; game.drawT = 0.3; game.sinceFire = 9;
         game.audio.play('click');
         game.emit('weapon:switch', { id });
         return true;
@@ -9575,6 +9747,7 @@ GK_LIBRARY.worlds = {
       };
       game.fire = () => {
         if (!game.armed() || game.state.mode !== 'playing' || game.cool > 0 || game.reloadT > 0) return false;
+        if (game.handsBusy && game.handsBusy()) return false;   // climbing or swimming: both hands are busy
         const s = st(), w = A.byId[s.cur], o = s.owned[s.cur], rapid = game.hasPower && game.hasPower('rapid');
         if (w.melee) return swing(w, rapid);
         if (!rapid && o.mag < 1) {
@@ -9584,6 +9757,7 @@ GK_LIBRARY.worlds = {
         }
         if (!rapid) o.mag -= 1;
         game.cool = w.cooldown * (rapid ? 0.5 : 1);
+        game.sinceFire = 0; game.lastCool = game.cool;
         const p = game.player, eye = p.eye(), f = p.forward(), yaw = p.yaw;
         // aim where the crosshair points (in third person: along the camera's line), start at the tip of the tool
         const ray = (game.aimRay && game.aimRay()) || { o: eye, d: f };
@@ -9608,13 +9782,16 @@ GK_LIBRARY.worlds = {
           // first person: the tip sits beside the eye; if scenery is in its way but not in the crosshair's, shoot along the crosshair
           start = V.add(eye, V.scale(f, 0.4)); dir = V.norm(V.sub(aim, start));
         }
+        const pm = w.projectile || 'bolt', lift = w.drop ? 0.5 * w.drop * V.dist(start, aim) / w.speed : 0;   // a falling shot starts a little up
         for (let i = 0; i < (w.pellets || 1); i++) {
           const b = take(fx.bolts);
           if (!b) break;
           let d = dir;
           if (w.spread) d = V.norm([dir[0] + (Math.random() - 0.5) * w.spread * 2, dir[1] + (Math.random() - 0.5) * w.spread * 2, dir[2] + (Math.random() - 0.5) * w.spread * 2]);
-          if (b.look.color !== w.color || b.look.size !== w.boltSize) b.setLook({ color: w.color, size: w.boltSize });
-          b.pos = start.slice(); b.v = V.scale(d, w.speed); b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
+          if (b.model !== pm) b.setModel(pm, pm === 'bolt' ? { color: w.color, size: w.boltSize } : {});
+          else if (pm === 'bolt' && (b.look.color !== w.color || b.look.size !== w.boltSize)) b.setLook({ color: w.color, size: w.boltSize });
+          b.pos = start.slice(); b.v = V.scale(d, w.speed); b.v[1] += lift; b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
+          b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / V.len(b.v), -1, 1)); b.roll = 0;
           b.show();
         }
         game.kick = 1;
@@ -9627,7 +9804,7 @@ GK_LIBRARY.worlds = {
       const swing = (w, rapid) => {
         const s = st();
         game.cool = w.cooldown * (rapid ? 0.6 : 1);
-        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1;
+        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1; game.sinceFire = 0; game.lastCool = game.cool;
         const p = game.player, eye = p.eye(), f = p.forward(), fl = Math.hypot(f[0], f[2]) || 1, fh = [f[0] / fl, 0, f[2] / fl];
         const reach = w.reach || 2.6, cosArc = Math.cos((w.arc || 90) * Math.PI / 360), hits = [];
         for (const e of game.world.entities) {
@@ -9801,10 +9978,14 @@ GK_LIBRARY.worlds = {
       if (game.reloadT > 0) { game.reloadT -= dt; if (game.reloadT <= 0) { game.reloadT = 0; game.reload(true); game.audio.play('click'); } }
       game.kick = Math.max(0, game.kick - dt * 7);
       if (game.swingT > 0) game.swingT = Math.max(0, game.swingT - dt);
+      if (game.drawT > 0) game.drawT = Math.max(0, game.drawT - dt);
+      game.sinceFire += dt;
       const w = A.byId[s.cur], o = s.owned[s.cur];
-      const lower = game.reloadT > 0 ? Math.sin(Math.PI * (1 - game.reloadT / (game.reloadMax || 1))) : 0;
-      game.viewModel = armed ? { model: w.model, look: w.look, scale: w.viewScale, kick: w.melee ? 0 : game.kick, glow: game.kick * 0.25, lower, melee: !!w.melee,
-        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0 } : null;
+      const rk = game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null;
+      const lower = rk != null ? Math.sin(Math.PI * rk) : 0;
+      game.viewModel = armed ? { model: w.model, look: animLook(game, w, o, rk), scale: w.viewScale, kick: w.melee ? 0 : game.kick, glow: w.projectile ? 0 : game.kick * 0.25, lower, melee: !!w.melee,
+        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0, anim: w.anim || null, reload: rk, raise: game.drawT / 0.3 } : null;
+      if (game.viewModel && (w.anim === 'bow' || w.anim === 'sling')) game.viewModel.arms = { pose: w.anim, draw: game.viewModel.look.draw || 0, pull: game.viewModel.look.pull || 0 };
       game.ui.setWeapon(armed ? {
         name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')), melee: !!w.melee,
         reload: game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null,
@@ -9835,6 +10016,11 @@ GK_LIBRARY.worlds = {
           b.hide();
         } else {
           b.pos = V.add(b.pos, V.scale(b.v, dt));
+          if (W.drop) b.v[1] -= W.drop * dt;
+          if (W.projectile) {   // a model in flight points along its path (round ones tumble)
+            b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / (V.len(b.v) || 1), -1, 1));
+            if (/pebble|coconut/.test(W.projectile)) b.roll = (b.roll || 0) + dt * 14;
+          }
           if (b.life <= 0) { if (W.splash) fx.explode(b.pos, W); b.hide(); }
         }
       }
@@ -10360,7 +10546,9 @@ GK_LIBRARY.worlds = {
                                           hold W (forward) to climb up, S to climb down; let go to hang on. Put it against
                                           a ledge face, `h` a little higher than the ledge.
    Config: traversal: { swimStamina: 20, swimSpeed: 0.55, climbSpeed: 2.8 }
-   Adds game.swimming, game.climbing; events traversal:swim {on}, traversal:climb {on}, traversal:tired.
+   Adds game.swimming, game.climbing, game.handsBusy() (true while climbing or swimming: weapons do not fire) and
+   game.climbPhase / game.swimPhase (where the arms are in their stroke: the view animates the hands from them);
+   events traversal:swim {on}, traversal:climb {on}, traversal:tired. Jumping in throws up a splash.
    The HUD shows a small "🏊 Swimming" / "🧗 Climbing" meter. Works with powerups (speed) and terrain (gravity zones):
    list it AFTER them in `mechanics`, because it adjusts the player's speedMul / gravityMul last. */
 (function () {
@@ -10401,6 +10589,8 @@ GK_LIBRARY.worlds = {
       const cfg = Object.assign({ swimStamina: 20, swimSpeed: 0.55, climbSpeed: 2.8 }, game.cfg.traversal);
       game.traversalCfg = cfg;
       game.swimming = false; game.climbing = false;
+      game.climbPhase = 0; game.swimPhase = 0; game.splashT = 0;
+      game.handsBusy = () => game.climbing || game.swimming;
       game.state.stamina = cfg.swimStamina;
       const ui = game.ui;
       if (ui.trMeter) ui.trMeter.remove();
@@ -10426,6 +10616,7 @@ GK_LIBRARY.worlds = {
         pl.vel[1] = up ? cfg.climbSpeed : down ? -cfg.climbSpeed : Math.max(Math.min(pl.vel[1], 0) * 0.5, -0.6);
         pl.grounded = false;
         if (up && pl.pos[1] > climb.pos[1] + climb.def.size[1] - 0.9) pl.vel[1] = Math.max(pl.vel[1], 3.2);   // a last push over the edge
+        if (up || down) game.climbPhase += dt * 7;   // hand over hand while moving
       } else if (wasClimb) pl.gravityMul = 1;
       if (game.climbing !== wasClimb) game.emit('traversal:climb', { on: game.climbing, id: climb ? climb.id : null });
       // ---- swimming ----
@@ -10438,6 +10629,13 @@ GK_LIBRARY.worlds = {
         pl.jumpMul = 1.15;
         pl.bob = Math.sin(S.time * 2.4) * 0.06;
         S.stamina = Math.max(0, S.stamina - dt);
+        const stroking = pl.moving || inp.down('forward') || inp.down('back') || inp.down('left') || inp.down('right');
+        game.swimPhase += dt * (stroking ? 4.2 : 1.6);
+        // a splash going in, then a little one at each stroke
+        const surf = [pl.pos[0] + Math.sin(pl.yaw) * -0.6, swim.pos[1] + swim.def.size[1] * 0.5, pl.pos[2] + Math.cos(pl.yaw) * -0.6];
+        if (!wasSwim && game.burst) game.burst([pl.pos[0], surf[1], pl.pos[2]], '#d0ebff', 14);
+        game.splashT -= dt;
+        if (stroking && game.splashT <= 0 && game.burst) { game.splashT = 0.75; game.burst(surf, '#e7f5ff', 4); }
         if (!wasSwim) { game.audio.play('jump'); game.ui.toast('🏊 Swimming! Watch your stamina bar.', 'hint'); }
         if (S.stamina <= 0) {
           S.stamina = cfg.swimStamina;

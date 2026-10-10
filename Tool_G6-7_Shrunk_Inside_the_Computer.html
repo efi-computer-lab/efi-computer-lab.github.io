@@ -1323,7 +1323,9 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-btn.big { font-size: 18px; padding: 13px 26px; }
 .gk-btn.small { font-size: 13px; padding: 6px 10px; margin-top: 8px; }
 .gk-btn.choice { text-align: left; }
-.gk-btn.right { background: var(--gk-good); color: #07361a; } .gk-btn.wrong { background: var(--gk-bad); color: #3a0909; opacity: .8; }
+.gk-btn.right { background: var(--gk-good); color: #07361a; }
+.gk-btn.choice.reveal { outline: 3px solid #ffd166; box-shadow: 0 0 18px #ffd16688; } .gk-btn.choice.reveal::after { content: '  ← answer'; color: #ffd166; font-weight: 800; }
+.gk-reveal { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; } .gk-reveal-btn b { color: #ffd166; margin-left: 4px; } .gk-btn.wrong { background: var(--gk-bad); color: #3a0909; opacity: .8; }
 .gk-btn:disabled { cursor: default; }
 .gk-order-answer, .gk-order-pool { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 8px; border-radius: 10px; margin-bottom: 8px; }
 .gk-order-answer { background: rgba(255,255,255,.06); border: 2px dashed rgba(255,255,255,.2); flex-direction: column; }
@@ -1537,6 +1539,41 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-stat b { display: block; height: 100%; background: var(--gk-accent); }
 .gk-shop-card .gk-btn { margin-top: 4px; }
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
+/* challenge extras (mechanics/puzzles): story, 💡 help, "well done" card, pattern tiles, build checklist; end-screen extra */
+.gk-story { background: rgba(255,209,102,.12); border-left: 4px solid var(--gk-hint); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; font-style: italic; line-height: 1.4; }
+.gk-help { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; align-items: flex-start; }
+.gk-help-btn kbd { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,.18); font: 700 12px/1.4 inherit; font-family: inherit; }
+.gk-help-out:empty { display: none; }
+.gk-help-out { padding: 9px 12px; border-radius: 8px; line-height: 1.4; }
+.gk-help-out.hint { background: rgba(255,209,102,.14); color: #ffe7a3; }
+.gk-help-out.answer { background: rgba(76,201,240,.14); color: #d6f4ff; }
+.gk-help-out.answer div { margin-top: 4px; }
+.gk-why { background: rgba(46,204,113,.13); color: #c9f7dc; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; line-height: 1.4; }
+.gk-done { text-align: center; padding: 6px 4px; }
+.gk-done-title { font-size: 22px; font-weight: 800; color: var(--gk-good); margin-bottom: 6px; }
+.gk-done-why { line-height: 1.45; margin: 8px 0; }
+.gk-done-reward { display: inline-block; margin: 6px 0 8px; padding: 8px 16px; border-radius: 999px; background: rgba(255,209,102,.18); border: 2px solid var(--gk-hint); font-weight: 800; font-size: 17px; }
+.gk-continue { display: block; margin: 12px auto 0; }
+.gk-pattern { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+.gk-ptile { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 54px; padding: 0 8px; border-radius: 12px; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.2); font-size: 28px; }
+.gk-ptile-q { border-style: dashed; border-color: var(--gk-hint); color: var(--gk-hint); font-weight: 800; }
+.gk-pattern-options .gk-btn.choice { font-size: 26px; min-width: 70px; text-align: center; }
+.gk-build-needs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin: 8px 0; }
+.gk-build-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15); font-weight: 600; }
+.gk-build-item b { margin-left: auto; }
+.gk-build-item.have { border-color: var(--gk-good); } .gk-build-item.have b { color: var(--gk-good); }
+.gk-build-item.missing { opacity: .7; border-style: dashed; } .gk-build-item.missing b { color: var(--gk-bad); }
+.gk-build-icon { font-size: 20px; }
+.gk-build-missing { color: var(--gk-bad); font-weight: 700; }
+.gk-end-extra { margin: 10px auto; max-width: 560px; text-align: left; }
+.gk-end-extra table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gk-end-extra td, .gk-end-extra th { padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.gk-end-extra th { text-align: left; color: var(--gk-hint); }
+/* mechanics/traversal: swim / climb meter */
+.gk-tr-meter { position: absolute; left: 50%; bottom: 200px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px; background: var(--gk-panel); font-weight: 800; font-size: 14px; pointer-events: none; }
+.gk-tr-meter.show { display: flex; }
+.gk-tr-meter i { display: block; width: 180px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
+.gk-tr-meter b { display: block; height: 100%; width: 100%; background: #4cc9f0; transition: width .2s; }
 
 </style>
 <script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/pc-inside/world","worlds/network/world","worlds/core-arena/world","worlds/phone-inside/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/weapons/weapons"],"local":[],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","hazards","powerups","weapons"],"spatial":true,"warnings":[]} };</script>
@@ -1577,6 +1614,15 @@ GK_LIBRARY.mechanics = {
   'moving-platform': { needs: [], spatial: true, about: 'platforms that move and carry the player' },
   hazards: { needs: [], spatial: true, about: 'enemies and traps: patrol, chase, shoot, pulse on/off, bosses with shields and minions; hurt on touch; squash with a shield' },
   powerups: { needs: [], spatial: true, about: 'floating power-ups: speed, shield, freeze, double points, heal, rapid fire (timed, shown as HUD chips)' },
+  online: { needs: [], spatial: true, files: ['online/firebase/firebase-app-compat', 'online/firebase/firebase-database-compat', 'online/config'], about: 'internet rooms (room code), other players drawn as animated ghosts, position sync, events; free Firebase (online/)' },
+  terrain: { needs: [], spatial: true, about: 'conveyor belts, bounce pads, speed pads, ice, crumbling platforms, wind / low-gravity zones, spinning sweeper bars; game.knock()' },
+  music: { needs: [], spatial: false, about: 'background music made live with WebAudio (bass, arpeggios, pad, drums; style per game or level); game.musicLevel()' },
+  cybertraps: { needs: ['terrain'], spatial: true, about: 'cyber obstacles that delay racers: packet press, spam cannon, buffering door, bit-flip tiles, packet wave, port shuffle, spinning hard drive, pixel rain, pop-ups, bumpers, captcha gate, loading bridge, upload lift, revolving door, balance disk (shared clock: same on every PC)' },
+  juice: { needs: [], spatial: true, about: 'game feel: speed widens the view + speed lines, dust puffs when running, landing rings, boost trails; game.fxBurst()' },
+  'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
+  gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
+  race: { needs: ['objectives', 'quiz-gates', 'gadgets'], spatial: true, about: 'class race in rounds: start barrier, countdown, progress along routes.course, live positions, finish, round scoring + championship; online host (mechanics/online) or solo with rival bots' },
+  traversal: { needs: [], spatial: true, about: 'nature moves: swim zones (slower, floaty, stamina meter: too tired = back to the checkpoint) and climb walls / rope ladders (hold W to climb); vineWall + ropeLadder models' },
   weapons: { needs: ['hazards'], spatial: true, about: 'a tool the player shoots with (zapper, blaster): bolts damage enemies with hp; enemy turrets shoot back; spark bursts' },
 };
 GK_LIBRARY.presets = {
@@ -1597,6 +1643,15 @@ GK_LIBRARY.worlds = {
   network: { name: 'Inside the Internet', about: 'fibre tunnel, router hub, mail room, safety lab, firewall corridor, server farm aisles, uplink gate' },
   'core-arena': { name: 'Core Arena', about: 'boss arena: hall with 4 pillars, 4 raised corner platforms, 3 alcoves for pylons/exit, entry corridor' },
   'phone-inside': { name: 'Inside a Smartphone', about: 'charging port, home-screen plaza, battery, app store, messages, camera, settings vault, processor core (boss hall with 3 alcoves)' },
+  'rush-city': { name: 'Neon City', files: ['worlds/_course'], about: 'race course (worlds/_course.js): night city, towers, holo signs, train; 5 gates, 3-lane stretches, plazas, team bridge, shortcut, hidden room' },
+  'rush-forest': { name: 'Digital Forest', files: ['worlds/_course'], about: 'race course: glowing trees, river stones, caves, waterfalls, World Tree; 6 gates' },
+  'rush-factory': { name: 'Data Factory', files: ['worlds/_course'], about: 'race course: conveyor belts, machines, molten-data pits with moving platforms, giant processor; 6 gates' },
+  'rush-ocean': { name: 'Digital Ocean', files: ['worlds/_course'], about: 'race course: decks over the sea, floating islands, boats, airships, moving platforms, floating server; 6 gates' },
+  'rush-core': { name: 'Cyber Core', files: ['worlds/_course'], about: 'race course: synthwave mountain pass, ice, crystals, void chasm, the Cyber Core; 7 gates' },
+  island: { name: 'Tropical Island', files: ['worlds/_course', 'assets/models/island'], about: 'survival island: shipwreck beach, jungle trail + camp + marker grove, river with a broken crossing, crystal cave (2 chambers), waterfall glade, signal hill (raised, stairs), escape cove; sea all round' },
+  'wild-coast': { name: 'Shipwreck Coast', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 1 (worlds/_wild.js): shipwreck beach, swimming lagoon, jungle trail, camp clearing, 3 m cliff to the Marker Grove plateau, deep river with stepping-stone spots, Bamboo Isle, east bank, delta beach, cave mouth' },
+  'crystal-caverns': { name: 'Crystal Caverns', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 2: dark roofed caves: crystal hall, 4 m chasm, underground lake (swim), north shore camp + niche, crystal cliff up to the +3 m ledge (boss)' },
+  'storm-peak': { name: 'Storm Peak', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 3: stormy waterfall glade, Signal Hill (terraces +2/+4/+6 m, stairs, vine-wall spot), long stairs down to Escape Cove (boss arena, workbench, boat)' },
   _template: { name: 'Blank room', about: 'one room: copy it to start a world' },
 };
 
@@ -1834,6 +1889,7 @@ GK_LIBRARY.worlds = {
   /** null/undefined = true · string = flag name · function(game) · array = all · object = every key must pass */
   GK.test = function (g, cond) {
     if (cond == null) return true;
+    if (typeof cond === 'boolean') return cond;   // e.g. win: false = the game never wins by itself (a mechanic ends rounds)
     if (typeof cond === 'function') return !!cond(g);
     if (typeof cond === 'string') return !!g.state.flags[cond];
     if (Array.isArray(cond)) return cond.every(c => GK.test(g, c));
@@ -1964,12 +2020,17 @@ GK_LIBRARY.worlds = {
         mousedown: e => {
           if (e.target !== this.el) return;
           if (e.button === 0) this.mouse = true;   // held: e.g. automatic fire
+          if (e.button === 2) this.rightClicks = (this.rightClicks || 0) + 1;   // takeRight(): e.g. punch
           if (!this.locked) this.drag = [e.clientX, e.clientY];
           if (e.button === 0 && this.onClick) this.onClick(this.locked);
         },
         mouseup: () => { this.drag = null; this.mouse = false; },
+        contextmenu: e => { if (e.target === this.el || this.locked) e.preventDefault(); },   // right click is a game button
         wheel: e => { if (this.locked || e.target === this.el) this.wheel += e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0; },
         lockchange: () => {
+          // the browser grants a lock a moment after it is asked: if a story card or panel opened in that moment
+          // (unlock() was called), give the mouse straight back instead of hiding it over the card
+          if (document.pointerLockElement === this.el && !this.wantLock) { document.exitPointerLock(); return; }
           this.locked = document.pointerLockElement === this.el;
           this.drag = null;
           if (this.onLockChange) this.onLockChange(this.locked);
@@ -1983,12 +2044,15 @@ GK_LIBRARY.worlds = {
       document.addEventListener('mouseup', this.handlers.mouseup);
       document.addEventListener('pointerlockchange', this.handlers.lockchange);
       document.addEventListener('wheel', this.handlers.wheel, { passive: true });
+      document.addEventListener('contextmenu', this.handlers.contextmenu);
       this.wheel = 0;
     }
     /** Is the action held down? */
     down(action) { return !!this.forced[action] || (this.map[action] || []).some(c => this.keys.has(c)); }
     /** Was the action pressed this frame? */
     pressed(action) { return (this.map[action] || []).some(c => this.hits.has(c)); }
+    /** Right clicks since the last call. */
+    takeRight() { const n = this.rightClicks || 0; this.rightClicks = 0; return n; }
     /** Mouse movement since the last call. */
     takeMouse() { const d = [this.dx, this.dy]; this.dx = 0; this.dy = 0; return d; }
     endFrame() { this.hits.clear(); }
@@ -1996,10 +2060,11 @@ GK_LIBRARY.worlds = {
     /** Hold an action from code (tests, on-screen buttons): input.force('forward', true). */
     force(action, on) { this.forced[action] = !!on; }
     lock() {
+      this.wantLock = true;
       if (this.locked || !this.el.requestPointerLock) return;
       try { const p = this.el.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* fallback: drag to look */ }
     }
-    unlock() { if (document.pointerLockElement) document.exitPointerLock(); }
+    unlock() { this.wantLock = false; if (document.pointerLockElement) document.exitPointerLock(); }
     destroy() {
       document.removeEventListener('keydown', this.handlers.keydown);
       document.removeEventListener('keyup', this.handlers.keyup);
@@ -2009,6 +2074,7 @@ GK_LIBRARY.worlds = {
       document.removeEventListener('mouseup', this.handlers.mouseup);
       document.removeEventListener('pointerlockchange', this.handlers.lockchange);
       document.removeEventListener('wheel', this.handlers.wheel);
+      document.removeEventListener('contextmenu', this.handlers.contextmenu);
     }
   }
   Input.DEFAULT_KEYS = DEFAULT_KEYS;
@@ -2284,6 +2350,8 @@ GK_LIBRARY.worlds = {
       this.cache.coins = key;
       this.$.coins.style.display = n == null ? 'none' : '';
       if (n != null) this.$.coins.querySelector('b').textContent = n;
+      const icon = (this.game.cfg.arsenal && this.game.cfg.arsenal.coinIcon) || '🪙', sp = this.$.coins.querySelector('span');
+      if (sp.textContent !== icon) sp.textContent = icon;
     }
     coinPop(text) {
       const e = this.$.coins.querySelector('em');
@@ -2511,6 +2579,7 @@ GK_LIBRARY.worlds = {
           s.querySelectorAll('[data-diff]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
         };
       });
+      this.game.emit('ui:title', { screen: s, nameBox });   // mechanics may add to the title screen (e.g. an online room box)
       s.querySelectorAll('[data-level]').forEach(b => {
         b.onclick = () => {
           if (nameBox) {
@@ -2543,14 +2612,15 @@ GK_LIBRARY.worlds = {
     }
     showPause(cfg, h) {
       const s = this.screen('gk-pause-screen',
-        '<h2>Paused</h2>' +
+        '<h2>Paused</h2>' + (cfg.ui.pauseNote ? '<p class="gk-sub">' + U.esc(cfg.ui.pauseNote) + '</p>' : '') +   // ui.pauseNote: e.g. "the race goes on"
         '<button class="gk-btn primary big" data-a="resume">▶ Resume</button>' +
-        '<div class="gk-row center">' + (h.checkpoint ? '<button class="gk-btn" data-a="checkpoint">↩ Last checkpoint</button>' : '') + '<button class="gk-btn" data-a="restart">⟲ Restart</button>' +
+        '<div class="gk-row center">' + (h.checkpoint ? '<button class="gk-btn" data-a="checkpoint">↩ Last checkpoint</button>' : '') + (cfg.ui.restart === false ? '' : '<button class="gk-btn" data-a="restart">⟲ Restart</button>') +
         '<button class="gk-btn" data-a="sound">' + (this.game.audio.muted ? '🔇 Sound off' : '🔊 Sound on') + '</button></div>' +
         this.viewsHtml(cfg) + this.controlsHtml(cfg) + this.menuLink(cfg));
       this.bindViews(s);
       s.querySelector('[data-a=resume]').onclick = h.resume;
-      s.querySelector('[data-a=restart]').onclick = h.restart;
+      const rs = s.querySelector('[data-a=restart]');   // ui.restart: false hides it (a class race cannot restart one PC)
+      if (rs) rs.onclick = h.restart;
       const cp = s.querySelector('[data-a=checkpoint]');
       if (cp) cp.onclick = h.checkpoint;
       const snd = s.querySelector('[data-a=sound]');
@@ -2584,6 +2654,7 @@ GK_LIBRARY.worlds = {
         '<div class="gk-final"><b>' + r.total + '</b><span>points</span></div>' +
         '<div class="gk-summary"><span>⏱ ' + U.time(r.time) + '</span>' + (r.required != null ? '<span>✓ ' + r.done + ' / ' + r.required + ' objectives</span>' : '') + (r.best ? '<span>Best: ' + r.best + '</span>' : '') + '</div>' +
         (r.leaders ? '<div class="gk-lead-title">' + (r.rank ? '🏆 ' + U.esc(r.playerName) + ', you are #' + r.rank + ' on this computer!' : 'Not in the top 10 yet: try again!') + '</div>' + this.leaderTable(r.leaders, r.rank, 5) : '') +
+        (cfg.hooks && cfg.hooks.endHtml ? '<div class="gk-end-extra">' + (cfg.hooks.endHtml(this.game, r) || '') + '</div>' : '') +
         (rows ? '<table class="gk-breakdown">' + rows + '<tr class="total"><td>Final score</td><td>' + r.total + '</td></tr></table>' : '') +
         '<div class="gk-row center">' + (h.next ? '<button class="gk-btn primary big" data-a="next">Next level ▶</button>' : '') +
         '<button class="gk-btn big' + (h.next ? '' : ' primary') + '" data-a="restart">⟲ Play again</button>' +
@@ -2629,6 +2700,7 @@ GK_LIBRARY.worlds = {
      timeBonus: {perSecondLeft: 2} | {par: 180, perSecond: 3, max: 500}
      completionBonus: 0      added when the game is won
      stars: [300, 600, 900]  score needed for 1/2/3 stars (optional)
+     labels: {kind: 'Name'}  end-screen names for score kinds (e.g. {challenge: 'Computer challenges'})
      allowNegative: false */
 (function () {
   'use strict';
@@ -2673,7 +2745,7 @@ GK_LIBRARY.worlds = {
     breakdown() {
       const groups = {};
       for (const e of this.log) {
-        const g = groups[e.kind] = groups[e.kind] || { kind: e.kind, label: KIND_LABELS[e.kind] || e.kind, points: 0, count: 0 };
+        const g = groups[e.kind] = groups[e.kind] || { kind: e.kind, label: (this.cfg.labels || {})[e.kind] || KIND_LABELS[e.kind] || e.kind, points: 0, count: 0 };
         g.points += e.points; g.count++;
       }
       return Object.values(groups);
@@ -2701,7 +2773,7 @@ GK_LIBRARY.worlds = {
   const U = GK.util;
   const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts',
     'content', 'levels', 'scenes', 'startScene', 'resume', 'difficulty', 'characters', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
-    'locations', 'spawns', 'routes', 'spawn', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
+    'locations', 'spawns', 'routes', 'spawn', 'slots', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
     'scoring', 'hints', 'win', 'lose', 'ui', 'audio', 'controls', 'hooks', 'triggers', 'vars', 'flags', 'intro',
     'winText', 'loseText', 'teacher', 'quiz'];
 
@@ -2984,6 +3056,8 @@ GK_LIBRARY.worlds = {
       this.view.setup();
       for (const m of this.mechanics) if (m.setup) m.setup(this);
       this.setupTriggers();
+      // resume: {checkpoints: true} also saves at every checkpoint, so one long scene loses at most a few minutes
+      if (U.isObj(cfg.resume) && cfg.resume.checkpoints) this.on('checkpoint', () => { if (this.checkpoint && (this.state.mode === 'playing' || this.state.mode === 'modal')) this.saveResume({ pos: this.checkpoint.pos.slice(), rot: this.checkpoint.rot }); });
       if (cfg.hooks.setup) cfg.hooks.setup(this);
       this.ui.update(this);
       this.ui.prompt(null);
@@ -3050,7 +3124,7 @@ GK_LIBRARY.worlds = {
     }
     unlockedLevels() { return Math.min(this.levelCount, Math.max(1, Number(this.store.get('unlocked', 1)) || 1)); }
     showTitle() {
-      const levels = this.levelCount > 1 && !this.sceneMode;
+      const levels = this.levelCount > 1 && !this.sceneMode && this.cfg.ui.levelSelect !== false;   // ui.levelSelect: false = one Play button
       const saved = this.savedResume();
       this.ui.showTitle(this.cfg, i => {
         this.audio.unlock();
@@ -3065,9 +3139,10 @@ GK_LIBRARY.worlds = {
         current scene. Only the entry of a scene is saved: nothing is running yet (no timers, waves or dialogs). */
     saveResume(spawn) {
       if (!this.cfg.resume || !this.sceneMode) return;
+      const mid = spawn && typeof spawn === 'object';   // {pos, rot}: a save in the middle of a scene (resume.checkpoints)
       const stage = this.stages[this.levelIndex] || {};
       this.store.set('resume', {
-        v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null,
+        v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null, mid: mid || undefined,
         part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
         name: this.playerName || '', difficulty: this.difficulty, character: this.character, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
       });
@@ -3076,7 +3151,7 @@ GK_LIBRARY.worlds = {
     savedResume() {
       if (!this.base.resume || !this.sceneMode) return null;
       const r = this.store.get('resume', null);
-      const ok = r && r.v === 1 && r.id === (this.base.id || 'game') && r.snap && this.stageIndex(r.scene) > 0;
+      const ok = r && r.v === 1 && r.id === (this.base.id || 'game') && r.snap && (this.stageIndex(r.scene) > 0 || (r.mid && this.stageIndex(r.scene) >= 0));
       if (r && !ok) this.store.remove('resume');
       return ok ? r : null;
     }
@@ -3092,7 +3167,7 @@ GK_LIBRARY.worlds = {
         this.state.inZone = {};
         if (r.name) this.state.vars.playerName = this.playerName;
         if (this.world) {
-          const at = (r.spawn && this.world.spawns[r.spawn]) || this.world.spawn;
+          const at = (r.spawn && typeof r.spawn === 'object' ? r.spawn : r.spawn && this.world.spawns[r.spawn]) || this.world.spawn;
           this.player.place(at.pos, at.rot);
           this.checkpoint = { pos: at.pos.slice(), rot: at.rot };
         }
@@ -4320,7 +4395,11 @@ GK_LIBRARY.worlds = {
                  look.part = 'torso' (origin at the feet) | 'head' (origin at the neck) | 'armL' / 'armR' (at the shoulder) |
                  'legL' / 'legR' (at the hip). Arms and legs hang straight down (−y) from the joint.
      'fpArms'    first-person sleeves and hands in WEAPON space (drawn with the weapon's own transform):
-                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt)
+                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt) |
+                 'bow' | 'sling' (the left hand holds it out in front; the drawing hand is at the cheek, out of view) |
+                 'spear' (one hand on a melee tool pitched forward to stab)
+     'fpFist'    a first-person punching arm (fist at the origin, sleeve back toward the camera) in weapon space
+     'fpHand'    a first-person open hand (palm down, fingers forward; look.grip curls them): climbing and swimming
      'sword'     a sword pointing UP (+y) from the hilt at the origin: look.color blade, look.glow edge, look.guard, look.grip
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail',
                        shirt, pants, shoes, accent (a small glowing badge), skirt: true }
@@ -4424,11 +4503,42 @@ GK_LIBRARY.worlds = {
       g.add(G().box(0, -0.06, 0, 0.12, 0.12, 0.13, sk, { top: dk(sk, 1.08) }).move(hand[0], hand[1], hand[2]));
     };
     if (o.pose === 'sword') arm([0, -0.02, 0], [-0.09, -0.2, -0.2], [-0.16, -0.4, -0.5]);
-    else {
+    else if (o.pose === 'spear') arm([0, -0.02, 0], [-0.07, -0.26, 0.1], [-0.14, -0.55, 0.22]);   // tool pitched forward: back = −y, down = +z
+    else if (o.pose === 'bow' || o.pose === 'sling') {
+      // the holding hand round the bow's grip / the slingshot's handle, the arm reaching out from the lower left; the
+      // drawing hand is back at the cheek, out of view (the string or band is seen stretched back toward you)
+      const y = o.pose === 'bow' ? -0.04 : -0.16, z = o.pose === 'bow' ? 0.1 : 0;
+      arm([0, y, z], [0.1, y - 0.16, z - 0.12], [0.2, y - 0.34, z - 0.3]);
+    } else {
       arm([-0.05, -0.07, -0.11], [-0.11, -0.2, -0.26], [-0.17, -0.34, -0.42]);   // right hand round the grip
       arm([0.05, -0.06, 0.07], [0.13, -0.17, -0.08], [0.22, -0.3, -0.26]);       // left hand under the barrel
     }
     return g;
+  });
+
+  /* A first-person punching arm in weapon space: the fist at the origin, the sleeve going back (−z) toward the camera. */
+  M.add('fpFist', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    segment(g, [0, -0.03, -0.6], [0, 0, -0.1], 0.16, 0.15, sl);
+    g.box(0, -0.035, -0.13, 0.18, 0.07, 0.06, dk(sl, 0.8));                                            // cuff
+    g.box(0, -0.11, 0, 0.22, 0.2, 0.22, sk, { top: dk(sk, 1.08) });                                    // fist
+    for (const x of [-0.075, -0.025, 0.025, 0.075]) g.box(x, 0.02, 0.1, 0.045, 0.06, 0.035, dk(sk, 0.88));   // knuckles
+    return g.box(0.12, -0.08, 0.02, 0.05, 0.1, 0.12, dk(sk, 0.95));                                    // thumb
+  });
+
+  /* A first-person OPEN hand (climbing, swimming): the palm at the origin facing down (−y), fingers forward (+z), the
+     sleeve going back (−z) toward the camera. look.grip: fingers curled (holding a vine). */
+  M.add('fpHand', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    segment(g, [0, -0.02, -0.8], [0, 0, -0.1], 0.16, 0.15, sl);
+    g.box(0, -0.075, -0.12, 0.17, 0.15, 0.05, dk(sl, 0.8));                                            // cuff
+    g.box(0, -0.05, 0, 0.19, 0.09, 0.2, dk(sk, 0.86), { top: dk(sk, 0.92) });                          // palm (a little dark: it is close to the eye)
+    const curl = o.grip ? 1 : 0;
+    for (const x of [-0.07, -0.023, 0.023, 0.07]) {                                                    // fingers
+      if (curl) g.box(x, -0.09, 0.1, 0.04, 0.09, 0.05, dk(sk, 0.92));
+      else g.box(x, -0.04, 0.1, 0.04, 0.05, 0.13, dk(sk, 0.92));
+    }
+    return g.box(0.115, -0.05, 0.0, 0.05, 0.06, 0.12, dk(sk, 0.95));                                   // thumb
   });
 
   /* Swords: hilt at the origin, blade up. */
@@ -4546,7 +4656,7 @@ GK_LIBRARY.worlds = {
 </script>
 <script>/* game-types/_spatial/body.js */
 /* Game Kit · game-types/_spatial/body.js
-   The player's body in a spatial world: WASD, sprint, jump (coyote time + jump buffer), gravity,
+   The player's body in a spatial world: WASD, sprint, jump (coyote time + jump buffer, airJumps: extra jumps in the air), gravity,
    box collision via GK.Physics, head-bob and optional health. Settings come from config.player.
    steering: 'camera' (first-person: W = where you look) | 'world' (top-down: W = north, body turns to face movement). */
 (function () {
@@ -4573,7 +4683,7 @@ GK_LIBRARY.worlds = {
       this.pitch = 0;
       this.grounded = false;
     }
-    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob, this.pos[2]]; }
+    eye() { return [this.pos[0], this.pos[1] + this.cfg.eyeHeight + this.bob + (this.eyeLift || 0) - (this.squashT > 0 ? 0.9 : 0), this.pos[2]]; }   // squashT: flattened by a press   // eyeLift: a mechanic raises the eyes (a giant)
     forward() {
       const cp = Math.cos(this.pitch);
       return [-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp];
@@ -4585,12 +4695,24 @@ GK_LIBRARY.worlds = {
     }
     update(dt, input, solids) {
       const c = this.cfg;
-      let f = (input.down('forward') ? 1 : 0) - (input.down('back') ? 1 : 0);
-      let s = (input.down('right') ? 1 : 0) - (input.down('left') ? 1 : 0);
+      // stun (seconds): knocked over, no control. grip (0..1): less grip on the ground = slippery (ice, a knock-back slide).
+      // gravityMul / jumpMul: low-gravity zones, jump boots. Mechanics set these; they default to normal.
+      const ctl = !(this.stun > 0);
+      if (this.stun > 0) this.stun -= dt;
+      let f = ctl ? (input.down('forward') ? 1 : 0) - (input.down('back') ? 1 : 0) : 0;
+      let s = ctl ? (input.down('right') ? 1 : 0) - (input.down('left') ? 1 : 0) : 0;
       const l = Math.hypot(f, s);
       if (l > 1) { f /= l; s /= l; }
       const world = c.steering === 'world';
       this.sprinting = c.canSprint && (world ? l > 0 : f > 0) && input.down('sprint');
+      // sprintTime (s, 0 = no limit): stamina. Sprint up to sprintTime, then rest; empty = tired until it is full again
+      // (it refills in sprintRest seconds). E.g. 2 / 3 = at most 2 s of sprint in every 5 s.
+      if (c.sprintTime) {
+        if (this.stamina == null) this.stamina = c.sprintTime;
+        if (this.tired) this.sprinting = false;
+        if (this.sprinting) { this.stamina -= dt; if (this.stamina <= 0) { this.stamina = 0; this.tired = true; this.sprinting = false; } }
+        else { this.stamina = Math.min(c.sprintTime, this.stamina + dt * c.sprintTime / (c.sprintRest || 3)); if (this.tired && this.stamina >= c.sprintTime) this.tired = false; }
+      }
       const speed = (this.sprinting ? c.sprintSpeed : c.walkSpeed) * (this.speedMul || 1);   // speedMul: power-ups
       let tx, tz;
       if (world) {
@@ -4605,18 +4727,25 @@ GK_LIBRARY.worlds = {
         const fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw), rx = Math.cos(this.yaw), rz = -Math.sin(this.yaw);
         tx = (fx * f + rx * s) * speed; tz = (fz * f + rz * s) * speed;
       }
-      const k = Math.min(1, (this.grounded ? c.accel : c.airAccel) * dt);
+      const k = Math.min(1, (this.grounded ? c.accel * (this.grip == null ? 1 : this.grip) : c.airAccel) * dt);
       this.vel[0] += (tx - this.vel[0]) * k;
       this.vel[2] += (tz - this.vel[2]) * k;
-      this.vel[1] = Math.max(this.vel[1] - c.gravity * dt, -40);
+      this.vel[1] = Math.max(this.vel[1] - c.gravity * (this.gravityMul || 1) * dt, -40);
 
       this.coyote = this.grounded ? 0.1 : this.coyote - dt;
-      this.jumpBuffer = input.pressed('jump') ? 0.12 : this.jumpBuffer - dt;
+      if (this.grounded) this.airLeft = c.airJumps || 0;
+      const press = ctl && input.pressed('jump');
+      this.jumpBuffer = press ? 0.12 : this.jumpBuffer - dt;
       if (c.canJump && this.jumpBuffer > 0 && this.coyote > 0) {
-        this.vel[1] = c.jumpSpeed;
+        this.vel[1] = c.jumpSpeed * (this.jumpMul || 1);
         this.coyote = this.jumpBuffer = 0;
         this.grounded = false;
         this.game.emit('player:jump');
+      } else if (c.canJump && press && this.airLeft > 0 && !this.grounded) {   // double jump
+        this.airLeft--;
+        this.vel[1] = Math.max(this.vel[1], c.jumpSpeed * (c.airJumpPower || 0.95) * (this.jumpMul || 1));
+        this.jumpBuffer = 0;
+        this.game.emit('player:jump', { air: true });
       }
 
       // Sub-steps keep fast movement from tunnelling through thin walls.
@@ -4694,7 +4823,7 @@ GK_LIBRARY.worlds = {
     }
     setLook(changes) { this.setModel(this.model, U.merge(this.look, changes)); }
     get active() { return this.visible && !this.removed; }
-    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }
+    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.lift || 0) + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }   // lift: a drawn-only hop (e.g. a creature's gait)
     /** World-space box around the model (rotated bounds). */
     box(noAnim) {
       const b = this.shape ? this.shape.bounds : { min: [-0.25, 0, -0.25], max: [0.25, 0.5, 0.25] };
@@ -4809,11 +4938,12 @@ GK_LIBRARY.worlds = {
       for (const f of map.floors) this.floor(f);
       for (const w of map.walls) this.wall(w);
       for (const r of map.rooms) this.room(r, pending);
-      for (const p of map.platforms) this.solid(this.toPos(p), p.size || [2, 1, 2], p.color || this.colors.platform, { top: p.top, kind: 'platform' });
+      // platforms: {pos, size, color, top, kind, invisible} (invisible: collision only, e.g. a tall boundary behind a low fence)
+      for (const p of map.platforms) this.solid(this.toPos(p), p.size || [2, 1, 2], p.color || this.colors.platform, { top: p.top, kind: p.kind || (p.invisible ? 'wall' : 'platform'), noDraw: p.invisible });
       for (const s of map.stairs) this.stairs(s);
 
       // named places (world first, game may add or override)
-      const addLoc = (name, L) => { this.locations[name] = { pos: this.toPos(L), rot: L.rot, name }; };
+      const addLoc = (name, L) => { this.locations[name] = { pos: this.toPos(L), rot: L.rot, name, data: L.data }; };
       for (const n in def.locations || {}) addLoc(n, def.locations[n]);
       for (const n in cfg.locations || {}) addLoc(n, cfg.locations[n]);
       const routes = Object.assign({}, def.routes, cfg.routes);
@@ -4828,17 +4958,43 @@ GK_LIBRARY.worlds = {
 
       // areas are named regions of the world; games use them as zones (e.g. reach objectives)
       for (const n in def.areas || {}) this.addZone(Object.assign({ id: n, area: true }, def.areas[n]));
-      for (const d of U.list(def.decorations)) this.add(Object.assign({ type: 'decoration' }, d));
+      // scenery marked `merge` (or every plain decoration when the world sets mergeScenery) is baked into the level mesh:
+      // one draw call for a whole city of buildings and trees, and solid ones still collide
+      for (const d of U.list(def.decorations)) {
+        if (d.merge || (def.mergeScenery && d.merge !== false && !d.label && !d.interact && !d.id && !d.spin && !d.bob && !d.hover && !d.light)) this.bake(d);
+        else this.add(Object.assign({ type: 'decoration' }, d));
+      }
       for (const d of pending) this.add(d);
+      // slots: the game fills the world's named locations with gameplay. {prefix: template | fn(location, name)} adds an
+      // entity (id = the location's name) at every location called `prefix` or `prefix-…`, with the location's `data`
+      // merged in and `route` set when the world has a route of the same name (movers, patrolling hazards).
+      const names = Object.keys(this.locations).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+      for (const pre in cfg.slots || {}) {
+        for (const n of names) {
+          if (n !== pre && n.indexOf(pre + '-') !== 0) continue;
+          const L = this.locations[n], t = cfg.slots[pre], tpl = typeof t === 'function' ? t(L, n) : t;
+          if (tpl) this.add(U.merge(tpl, L.data, { id: n, at: n }, this.routes[n] ? { route: n } : {}));
+        }
+      }
       for (const d of U.list(cfg.entities)) this.add(d);
       for (const z of U.list(cfg.zones)) this.addZone(z);
     }
 
+    /** Bake a scenery model into the level mesh (no entity): {model, look, color, size, scale, rot, pos | at | cell, solid}. */
+    bake(d) {
+      if (d.model && !GK.Models.has(d.model)) { this.problem('Scenery: unknown model "' + d.model + '"'); return; }
+      const shape = GK.Models.shape(d.model || 'box', U.merge({ color: d.color, size: d.size }, d.look), 'bake');
+      const p = this.toPos(d), yaw = U.yaw(d.rot != null ? d.rot : this.rotAt(d));
+      const s = d.scale == null ? [1, 1, 1] : typeof d.scale === 'number' ? [d.scale, d.scale, d.scale] : d.scale;
+      const g = new GK.Geo().add(shape.geo).scale(s[0], s[1], s[2]).rotY(yaw).move(p[0], p[1], p[2]);
+      this.geo.add(g);
+      if (d.solid !== false) { const b = g.bounds(); this.statics.push({ min: b.min, max: b.max, color: shape.top || '#888', kind: 'prop', noDraw: true }); }
+    }
     /** Static solid box (visual + collision). pos = bottom centre. */
     solid(pos, size, color, o) {
       o = o || {};
       if (!o.noDraw) this.geo.box(pos[0], pos[1], pos[2], size[0], size[1], size[2], color, { top: o.top, noBottom: true });
-      if (!o.noCollide) this.statics.push({ min: [pos[0] - size[0] / 2, pos[1], pos[2] - size[2] / 2], max: [pos[0] + size[0] / 2, pos[1] + size[1], pos[2] + size[2] / 2], color, top: o.top || color, kind: o.kind || 'wall' });
+      if (!o.noCollide) this.statics.push({ min: [pos[0] - size[0] / 2, pos[1], pos[2] - size[2] / 2], max: [pos[0] + size[0] / 2, pos[1] + size[1], pos[2] + size[2] / 2], color, top: o.top || color, kind: o.kind || 'wall', noDraw: o.noDraw || undefined });
     }
     floor(f) {
       const p = this.toPos(f), s = f.size || [10, 10], t = 0.3, color = f.color || this.colors.floor;
@@ -4897,7 +5053,10 @@ GK_LIBRARY.worlds = {
         seg(cur, hi, y, h);
       }
     }
-    /** ASCII grid. Legend entries: {wall, floor, spawn, door, entity|entities, zone, location:'name' ('#' → auto number)}. */
+    /** ASCII grid. Legend entries: {wall, floor, block (floor you cannot walk on: water), raise: h (a solid block h m high you
+        walk on top of: ledges, plateaus, hills; `side` colour), sink: d (the floor is d m lower: pits, lagoons; `bank` colour
+        for the sides), water: colour (with sink: a water surface 0.3 m below ground level), spawn, door, entity|entities,
+        zone, location:'name' ('#' → auto number)}. Locations, spawns and tiles on raised / sunk cells get their height. */
     buildGrid(map, pending) {
       const rows = map.grid, cs = this.cell, H = this.wallH;
       // legend entries may reuse a world part: {part: 'workstation', location: 'pc#'} (worlds/_parts.js)
@@ -4909,6 +5068,8 @@ GK_LIBRARY.worlds = {
       const at = (c, r) => legend[(rows[r] || '')[c] || ' '] || {};
       const isWall = (c, r) => !!at(c, r).wall;
       const hasFloor = L => !!(L.floor || L.spawn || L.door || L.entity || L.entities || L.zone || L.location);
+      /** floor height of a cell: raise > 0, sink < 0, walls and plain floors 0 (null = nothing there) */
+      const heightAt = (c, r) => { const L = at(c, r); if (L.wall) return 0; if (!hasFloor(L)) return null; return L.raise ? L.raise : L.sink ? -L.sink : 0; };
       const counters = {};
       rows.forEach((line, r) => {
         let run = null;
@@ -4928,11 +5089,33 @@ GK_LIBRARY.worlds = {
           if (c >= line.length) break;
           const p = this.cellPos(c, r);
           const acrossX = isWall(c - 1, r) || isWall(c + 1, r);
-          if (hasFloor(L)) {
+          if (hasFloor(L) && (L.raise || L.sink)) {
+            const fc = U.isObj(L.floor) && L.floor.color ? L.floor.color : this.colors.floor, h = heightAt(c, r);
+            p[1] = h;
+            if (L.raise) this.solid([p[0], 0, p[2]], [cs, L.raise, cs], L.side || this.colors.platform, { top: fc, kind: 'platform' });
+            else {
+              this.geo.plane(p[0], h, p[2], cs, cs, fc);
+              this.statics.push({ min: [p[0] - cs / 2, h - 0.5, p[2] - cs / 2], max: [p[0] + cs / 2, h, p[2] + cs / 2], color: fc, kind: 'floor', noDraw: true });
+              // the pit's sides: a bank face toward every higher neighbour, which is also solid all the way down
+              for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const hn = heightAt(c + dc, r + dr);
+                if (hn == null || hn <= h) continue;
+                const top = Math.min(hn, 0), ex = p[0] + dc * cs / 2, ez = p[2] + dr * cs / 2, ax = dr ? cs / 2 : 0, az = dc ? cs / 2 : 0, n = [-dc, 0, -dr];
+                const bank = L.bank || '#7a6248';
+                this.geo.triN([ex - ax, h, ez - az], [ex + ax, h, ez + az], [ex + ax, top, ez + az], n, bank).triN([ex - ax, h, ez - az], [ex + ax, top, ez + az], [ex - ax, top, ez - az], n, bank);
+                const nx = p[0] + dc * cs, nz = p[2] + dr * cs;
+                this.statics.push({ min: [nx - cs / 2, h - 0.5, nz - cs / 2], max: [nx + cs / 2, hn - 0.5, nz + cs / 2], color: bank, kind: 'wall', noDraw: true });   // under the neighbour's own floor (no bump at the edge)
+              }
+              if (L.water) this.geo.plane(p[0], -0.3, p[2], cs, cs, L.water, { glow: 0.08 });
+            }
+            this.tiles.push({ x: p[0], z: p[2], w: cs, d: cs, y: h, color: L.water || fc });
+          } else if (hasFloor(L)) {
             const fc = U.isObj(L.floor) && L.floor.color ? L.floor.color : ((c + r) % 2 ? this.colors.floor : this.colors.floor2);
             this.geo.plane(p[0], 0, p[2], cs, cs, fc);
             this.tiles.push({ x: p[0], z: p[2], w: cs, d: cs, y: 0, color: fc });
             this.statics.push({ min: [p[0] - cs / 2, -0.5, p[2] - cs / 2], max: [p[0] + cs / 2, 0, p[2] + cs / 2], color: fc, kind: 'floor', noDraw: true });
+            // block: true = a floor you cannot walk on (water, lava, a chasm): drawn as floor, with an invisible wall
+            if (L.block) this.statics.push({ min: [p[0] - cs / 2, 0, p[2] - cs / 2], max: [p[0] + cs / 2, U.isObj(L.block) && L.block.height || 3, p[2] + cs / 2], color: fc, kind: 'wall', noDraw: true });
             if (map.ceiling) this.geo.plane(p[0], H, p[2], cs, cs, map.ceiling === true ? this.colors.ceiling : map.ceiling, { down: true });
           }
           if (L.spawn) this.gridSpawn = { pos: p.slice(), rot: (U.isObj(L.spawn) && L.spawn.rot) || map.spawnRot || 'n' };
@@ -5134,7 +5317,7 @@ GK_LIBRARY.worlds = {
   const PLAYER = {
     height: 1.7, eyeHeight: 1.6, radius: 0.3, walkSpeed: 4.2, sprintSpeed: 7, jumpSpeed: 5.6, gravity: 18,
     stepHeight: 0.4, accel: 14, airAccel: 3, sensitivity: 0.0022, invertY: false, fov: 72, reach: 3,
-    canJump: true, canSprint: true, headBob: true, health: null, respawnOnDeath: false, killY: -15, steering: 'camera',
+    canJump: true, airJumps: 0, airJumpPower: 0.95, canSprint: true, sprintTime: 0, sprintRest: 3, headBob: true, health: null, respawnOnDeath: false, killY: -15, steering: 'camera',
   };
 
   const S = GK.Spatial = {
@@ -5191,9 +5374,9 @@ GK_LIBRARY.worlds = {
       if (mode === 'ended' || mode === 'title') return out;
       for (const e of game.world.entities) {
         if (!e.active || !e.label) continue;
-        const top = e.top();
-        if (V.dist(top, eye) > range) continue;
-        out.push({ text: U.fill(e.label, game.state.vars), pos: [top[0], top[1] + 0.25, top[2]] });
+        const top = e.figure ? [e.pos[0], e.pos[1] + GK.HERO.height + 0.1, e.pos[2]] : e.top();   // animated characters have no single model
+        if (V.dist(top, eye) > (e.labelRange || range)) continue;   // entity.labelRange: e.g. other players' names from further away
+        out.push({ text: U.fill(e.label, game.state.vars), pos: [top[0], top[1] + 0.25, top[2]], cls: e.labelCls });
       }
       // named places + areas: shown with the teacher debug overlay, or ui.showLocations (world viewer)
       if (game.cfg.ui.showLocations || GK.Settings.get('overlay', false)) {
@@ -5580,9 +5763,14 @@ GK_LIBRARY.worlds = {
    Camera: first person, or THIRD PERSON (ui.views; the title screen and the V key switch it, kept per computer in
    GK.Settings 'view'): the camera sits behind the right shoulder (pulled in by walls) and the character is drawn
    walking, aiming the gun or swinging the sword. Aiming, shooting and E still work from the player's eyes.
+   Animation: the held tool follows game.viewModel (kick, reload dip + tilt, raise after a switch, bow / sling draw,
+   spear thrust); while game.climbing / game.swimming (mechanics/traversal) both hands climb hand over hand or swim
+   breaststroke instead (game.climbPhase / swimPhase), in third person too. A hard landing dips the camera.
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
+  /** How far a punch reaches (0..1) at progress k (0..1): fast out, slower back. */
+  GK.punchReach = k => { const e = t => t * t * (3 - 2 * t); return k < 0 || k > 1 ? 0 : k < 0.3 ? e(k / 0.3) : 1 - e((k - 0.3) / 0.7); };
   const U = GK.util, V = GK.vec;
   const SHADOW = { hazard: 1, npc: 1, collectible: 1, powerup: 1, item: 1, pickup: 1 };
 
@@ -5631,7 +5819,7 @@ GK_LIBRARY.worlds = {
       g.muzzlePoint = target => this.muzzlePoint(target);   // third person: shots leave the gun's muzzle
       g.aimRay = () => this.aimRay();                       // third person: aim along the crosshair (the camera's line)
       this.aimT = 0;
-      this.worldMesh = this.renderer.mesh(g.world.geo);
+      this.chunks = this.chunkWorld(g.world.geo, (cfg.render && cfg.render.chunk) || (g.world.geo.count > 60000 ? 36 : 0));
       if (cfg.ui.vignette && !this.vignette) this.vignette = this.canvas.insertAdjacentElement('afterend', U.el('div', 'gk-vignette'));
       if (cfg.ui.minimap) this.buildMinimap();
       // a camera button on the screen (click it, press V, or use the pause menu)
@@ -5651,8 +5839,20 @@ GK_LIBRARY.worlds = {
       g.ui.toast(next === 'third' ? '🎥 Third-person camera · press V for first person' : '👁 First-person view · press V for third person');
       g.emit('view', { view: next });
     }
+    /** The level mesh, split into square chunks of `size` metres (0 = one mesh) so far-away parts of a big world are skipped. */
+    chunkWorld(geo, size) {
+      if (!size) { const b = geo.bounds(); return [{ mesh: this.renderer.mesh(geo), min: b.min, max: b.max }]; }
+      const parts = {};
+      for (let i = 0; i < geo.p.length; i += 9) {
+        const cx = Math.floor((geo.p[i] + geo.p[i + 3] + geo.p[i + 6]) / 3 / size), cz = Math.floor((geo.p[i + 2] + geo.p[i + 5] + geo.p[i + 8]) / 3 / size);
+        const k = cx + ',' + cz, part = parts[k] || (parts[k] = new GK.Geo());
+        for (let j = i; j < i + 9; j++) { part.p.push(geo.p[j]); part.n.push(geo.n[j]); part.c.push(geo.c[j]); }
+        part.g.push(geo.g[i / 3], geo.g[i / 3 + 1], geo.g[i / 3 + 2]);
+      }
+      return Object.keys(parts).map(k => { const b = parts[k].bounds(); return { mesh: this.renderer.mesh(parts[k]), min: b.min, max: b.max }; });
+    }
     teardown() {
-      if (this.worldMesh) { this.renderer.free(this.worldMesh); this.worldMesh = null; }
+      if (this.chunks) { for (const c of this.chunks) this.renderer.free(c.mesh); this.chunks = null; }
       if (this.mini) { this.mini.canvas.remove(); this.mini = null; }
       if (this.viewBtn) { this.viewBtn.remove(); this.viewBtn = null; }
     }
@@ -5693,6 +5893,7 @@ GK_LIBRARY.worlds = {
         else if (e.type === 'hazard') dot(e.pos[0], e.pos[2], 3.5, e.enabled && !(e.state && e.state.off) ? '#ff4d6d' : '#7a7f8c');
         else if (e.type === 'powerup') dot(e.pos[0], e.pos[2], 3.5, U.css(e.look.color || '#2ecc71'));
         else if (e.type === 'collectible') dot(e.pos[0], e.pos[2], 2, '#f5d76e');
+        else if (e.mapDot) dot(e.pos[0], e.pos[2], 3.5, e.mapDot);   // entity.mapDot: any colour (other players, rivals)
       }
       const t = g.missions && g.cfg.ui.markers !== false ? g.missions.targetOf(g.missions.current()) : null;
       if (t) {
@@ -5720,7 +5921,12 @@ GK_LIBRARY.worlds = {
         const m = g.input.takeMouse();
         g.player.look(m[0], m[1]);
       }
+      const fall = g.player && !g.player.grounded ? g.player.vel[1] : 0;
       GK.Spatial.update(g, dt, g.input);
+      // a landing after a fall dips the camera a little (bigger fall, bigger dip)
+      if (g.player && g.player.grounded && this.fallV < -4 && mode === 'playing') { this.landT = 0.28; this.landAmp = U.clamp(-this.fallV * 0.011, 0.04, 0.14); }
+      this.fallV = g.player && !g.player.grounded ? Math.min(fall, g.player.vel[1]) : 0;
+      if (this.landT > 0) this.landT -= dt;
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
       if (this.aimT > 0) this.aimT -= dt;
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
@@ -5735,6 +5941,7 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer;
       r.resize();
       let eye = g.player.eye();
+      if (this.landT > 0) eye = [eye[0], eye[1] - this.landAmp * Math.sin(Math.PI * this.landT / 0.28), eye[2]];
       if (g.shakeT > 0 && g.state.mode === 'playing') {
         const a = g.shakeAmp * Math.min(1, g.shakeT * 4);
         eye = [eye[0] + (Math.random() - 0.5) * a, eye[1] + (Math.random() - 0.5) * a, eye[2] + (Math.random() - 0.5) * a];
@@ -5752,8 +5959,14 @@ GK_LIBRARY.worlds = {
         else { eye = c.pos; look = c.dir; }
       }
       this.camPos = eye;
-      r.setCamera(eye, look, g.player.cfg.fov);
-      const items = [{ mesh: this.worldMesh, pos: [0, 0, 0], grid: true }];
+      r.setCamera(eye, look, g.player.cfg.fov + (g.fovKick || 0));   // game.fovKick: a mechanic widens the view (speed)
+      // anything further than the end of the fog cannot be seen: skip those chunks and entities (big worlds stay fast)
+      const fogEnd = (g.cfg.environment.fog && g.cfg.environment.fog[1]) || r.far, cull = Math.min(r.far, fogEnd + 6), cull2 = cull * cull;
+      const items = [];
+      for (const c of this.chunks) {
+        const dx = Math.max(c.min[0] - eye[0], 0, eye[0] - c.max[0]), dz = Math.max(c.min[2] - eye[2], 0, eye[2] - c.max[2]);
+        if (dx * dx + dz * dz < cull2) items.push({ mesh: c.mesh, pos: [0, 0, 0], grid: g.cfg.environment.grid !== false });   // environment.grid: false = no tile seams / traces (natural worlds)
+      }
       r.setLights(this.gatherLights(eye));
       for (const z of g.world.visibleZones()) {
         const s = [z.box.max[0] - z.box.min[0], z.box.max[2] - z.box.min[2]], col = z.show === true ? '#f1c40f' : z.show;
@@ -5765,10 +5978,14 @@ GK_LIBRARY.worlds = {
       const barOk = r.cached('gk:barOk', () => new GK.Geo().box(0, 0.02, 0, 0.96, 0.1, 0.05, '#2ecc71', { glow: 1 }));
       const barLow = r.cached('gk:barLow', () => new GK.Geo().box(0, 0.02, 0, 0.96, 0.1, 0.05, '#ff3b3b', { glow: 1 }));
       for (const e of g.world.entities) {
-        if (!e.active || !e.shape) continue;
+        if (!e.active) continue;
+        const ex = e.pos[0] - eye[0], ez = e.pos[2] - eye[2];
+        if (ex * ex + ez * ez > cull2 + (e.def.big ? 1e5 : 0)) continue;   // big: true (landmarks) are seen from further away
+        if (e.figure) { this.drawFigure(items, e); continue; }
+        if (!e.shape) continue;
         const mesh = r.cached(e.shape.key, () => e.shape.geo);
         const ghost = third && this.seeThrough && this.seeThrough.has(e);
-        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, scale: e.scale, tint: e.tint, alpha: ghost ? 0.22 : e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });
+        items.push({ mesh, pos: e.drawPos(), yaw: e.yaw, pitch: e.pitch, roll: e.roll, scale: e.scale, tint: e.tint, alpha: ghost ? 0.22 : e.alpha, hi: e === g.focus ? 0.12 + Math.sin(e.t * 6) * 0.04 : (e.hi || 0) });   // entity.pitch / roll: swinging and rolling things
         if (!SHADOW[e.type]) continue;
         const dx = e.pos[0] - eye[0], dz = e.pos[2] - eye[2];
         if (dx * dx + dz * dz > 900) continue;
@@ -5788,12 +6005,79 @@ GK_LIBRARY.worlds = {
         }
       }
       const vm = g.viewModel;
+      const live = g.state.mode === 'playing' || g.state.mode === 'paused';
       if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
-      else if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) this.drawHeld(items, vm, eye);
+      else if ((g.climbing || g.swimming) && live) this.drawLimbs(items, eye);
+      else if (vm && vm.model && live) this.drawHeld(items, vm, eye);
+      else if (g.player.punchK >= 0 && g.state.mode === 'playing') this.drawPunch(items, eye);
       r.render(items);
 
       g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => { const s = r.project(l.pos); return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null; }).filter(Boolean));
       if (this.mini) this.drawMinimap();
+    }
+    /** An animated character that is not the player (other players online, race rivals, NPCs): entity.figure =
+        {look (a character look), walk (0..1: how much the limbs swing), phase (walk cycle), air (in a jump), spin (radians),
+         punchK (0..1 while a punch runs, else −1), punchSide (1 = right arm, −1 = left), scale (1 = normal size)}. */
+    drawFigure(items, e) {
+      const r = this.renderer, f = e.figure, look = f.look || {}, H = GK.HERO;
+      if (!H) return;
+      const lk = f.key || (f.key = JSON.stringify(look)), part = name => r.cached('hero:' + name + lk, () => GK.Models.shape('heroPart', Object.assign({ part: name }, look), 'hero').geo);
+      const Y = e.yaw + (f.spin || 0), c = Math.cos(Y), n = Math.sin(Y), p = e.drawPos(), k = f.scale || 1;
+      const at = (x, y, z) => [p[0] + (x * c + z * n) * k, p[1] + y * k, p[2] + (-x * n + z * c) * k];
+      const sw = Math.sin(f.phase || 0) * 0.6 * (f.walk || 0), air = f.air ? 0.35 : 0, sx = GK.heroShoulderX(look);
+      const pk = f.punchK >= 0 ? GK.punchReach(f.punchK) : 0;
+      const armL = U.lerp(-sw * 0.8 + air + (f.armsUp || 0), 1.65, f.punchSide < 0 ? pk : 0), armR = U.lerp(sw * 0.8 + air + (f.armsUp || 0), 1.65, f.punchSide < 0 ? 0 : pk);
+      const base = { tint: e.tint, alpha: e.alpha, hi: e.hi || 0, scale: k === 1 ? undefined : [k, k, k] };
+      items.push(Object.assign({ mesh: part('torso'), pos: at(0, 0, 0), yaw: Y }, base));
+      items.push(Object.assign({ mesh: part('head'), pos: at(0, H.neck, 0), yaw: Y }, base));
+      items.push(Object.assign({ mesh: part('legL'), pos: at(0.105, H.hip, 0), yaw: Y, pitch: sw + air }, base));
+      items.push(Object.assign({ mesh: part('legR'), pos: at(-0.105, H.hip, 0), yaw: Y, pitch: -sw + air * 0.4 }, base));
+      items.push(Object.assign({ mesh: part('armL'), pos: at(sx, H.shoulder, 0), yaw: Y, pitch: armL }, base));
+      items.push(Object.assign({ mesh: part('armR'), pos: at(-sx, H.shoulder, 0), yaw: Y, pitch: armR }, base));
+      const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
+      items.push({ mesh: blob, pos: [e.pos[0], (f.ground != null ? f.ground : e.pos[1]) + 0.02, e.pos[2]], scale: [0.42 * k, 1, 0.42 * k], alpha: 0.3 });
+      if (f.balloon) {   // figure.balloon: a balloon tied above the head (colour)
+        const bal = r.cached('gk:balloon' + f.balloon, () => new GK.Geo().sphere(0, 0.75, 0, 0.75, f.balloon, { glow: 0.4, seg: 10, rings: 7 }).box(0, -1.1, 0, 0.03, 1.1, 0.03, '#ffffff'));
+        items.push({ mesh: bal, pos: [p[0], p[1] + GK.HERO.height + 1.1, p[2]] });
+      }
+      if (f.bubble) {   // figure.bubble: a see-through shield bubble around the character (colour)
+        const ball = r.cached('gk:bubble' + f.bubble, () => new GK.Geo().sphere(0, 0, 0, 1, f.bubble, { glow: 0.7, seg: 12, rings: 8 }));
+        items.push({ mesh: ball, pos: [p[0], p[1] + 0.95, p[2]], scale: [0.85, 1.15, 0.85], alpha: 0.28 });
+      }
+    }
+    /** First person, empty hands: a punch. The arm shoots out from the lower right (or left) toward the crosshair and comes back. */
+    drawPunch(items, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const k = GK.punchReach(p.punchK), sd = p.punchSide < 0 ? -1 : 1;
+      const along = 0.3 + k * 0.42, side = sd * (0.3 - k * 0.24), down = -0.34 + k * 0.2;
+      const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const look = this.heroLook(), mesh = r.cached('fpFist' + JSON.stringify(look), () => GK.Models.shape('fpFist', look, 'arms').geo);
+      items.push({ mesh, pos, yaw: yaw + Math.PI - sd * (0.35 - k * 0.3), pitch: p.pitch + 0.18 - k * 0.12, roll: sd * 0.25, scale: 1, front: true });
+    }
+    /** First person while climbing or swimming: both hands, no tool. Climbing = hand over hand up the vines (the hands
+        move with game.climbPhase); swimming = breaststroke (game.swimPhase): together in front, out wide, back in. */
+    drawLimbs(items, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const at = (along, side, down) => [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const look = this.heroLook();
+      for (const sd of [1, -1]) {   // 1 = right hand, −1 = left hand
+        let pos, pitch, roll, grip = false;
+        if (g.climbing) {
+          // one hand reaches up while the other pulls down; a reaching hand is open, a pulling hand grips
+          const ph = (g.climbPhase || 0) + (sd < 0 ? Math.PI : 0), h = Math.sin(ph);
+          grip = Math.cos(ph) < 0;
+          pos = at(0.6 - Math.max(0, h) * 0.04, sd * 0.2, -0.1 + h * 0.17);
+          pitch = p.pitch + 1.15 + h * 0.15; roll = sd * 0.15;
+        } else {
+          const s = (g.swimPhase || 0) % (Math.PI * 2), out = Math.max(0, Math.sin(s)), fwd = Math.cos(s);
+          pos = at(0.6 + fwd * 0.14, sd * (0.1 + out * 0.3), -0.3 - out * 0.03);
+          pitch = p.pitch + 0.22; roll = sd * (0.35 + out * 0.45);
+        }
+        const hl = Object.assign({ grip }, look), mesh = r.cached('fpHand' + JSON.stringify(hl), () => GK.Models.shape('fpHand', hl, 'arms').geo);
+        items.push({ mesh, pos, yaw: yaw + Math.PI - sd * 0.12, pitch, roll, scale: 0.45, front: true });
+      }
     }
     /** The chosen character's look (a default one for games without characters). */
     heroLook() { const l = this.game.characterLook ? this.game.characterLook() : null; return l || {}; }
@@ -5802,9 +6086,17 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
       const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
       const sway = p.moving ? Math.sin((p.bobT || 0) * 2) * 0.012 : 0, look = this.heroLook();
+      const air = p.grounded ? 0 : U.clamp(-p.vel[1] * 0.006, -0.035, 0.045);   // in a jump the tool lags behind
+      const raise = vm.raise || 0, rk = vm.reload;
       let along, side, down, pitch, yo = 0;
       let roll = 0;
-      if (vm.melee) {
+      if (vm.melee && vm.anim === 'thrust') {
+        // spear: held low, pointing ahead; a thrust pulls back a little, then stabs straight out and comes back
+        const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t);
+        const reach = k <= 0 ? 0 : k < 0.2 ? -0.35 * ease(k / 0.2) : k < 0.5 ? -0.35 + 1.35 * ease((k - 0.2) / 0.3) : 1 - ease((k - 0.5) / 0.5);
+        along = 0.42 + reach * 0.32; side = 0.2 - Math.max(0, reach) * 0.1; down = -0.24 + sway + air - raise * 0.3 + Math.max(0, reach) * 0.06;
+        pitch = p.pitch - 1.3 - Math.max(0, reach) * 0.22; roll = 0.1;
+      } else if (vm.melee) {
         // sword: rest with the blade up at the right; a swing winds up, slashes across and down to the left, then recovers
         const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t), mix = (a, b, t) => a + (b - a) * t;
         let ang = -0.3, sideK = 0;
@@ -5815,16 +6107,22 @@ GK_LIBRARY.worlds = {
         along = 0.4; side = 0.25 - sideK * 0.24; down = -0.21 + sway - sideK * 0.04 - (vm.lower || 0) * 0.22;
         pitch = p.pitch + ang;
       } else {
-        const k = vm.kick || 0;
-        along = 0.44 - k * 0.1; side = 0.19; down = -0.18 + sway - k * 0.02 - (vm.lower || 0) * 0.22;
-        pitch = p.pitch + k * 0.15 - (vm.lower || 0) * 0.6;
+        const k = vm.kick || 0, lo = vm.lower || 0;
+        along = 0.44 - k * 0.1; side = 0.19 - lo * 0.06; down = -0.18 + sway + air - k * 0.02 - lo * 0.2 - raise * 0.3;
+        pitch = p.pitch + k * 0.15 - lo * 0.5 - raise * 0.7;
+        if (rk != null) roll = Math.sin(Math.PI * rk) * 0.75;   // reloading: dip and tilt the tool toward you, then back
+        if (vm.anim === 'bow' || vm.anim === 'sling') {   // held out in front, the arrow / pebble lined up with the crosshair
+          const bow = vm.anim === 'bow';
+          side = bow ? 0.07 : 0.05; down += bow ? 0.04 : 0.04; along += 0.06; roll += bow ? 0.2 : 0.08; pitch -= k * 0.1 - (bow ? 0.06 : 0);
+          yo = bow ? 0.22 : 0.1;   // turned in a little, so the arrow is seen pointing at the crosshair
+        }
       }
       const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
       const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
       const it = { pos, yaw: yaw + Math.PI + yo, pitch, roll, scale: vm.scale || (vm.melee ? 0.55 : 0.75), front: true };
       items.push(Object.assign({ mesh, hi: vm.glow || 0 }, it));
       if (GK.Models.has && !GK.Models.has('fpArms')) return;
-      const arms = Object.assign({ pose: vm.melee ? 'sword' : 'gun' }, look);
+      const arms = Object.assign({ pose: vm.melee ? (vm.anim === 'thrust' ? 'spear' : 'sword') : 'gun' }, vm.arms || {}, look);
       items.push(Object.assign({ mesh: r.cached('fpArms' + JSON.stringify(arms), () => GK.Models.shape('fpArms', arms, 'arms').geo) }, it));
     }
     /** Third person: the camera behind the right shoulder, looking where the player aims; walls pull it in. */
@@ -5863,6 +6161,17 @@ GK_LIBRARY.worlds = {
       const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
       const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
       const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (g.climbing) {   // arms up on the vines, hand over hand; legs step
+        const ph = g.climbPhase || 0;
+        out.armR = 2.75 + Math.sin(ph) * 0.35; out.armL = 2.75 - Math.sin(ph) * 0.35; out.sw = Math.sin(ph) * 0.45; out.air = 0;
+        return out;
+      }
+      if (g.swimming) {   // front crawl: the arms turn over, the legs kick fast
+        const ph = g.swimPhase || 0;
+        out.armR = ph % (Math.PI * 2); out.armL = (ph + Math.PI) % (Math.PI * 2); out.sw = Math.sin(ph * 3) * 0.3; out.air = 0.25;
+        return out;
+      }
+      if (p.punchK >= 0 && !vm) { const k = GK.punchReach(p.punchK); if (p.punchSide < 0) out.armL = lerp(out.armL, 1.65, k); else out.armR = lerp(out.armR, 1.65, k); }
       if (!vm) return out;
       if (vm.melee) {
         const k = vm.swing || 0;
@@ -6836,7 +7145,7 @@ GK.Worlds.add('pc-inside', {
         if (!O.has(o.type)) { report(where + ': unknown type "' + o.type + '"', 'error'); continue; }
         const ent = o.target || o.npc;
         if (ent && w && !other && !w.get(ent)) report(where + ': no entity "' + ent + '"', 'error');
-        if (o.type === 'reach' && o.zone && w && !w.zone(o.zone)) report(where + ': no zone or area "' + o.zone + '"', 'error');
+        if (o.type === 'reach' && o.zone && w && !other && !w.zone(o.zone)) report(where + ': no zone or area "' + o.zone + '"', 'error');
         if (o.type === 'solve' && !other && !puzzles.has(o.puzzle)) report(where + ': no puzzle "' + o.puzzle + '" (known: ' + [...puzzles].join(', ') + ')', 'error');
         if (o.type === 'collect' && o.item && !other && !items.has(o.item)) report(where + ': nothing gives item "' + o.item + '"', 'error');
         if (o.type === 'collect' && o.tag && w && !other && !w.entities.some(e => e.tags.indexOf(o.tag) >= 0)) report(where + ': nothing has tag "' + o.tag + '"', 'error');
@@ -6950,7 +7259,16 @@ GK.Worlds.add('pc-inside', {
    choice (multiple choice), order (put items in order), quiz (several questions, pass mark),
    sort (items into groups), bits (binary switches to a target number), mix (red/green/blue light),
    logic (gate expression: test with switches, fill in the truth table).
-   Config: puzzles: {id: {type, title, points, penalty, maxAttempts, onSolve, onFail, …}}
+   Config: puzzles: {id: {type, title, points, kind, penalty, maxAttempts, onSolve, onFail, reveal, revealPoints, …}}
+     reveal: 15 (or {cost: 15}) adds a "Show answer (−15)" button: it costs the points, marks the answer (choice) or
+     shows it, and solving afterwards gives revealPoints (default 0) instead of points. Emits puzzle:revealed {id, cost}.
+     kind: the scoring kind of the points (default 'puzzle'), e.g. 'academic'.
+     Challenge extras (any type): story (a situation shown above the question) · hint (💡 Hint button or H: first press
+     the hint, second press the answer + why; showing the answer gives revealPoints but never blocks) · why (shown on a
+     "well done" card after solving, with reward: 'text' and a Continue button) · variants {difficultyId: {…overrides}}
+     (e.g. a Grade 7 version). Quiz questions can have their own hint / why. Emits puzzle:hint {id, step} and, when a solved
+     puzzle's panel closes, puzzle:finished {id} (e.g. to show a story card after the "well done" card).
+     More types: pattern (continue a sequence of tiles) · build (craft: needs [{item}] in the inventory, then put the steps in order).
    Adds: interactions puzzle {puzzle:'id'|{…}} · input {question, store}; condition {solved:'id'};
          action {do:'puzzle', puzzle}; game.openPuzzle(ref, done(solved), entity); state.solved.
    New puzzle types: GK.Puzzles.add('name', { render(body, pz, api) }) — api.solve() · api.wrong(msg) · api.close() · api.note(msg) · api.game. */
@@ -7019,6 +7337,7 @@ GK.Worlds.add('pc-inside', {
       });
       body.appendChild(list);
       feedback(body);
+      api.onReveal = () => list.querySelectorAll('button').forEach((x, i) => { if (correct.indexOf(i) >= 0 || correct.indexOf(pz.options[i]) >= 0) x.classList.add('reveal'); });
     },
   });
 
@@ -7052,30 +7371,74 @@ GK.Worlds.add('pc-inside', {
     },
   });
 
-  PZ.add('quiz', { // pz.questions: [{type:'choice'|'input', …}], pz.pass = how many must be right (default all)
+  PZ.add('quiz', { // pz.questions: [{type:'choice'|'input'|'order'|'sort'|'pattern', …, hint, why}], pz.pass = how many must be right (default all)
+    // pz.retry: a wrong answer stays on the same question (and with pass: 0 every question just has to be got right in the end).
+    // Each question's `hint` / `why` feed the panel's 💡 Hint button (H); a solved question's `why` is shown above the next one.
     render(body, pz, api) {
       const qs = pz.questions, pass = pz.pass == null ? qs.length : pz.pass;
-      let i = 0, right = 0, missed = false;
+      let i = 0, right = 0, missed = false, lastWhy = null;
       const next = () => {
         body.innerHTML = '';
         if (i >= qs.length) {
-          if (right >= pass) api.solve();
+          if (right >= pass) { api.lastWhy = lastWhy; api.solve(); }
           else { api.wrong('You got ' + right + ' of ' + qs.length + '. You need ' + pass + '.'); const b = U.el('button', 'gk-btn primary', 'Try again'); b.onclick = () => { i = 0; right = 0; next(); }; body.appendChild(b); }
           return;
         }
+        if (lastWhy) body.appendChild(U.el('div', 'gk-why', '✅ ' + U.fill(lastWhy, api.game.state.vars)));
         body.appendChild(U.el('div', 'gk-muted', 'Question ' + (i + 1) + ' of ' + qs.length));
         const q = qs[i], sub = U.el('div');
         body.appendChild(sub);
         missed = false;
-        PZ.get(q.type || 'choice').render(sub, q, {
+        const subApi = {
           game: api.game,
-          solve: () => { if (!missed) right++; i++; next(); },
-          wrong: msg => { missed = true; api.note(msg || 'Not quite.'); if (!pz.retry) { i++; setTimeout(next, 700); } },
+          solve: () => { if (!missed) right++; lastWhy = q.why || null; i++; next(); },
+          wrong: msg => {
+            missed = true; api.note(msg || 'Not quite.');
+            api.game.audio.play('wrong');
+            api.game.emit('puzzle:wrong', { id: api.id, question: i });
+            if (!pz.retry) { i++; setTimeout(next, 700); }
+          },
           close: api.close,
           note: api.note,
-        });
+        };
+        PZ.get(q.type || 'choice').render(sub, q, subApi);
+        api.cur = q; api.curReveal = subApi.onReveal || null;
+        if (api.resetHelp) api.resetHelp();
       };
       next();
+    },
+  });
+  PZ.add('pattern', { // continue a pattern: pz.sequence ['🍃','🪨','🍃','🪨'], pz.options ['🍃','🪨','🐚'], pz.correct (index or text)
+    render(body, pz, api) {
+      question(body, U.fill(pz.question, api.game.state.vars) || 'What comes next?');
+      const row = U.el('div', 'gk-pattern');
+      pz.sequence.forEach(s => row.appendChild(U.el('span', 'gk-ptile', s)));
+      row.appendChild(U.el('span', 'gk-ptile gk-ptile-q', '?'));
+      body.appendChild(row);
+      PZ.get('choice').render(body, Object.assign({}, pz, { question: null }), api);
+      body.querySelector('.gk-choices').classList.add('gk-pattern-options');
+    },
+  });
+  PZ.add('build', { // crafting: pz.needs [{item, label}] must all be carried, then pz.items (the build steps) go in the right order
+    render(body, pz, api) {
+      const g = api.game, list = U.el('div', 'gk-build-needs');
+      const missing = [];
+      pz.needs.forEach(n => {
+        const def = g.itemDef ? g.itemDef(n.item) : { name: n.item }, have = g.hasItem ? g.hasItem(n.item) : false;
+        if (!have) missing.push(n.label || def.name || n.item);
+        const it = U.el('div', 'gk-build-item' + (have ? ' have' : ' missing'));
+        it.innerHTML = '<span class="gk-build-icon">' + U.esc(def.icon || '•') + '</span><span>' + U.esc(n.label || def.name || n.item) + '</span><b>' + (have ? '✓' : '✗') + '</b>';
+        list.appendChild(it);
+      });
+      body.appendChild(U.el('div', 'gk-muted', 'Materials: ' + (pz.needs.length - missing.length) + ' of ' + pz.needs.length + ' collected'));
+      body.appendChild(list);
+      if (missing.length) {
+        body.appendChild(U.el('p', 'gk-build-missing', U.fill(pz.missingText || 'Still missing: ', g.state.vars) + missing.join(', ') + '.'));
+        return;
+      }
+      const sub = U.el('div', 'gk-build-steps');
+      body.appendChild(sub);
+      PZ.get('order').render(sub, Object.assign({}, pz, { question: pz.question || 'Put the building steps in order.' }), api);
     },
   });
   PZ.add('sort', { // pz.bins: ['Input', 'Output'], pz.items: [{text, bin: index | name, why}] — put every item in its group
@@ -7260,8 +7623,8 @@ GK.Worlds.add('pc-inside', {
   /** Readable answer of a puzzle, for the teacher panel. */
   PZ.answerText = function (pz) {
     const t = pz.type || 'input';
-    if (t === 'choice') return U.list(pz.correct).map(c => (typeof c === 'number' ? pz.options[c] : c)).join(' / ');
-    if (t === 'order') return pz.items.join(' → ');
+    if (t === 'choice' || t === 'pattern') return U.list(pz.correct).map(c => (typeof c === 'number' ? pz.options[c] : c)).join(' / ');
+    if (t === 'order' || t === 'build') return pz.items.join(' → ');
     if (t === 'quiz') return pz.questions.map((q, i) => (i + 1) + ') ' + PZ.answerText(q)).join('   ');
     if (t === 'sort') return pz.bins.map((b, i) => (typeof b === 'string' ? b : b.name) + ': ' + pz.items.filter(it => it.bin === i || it.bin === (typeof b === 'string' ? b : b.name)).map(it => it.text).join(', ')).join(' | ');
     if (t === 'bits') { const n = pz.bits || 5; return pz.target + ' = ' + Number(pz.target).toString(2).padStart(n, '0'); }
@@ -7281,6 +7644,9 @@ GK.Worlds.add('pc-inside', {
         if (!PZ.has(t)) report('Puzzle "' + id + '": unknown type "' + t + '"', 'error');
         else if (t === 'choice' && !(pz.options && pz.options.length && pz.correct !== undefined)) report('Puzzle "' + id + '": a choice puzzle needs options and correct', 'error');
         else if (t === 'order' && !(pz.items && pz.items.length > 1)) report('Puzzle "' + id + '": an order puzzle needs at least 2 items', 'error');
+        else if (t === 'pattern' && !(pz.sequence && pz.options && pz.correct !== undefined)) report('Puzzle "' + id + '": a pattern puzzle needs sequence, options and correct', 'error');
+        else if (t === 'build' && !(pz.needs && pz.needs.length && pz.items && pz.items.length > 1)) report('Puzzle "' + id + '": a build puzzle needs needs [{item}] and at least 2 steps (items)', 'error');
+        else if (t === 'quiz' && !(pz.questions && pz.questions.length)) report('Puzzle "' + id + '": a quiz needs questions', 'error');
         else if (t === 'sort' && !(pz.bins && pz.bins.length > 1 && pz.items && pz.items.length)) report('Puzzle "' + id + '": a sort puzzle needs bins (2 or more) and items', 'error');
         else if (t === 'bits' && typeof pz.target !== 'number') report('Puzzle "' + id + '": a bits puzzle needs a number target', 'error');
         else if (t === 'mix' && !(pz.target || pz.targets)) report('Puzzle "' + id + '": a mix puzzle needs target [r,g,b] or targets', 'error');
@@ -7299,26 +7665,51 @@ GK.Worlds.add('pc-inside', {
       game.state.solved = {};
       /** Open a puzzle by id (config.puzzles) or inline definition. done(solved) is called when it closes. */
       game.openPuzzle = (ref, done, ent) => {
-        const base = typeof ref === 'string' ? (game.cfg.puzzles || {})[ref] : ref;
+        let base = typeof ref === 'string' ? (game.cfg.puzzles || {})[ref] : ref;
         if (!base) { console.warn('[GK] unknown puzzle', ref); if (done) done(false); return; }
+        // variants: {difficultyId: {…overrides}} — e.g. a harder Grade 7 version of the same challenge
+        if (base.variants && game.difficulty && base.variants[game.difficulty]) base = Object.assign({}, base, base.variants[game.difficulty]);
         const pz = Object.assign({ id: typeof ref === 'string' ? ref : (ent ? ent.id + ':puzzle' : 'puzzle') }, base);
         if (game.state.solved[pz.id] && !pz.repeatable) { game.ui.toast(pz.doneText || 'Already solved.'); if (done) done(false); return; }
-        let solved = false, attempts = 0;
+        let solved = false, attempts = 0, revealed = false, hints = 0, onKey = null;
+        const vars = game.state.vars;
         const body = U.el('div', 'gk-puzzle');
-        const h = game.ui.panel({ title: pz.title || (ent && ent.name) || 'Puzzle', body, buttons: [], wide: pz.wide, onClose: () => { if (!solved) game.emit('puzzle:closed', { id: pz.id }); if (done) done(solved); } });
+        const h = game.ui.panel({ title: pz.title || (ent && ent.name) || 'Puzzle', body, buttons: [], wide: pz.wide,
+          onClose: () => { if (onKey) document.removeEventListener('keydown', onKey); game.emit(solved ? 'puzzle:finished' : 'puzzle:closed', { id: pz.id }); if (done) done(solved); } });
+        // a story-based situation above the question
+        if (pz.story) body.appendChild(U.el('div', 'gk-story', U.fill(pz.story, vars)));
+        const inner = U.el('div', 'gk-puzzle-main');
+        body.appendChild(inner);
         const api = {
-          game, close: h.close, note: h.note,
+          game, id: pz.id, close: h.close, note: h.note,
           solve: () => {
             if (solved) return;
             solved = true;
             game.state.solved[pz.id] = true;
-            if (pz.points) game.scoring.add(pz.points, pz.title || 'Puzzle', 'puzzle');
+            const pts = revealed ? (pz.revealPoints || 0) : pz.points;
+            if (pts) game.scoring.add(pts, pz.title || 'Puzzle', pz.kind || 'puzzle');
             game.audio.play('success');
             h.note(pz.solvedText || (pz.store && pz.answer === undefined ? 'Saved.' : 'Correct!'), true);
             if (pz.onSolve) GK.run(game, pz.onSolve, { entity: ent });
-            game.emit('puzzle:solved', { id: pz.id });
+            game.emit('puzzle:solved', { id: pz.id, revealed, attempts, hints });
             if (game.missions) game.missions.check();
-            setTimeout(h.close, 700);
+            const why = pz.why || api.lastWhy, last = pz.why && api.lastWhy;
+            if (!why && !pz.reward) { setTimeout(h.close, 700); return; }
+            // a "well done" card: why the answer is right + the reward, closed with Continue (or Esc)
+            if (helpRow) helpRow.remove();
+            inner.innerHTML = '';
+            const card = U.el('div', 'gk-done');
+            card.appendChild(U.el('div', 'gk-done-title', '✅ ' + U.fill(pz.solvedText || 'Correct!', vars)));
+            if (last) card.appendChild(U.el('div', 'gk-why', '✅ ' + U.fill(last, vars)));
+            if (why) card.appendChild(U.el('p', 'gk-done-why', U.fill(why, vars)));
+            if (pz.reward) card.appendChild(U.el('div', 'gk-done-reward', '🎁 ' + U.fill(pz.reward, vars)));
+            if (pts) card.appendChild(U.el('div', 'gk-muted', '+' + pts + ' points' + (revealed ? ' (answer was shown)' : '')));
+            const go = U.el('button', 'gk-btn primary big gk-continue', U.fill(pz.continueLabel || 'Continue ▶', vars));
+            go.onclick = h.close;
+            card.appendChild(go);
+            inner.appendChild(card);
+            const f = body.querySelector('.gk-feedback'); if (f) f.textContent = '';
+            setTimeout(() => go.focus(), 30);
           },
           wrong: msg => {
             attempts++;
@@ -7334,7 +7725,75 @@ GK.Worlds.add('pc-inside', {
             }
           },
         };
-        PZ.get(pz.type || 'input').render(body, pz, api);
+        PZ.get(pz.type || 'input').render(inner, pz, api);
+        // 💡 help (pz.hint, or hints on quiz questions): the button or H shows a hint, then the answer with why it is right.
+        // Showing the answer marks the puzzle `revealed` (it then gives revealPoints) but never blocks solving it.
+        let helpRow = null;
+        const hasHelp = pz.hint || (pz.questions && pz.questions.some(q => q.hint));
+        if (hasHelp) {
+          let step = 0;
+          helpRow = U.el('div', 'gk-help');
+          const btn = U.el('button', 'gk-btn small gk-help-btn'), out = U.el('div', 'gk-help-out');
+          const draw = () => {
+            btn.innerHTML = step === 0 ? '💡 Hint <kbd>H</kbd>' : step === 1 ? '🔑 Show the answer <kbd>H</kbd>' : '🔑 Answer shown';
+            btn.disabled = step >= 2 || solved;
+          };
+          api.resetHelp = () => { step = 0; out.innerHTML = ''; out.className = 'gk-help-out'; draw(); };
+          const help = () => {
+            if (solved || step >= 2) return;
+            const q = api.cur || pz;
+            if (step === 0) {
+              step = 1; hints++;
+              out.className = 'gk-help-out hint';
+              out.textContent = '💡 ' + U.fill(q.hint || pz.hint || 'Read the question again slowly. Which answer makes the most sense?', vars);
+              game.emit('puzzle:hint', { id: pz.id, step: 1 });
+            } else {
+              step = 2; revealed = true;
+              const rv = api.cur ? api.curReveal : api.onReveal;
+              if (rv) rv();
+              out.className = 'gk-help-out answer';
+              out.innerHTML = '';
+              out.appendChild(U.el('b', '', '🔑 Answer: ' + PZ.answerText(q)));
+              const why = q.why || (!api.cur && pz.why);
+              if (why) out.appendChild(U.el('div', '', U.fill(why, vars)));
+              out.appendChild(U.el('div', 'gk-muted', 'Now try it yourself!'));
+              game.emit('puzzle:revealed', { id: pz.id, cost: 0, help: true });
+            }
+            game.audio.play('hint');
+            draw();
+          };
+          btn.onclick = help;
+          helpRow.append(btn, out);
+          body.appendChild(helpRow);
+          draw();
+          onKey = e => {
+            if ((e.key !== 'h' && e.key !== 'H') || e.ctrlKey || e.altKey || e.metaKey) return;
+            if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+            const modal = body.closest('.gk-modal');
+            if (!modal || modal.parentNode.lastElementChild !== modal) return;   // only the panel on top
+            e.preventDefault();
+            help();
+          };
+          document.addEventListener('keydown', onKey);
+        }
+        if (pz.reveal) {
+          const cost = typeof pz.reveal === 'number' ? pz.reveal : pz.reveal.cost || 0;
+          const row = U.el('div', 'gk-reveal'), btn = U.el('button', 'gk-btn small gk-reveal-btn');
+          btn.innerHTML = '💡 Show answer <b>' + (cost ? '−' + cost + ' points' : 'free') + '</b>';
+          btn.title = 'Stuck? See the answer, but it costs ' + cost + ' points and this question then gives no points.';
+          btn.onclick = () => {
+            if (revealed || solved) return;
+            revealed = true; btn.disabled = true;
+            if (cost) game.scoring.add(-cost, 'Answer shown', pz.revealKind || 'reveal');
+            if (api.onReveal) api.onReveal(); else h.note('Answer: ' + PZ.answerText(pz), true);
+            if (api.onReveal && pz.type !== 'choice') h.note('Answer: ' + PZ.answerText(pz), true);
+            game.audio.play('hint');
+            game.emit('puzzle:revealed', { id: pz.id, cost });
+          };
+          row.appendChild(btn);
+          if (pz.revealNote !== false) row.appendChild(U.el('span', 'gk-muted', cost ? 'Costs ' + cost + ' points. Only if you are stuck!' : ''));
+          body.appendChild(row);
+        }
       };
     },
   });
@@ -7727,6 +8186,29 @@ GK.Worlds.add('pc-inside', {
     }
   }
 
+  /** gait: how a creature moves (drawn only, nothing changes in the game): 'waddle' (rocks side to side: crabs),
+      'trot' (bounces and nods: boars), 'hop' (jumps along), 'flap' (flutters up and down: bats), 'slither' (sways:
+      snakes), 'stomp' (heavy steps: big bosses). Shooters lean back before they throw and forward as they throw;
+      a hit knocks them back a little. */
+  function gait(ent, dt, moved) {
+    const g = ent.def.gait, t = ent.t || 0;
+    ent.gaitK = U.lerp(ent.gaitK || 0, moved > 0.001 ? 1 : 0, Math.min(1, dt * 8));
+    ent.gaitPh = (ent.gaitPh || 0) + moved * (g === 'hop' ? 3.2 : g === 'stomp' ? 2.4 : 6.5);
+    const k = ent.gaitK, ph = ent.gaitPh;
+    let lift = 0, roll = 0, pitch = 0;
+    if (g === 'waddle') { roll = Math.sin(ph) * 0.2 * k; lift = Math.abs(Math.sin(ph)) * 0.05 * k; }
+    else if (g === 'trot') { pitch = Math.sin(ph * 2) * 0.09 * k; lift = Math.abs(Math.sin(ph)) * 0.1 * k; }
+    else if (g === 'hop') lift = Math.abs(Math.sin(ph)) * 0.35 * k;
+    else if (g === 'flap') { lift = Math.sin(t * 11) * 0.1; roll = Math.sin(t * 5.5) * 0.18; }
+    else if (g === 'slither') { roll = Math.sin(t * 7) * 0.12 * (0.4 + k); lift = 0; }
+    else if (g === 'stomp') { roll = Math.sin(ph) * 0.07 * k; lift = Math.abs(Math.sin(ph)) * 0.16 * k; }
+    // throwing: lean back while about to shoot, snap forward when the shot leaves
+    if (ent.def.shoots && ent.sees && ent.shootT < 0.45) pitch -= (0.45 - Math.max(0, ent.shootT)) / 0.45 * 0.35;
+    if (ent.throwT > 0) { ent.throwT -= dt; pitch += ent.throwT / 0.3 * 0.4; }
+    if (ent.hurtT > 0) { ent.hurtT -= dt; pitch -= ent.hurtT / 0.25 * 0.3; lift += ent.hurtT * 0.3; }
+    ent.lift = lift; ent.roll = roll; ent.pitch = pitch;
+  }
+
   P.add('hazard', {
     defaults: { model: 'virus', solid: false, speed: 2, wait: 0.3, damage: 25, bob: 0.12, faceTravel: true, points: 50, hp: 0, contactEvery: 1, knockback: 5 },
     init(ent, game) {
@@ -7767,6 +8249,7 @@ GK.Worlds.add('pc-inside', {
         }
       }
       if (ent.touching && !ent.state.off) { ent.contactT -= dt; if (ent.contactT <= 0) contact(ent, g); }
+      const x0 = ent.pos[0], z0 = ent.pos[2];
 
       // senses: distance to the player and line of sight, a few times a second
       const pl = g.player, eye = pl.eye();
@@ -7824,8 +8307,10 @@ GK.Worlds.add('pc-inside', {
           ent.shootT = (d.shoots.every || 2) * (0.85 + Math.random() * 0.3);
           const c = eyeOf(ent);
           g.enemyFire(ent, c, [eye[0], eye[1] - 0.25, eye[2]], d.shoots);   // the same line it saw you along
+          ent.throwT = 0.3;
         }
       }
+      if (d.gait) gait(ent, dt, Math.hypot(ent.pos[0] - x0, ent.pos[2] - z0));
 
       // bosses bring their minions back
       if (d.summon && ent.state.engaged && !(d.armor !== undefined && d.summon.whileArmored === false && GK.test(g, d.armor))) {
@@ -7907,6 +8392,7 @@ GK.Worlds.add('pc-inside', {
         if (d.boss) ent.state.engaged = true;
         game.emit('hazard:damaged', { id: ent.id });
         if (ent.state.hp <= 0) { defeat(ent, game, 'shot'); return 'defeated'; }
+        if (ent.def.gait) ent.hurtT = 0.25;
         game.audio.play('hit');
         return 'hit';
       };
@@ -7973,15 +8459,17 @@ GK.Worlds.add('pc-inside', {
   GK.Mechanics.add('powerups', {
     setup(game) {
       game.state.powers = {};
-      game.activatePower = (name, seconds, ent) => {
+      game.activatePower = (name, seconds, ent, quiet) => {   // quiet: no toast / flash (e.g. a speed pad)
         const k = KINDS[name];
         if (!k) return;
         if (name === 'heal') { if (game.player && game.player.health != null) game.player.heal(50); }
         else game.state.powers[name] = Math.max(game.state.powers[name] || 0, seconds || k.duration);
         if (ent && ent.def.points) game.scoring.add(ent.def.points, 'Power-up', 'bonus');
-        game.audio.play('checkpoint');
-        game.ui.flash(k.color);
-        game.ui.toast(k.label + (name === 'heal' ? '!' : ' for ' + (seconds || k.duration) + ' seconds!'), 'good');
+        if (!quiet) {
+          game.audio.play('checkpoint');
+          game.ui.flash(k.color);
+          game.ui.toast(k.label + (name === 'heal' ? '!' : ' for ' + (seconds || k.duration) + ' seconds!'), 'good');
+        }
         game.emit('powerup', { id: ent ? ent.id : null, power: name });
       };
       game.hasPower = name => (game.state.powers[name] || 0) > 0;
@@ -7994,7 +8482,7 @@ GK.Worlds.add('pc-inside', {
       const P2 = game.state.powers;
       for (const n in P2) {
         P2[n] -= dt;
-        if (P2[n] <= 0) { delete P2[n]; game.ui.toast(KINDS[n].label + ' is over'); }
+        if (P2[n] <= 0) { delete P2[n]; if (!KINDS[n].quiet) game.ui.toast(KINDS[n].label + ' is over'); }
       }
       if (game.player) game.player.speedMul = game.hasPower('speed') ? 1.6 : 1;
       game.ui.setChips(Object.keys(P2).map(n => ({ text: KINDS[n].label + '  ' + Math.ceil(P2[n]), color: KINDS[n].color })));
@@ -8017,9 +8505,14 @@ GK.Worlds.add('pc-inside', {
                    pierce: false,                                          // goes through enemies
                    price: 0, ammoPrice: 20, ammoPack: 24,                  // shop: buy it, buy a pack of ammo
                    melee: true, reach: 2.6, arc: 90, maxTargets: 3, swing: 0.3, // a sword: no ammo, hits what is in front
+                   viewScale: 0.55,                                        // size of the tool drawn in the hand (first person)
+                   anim: 'bow' | 'sling' | 'load' | 'thrust',              // how it moves in the hand (below)
+                   projectile: 'arrowShot', drop: 0,                       // the model that flies (default a glowing bolt);
+                                                                           // drop: m/s² of fall, aimed so it still lands on the crosshair
                    owned: true, always: true }, …],                        // owned from the start; usable before `requires`
        start: 'zapper', requires: {has: 'zapper'},                         // owned at the start; usable once true
        coins: 0, objectiveCoins: 15, dropChance: 0.35,                     // coins for each objective; ammo drops
+       coinsName: 'coins', coinIcon: '🪙',                                 // what the money is called and its icon (e.g. 'shells', '🐚')
        extras: [{ id, name, icon, desc, price, actions }] }                // other things to buy (heal, shield…)
      weapon: {…}  — the old single-weapon form still works (one weapon, owned from the start).
    Controls: click / hold the mouse / hold Q = fire (or swing) · R = reload · 1-9 or the mouse wheel = switch weapon.
@@ -8037,7 +8530,11 @@ GK.Worlds.add('pc-inside', {
    game.addCoins(n), game.coins(), game.buy(id), game.openShop(), game.armed(), game.weaponState().
    Conditions {coins: {gte}}, {weapon: 'id'}; actions {do:'coins', add}, {do:'giveWeapon', weapon}, {do:'ammo', amount},
    {do:'shop'}. Events weapon:fire / hit / reload / switch, shop:open, shop:buy {id}, coins.
-   Bolts, sparks and loot come from small pools made once per scene (ids fx-…), so snapshot/restore keep working. */
+   Bolts, sparks and loot come from small pools made once per scene (ids fx-…), so snapshot/restore keep working.
+   Animation (game.viewModel, drawn by the view): a new weapon comes up from below (raise), a shot kicks, a reload dips
+   and tilts it. `anim` also sets the model's look: 'bow' {draw, arrow} and 'sling' {pull, pebble} lose the arrow/pebble
+   when they shoot, fit a new one and pull back (arms pose 'bow' / 'sling'); 'load' {loaded} is empty until reloaded;
+   'thrust' (melee) stabs forward instead of slashing. No firing while game.handsBusy() (climbing, swimming). */
 (function () {
   'use strict';
   const V = GK.vec, Ph = GK.Physics, U = GK.util;
@@ -8078,6 +8575,18 @@ GK.Worlds.add('pc-inside', {
     return best;
   }
   function take(list) { return list.find(e => !e.visible) || null; }
+  /** The held weapon's look this frame (weapon `anim`): after a shot the arrow / pebble / harpoon is gone, then a new
+      one is fitted and (bow, sling) pulled back. Steps of 0.1 so only a few shapes are ever built. */
+  function animLook(game, w, o, rk) {
+    if (!w.anim || w.anim === 'thrust') return w.look;
+    const k = U.clamp(game.sinceFire / Math.max(0.15, game.lastCool || w.cooldown), 0, 1);
+    const has = o.mag > 0 || !!(game.hasPower && game.hasPower('rapid'));
+    const q = x => Math.round(x * 10) / 10;
+    if (w.anim === 'load') return Object.assign({}, w.look, { loaded: rk != null ? rk > 0.55 : has && k > 0.7 });
+    const ready = rk != null ? rk > 0.6 : has && k > 0.4;
+    const pull = rk == null && ready ? q(U.clamp((k - 0.55) / 0.45, 0, 1) * 0.7) : 0;
+    return Object.assign({}, w.look, w.anim === 'bow' ? { draw: pull, arrow: ready } : { pull, pebble: ready });
+  }
 
   function config(game) {
     const c = game.cfg;
@@ -8126,7 +8635,7 @@ GK.Worlds.add('pc-inside', {
         sparks: add('spark', POOL.spark, 'spark', { color: '#ffffff' }),
         loot: add('loot', POOL.loot, 'ammoBox', {}, 'pickup'),
       };
-      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3;
+      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3; game.sinceFire = 9; game.lastCool = 0.3; game.drawT = 0;
       game.ui.setWeapon(null);
       const st = () => game.state.arsenal;
       const gunsReady = () => A.requires === undefined || GK.test(game, A.requires);
@@ -8158,7 +8667,7 @@ GK.Worlds.add('pc-inside', {
       game.selectWeapon = ref => {
         const id = typeof ref === 'number' ? (A.weapons[ref - 1] || {}).id : ref;
         if (!id || !st().owned[id] || id === st().cur || !usable(A.byId[id])) return false;
-        st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 1;
+        st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 0; game.drawT = 0.3; game.sinceFire = 9;
         game.audio.play('click');
         game.emit('weapon:switch', { id });
         return true;
@@ -8198,6 +8707,7 @@ GK.Worlds.add('pc-inside', {
       };
       game.fire = () => {
         if (!game.armed() || game.state.mode !== 'playing' || game.cool > 0 || game.reloadT > 0) return false;
+        if (game.handsBusy && game.handsBusy()) return false;   // climbing or swimming: both hands are busy
         const s = st(), w = A.byId[s.cur], o = s.owned[s.cur], rapid = game.hasPower && game.hasPower('rapid');
         if (w.melee) return swing(w, rapid);
         if (!rapid && o.mag < 1) {
@@ -8207,6 +8717,7 @@ GK.Worlds.add('pc-inside', {
         }
         if (!rapid) o.mag -= 1;
         game.cool = w.cooldown * (rapid ? 0.5 : 1);
+        game.sinceFire = 0; game.lastCool = game.cool;
         const p = game.player, eye = p.eye(), f = p.forward(), yaw = p.yaw;
         // aim where the crosshair points (in third person: along the camera's line), start at the tip of the tool
         const ray = (game.aimRay && game.aimRay()) || { o: eye, d: f };
@@ -8231,13 +8742,16 @@ GK.Worlds.add('pc-inside', {
           // first person: the tip sits beside the eye; if scenery is in its way but not in the crosshair's, shoot along the crosshair
           start = V.add(eye, V.scale(f, 0.4)); dir = V.norm(V.sub(aim, start));
         }
+        const pm = w.projectile || 'bolt', lift = w.drop ? 0.5 * w.drop * V.dist(start, aim) / w.speed : 0;   // a falling shot starts a little up
         for (let i = 0; i < (w.pellets || 1); i++) {
           const b = take(fx.bolts);
           if (!b) break;
           let d = dir;
           if (w.spread) d = V.norm([dir[0] + (Math.random() - 0.5) * w.spread * 2, dir[1] + (Math.random() - 0.5) * w.spread * 2, dir[2] + (Math.random() - 0.5) * w.spread * 2]);
-          if (b.look.color !== w.color || b.look.size !== w.boltSize) b.setLook({ color: w.color, size: w.boltSize });
-          b.pos = start.slice(); b.v = V.scale(d, w.speed); b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
+          if (b.model !== pm) b.setModel(pm, pm === 'bolt' ? { color: w.color, size: w.boltSize } : {});
+          else if (pm === 'bolt' && (b.look.color !== w.color || b.look.size !== w.boltSize)) b.setLook({ color: w.color, size: w.boltSize });
+          b.pos = start.slice(); b.v = V.scale(d, w.speed); b.v[1] += lift; b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
+          b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / V.len(b.v), -1, 1)); b.roll = 0;
           b.show();
         }
         game.kick = 1;
@@ -8250,7 +8764,7 @@ GK.Worlds.add('pc-inside', {
       const swing = (w, rapid) => {
         const s = st();
         game.cool = w.cooldown * (rapid ? 0.6 : 1);
-        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1;
+        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1; game.sinceFire = 0; game.lastCool = game.cool;
         const p = game.player, eye = p.eye(), f = p.forward(), fl = Math.hypot(f[0], f[2]) || 1, fh = [f[0] / fl, 0, f[2] / fl];
         const reach = w.reach || 2.6, cosArc = Math.cos((w.arc || 90) * Math.PI / 360), hits = [];
         for (const e of game.world.entities) {
@@ -8344,7 +8858,7 @@ GK.Worlds.add('pc-inside', {
         const draw = () => {
           const s = st();
           body.innerHTML = '';
-          body.appendChild(U.el('div', 'gk-shop-coins', '🪙 ' + s.coins + ' ' + (A.coinsName || 'coins')));
+          body.appendChild(U.el('div', 'gk-shop-coins', (A.coinIcon || '🪙') + ' ' + s.coins + ' ' + (A.coinsName || 'coins')));
           const grid = U.el('div', 'gk-shop-grid');
           const bar = (label, k) => '<div class="gk-shop-stat"><span>' + label + '</span><i><b style="width:' + Math.round(U.clamp(k, 0.05, 1) * 100) + '%"></b></i></div>';
           for (const w of A.weapons) {
@@ -8353,7 +8867,7 @@ GK.Worlds.add('pc-inside', {
             card.innerHTML = '<div class="gk-shop-icon" style="--c:' + U.css(w.color) + '">' + U.esc(w.icon || '⚡') + '</div>' +
               '<b>' + U.esc(w.name) + '</b><small>' + U.esc(w.desc || '') + '</small>' +
               bar('Power', (w.damage * (w.pellets || 1) + (w.splash ? 3 : 0)) / 8) + bar('Speed', 0.09 / Math.max(0.09, w.cooldown)) + (w.melee ? bar('Reach', (w.reach || 2.6) / 4) : bar('Ammo', w.mag / 30));
-            const btn = U.el('button', 'gk-btn' + (owned ? '' : ' primary'), w.melee && owned ? '✔ No ammo needed' : owned ? 'Ammo +' + w.ammoPack + ' · 🪙 ' + price : (price ? 'Buy · 🪙 ' + price : 'Free'));
+            const btn = U.el('button', 'gk-btn' + (owned ? '' : ' primary'), w.melee && owned ? '✔ No ammo needed' : owned ? 'Ammo +' + w.ammoPack + ' · ' + (A.coinIcon || '🪙') + ' ' + price : (price ? 'Buy · ' + (A.coinIcon || '🪙') + ' ' + price : 'Free'));
             btn.disabled = (w.melee && owned) || s.coins < price || (owned && owned.res >= w.maxReserve);
             btn.onclick = () => { game.buy(w.id); draw(); };
             card.appendChild(btn);
@@ -8363,7 +8877,7 @@ GK.Worlds.add('pc-inside', {
           for (const x of A.extras) {
             const card = U.el('div', 'gk-shop-card extra');
             card.innerHTML = '<div class="gk-shop-icon">' + U.esc(x.icon || '✨') + '</div><b>' + U.esc(x.name) + '</b><small>' + U.esc(x.desc || '') + '</small>';
-            const btn = U.el('button', 'gk-btn primary', 'Buy · 🪙 ' + x.price);
+            const btn = U.el('button', 'gk-btn primary', 'Buy · ' + (A.coinIcon || '🪙') + ' ' + x.price);
             btn.disabled = s.coins < x.price;
             btn.onclick = () => { game.buy(x.id); draw(); };
             card.appendChild(btn);
@@ -8424,10 +8938,14 @@ GK.Worlds.add('pc-inside', {
       if (game.reloadT > 0) { game.reloadT -= dt; if (game.reloadT <= 0) { game.reloadT = 0; game.reload(true); game.audio.play('click'); } }
       game.kick = Math.max(0, game.kick - dt * 7);
       if (game.swingT > 0) game.swingT = Math.max(0, game.swingT - dt);
+      if (game.drawT > 0) game.drawT = Math.max(0, game.drawT - dt);
+      game.sinceFire += dt;
       const w = A.byId[s.cur], o = s.owned[s.cur];
-      const lower = game.reloadT > 0 ? Math.sin(Math.PI * (1 - game.reloadT / (game.reloadMax || 1))) : 0;
-      game.viewModel = armed ? { model: w.model, look: w.look, kick: w.melee ? 0 : game.kick, glow: game.kick * 0.25, lower, melee: !!w.melee,
-        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0 } : null;
+      const rk = game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null;
+      const lower = rk != null ? Math.sin(Math.PI * rk) : 0;
+      game.viewModel = armed ? { model: w.model, look: animLook(game, w, o, rk), scale: w.viewScale, kick: w.melee ? 0 : game.kick, glow: w.projectile ? 0 : game.kick * 0.25, lower, melee: !!w.melee,
+        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0, anim: w.anim || null, reload: rk, raise: game.drawT / 0.3 } : null;
+      if (game.viewModel && (w.anim === 'bow' || w.anim === 'sling')) game.viewModel.arms = { pose: w.anim, draw: game.viewModel.look.draw || 0, pull: game.viewModel.look.pull || 0 };
       game.ui.setWeapon(armed ? {
         name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')), melee: !!w.melee,
         reload: game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null,
@@ -8458,6 +8976,11 @@ GK.Worlds.add('pc-inside', {
           b.hide();
         } else {
           b.pos = V.add(b.pos, V.scale(b.v, dt));
+          if (W.drop) b.v[1] -= W.drop * dt;
+          if (W.projectile) {   // a model in flight points along its path (round ones tumble)
+            b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / (V.len(b.v) || 1), -1, 1));
+            if (/pebble|coconut/.test(W.projectile)) b.roll = (b.roll || 0) + dt * 14;
+          }
           if (b.life <= 0) { if (W.splash) fx.explode(b.pos, W); b.hide(); }
         }
       }
