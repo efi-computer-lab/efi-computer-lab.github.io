@@ -706,6 +706,7 @@ window.GAME_CONTENT = {};
     roundInfo: { name: C.rounds[i].name, text: C.rounds[i].text },
   });
 
+  window.GK_NATURE_KEEP = ['island'];   // keep the course's floating sky islands (the stylized 'island' is a sea islet)
   window.GAME = {
     id: 'cyber-rush',
     title: 'CYBER RUSH',
@@ -714,6 +715,7 @@ window.GAME_CONTENT = {};
     type: 'first-person-3d',
     world: 'rush-city',
     mechanics: ['interaction', 'inventory', 'objectives', 'puzzles', 'world-objects', 'hazards', 'powerups', 'moving-platform', 'terrain', 'cybertraps', 'juice', 'music', 'online', 'quiz-gates', 'gadgets', 'race'],
+    models: ['stylized-characters', 'stylized-nature'],   // 3D Visual Foundation: rounded racers, stylized trees and mountains
     levels: [
       round(0, 'rush-city', ['easy', 'easy', 'easy', 'medium', 'easy'], 1),
       round(1, 'rush-forest', ['easy', 'medium', 'easy', 'medium', 'medium', 'easy'], 2),
@@ -818,6 +820,12 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 /* crosshair */
 .gk-crosshair { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.35); transition: transform .12s, background .12s; }
 .gk-hud.no-crosshair .gk-crosshair { display: none; }
+.gk-hud.gk-aiming .gk-crosshair { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: transparent; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.35); }
+.gk-hud.gk-aiming .gk-crosshair::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: #ff6b6b; }
+.gk-chars.many { max-width: 600px; }
+.gk-chars.many .gk-char { width: 100px; padding: 6px 4px; }
+.gk-chars.many .gk-avatar { width: 50px; height: 50px; }
+.gk-chars.many .gk-char span { font-size: 11px; }
 .gk-hud.aiming .gk-crosshair { transform: scale(2.2); background: var(--gk-accent); }
 
 /* objectives */
@@ -839,7 +847,8 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-stat { padding: 8px 14px; font-size: 20px; font-weight: 700; display: flex; gap: 8px; align-items: center; font-variant-numeric: tabular-nums; }
 .gk-stat span { font-size: 16px; opacity: .8; }
 .gk-timer.warn b { color: var(--gk-bad); animation: gk-pulse 1s infinite; }
-.gk-health { position: absolute; left: 50%; bottom: 96px; width: 220px; margin-left: -110px; height: 10px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
+.gk-health { position: absolute; left: 50%; bottom: 14px; width: 260px; margin-left: -130px; height: 14px; border-radius: 7px; background: rgba(0,0,0,.55); border: 2px solid rgba(255,255,255,.7); box-shadow: 0 2px 8px rgba(0,0,0,.5); overflow: hidden; }
+.gk-health-heart { position: absolute; left: 50%; bottom: 8px; margin-left: -162px; font-size: 22px; line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .gk-health i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #e74c3c, #2ecc71); transition: width .25s; }
 
 /* prompt */
@@ -847,14 +856,26 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-prompt.show { opacity: 1; }
 
 /* inventory */
-.gk-inv { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 8px; }
+.gk-inv { position: absolute; left: 14px; bottom: 14px; display: flex; flex-wrap: wrap-reverse; gap: 6px; max-width: 300px; }
+.gk-inv .gk-slot { width: 54px; height: 54px; }
+.gk-inv .gk-slot-icon { font-size: 21px; }
+.gk-inv .gk-slot small { font-size: 9px; max-width: 50px; }
 .gk-slot { --slot: var(--gk-accent); position: relative; width: 64px; height: 64px; border-radius: 12px; background: var(--gk-panel); border: 2px solid var(--slot); display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .gk-slot-icon { font-size: 24px; line-height: 1; }
 .gk-slot small { font-size: 10px; opacity: .85; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
 .gk-slot b { position: absolute; right: 4px; top: 2px; font-size: 12px; }
 .gk-keys { position: absolute; right: 16px; bottom: 16px; display: flex; gap: 8px; font-size: 12px; opacity: .8; }
 .gk-keys span { background: var(--gk-panel); padding: 5px 9px; border-radius: 8px; }
-.gk-lockhint { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--gk-panel); padding: 6px 12px; border-radius: 8px; font-size: 13px; display: none; }
+.gk-keys .gk-guide-chip { pointer-events: auto; cursor: pointer; border: 1px solid rgba(255,255,255,.35); }
+.gk-keys .gk-guide-chip:hover { border-color: var(--gk-accent); }
+.gk-guide { position: absolute; right: 16px; bottom: 56px; display: none; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--gk-panel); border: 1px solid rgba(255,255,255,.25); font-size: 13px; pointer-events: auto; z-index: 4; min-width: 230px; }
+.gk-guide.show { display: flex; }
+.gk-guide-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 14px; margin-bottom: 2px; }
+.gk-guide-x { background: none; border: 0; color: inherit; font-size: 15px; cursor: pointer; padding: 0 4px; }
+.gk-guide-row { display: grid; grid-template-columns: 22px 92px 1fr; align-items: center; gap: 6px; }
+.gk-guide-icon { font-size: 16px; text-align: center; }
+.gk-guide kbd { font: inherit; font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 5px; background: rgba(255,255,255,.16); text-align: center; }
+.gk-lockhint { position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%); background: var(--gk-panel); padding: 6px 12px; border-radius: 8px; font-size: 13px; display: none; }
 .gk-lockhint.show { display: block; }
 
 /* toasts */
@@ -867,7 +888,11 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 
 /* labels & marker */
 .gk-label { position: absolute; left: 0; top: 0; padding: 3px 9px; border-radius: 8px; background: rgba(10,14,20,.7); font-size: 13px; font-weight: 600; white-space: nowrap; will-change: transform; }
-.gk-label.marker { background: none; color: var(--gk-hint); font-size: 14px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+.gk-label.marker { background: rgba(10,14,20,.6); color: var(--gk-hint); font-size: 22px; font-weight: 900; padding: 3px 12px; border: 2px solid var(--gk-hint); border-radius: 14px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 0 14px rgba(0,0,0,.45); animation: gk-mark-bob 1s ease-in-out infinite; }
+.gk-label.marker.edge { font-size: 20px; animation: gk-mark-pulse 0.9s ease-in-out infinite; }
+@keyframes gk-mark-bob { 0%, 100% { margin-top: 0; } 50% { margin-top: -8px; } }
+@keyframes gk-mark-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 
 /* modal panels */
 .gk-modal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(5,8,12,.45); animation: gk-fade .15s; user-select: text; }
@@ -1057,7 +1082,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-hud.hidden .gk-minimap { display: none; }
 
 /* weapon energy, hit marker, boss bar */
-.gk-weapon { position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 10px; background: var(--gk-panel); font-size: 13px; font-weight: 700; pointer-events: none; }
+.gk-weapon { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 10px; background: var(--gk-panel); font-size: 13px; font-weight: 700; pointer-events: none; }
 .gk-weapon.show { display: flex; }
 .gk-weapon i { display: block; width: 130px; height: 9px; border-radius: 5px; background: rgba(255,255,255,.15); overflow: hidden; }
 .gk-weapon b { display: block; height: 100%; background: linear-gradient(90deg, var(--gk-accent), #fff); transition: width .1s; }
@@ -1107,9 +1132,70 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-shop-stat b { display: block; height: 100%; background: var(--gk-accent); }
 .gk-shop-card .gk-btn { margin-top: 4px; }
 .gk-shop-card .gk-btn:disabled { opacity: .45; cursor: not-allowed; }
+/* challenge extras (mechanics/puzzles): story, 💡 help, "well done" card, pattern tiles, build checklist; end-screen extra */
+.gk-story { background: rgba(255,209,102,.12); border-left: 4px solid var(--gk-hint); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; font-style: italic; line-height: 1.4; }
+.gk-help { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; align-items: flex-start; }
+.gk-help-btn kbd { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,.18); font: 700 12px/1.4 inherit; font-family: inherit; }
+.gk-help-out:empty { display: none; }
+.gk-help-out { padding: 9px 12px; border-radius: 8px; line-height: 1.4; }
+.gk-help-out.hint { background: rgba(255,209,102,.14); color: #ffe7a3; }
+.gk-help-out.answer { background: rgba(76,201,240,.14); color: #d6f4ff; }
+.gk-help-out.answer div { margin-top: 4px; }
+.gk-why { background: rgba(46,204,113,.13); color: #c9f7dc; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; line-height: 1.4; }
+.gk-done { text-align: center; padding: 6px 4px; }
+.gk-done-title { font-size: 22px; font-weight: 800; color: var(--gk-good); margin-bottom: 6px; }
+.gk-done-why { line-height: 1.45; margin: 8px 0; }
+.gk-done-reward { display: inline-block; margin: 6px 0 8px; padding: 8px 16px; border-radius: 999px; background: rgba(255,209,102,.18); border: 2px solid var(--gk-hint); font-weight: 800; font-size: 17px; }
+.gk-continue { display: block; margin: 12px auto 0; }
+.gk-pattern { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+.gk-ptile { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 54px; padding: 0 8px; border-radius: 12px; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.2); font-size: 28px; }
+.gk-ptile-q { border-style: dashed; border-color: var(--gk-hint); color: var(--gk-hint); font-weight: 800; }
+.gk-pattern-options .gk-btn.choice { font-size: 26px; min-width: 70px; text-align: center; }
+.gk-build-needs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin: 8px 0; }
+.gk-build-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15); font-weight: 600; }
+.gk-build-item b { margin-left: auto; }
+.gk-build-item.have { border-color: var(--gk-good); } .gk-build-item.have b { color: var(--gk-good); }
+.gk-build-item.missing { opacity: .7; border-style: dashed; } .gk-build-item.missing b { color: var(--gk-bad); }
+.gk-build-icon { font-size: 20px; }
+.gk-build-missing { color: var(--gk-bad); font-weight: 700; }
+.gk-end-extra { margin: 10px auto; max-width: 560px; text-align: left; }
+.gk-end-extra table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gk-end-extra td, .gk-end-extra th { padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.gk-end-extra th { text-align: left; color: var(--gk-hint); }
+/* mechanics/traversal: swim / climb meter */
+.gk-tr-meter { position: absolute; left: 50%; bottom: 210px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px; background: var(--gk-panel); font-weight: 800; font-size: 14px; pointer-events: none; }
+.gk-tr-meter.show { display: flex; }
+.gk-tr-meter i { display: block; width: 180px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
+.gk-tr-meter b { display: block; height: 100%; width: 100%; background: #4cc9f0; transition: width .2s; }
+
+/* pets (mechanics/pets): badges with a cooldown bar, the "You got a new pet!" reward, the chooser */
+.gk-pets { position: absolute; left: 14px; bottom: 140px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+.gk-pet-badge { display: grid; grid-template-columns: 26px auto; grid-template-rows: auto 5px; column-gap: 6px; align-items: center; padding: 4px 9px 5px 6px; border-radius: 10px; background: var(--gk-panel); border: 1px solid rgba(255,255,255,.2); font-size: 12px; font-weight: 700; min-width: 120px; }
+.gk-pet-badge.ready { border-color: #69db7c; }
+.gk-pet-icon { grid-row: 1 / 3; font-size: 20px; text-align: center; }
+.gk-pet-badge i { display: block; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+.gk-pet-badge b { display: block; height: 100%; background: #69db7c; }
+.gk-pet-reward { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px 0 2px; overflow: hidden; min-width: 300px; }
+.gk-pet-rays { position: absolute; left: 50%; top: 120px; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255,224,102,.32) 0deg 10deg, transparent 10deg 20deg); -webkit-mask: radial-gradient(circle, #000 20%, transparent 68%); mask: radial-gradient(circle, #000 20%, transparent 68%); animation: gk-rays 6s linear infinite; }
+@keyframes gk-rays { to { transform: rotate(360deg); } }
+.gk-pet-view { position: relative; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.25), rgba(255,255,255,0) 70%); animation: gk-pet-pop .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes gk-pet-pop { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.gk-pet-sparks { position: absolute; left: 0; right: 0; top: 0; height: 240px; pointer-events: none; }
+.gk-pet-sparks i { position: absolute; left: calc(14% + var(--i) * 14%); top: 40%; color: #ffe066; font-style: normal; font-size: 22px; opacity: 0; animation: gk-spark 1.6s ease-out calc(var(--i) * .12s) infinite; }
+@keyframes gk-spark { 0% { opacity: 0; transform: translateY(20px) scale(.5); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-90px) scale(1.2); } }
+.gk-pet-new { position: relative; margin-top: 4px; font-size: 26px; font-weight: 900; color: #ffe066; text-shadow: 0 2px 0 #b8860b, 0 4px 12px rgba(0,0,0,.5); animation: gk-pet-pop .5s .15s cubic-bezier(.2,1.6,.4,1) both; }
+.gk-pet-title { position: relative; margin-top: 6px; font-size: 20px; font-weight: 800; }
+.gk-pet-desc { position: relative; margin-top: 4px; font-size: 15px; opacity: .9; max-width: 340px; }
+.gk-pet-help { margin-bottom: 8px; }
+.gk-pet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.gk-pet-card { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 8px; border-radius: 12px; border: 2px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; text-align: center; opacity: .8; }
+.gk-pet-card.on { opacity: 1; border-color: var(--gk-accent); background: rgba(255,255,255,.16); box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
+.gk-pet-card .gk-pet-big { font-size: 34px; line-height: 1.1; }
+.gk-pet-card small { font-size: 12px; opacity: .85; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/cybertraps/cybertraps","mechanics/juice/juice","mechanics/music/music","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","cybertraps","juice","music","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","worlds/rush-city/world","worlds/rush-forest/world","worlds/rush-factory/world","worlds/rush-ocean/world","worlds/rush-core/world","assets/models/stylized-characters","assets/models/stylized-nature","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/moving-platform/moving-platform","mechanics/terrain/terrain","mechanics/cybertraps/cybertraps","mechanics/juice/juice","mechanics/music/music","online/firebase/firebase-app-compat","online/firebase/firebase-database-compat","online/config","mechanics/online/online","mechanics/quiz-gates/quiz-gates","mechanics/gadgets/gadgets","mechanics/race/race"],"local":[],"mechanics":["interaction","inventory","objectives","puzzles","world-objects","hazards","powerups","moving-platform","terrain","cybertraps","juice","music","online","quiz-gates","gadgets","race"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1155,6 +1241,9 @@ GK_LIBRARY.mechanics = {
   'quiz-gates': { needs: ['puzzles', 'world-objects'], spatial: true, about: 'question terminals: firewall gates (a right answer opens them), case / comeback / shortcut terminals, per-player question order, reveal-answer penalty, freeze on a wrong answer' },
   gadgets: { needs: ['powerups', 'terrain'], spatial: true, about: '3-slot party gadgets (glove, bowling ball, banana trap, lag virus, bubble, ghost, anchor, rocket shoes, scanner, jump pad): loadout screen, charges, cooldowns, counters, recovery protection' },
   race: { needs: ['objectives', 'quiz-gates', 'gadgets'], spatial: true, about: 'class race in rounds: start barrier, countdown, progress along routes.course, live positions, finish, round scoring + championship; online host (mechanics/online) or solo with rival bots' },
+  bossmoves: { needs: ['hazards'], spatial: true, about: 'telegraphed boss attacks to dodge: slam (red circle), charge (red lane), ring (shock ring: jump), volley (a fan of shots)' },
+  pets: { needs: ['hazards'], spatial: true, about: 'pets the player unlocks and takes along: they follow, hop and help with a cooldown (attack, reveal, shield, heal, build, dragon); reward screen + chooser' },
+  traversal: { needs: [], spatial: true, about: 'nature moves: swim zones (slower, floaty, stamina meter: too tired = back to the checkpoint) and climb walls / rope ladders (hold W to climb); vineWall + ropeLadder models' },
   weapons: { needs: ['hazards'], spatial: true, about: 'a tool the player shoots with (zapper, blaster): bolts damage enemies with hp; enemy turrets shoot back; spark bursts' },
 };
 GK_LIBRARY.presets = {
@@ -1180,6 +1269,14 @@ GK_LIBRARY.worlds = {
   'rush-factory': { name: 'Data Factory', files: ['worlds/_course'], about: 'race course: conveyor belts, machines, molten-data pits with moving platforms, giant processor; 6 gates' },
   'rush-ocean': { name: 'Digital Ocean', files: ['worlds/_course'], about: 'race course: decks over the sea, floating islands, boats, airships, moving platforms, floating server; 6 gates' },
   'rush-core': { name: 'Cyber Core', files: ['worlds/_course'], about: 'race course: synthwave mountain pass, ice, crystals, void chasm, the Cyber Core; 7 gates' },
+  island: { name: 'Tropical Island', files: ['worlds/_course', 'assets/models/island'], about: 'survival island: shipwreck beach, jungle trail + camp + marker grove, river with a broken crossing, crystal cave (2 chambers), waterfall glade, signal hill (raised, stairs), escape cove; sea all round' },
+  'wild-coast': { name: 'Shipwreck Coast', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 1 (worlds/_wild.js): shipwreck beach, swimming lagoon, jungle trail, camp clearing, 3 m cliff to the Marker Grove plateau, deep river with stepping-stone spots, Bamboo Isle, east bank, delta beach, cave mouth' },
+  'crystal-caverns': { name: 'Crystal Caverns', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 2: dark roofed caves: crystal hall, 4 m chasm, underground lake (swim), north shore camp + niche, crystal cliff up to the +3 m ledge (boss)' },
+  'storm-peak': { name: 'Storm Peak', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 3: stormy waterfall glade, Signal Hill (terraces +2/+4/+6 m, stairs, vine-wall spot), long stairs down to Escape Cove (boss arena, workbench, boat)' },
+  'ember-isle': { name: 'Ember Isle', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 4: volcanic island: black sand bay, ash path, lava river (crumbling-stone spot), obsidian fields, a 3 m cliff to Lighthouse Point (+3 m, boss arena), stairs down to the jetty beach' },
+  'coral-reef': { name: 'Coral Reef', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 5: sandbar, jellyfish lagoon (swim), reef shelf, a 4 m causeway over deep water (pendulum spots), reef plateau with an eel pool, the Kraken lagoon' },
+  'skull-fort': { name: 'Skull Fort', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 6: landing cove, cannonball lane with alcoves, walled courtyard, a moat for a plank (glasstile) bridge, the keep yard (boss arena)' },
+  'storm-rock': { name: 'Storm Rock', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape final battle: a stormy rock plateau arena, a beach to the south, a pirate ship to the north' },
   _template: { name: 'Blank room', about: 'one room: copy it to start a world' },
 };
 
@@ -1548,14 +1645,17 @@ GK_LIBRARY.worlds = {
         mousedown: e => {
           if (e.target !== this.el) return;
           if (e.button === 0) this.mouse = true;   // held: e.g. automatic fire
-          if (e.button === 2) this.rightClicks = (this.rightClicks || 0) + 1;   // takeRight(): e.g. punch
+          if (e.button === 2) { this.rightClicks = (this.rightClicks || 0) + 1; this.mouseR = true; this.aimToggle = !this.aimToggle; }   // takeRight(): e.g. punch; mouseR: held; aimToggle: each right click switches a sight on / off
           if (!this.locked) this.drag = [e.clientX, e.clientY];
           if (e.button === 0 && this.onClick) this.onClick(this.locked);
         },
-        mouseup: () => { this.drag = null; this.mouse = false; },
+        mouseup: e => { this.drag = null; if (!e || e.button !== 2) this.mouse = false; if (!e || e.button === 2) this.mouseR = false; },
         contextmenu: e => { if (e.target === this.el || this.locked) e.preventDefault(); },   // right click is a game button
         wheel: e => { if (this.locked || e.target === this.el) this.wheel += e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0; },
         lockchange: () => {
+          // the browser grants a lock a moment after it is asked: if a story card or panel opened in that moment
+          // (unlock() was called), give the mouse straight back instead of hiding it over the card
+          if (document.pointerLockElement === this.el && !this.wantLock) { document.exitPointerLock(); return; }
           this.locked = document.pointerLockElement === this.el;
           this.drag = null;
           if (this.onLockChange) this.onLockChange(this.locked);
@@ -1581,14 +1681,15 @@ GK_LIBRARY.worlds = {
     /** Mouse movement since the last call. */
     takeMouse() { const d = [this.dx, this.dy]; this.dx = 0; this.dy = 0; return d; }
     endFrame() { this.hits.clear(); }
-    clear() { this.keys.clear(); this.hits.clear(); this.dx = this.dy = 0; this.drag = null; this.mouse = false; }
+    clear() { this.keys.clear(); this.hits.clear(); this.dx = this.dy = 0; this.drag = null; this.mouse = false; this.mouseR = false; }
     /** Hold an action from code (tests, on-screen buttons): input.force('forward', true). */
     force(action, on) { this.forced[action] = !!on; }
     lock() {
+      this.wantLock = true;
       if (this.locked || !this.el.requestPointerLock) return;
       try { const p = this.el.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* fallback: drag to look */ }
     }
-    unlock() { if (document.pointerLockElement) document.exitPointerLock(); }
+    unlock() { this.wantLock = false; if (document.pointerLockElement) document.exitPointerLock(); }
     destroy() {
       document.removeEventListener('keydown', this.handlers.keydown);
       document.removeEventListener('keyup', this.handlers.keyup);
@@ -1709,7 +1810,7 @@ GK_LIBRARY.worlds = {
         '<div class="gk-crosshair"></div>',
         '<div class="gk-card gk-obj"><div class="gk-obj-title"></div><div class="gk-bar"><i></i></div><ul class="gk-obj-list"></ul></div>',
         '<div class="gk-stats"><div class="gk-card gk-stat gk-timer"><span>⏱</span><b></b></div><div class="gk-card gk-stat gk-score"><span>★</span><b>0</b></div><div class="gk-card gk-stat gk-coins" style="display:none"><span>🪙</span><b>0</b><em></em></div></div>',
-        '<div class="gk-health"><i></i></div>',
+        '<div class="gk-health"><i></i></div><div class="gk-health-heart">❤️</div>',
         '<div class="gk-chips"></div>',
         '<div class="gk-boss"><span></span><i><b></b></i></div>',
         '<div class="gk-weapon"><div class="gk-w-slots"></div><div class="gk-w-main"><span class="gk-w-name"></span><span class="gk-w-ammo"></span></div><i class="gk-w-reload"><b></b></i><div class="gk-w-hint"></div></div>',
@@ -1727,7 +1828,7 @@ GK_LIBRARY.worlds = {
       const q = s => this.hud.querySelector(s);
       this.$ = {
         objTitle: q('.gk-obj-title'), objList: q('.gk-obj-list'), bar: q('.gk-bar i'), obj: q('.gk-obj'),
-        timer: q('.gk-timer'), timerVal: q('.gk-timer b'), score: q('.gk-score b'), health: q('.gk-health'), healthBar: q('.gk-health i'),
+        timer: q('.gk-timer'), timerVal: q('.gk-timer b'), score: q('.gk-score b'), health: q('.gk-health'), healthBar: q('.gk-health i'), heart: q('.gk-health-heart'),
         prompt: q('.gk-prompt'), inv: q('.gk-inv'), chips: q('.gk-chips'), boss: q('.gk-boss'), weapon: q('.gk-weapon'), crosshair: q('.gk-crosshair'), coins: q('.gk-coins'), flash: q('.gk-flash'), keys: q('.gk-keys'), toasts: q('.gk-toasts'), lockhint: q('.gk-lockhint'), debug: q('.gk-debug'),
       };
       this.labelPool = [];
@@ -1745,8 +1846,22 @@ GK_LIBRARY.worlds = {
       this.$.keys.innerHTML = '';
       if (cfg.ui.showHintKey !== false) this.$.keys.appendChild(el('span', '', 'H  Hint' + hintCost));
       this.$.keys.appendChild(el('span', '', 'Esc  Pause'));
+      // ui.controlsGuide: a compact controls card (icon, key, one line) that the C key or this chip opens and closes
+      if (this.guide) { this.guide.remove(); this.guide = null; }
+      if (cfg.ui.controlsGuide) {
+        const chip = el('span', 'gk-guide-chip', 'C  🎮 Controls');
+        chip.onmousedown = e => e.stopPropagation();
+        chip.onclick = e => { e.stopPropagation(); this.toggleGuide(); };
+        this.$.keys.insertBefore(chip, this.$.keys.firstChild);
+        this.guide = el('div', 'gk-guide');
+        this.guide.innerHTML = '<div class="gk-guide-head">🎮 Controls<button type="button" class="gk-guide-x" title="Close">✕</button></div>' +
+          cfg.ui.controlsGuide.map(k => '<div class="gk-guide-row"><span class="gk-guide-icon">' + U.esc(k[0]) + '</span><kbd>' + U.esc(k[1]) + '</kbd><span>' + U.esc(k[2]) + '</span></div>').join('');
+        this.guide.querySelector('.gk-guide-x').onclick = e => { e.stopPropagation(); this.toggleGuide(false); };
+        this.guide.onmousedown = e => e.stopPropagation();
+        this.hud.appendChild(this.guide);
+      }
       this.$.timer.style.display = cfg.timer.show === false ? 'none' : '';
-      this.$.health.style.display = !cfg.player || cfg.player.health == null ? 'none' : '';
+      this.$.health.style.display = this.$.heart.style.display = !cfg.player || cfg.player.health == null ? 'none' : '';
       this.$.obj.style.display = cfg.ui.objectives === false ? 'none' : '';
       this.cache = {};
     }
@@ -1874,11 +1989,19 @@ GK_LIBRARY.worlds = {
       this.cache.coins = key;
       this.$.coins.style.display = n == null ? 'none' : '';
       if (n != null) this.$.coins.querySelector('b').textContent = n;
+      const icon = (this.game.cfg.arsenal && this.game.cfg.arsenal.coinIcon) || '🪙', sp = this.$.coins.querySelector('span');
+      if (sp.textContent !== icon) sp.textContent = icon;
     }
     coinPop(text) {
       const e = this.$.coins.querySelector('em');
       e.textContent = text;
       e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop');
+    }
+    /** Show / hide the controls guide (ui.controlsGuide); no argument = switch it. */
+    toggleGuide(on) {
+      if (!this.guide) return;
+      const show = on == null ? !this.guide.classList.contains('show') : on;
+      this.guide.classList.toggle('show', show);
     }
     /** Crosshair blink when a shot hits something (red = it took damage, blue = it is shielded). */
     hitMarker(kind) {
@@ -2064,7 +2187,7 @@ GK_LIBRARY.worlds = {
       const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
       // characters (config.characters) and the camera (ui.views, kept per computer in GK.Settings 'view')
       const chars = this.game.characterChoices(), clabels = (cfg.characters && cfg.characters.choices) || chars;
-      const who = chars ? '<div class="gk-chars"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
+      const who = chars ? '<div class="gk-chars' + (clabels.length > 6 ? ' many' : '') + '"><div class="gk-diff-title">' + U.esc((cfg.characters && cfg.characters.title) || 'Choose your character') + '</div><div class="gk-chars-row">' +
         clabels.map(c => '<button type="button" class="gk-char' + (c.id === this.game.character ? ' on' : '') + '" data-char="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.character) + '">' +
           this.avatar(c.look || {}) + '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
       const cam = this.viewsHtml(cfg);
@@ -2176,6 +2299,7 @@ GK_LIBRARY.worlds = {
         '<div class="gk-final"><b>' + r.total + '</b><span>points</span></div>' +
         '<div class="gk-summary"><span>⏱ ' + U.time(r.time) + '</span>' + (r.required != null ? '<span>✓ ' + r.done + ' / ' + r.required + ' objectives</span>' : '') + (r.best ? '<span>Best: ' + r.best + '</span>' : '') + '</div>' +
         (r.leaders ? '<div class="gk-lead-title">' + (r.rank ? '🏆 ' + U.esc(r.playerName) + ', you are #' + r.rank + ' on this computer!' : 'Not in the top 10 yet: try again!') + '</div>' + this.leaderTable(r.leaders, r.rank, 5) : '') +
+        (cfg.hooks && cfg.hooks.endHtml ? '<div class="gk-end-extra">' + (cfg.hooks.endHtml(this.game, r) || '') + '</div>' : '') +
         (rows ? '<table class="gk-breakdown">' + rows + '<tr class="total"><td>Final score</td><td>' + r.total + '</td></tr></table>' : '') +
         '<div class="gk-row center">' + (h.next ? '<button class="gk-btn primary big" data-a="next">Next level ▶</button>' : '') +
         '<button class="gk-btn big' + (h.next ? '' : ' primary') + '" data-a="restart">⟲ Play again</button>' +
@@ -2221,6 +2345,7 @@ GK_LIBRARY.worlds = {
      timeBonus: {perSecondLeft: 2} | {par: 180, perSecond: 3, max: 500}
      completionBonus: 0      added when the game is won
      stars: [300, 600, 900]  score needed for 1/2/3 stars (optional)
+     labels: {kind: 'Name'}  end-screen names for score kinds (e.g. {challenge: 'Computer challenges'})
      allowNegative: false */
 (function () {
   'use strict';
@@ -2265,7 +2390,7 @@ GK_LIBRARY.worlds = {
     breakdown() {
       const groups = {};
       for (const e of this.log) {
-        const g = groups[e.kind] = groups[e.kind] || { kind: e.kind, label: KIND_LABELS[e.kind] || e.kind, points: 0, count: 0 };
+        const g = groups[e.kind] = groups[e.kind] || { kind: e.kind, label: (this.cfg.labels || {})[e.kind] || KIND_LABELS[e.kind] || e.kind, points: 0, count: 0 };
         g.points += e.points; g.count++;
       }
       return Object.values(groups);
@@ -2291,7 +2416,7 @@ GK_LIBRARY.worlds = {
 (function () {
   'use strict';
   const U = GK.util;
-  const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts',
+  const KNOWN = ['id', 'title', 'subtitle', 'description', 'grade', 'subject', 'type', 'world', 'worlds', 'mechanics', 'scripts', 'models',
     'content', 'levels', 'scenes', 'startScene', 'resume', 'difficulty', 'characters', 'map', 'entities', 'zones', 'templates', 'items', 'puzzles', 'sequences',
     'locations', 'spawns', 'routes', 'spawn', 'slots', 'environment', 'render', 'view', 'player', 'objectives', 'ordered', 'timer',
     'scoring', 'hints', 'win', 'lose', 'ui', 'audio', 'controls', 'hooks', 'triggers', 'vars', 'flags', 'intro',
@@ -2576,6 +2701,8 @@ GK_LIBRARY.worlds = {
       this.view.setup();
       for (const m of this.mechanics) if (m.setup) m.setup(this);
       this.setupTriggers();
+      // resume: {checkpoints: true} also saves at every checkpoint, so one long scene loses at most a few minutes
+      if (U.isObj(cfg.resume) && cfg.resume.checkpoints) this.on('checkpoint', () => { if (this.checkpoint && (this.state.mode === 'playing' || this.state.mode === 'modal')) this.saveResume({ pos: this.checkpoint.pos.slice(), rot: this.checkpoint.rot }); });
       if (cfg.hooks.setup) cfg.hooks.setup(this);
       this.ui.update(this);
       this.ui.prompt(null);
@@ -2586,6 +2713,7 @@ GK_LIBRARY.worlds = {
       }
     }
     begin() {
+      if (this.ui.toggleGuide) this.ui.toggleGuide(false);
       this.state.mode = 'playing';
       this.input.clear();
       if (this.view.begin) this.view.begin();
@@ -2657,9 +2785,10 @@ GK_LIBRARY.worlds = {
         current scene. Only the entry of a scene is saved: nothing is running yet (no timers, waves or dialogs). */
     saveResume(spawn) {
       if (!this.cfg.resume || !this.sceneMode) return;
+      const mid = spawn && typeof spawn === 'object';   // {pos, rot}: a save in the middle of a scene (resume.checkpoints)
       const stage = this.stages[this.levelIndex] || {};
       this.store.set('resume', {
-        v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null,
+        v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null, mid: mid || undefined,
         part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
         name: this.playerName || '', difficulty: this.difficulty, character: this.character, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
       });
@@ -2668,7 +2797,7 @@ GK_LIBRARY.worlds = {
     savedResume() {
       if (!this.base.resume || !this.sceneMode) return null;
       const r = this.store.get('resume', null);
-      const ok = r && r.v === 1 && r.id === (this.base.id || 'game') && r.snap && this.stageIndex(r.scene) > 0;
+      const ok = r && r.v === 1 && r.id === (this.base.id || 'game') && r.snap && (this.stageIndex(r.scene) > 0 || (r.mid && this.stageIndex(r.scene) >= 0));
       if (r && !ok) this.store.remove('resume');
       return ok ? r : null;
     }
@@ -2684,7 +2813,7 @@ GK_LIBRARY.worlds = {
         this.state.inZone = {};
         if (r.name) this.state.vars.playerName = this.playerName;
         if (this.world) {
-          const at = (r.spawn && this.world.spawns[r.spawn]) || this.world.spawn;
+          const at = (r.spawn && typeof r.spawn === 'object' ? r.spawn : r.spawn && this.world.spawns[r.spawn]) || this.world.spawn;
           this.player.place(at.pos, at.rot);
           this.checkpoint = { pos: at.pos.slice(), rot: at.rot };
         }
@@ -3960,8 +4089,11 @@ GK_LIBRARY.worlds = {
                  look.part = 'torso' (origin at the feet) | 'head' (origin at the neck) | 'armL' / 'armR' (at the shoulder) |
                  'legL' / 'legR' (at the hip). Arms and legs hang straight down (−y) from the joint.
      'fpArms'    first-person sleeves and hands in WEAPON space (drawn with the weapon's own transform):
-                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt)
+                 look.pose = 'gun' (right hand on the grip, left hand under the barrel) | 'sword' (one hand on the hilt) |
+                 'bow' | 'sling' (the left hand holds it out in front; the drawing hand is at the cheek, out of view) |
+                 'spear' (one hand on a melee tool pitched forward to stab)
      'fpFist'    a first-person punching arm (fist at the origin, sleeve back toward the camera) in weapon space
+     'fpHand'    a first-person open hand (palm down, fingers forward; look.grip curls them): climbing and swimming
      'sword'     a sword pointing UP (+y) from the hilt at the origin: look.color blade, look.glow edge, look.guard, look.grip
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail',
                        shirt, pants, shoes, accent (a small glowing badge), skirt: true }
@@ -4065,7 +4197,13 @@ GK_LIBRARY.worlds = {
       g.add(G().box(0, -0.06, 0, 0.12, 0.12, 0.13, sk, { top: dk(sk, 1.08) }).move(hand[0], hand[1], hand[2]));
     };
     if (o.pose === 'sword') arm([0, -0.02, 0], [-0.09, -0.2, -0.2], [-0.16, -0.4, -0.5]);
-    else {
+    else if (o.pose === 'spear') arm([0, -0.02, 0], [-0.07, -0.26, 0.1], [-0.14, -0.55, 0.22]);   // tool pitched forward: back = −y, down = +z
+    else if (o.pose === 'bow' || o.pose === 'sling') {
+      // the holding hand round the bow's grip / the slingshot's handle, the arm reaching out from the lower left; the
+      // drawing hand is back at the cheek, out of view (the string or band is seen stretched back toward you)
+      const y = o.pose === 'bow' ? -0.04 : -0.16, z = o.pose === 'bow' ? 0.1 : 0;
+      arm([0, y, z], [0.1, y - 0.16, z - 0.12], [0.2, y - 0.34, z - 0.3]);
+    } else {
       arm([-0.05, -0.07, -0.11], [-0.11, -0.2, -0.26], [-0.17, -0.34, -0.42]);   // right hand round the grip
       arm([0.05, -0.06, 0.07], [0.13, -0.17, -0.08], [0.22, -0.3, -0.26]);       // left hand under the barrel
     }
@@ -4082,6 +4220,21 @@ GK_LIBRARY.worlds = {
     return g.box(0.12, -0.08, 0.02, 0.05, 0.1, 0.12, dk(sk, 0.95));                                    // thumb
   });
 
+  /* A first-person OPEN hand (climbing, swimming): the palm at the origin facing down (−y), fingers forward (+z), the
+     sleeve going back (−z) toward the camera. look.grip: fingers curled (holding a vine). */
+  M.add('fpHand', look => {
+    const o = L(look), g = G(), sl = o.shirt, sk = o.skin;
+    segment(g, [0, -0.02, -0.8], [0, 0, -0.1], 0.16, 0.15, sl);
+    g.box(0, -0.075, -0.12, 0.17, 0.15, 0.05, dk(sl, 0.8));                                            // cuff
+    g.box(0, -0.05, 0, 0.19, 0.09, 0.2, dk(sk, 0.86), { top: dk(sk, 0.92) });                          // palm (a little dark: it is close to the eye)
+    const curl = o.grip ? 1 : 0;
+    for (const x of [-0.07, -0.023, 0.023, 0.07]) {                                                    // fingers
+      if (curl) g.box(x, -0.09, 0.1, 0.04, 0.09, 0.05, dk(sk, 0.92));
+      else g.box(x, -0.04, 0.1, 0.04, 0.05, 0.13, dk(sk, 0.92));
+    }
+    return g.box(0.115, -0.05, 0.0, 0.05, 0.06, 0.12, dk(sk, 0.95));                                   // thumb
+  });
+
   /* Swords: hilt at the origin, blade up. */
   M.add('sword', o => {
     const blade = o.color || '#aeb8c4', glow = o.glow || '#4cc9f0', guard = o.guard || '#f5b700', grip = o.grip || '#6d4c41', g = G();
@@ -4093,138 +4246,6 @@ GK_LIBRARY.worlds = {
     g.box(0, 0.06, -0.011, 0.008, 0.58, 0.004, glow, { glow: 0.55 });
     return g.cone(0, 0.695, 0, 0.034, 0.1, blade, { seg: 4 });                                      // tip
   });
-})();
-
-</script>
-<script>/* stylized-characters.js */
-/* 3D Visual Foundation · stylized-characters.js — a rounded, friendly explorer for the Game Kit's animated character.
-   Replaces the boxy 'heroPart' / 'hero' models (load AFTER assets/models/people.js). Same joints and sizes as GK.HERO, so
-   walking, aiming and the third-person camera work unchanged. Big round head and eyes, soft limbs, short sleeves, boots,
-   an optional scarf (look.scarf: '#colour', default the accent colour; false = none) and backpack (look.pack: true | '#colour';
-   false = none).
-   A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail', shirt, pants, shoes,
-                       accent, scarf, pack, skirt } */
-(function () {
-  'use strict';
-  const M = GK.Models, G = () => new GK.Geo(), U = GK.util, V = GK.vec;
-  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
-  const HERO = GK.HERO || (GK.HERO = { hip: 0.86, shoulder: 1.38, neck: 1.42, arm: 0.68, height: 1.8 });
-  const D = { body: 'm', skin: '#e0ac69', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#6b4a2b', accent: '#4cc9f0' };
-  const L = o => Object.assign({}, D, o);
-  const shoulderX = o => (o.body === 'f' ? 0.255 : 0.285);
-  const S = { seg: 10, rings: 7 };
-
-  /** A rounded limb from a to b: a smooth tapered cylinder with ball ends. */
-  function limb(g, a, b, r0, r1, col) {
-    const d = V.sub(b, a), len = V.len(d), z = V.norm(d);
-    const s = G().cyl(0, 0, 0, r0, len, col, { seg: 9, rTop: r1, noBottom: true });
-    // turn +y onto the limb direction
-    const ang = Math.acos(U.clamp(z[1], -1, 1)), ax = V.norm(V.cross([0, 1, 0], z));
-    if (ang > 1e-4 && V.len(V.cross([0, 1, 0], z)) > 1e-6) {
-      const c = Math.cos(ang), sn = Math.sin(ang), k = ax, rot = v => {   // Rodrigues
-        const kv = V.cross(k, v), kd = V.dot(k, v);
-        return [v[0] * c + kv[0] * sn + k[0] * kd * (1 - c), v[1] * c + kv[1] * sn + k[1] * kd * (1 - c), v[2] * c + kv[2] * sn + k[2] * kd * (1 - c)];
-      };
-      s.map(rot, rot);
-    } else if (z[1] < 0) s.rotX(Math.PI);
-    g.add(s.move(a[0], a[1], a[2]));
-    return g.sphere(b[0], b[1], b[2], r1, col, { seg: 8, rings: 5 });
-  }
-
-  function torso(o) {
-    const g = G(), f = o.body === 'f', w = f ? 0.2 : 0.225, top = HERO.shoulder + 0.03, shirt = o.shirt;
-    g.add(G().cyl(0, 0, 0, w * 0.9, top - HERO.hip, shirt, { seg: 12, rTop: w * 1.08 }).scale(1, 1, 0.62).move(0, HERO.hip, 0));
-    g.add(G().sphere(0, 0, 0, w * 1.08, dk(shirt, 1.06), S).scale(1, 0.38, 0.62).move(0, top, 0));                           // rounded shoulders
-    g.add(G().cyl(0, 0, 0, w * 0.93, 0.07, dk(o.pants, 0.75), { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip, 0));         // belt
-    g.box(0, HERO.hip + 0.012, w * 0.6, 0.07, 0.05, 0.02, '#e9c46a');                                                        // buckle
-    g.add(G().cyl(0, 0, 0, w * 0.95, 0.16, o.pants, { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip - 0.12, 0));   // hips
-    g.box(f ? 0.07 : 0.09, HERO.hip + 0.34, w * 0.62 + 0.005, 0.06, 0.06, 0.012, o.accent, { glow: 1 });                    // glowing badge
-    if (o.scarf !== false) {
-      const scarf = o.scarf || o.accent;
-      g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                     // scarf
-      g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                // scarf tail
-    } else g.cyl(0, top - 0.02, 0, 0.075, 0.05, dk(o.shirt, 0.85), { seg: 10 });                                             // collar
-    if (o.pack !== false) {
-      const p = typeof o.pack === 'string' ? o.pack : '#8b5a2b';
-      g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });
-      g.blob(0, HERO.hip + 0.47, -0.2, 0.15, dk(p, 1.08), { seed: 5, rough: 0.05, seg: 8, rings: 5, squash: 0.55 });          // rolled top
-      g.box(0, HERO.hip + 0.18, -0.28, 0.2, 0.14, 0.04, dk(p, 0.85)).box(0, HERO.hip + 0.3, -0.3, 0.05, 0.05, 0.02, '#e9c46a');  // pocket + clasp
-      g.add(G().cyl(0, 0, 0, 0.065, 0.32, '#c9b27a', { seg: 8 }).rotZ(Math.PI / 2).move(-0.16, HERO.hip + 0.05, -0.2));     // bedroll
-      for (const x of [-0.1, 0.1]) g.box(x, HERO.hip + 0.12, w * 0.6, 0.04, 0.42, 0.015, dk(p, 0.8));                          // straps
-    }
-    if (o.skirt) g.add(G().cyl(0, 0, 0, w * 1.25, 0.3, dk(o.pants, 1.15), { seg: 12, rTop: w * 0.95 }).scale(1, 1, 0.75).move(0, HERO.hip - 0.26, 0));
-    return g;
-  }
-  function head(o) {
-    const g = G(), hs = o.hairStyle, h = o.hair, s = o.skin, R = 0.19, cy = 0.21;
-    g.cyl(0, -0.03, 0, 0.065, 0.1, dk(s, 0.92), { seg: 8 });                                                                  // neck
-    g.add(G().sphere(0, 0, 0, R, s, S).scale(1, 1.02, 0.95).move(0, cy, 0));                                                 // head
-    for (const x of [-1, 1]) g.add(G().sphere(0, 0, 0, 0.045, dk(s, 0.95), { seg: 7, rings: 5 }).scale(0.6, 1, 0.9).move(x * R * 0.98, cy, 0));   // ears
-    for (const x of [-0.072, 0.072]) {                                                                                        // big friendly eyes
-      g.add(G().sphere(0, 0, 0, 0.05, '#ffffff', { seg: 8, rings: 6 }).scale(0.85, 1.05, 0.45).move(x, cy + 0.02, R * 0.88));
-      g.add(G().sphere(0, 0, 0, 0.032, '#3b2a1a', { seg: 8, rings: 5 }).scale(0.9, 1.1, 0.5).move(x, cy + 0.015, R * 0.93));
-      g.sphere(x + 0.012, cy + 0.035, R * 0.96, 0.01, '#ffffff', { seg: 4, rings: 3, glow: 0.8 });                            // sparkle
-      g.add(G().box(0, 0, 0, 0.07, 0.016, 0.02, dk(h, 0.95)).rotZ(x > 0 ? -0.12 : 0.12).move(x, cy + 0.095, R * 0.88));      // eyebrows
-    }
-    g.add(G().sphere(0, 0, 0, 0.022, dk(s, 0.9), { seg: 6, rings: 4 }).move(0, cy - 0.025, R * 0.97));                      // nose
-    g.add(G().box(0, 0, 0, 0.06, 0.014, 0.02, '#9e4a3c').move(0, cy - 0.075, R * 0.9));                                     // smile
-    g.add(G().sphere(0, 0, 0, 0.026, '#f08a8a', { seg: 6, rings: 4 }).scale(1.2, 0.7, 0.4).move(-0.11, cy - 0.04, R * 0.82))
-      .add(G().sphere(0, 0, 0, 0.026, '#f08a8a', { seg: 6, rings: 4 }).scale(1.2, 0.7, 0.4).move(0.11, cy - 0.04, R * 0.82));   // rosy cheeks
-    // hair: a cap over the top and back, then the style
-    g.add(G().sphere(0, 0, 0, R * 1.06, h, S).scale(1, 0.78, 1).move(0, cy + 0.05, -0.02));
-    g.add(G().sphere(0, 0, 0, R * 1.02, h, S).scale(1, 0.95, 0.7).move(0, cy - 0.02, -0.07));
-    g.add(G().blob(0, 0, 0, 0.11, dk(h, 1.1), { seed: 3, rough: 0.2, seg: 8, rings: 5 }).scale(1.5, 0.55, 0.7).rotX(0.35).move(0.03, cy + 0.15, R * 0.62));   // fringe
-    if (hs === 'spiky' || hs === 'short') {
-      const n = hs === 'spiky' ? 9 : 5, len = hs === 'spiky' ? 0.16 : 0.09;
-      for (let i = 0; i < n; i++) {
-        const a = i / n * Math.PI * 2, rx = Math.cos(a) * 0.09, rz = Math.sin(a) * 0.09 - 0.02;
-        g.add(G().cone(0, 0, 0, 0.055, len, i % 2 ? h : dk(h, 1.12), { seg: 6 }).rotX(-0.5 + Math.sin(a) * 0.4).rotZ(-Math.cos(a) * 0.55).move(rx, cy + 0.17, rz));
-      }
-      g.add(G().cone(0, 0, 0, 0.06, len * 1.1, dk(h, 1.12), { seg: 6 }).rotX(-0.35).move(0.02, cy + 0.2, 0.03));
-    } else if (hs === 'long') {
-      g.add(G().blob(0, 0, 0, 0.2, h, { seed: 7, rough: 0.1, seg: 9, rings: 6 }).scale(1, 1.5, 0.45).move(0, cy - 0.15, -0.12));
-      for (const x of [-1, 1]) g.add(G().blob(0, 0, 0, 0.07, h, { seed: 8, rough: 0.1, seg: 7, rings: 5 }).scale(0.8, 2.4, 1).move(x * 0.17, cy - 0.09, 0.03));
-    } else if (hs === 'ponytail') {
-      g.add(G().cyl(0, 0, 0, 0.045, 0.05, o.accent, { seg: 8 }).rotX(1.3).move(0, cy + 0.06, -0.19));                          // hair band
-      limb(g, [0, cy + 0.06, -0.22], [0, cy - 0.3, -0.3], 0.07, 0.04, h);                                                      // the tail
-    }
-    return g;
-  }
-  function arm(o, right) {
-    const g = G(), s = o.shirt, sk = o.skin;
-    g.sphere(0, -0.03, 0, 0.085, dk(s, 1.04), { seg: 8, rings: 5 });                                                         // shoulder ball
-    limb(g, [0, -0.03, 0], [0, -0.3, 0], 0.08, 0.072, s);                                                                     // short sleeve
-    g.cyl(0, -0.31, 0, 0.074, 0.04, dk(s, 0.8), { seg: 9 });                                                                  // cuff
-    limb(g, [0, -0.3, 0], [0, -HERO.arm + 0.06, 0], 0.056, 0.05, sk);                                                         // forearm
-    if (right) g.cyl(0, -0.5, 0, 0.06, 0.04, '#5c4a2e', { seg: 8 });                                                          // wrist band
-    return g.blob(0, -HERO.arm + 0.02, 0.005, 0.062, sk, { seed: right ? 2 : 3, rough: 0.08, seg: 8, rings: 5 });             // hand
-  }
-  function leg(o) {
-    const g = G(), p = o.pants, sh = o.shoes;
-    limb(g, [0, 0, 0], [0, -0.42, 0], 0.095, 0.082, p);                                                                       // thigh (shorts)
-    g.cyl(0, -0.44, 0, 0.084, 0.04, dk(p, 0.85), { seg: 9 });                                                                 // hem
-    limb(g, [0, -0.42, 0], [0, -HERO.hip + 0.17, 0], 0.062, 0.056, o.skin);                                                   // shin
-    g.cyl(0, -HERO.hip + 0.07, 0.01, 0.075, 0.17, sh, { seg: 9, rTop: 0.068 });                                               // boot cuff
-    g.add(G().blob(0, 0, 0, 0.1, dk(sh, 1.08), { seed: 4, rough: 0.05, seg: 9, rings: 5 }).scale(0.85, 0.55, 1.45).move(0, -HERO.hip + 0.06, 0.05));   // boot toe
-    return g.box(0, -HERO.hip, 0.04, 0.17, 0.035, 0.29, dk(sh, 0.6));                                                         // sole
-  }
-  function part(name, o) {
-    if (name === 'torso') return torso(o);
-    if (name === 'head') return head(o);
-    if (name === 'armL') return arm(o, false);
-    if (name === 'armR') return arm(o, true);
-    return leg(o);
-  }
-
-  M.add('heroPart', look => { const o = L(look); return part(o.part || 'torso', o); });
-  M.add('hero', look => {
-    const o = L(look), g = torso(o), sx = shoulderX(o);
-    g.add(head(o).move(0, HERO.neck, 0));
-    g.add(arm(o, false).move(sx, HERO.shoulder, 0)).add(arm(o, true).move(-sx, HERO.shoulder, 0));
-    g.add(leg(o).move(-0.105, HERO.hip, 0)).add(leg(o).move(0.105, HERO.hip, 0));
-    return g;
-  });
-  GK.heroShoulderX = o => shoulderX(L(o));
 })();
 
 </script>
@@ -4377,7 +4398,7 @@ GK_LIBRARY.worlds = {
       const l = Math.hypot(f, s);
       if (l > 1) { f /= l; s /= l; }
       const world = c.steering === 'world';
-      this.sprinting = c.canSprint && (world ? l > 0 : f > 0) && input.down('sprint');
+      this.sprinting = c.canSprint && (world ? l > 0 : f > 0) && input.down('sprint') && !this.aiming;   // aiming: a mechanic (weapons) is looking down the sight
       // sprintTime (s, 0 = no limit): stamina. Sprint up to sprintTime, then rest; empty = tired until it is full again
       // (it refills in sprintRest seconds). E.g. 2 / 3 = at most 2 s of sprint in every 5 s.
       if (c.sprintTime) {
@@ -4386,7 +4407,7 @@ GK_LIBRARY.worlds = {
         if (this.sprinting) { this.stamina -= dt; if (this.stamina <= 0) { this.stamina = 0; this.tired = true; this.sprinting = false; } }
         else { this.stamina = Math.min(c.sprintTime, this.stamina + dt * c.sprintTime / (c.sprintRest || 3)); if (this.tired && this.stamina >= c.sprintTime) this.tired = false; }
       }
-      const speed = (this.sprinting ? c.sprintSpeed : c.walkSpeed) * (this.speedMul || 1);   // speedMul: power-ups
+      const speed = (this.sprinting ? c.sprintSpeed : c.walkSpeed) * (this.speedMul || 1) * (this.aiming ? 0.55 : 1);   // speedMul: power-ups
       let tx, tz;
       if (world) {
         tx = s * speed; tz = -f * speed;
@@ -4496,7 +4517,7 @@ GK_LIBRARY.worlds = {
     }
     setLook(changes) { this.setModel(this.model, U.merge(this.look, changes)); }
     get active() { return this.visible && !this.removed; }
-    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }
+    drawPos() { return [this.pos[0] + this.offset[0], this.pos[1] + this.offset[1] + this.hover + (this.lift || 0) + (this.bobAmp ? Math.sin(this.t * 2.2) * this.bobAmp : 0), this.pos[2] + this.offset[2]]; }   // lift: a drawn-only hop (e.g. a creature's gait)
     /** World-space box around the model (rotated bounds). */
     box(noAnim) {
       const b = this.shape ? this.shape.bounds : { min: [-0.25, 0, -0.25], max: [0.25, 0.5, 0.25] };
@@ -4726,7 +4747,10 @@ GK_LIBRARY.worlds = {
         seg(cur, hi, y, h);
       }
     }
-    /** ASCII grid. Legend entries: {wall, floor, spawn, door, entity|entities, zone, location:'name' ('#' → auto number)}. */
+    /** ASCII grid. Legend entries: {wall, floor, block (floor you cannot walk on: water), raise: h (a solid block h m high you
+        walk on top of: ledges, plateaus, hills; `side` colour), sink: d (the floor is d m lower: pits, lagoons; `bank` colour
+        for the sides), water: colour (with sink: a water surface 0.3 m below ground level; waterGlow 0..1), spawn, door, entity|entities,
+        zone, location:'name' ('#' → auto number)}. Locations, spawns and tiles on raised / sunk cells get their height. */
     buildGrid(map, pending) {
       const rows = map.grid, cs = this.cell, H = this.wallH;
       // legend entries may reuse a world part: {part: 'workstation', location: 'pc#'} (worlds/_parts.js)
@@ -4738,6 +4762,8 @@ GK_LIBRARY.worlds = {
       const at = (c, r) => legend[(rows[r] || '')[c] || ' '] || {};
       const isWall = (c, r) => !!at(c, r).wall;
       const hasFloor = L => !!(L.floor || L.spawn || L.door || L.entity || L.entities || L.zone || L.location);
+      /** floor height of a cell: raise > 0, sink < 0, walls and plain floors 0 (null = nothing there) */
+      const heightAt = (c, r) => { const L = at(c, r); if (L.wall) return 0; if (!hasFloor(L)) return null; return L.raise ? L.raise : L.sink ? -L.sink : 0; };
       const counters = {};
       rows.forEach((line, r) => {
         let run = null;
@@ -4757,11 +4783,33 @@ GK_LIBRARY.worlds = {
           if (c >= line.length) break;
           const p = this.cellPos(c, r);
           const acrossX = isWall(c - 1, r) || isWall(c + 1, r);
-          if (hasFloor(L)) {
+          if (hasFloor(L) && (L.raise || L.sink)) {
+            const fc = U.isObj(L.floor) && L.floor.color ? L.floor.color : this.colors.floor, h = heightAt(c, r);
+            p[1] = h;
+            if (L.raise) this.solid([p[0], 0, p[2]], [cs, L.raise, cs], L.side || this.colors.platform, { top: fc, kind: 'platform' });
+            else {
+              this.geo.plane(p[0], h, p[2], cs, cs, fc);
+              this.statics.push({ min: [p[0] - cs / 2, h - 0.5, p[2] - cs / 2], max: [p[0] + cs / 2, h, p[2] + cs / 2], color: fc, kind: 'floor', noDraw: true });
+              // the pit's sides: a bank face toward every higher neighbour, which is also solid all the way down
+              for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const hn = heightAt(c + dc, r + dr);
+                if (hn == null || hn <= h) continue;
+                const top = Math.min(hn, 0), ex = p[0] + dc * cs / 2, ez = p[2] + dr * cs / 2, ax = dr ? cs / 2 : 0, az = dc ? cs / 2 : 0, n = [-dc, 0, -dr];
+                const bank = L.bank || '#7a6248';
+                this.geo.triN([ex - ax, h, ez - az], [ex + ax, h, ez + az], [ex + ax, top, ez + az], n, bank).triN([ex - ax, h, ez - az], [ex + ax, top, ez + az], [ex - ax, top, ez - az], n, bank);
+                const nx = p[0] + dc * cs, nz = p[2] + dr * cs;
+                this.statics.push({ min: [nx - cs / 2, h - 0.5, nz - cs / 2], max: [nx + cs / 2, hn - 0.5, nz + cs / 2], color: bank, kind: 'wall', noDraw: true });   // under the neighbour's own floor (no bump at the edge)
+              }
+              if (L.water) this.geo.plane(p[0], -0.3, p[2], cs, cs, L.water, { glow: L.waterGlow != null ? L.waterGlow : 0.08 });   // waterGlow: e.g. lava shines
+            }
+            this.tiles.push({ x: p[0], z: p[2], w: cs, d: cs, y: h, color: L.water || fc });
+          } else if (hasFloor(L)) {
             const fc = U.isObj(L.floor) && L.floor.color ? L.floor.color : ((c + r) % 2 ? this.colors.floor : this.colors.floor2);
             this.geo.plane(p[0], 0, p[2], cs, cs, fc);
             this.tiles.push({ x: p[0], z: p[2], w: cs, d: cs, y: 0, color: fc });
             this.statics.push({ min: [p[0] - cs / 2, -0.5, p[2] - cs / 2], max: [p[0] + cs / 2, 0, p[2] + cs / 2], color: fc, kind: 'floor', noDraw: true });
+            // block: true = a floor you cannot walk on (water, lava, a chasm): drawn as floor, with an invisible wall
+            if (L.block) this.statics.push({ min: [p[0] - cs / 2, 0, p[2] - cs / 2], max: [p[0] + cs / 2, U.isObj(L.block) && L.block.height || 3, p[2] + cs / 2], color: fc, kind: 'wall', noDraw: true });
             if (map.ceiling) this.geo.plane(p[0], H, p[2], cs, cs, map.ceiling === true ? this.colors.ceiling : map.ceiling, { down: true });
           }
           if (L.spawn) this.gridSpawn = { pos: p.slice(), rot: (U.isObj(L.spawn) && L.spawn.rot) || map.spawnRot || 'n' };
@@ -5699,6 +5747,11 @@ GK_LIBRARY.worlds = {
    Camera: first person, or THIRD PERSON (ui.views; the title screen and the V key switch it, kept per computer in
    GK.Settings 'view'): the camera sits behind the right shoulder (pulled in by walls) and the character is drawn
    walking, aiming the gun or swinging the sword. Aiming, shooting and E still work from the player's eyes.
+   Animation: the held tool follows game.viewModel (kick, reload dip + tilt, raise after a switch, bow / sling draw,
+   spear thrust); while game.climbing / game.swimming (mechanics/traversal) both hands climb hand over hand or swim
+   breaststroke instead (game.climbPhase / swimPhase), in third person too. A hard landing dips the camera.
+   The objective marker is a big bobbing "▼ 17 m" tag; when the target is off screen it moves to the left or right edge
+   ("◀ 17 m"). ui.beacon: true (or a colour) also stands a tall beam of light on the target.
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
@@ -5867,19 +5920,25 @@ GK_LIBRARY.worlds = {
     update(dt, mode) {
       const g = this.game;
       if (mode === 'playing') {
-        const m = g.input.takeMouse();
-        g.player.look(m[0], m[1]);
+        const m = g.input.takeMouse(), z = 1 - (g.zoom || 0);   // looking down a sight: the mouse turns slower
+        g.player.look(m[0] * z, m[1] * z);
       }
+      const fall = g.player && !g.player.grounded ? g.player.vel[1] : 0;
       GK.Spatial.update(g, dt, g.input);
       if (mode === 'playing') {   // a slow computer: switch off shadows, then detail, then bloom (this visit only)
         const off = this.renderer.adapt(dt);
         if (off) g.ui.toast('⚙️ Simpler graphics for a smoother game (' + { shadows: 'shadows', detail: 'surface detail', bloom: 'glow' }[off] + ' off)');
       }
+      // a landing after a fall dips the camera a little (bigger fall, bigger dip)
+      if (g.player && g.player.grounded && this.fallV < -4 && mode === 'playing') { this.landT = 0.28; this.landAmp = U.clamp(-this.fallV * 0.011, 0.04, 0.14); }
+      this.fallV = g.player && !g.player.grounded ? Math.min(fall, g.player.vel[1]) : 0;
+      if (this.landT > 0) this.landT -= dt;
       if (g.shakeT > 0) { g.shakeT -= dt; if (g.shakeT <= 0) g.shakeAmp = 0; }
       if (this.aimT > 0) this.aimT -= dt;
       for (const e of g.world.entities) if (e.hi > 0) e.hi = Math.max(0, e.hi - dt * 4);
       if (this.flashes.length) { for (const f of this.flashes) f.t -= dt; this.flashes = this.flashes.filter(f => f.t > 0); }
       if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) this.toggleView();
+      if (mode === 'playing' && g.input.hits.has('KeyC') && g.ui.toggleGuide) g.ui.toggleGuide();   // ui.controlsGuide: C opens / closes it
       if (mode === 'playing' && g.setFocus) {
         const hit = g.world.raycast(g.player.eye(), g.player.forward(), g.player.cfg.reach);
         g.setFocus(hit.entity && hit.entity.currentInteraction() ? hit.entity : null);
@@ -5889,6 +5948,7 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer;
       r.resize();
       let eye = g.player.eye();
+      if (this.landT > 0) eye = [eye[0], eye[1] - this.landAmp * Math.sin(Math.PI * this.landT / 0.28), eye[2]];
       if (g.shakeT > 0 && g.state.mode === 'playing') {
         const a = g.shakeAmp * Math.min(1, g.shakeT * 4);
         eye = [eye[0] + (Math.random() - 0.5) * a, eye[1] + (Math.random() - 0.5) * a, eye[2] + (Math.random() - 0.5) * a];
@@ -5906,7 +5966,7 @@ GK_LIBRARY.worlds = {
         else { eye = c.pos; look = c.dir; }
       }
       this.camPos = eye;
-      r.setCamera(eye, look, g.player.cfg.fov + (g.fovKick || 0));   // game.fovKick: a mechanic widens the view (speed)
+      r.setCamera(eye, look, (g.player.cfg.fov + (g.fovKick || 0)) * (1 - (g.zoom || 0)));   // game.fovKick: a mechanic widens the view (speed); game.zoom: a sight
       { const f = g.player.forward(), fl = Math.hypot(f[0], f[2]) || 1, k = r.quality.shadowRange * 0.45;   // sun shadows cover what is in front of you
         r.setShadowFocus([g.player.pos[0] + f[0] / fl * k, g.player.pos[1], g.player.pos[2] + f[2] / fl * k]); }
       const blobA = r.quality.shadows && r.env.shadows ? 0.5 : 1;   // real sun shadows: the round contact shadows only darken a little
@@ -5915,13 +5975,22 @@ GK_LIBRARY.worlds = {
       const items = [];
       for (const c of this.chunks) {
         const dx = Math.max(c.min[0] - eye[0], 0, eye[0] - c.max[0]), dz = Math.max(c.min[2] - eye[2], 0, eye[2] - c.max[2]);
-        if (dx * dx + dz * dz < cull2) items.push({ mesh: c.mesh, pos: [0, 0, 0], grid: true });
+        if (dx * dx + dz * dz < cull2) items.push({ mesh: c.mesh, pos: [0, 0, 0], grid: g.cfg.environment.grid !== false });   // environment.grid: false = no tile seams / traces (natural worlds)
       }
       r.setLights(this.gatherLights(eye));
       for (const z of g.world.visibleZones()) {
         const s = [z.box.max[0] - z.box.min[0], z.box.max[2] - z.box.min[2]], col = z.show === true ? '#f1c40f' : z.show;
         const mesh = r.cached('zone' + s.join(',') + col, () => new GK.Geo().box(0, 0, 0, s[0], 0.05, s[1], col, { glow: 1 }));
         items.push({ mesh, pos: [z.center[0], z.center[1] + 0.01, z.center[2]], alpha: 0.35 + Math.sin(g.state.time * 3) * 0.1 });
+      }
+      // ui.beacon: a tall beam of light on the objective, seen from far away
+      if (g.cfg.ui.beacon && g.cfg.ui.markers !== false && g.missions && (g.state.mode === 'playing' || g.state.mode === 'paused')) {
+        const t = g.missions.targetOf(g.missions.current());
+        if (t && Math.hypot(t[0] - eye[0], t[2] - eye[2]) > 5) {
+          const col = typeof g.cfg.ui.beacon === 'string' ? g.cfg.ui.beacon : '#ffe066';
+          const beam = r.cached('gk:beacon' + col, () => new GK.Geo().cyl(0, 0, 0, 0.32, 36, col, { glow: 1, seg: 8 }));
+          items.push({ mesh: beam, pos: [t[0], t[1] + 0.4, t[2]], alpha: 0.3 + Math.sin(g.state.time * 3) * 0.08 });
+        }
       }
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
       const barBg = r.cached('gk:barBg', () => new GK.Geo().box(0, 0, 0, 1, 0.14, 0.03, '#10131a', { glow: 1 }));
@@ -5955,12 +6024,26 @@ GK_LIBRARY.worlds = {
         }
       }
       const vm = g.viewModel;
+      const live = g.state.mode === 'playing' || g.state.mode === 'paused';
       if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
-      else if (vm && vm.model && (g.state.mode === 'playing' || g.state.mode === 'paused')) this.drawHeld(items, vm, eye);
+      else if ((g.climbing || g.swimming) && live) this.drawLimbs(items, eye);
+      else if (vm && vm.model && live) this.drawHeld(items, vm, eye);
       else if (g.player.punchK >= 0 && g.state.mode === 'playing') this.drawPunch(items, eye);
       r.render(items);
 
-      g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => { const s = r.project(l.pos); return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null; }).filter(Boolean));
+      const W = this.canvas.clientWidth, Hh = this.canvas.clientHeight;
+      g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => {
+        const s = r.project(l.pos);
+        if (l.cls === 'marker' && (!s.visible || s.x < 40 || s.x > W - 40 || s.y < 60 || s.y > Hh - 20)) {
+          // the objective is off screen: an arrow at the left or right edge points the way
+          const dx = l.pos[0] - eye[0], dz = l.pos[2] - eye[2], f = g.player.forward(), rgt = [Math.cos(g.player.yaw), -Math.sin(g.player.yaw)];
+          const side = dx * rgt[0] + dz * rgt[1], ahead = dx * f[0] + dz * f[2];
+          const dist = l.text.replace(/^\S+\s*/, '');
+          if (ahead > 0 && s.visible && s.x >= 40 && s.x <= W - 40) return { text: '▼ ' + dist, x: s.x, y: Math.min(Math.max(s.y, 90), Hh - 120), cls: 'marker' };   // above or below: keep it on screen
+          return side >= 0 ? { text: dist + ' ▶', x: W - 70, y: Hh * 0.56, cls: 'marker edge' } : { text: '◀ ' + dist, x: 70, y: Hh * 0.56, cls: 'marker edge' };
+        }
+        return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null;
+      }).filter(Boolean));
       if (this.mini) this.drawMinimap();
     }
     /** An animated character that is not the player (other players online, race rivals, NPCs): entity.figure =
@@ -6003,6 +6086,30 @@ GK_LIBRARY.worlds = {
       const look = this.heroLook(), mesh = r.cached('fpFist' + JSON.stringify(look), () => GK.Models.shape('fpFist', look, 'arms').geo);
       items.push({ mesh, pos, yaw: yaw + Math.PI - sd * (0.35 - k * 0.3), pitch: p.pitch + 0.18 - k * 0.12, roll: sd * 0.25, scale: 1, front: true });
     }
+    /** First person while climbing or swimming: both hands, no tool. Climbing = hand over hand up the vines (the hands
+        move with game.climbPhase); swimming = breaststroke (game.swimPhase): together in front, out wide, back in. */
+    drawLimbs(items, eye) {
+      const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
+      const at = (along, side, down) => [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
+      const look = this.heroLook();
+      for (const sd of [1, -1]) {   // 1 = right hand, −1 = left hand
+        let pos, pitch, roll, grip = false;
+        if (g.climbing) {
+          // one hand reaches up while the other pulls down; a reaching hand is open, a pulling hand grips
+          const ph = (g.climbPhase || 0) + (sd < 0 ? Math.PI : 0), h = Math.sin(ph);
+          grip = Math.cos(ph) < 0;
+          pos = at(0.6 - Math.max(0, h) * 0.04, sd * 0.2, -0.1 + h * 0.17);
+          pitch = p.pitch + 1.15 + h * 0.15; roll = sd * 0.15;
+        } else {
+          const s = (g.swimPhase || 0) % (Math.PI * 2), out = Math.max(0, Math.sin(s)), fwd = Math.cos(s);
+          pos = at(0.6 + fwd * 0.14, sd * (0.1 + out * 0.3), -0.3 - out * 0.03);
+          pitch = p.pitch + 0.22; roll = sd * (0.35 + out * 0.45);
+        }
+        const hl = Object.assign({ grip }, look), mesh = r.cached('fpHand' + JSON.stringify(hl), () => GK.Models.shape('fpHand', hl, 'arms').geo);
+        items.push({ mesh, pos, yaw: yaw + Math.PI - sd * 0.12, pitch, roll, scale: 0.45, front: true });
+      }
+    }
     /** The chosen character's look (a default one for games without characters). */
     heroLook() { const l = this.game.characterLook ? this.game.characterLook() : null; return l || {}; }
     /** First person: the tool in the hand, with the player's sleeves and hands. Guns kick back; swords swing. */
@@ -6010,9 +6117,17 @@ GK_LIBRARY.worlds = {
       const g = this.game, r = this.renderer, p = g.player, f = p.forward(), yaw = p.yaw, rx = Math.cos(yaw), rz = -Math.sin(yaw);
       const up = [-Math.sin(yaw) * -Math.sin(p.pitch), Math.cos(p.pitch), -Math.cos(yaw) * -Math.sin(p.pitch)];
       const sway = p.moving ? Math.sin((p.bobT || 0) * 2) * 0.012 : 0, look = this.heroLook();
+      const air = p.grounded ? 0 : U.clamp(-p.vel[1] * 0.006, -0.035, 0.045);   // in a jump the tool lags behind
+      const raise = vm.raise || 0, rk = vm.reload;
       let along, side, down, pitch, yo = 0;
-      let roll = 0;
-      if (vm.melee) {
+      let roll = 0, aim = 0;
+      if (vm.melee && vm.anim === 'thrust') {
+        // spear: held low, pointing ahead; a thrust pulls back a little, then stabs straight out and comes back
+        const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t);
+        const reach = k <= 0 ? 0 : k < 0.2 ? -0.35 * ease(k / 0.2) : k < 0.5 ? -0.35 + 1.35 * ease((k - 0.2) / 0.3) : 1 - ease((k - 0.5) / 0.5);
+        along = 0.42 + reach * 0.32; side = 0.2 - Math.max(0, reach) * 0.1; down = -0.24 + sway + air - raise * 0.3 + Math.max(0, reach) * 0.06;
+        pitch = p.pitch - 1.3 - Math.max(0, reach) * 0.22; roll = 0.1;
+      } else if (vm.melee) {
         // sword: rest with the blade up at the right; a swing winds up, slashes across and down to the left, then recovers
         const k = vm.swing || 0, ease = t => t * t * (3 - 2 * t), mix = (a, b, t) => a + (b - a) * t;
         let ang = -0.3, sideK = 0;
@@ -6023,16 +6138,30 @@ GK_LIBRARY.worlds = {
         along = 0.4; side = 0.25 - sideK * 0.24; down = -0.21 + sway - sideK * 0.04 - (vm.lower || 0) * 0.22;
         pitch = p.pitch + ang;
       } else {
-        const k = vm.kick || 0;
-        along = 0.44 - k * 0.1; side = 0.19; down = -0.18 + sway - k * 0.02 - (vm.lower || 0) * 0.22;
-        pitch = p.pitch + k * 0.15 - (vm.lower || 0) * 0.6;
+        const k = vm.kick || 0, lo = vm.lower || 0;
+        along = 0.44 - k * 0.1; side = 0.19 - lo * 0.06; down = -0.18 + sway + air - k * 0.02 - lo * 0.2 - raise * 0.3;
+        pitch = p.pitch + k * 0.15 - lo * 0.5 - raise * 0.7;
+        if (rk != null) roll = Math.sin(Math.PI * rk) * 0.75;   // reloading: dip and tilt the tool toward you, then back
+        aim = vm.aim || 0;
+        if (vm.anim === 'bow' || vm.anim === 'sling') {   // held out in front, the arrow / pebble lined up with the crosshair
+          const bow = vm.anim === 'bow';
+          side = bow ? 0.07 : 0.05; down += bow ? 0.04 : 0.04; along += 0.06; roll += bow ? 0.2 : 0.08; pitch -= k * 0.1 - (bow ? 0.06 : 0);
+          yo = bow ? 0.22 : 0.1;   // turned in a little, so the arrow is seen pointing at the crosshair
+        }
+      }
+      if (aim > 0) {   // the sight: the tool comes up to the middle, lined up under the crosshair
+        const e = aim * aim * (3 - 2 * aim);
+        const to = vm.anim === 'sling' ? [-0.2, 0.58] : vm.anim === 'bow' ? [-0.1, 0.52] : [-0.13, 0.5];   // [down, along]: the target stays visible above the tool
+        const bow = vm.anim === 'bow';   // a bow stays a little left and tilted, so its string is not across the target
+        side += ((bow ? -0.075 : 0) - side) * e; down += (to[0] - down) * e; along += (to[1] - along) * e;
+        roll += ((bow ? 0.38 : 0) - roll) * e; yo += ((bow ? -0.1 : 0) - yo) * e; pitch += (p.pitch - pitch) * e;
       }
       const pos = [eye[0] + f[0] * along + rx * side + up[0] * down, eye[1] + f[1] * along + up[1] * down, eye[2] + f[2] * along + rz * side + up[2] * down];
       const mesh = r.cached('vm:' + vm.model + JSON.stringify(vm.look || {}), () => GK.Models.shape(vm.model, vm.look || {}, 'viewmodel').geo);
       const it = { pos, yaw: yaw + Math.PI + yo, pitch, roll, scale: vm.scale || (vm.melee ? 0.55 : 0.75), front: true };
       items.push(Object.assign({ mesh, hi: vm.glow || 0 }, it));
       if (GK.Models.has && !GK.Models.has('fpArms')) return;
-      const arms = Object.assign({ pose: vm.melee ? 'sword' : 'gun' }, look);
+      const arms = Object.assign({ pose: vm.melee ? (vm.anim === 'thrust' ? 'spear' : 'sword') : 'gun' }, vm.arms || {}, look);
       items.push(Object.assign({ mesh: r.cached('fpArms' + JSON.stringify(arms), () => GK.Models.shape('fpArms', arms, 'arms').geo) }, it));
     }
     /** Third person: the camera behind the right shoulder, looking where the player aims; walls pull it in. */
@@ -6071,6 +6200,17 @@ GK_LIBRARY.worlds = {
       const toward = d => { const l = V.len(d) || 1, u = V.scale(d, 1 / l); let o = Math.atan2(u[0], u[2]) - Y; while (o > Math.PI) o -= 2 * Math.PI; while (o < -Math.PI) o += 2 * Math.PI; return { pitch: Math.acos(U.clamp(-u[1], -1, 1)), yaw: o }; };
       const handOf = (sh, pitch, yaw) => { const nr = Math.sin(Y + yaw), cr = Math.cos(Y + yaw); return [sh[0] + Math.sin(pitch) * nr * L, sh[1] - Math.cos(pitch) * L, sh[2] + Math.sin(pitch) * cr * L]; };
       const out = { Y, at, sw, air, sx, armR: -sw * 0.8 + air, armL: sw * 0.8 + air, yawR: 0, yawL: 0, tool: null };
+      if (vm && !vm.melee && vm.aim > 0.3) { const e = p.eye(), fw = p.forward(); this.aimAt = [e[0] + fw[0] * 20, e[1] + fw[1] * 20, e[2] + fw[2] * 20]; this.aimT = Math.max(this.aimT, 0.15); }
+      if (g.climbing) {   // arms up on the vines, hand over hand; legs step
+        const ph = g.climbPhase || 0;
+        out.armR = 2.75 + Math.sin(ph) * 0.35; out.armL = 2.75 - Math.sin(ph) * 0.35; out.sw = Math.sin(ph) * 0.45; out.air = 0;
+        return out;
+      }
+      if (g.swimming) {   // front crawl: each arm reaches up and FORWARD, pulls down and back (arm pitch goes down: π → π/2 → 0 → −π/2)
+        const ph = g.swimPhase || 0, TAU = Math.PI * 2, wrap = a => ((a % TAU) + TAU) % TAU;
+        out.armR = wrap(Math.PI - ph); out.armL = wrap(-ph); out.sw = Math.sin(ph * 3) * 0.3; out.air = 0.25;
+        return out;
+      }
       if (p.punchK >= 0 && !vm) { const k = GK.punchReach(p.punchK); if (p.punchSide < 0) out.armL = lerp(out.armL, 1.65, k); else out.armR = lerp(out.armR, 1.65, k); }
       if (!vm) return out;
       if (vm.melee) {
@@ -7062,183 +7202,6 @@ GK_LIBRARY.worlds = {
 })();
 
 </script>
-<script>/* cyber-rush-nature-keep.js */
-/* Cyber Rush keeps its own floating sky islands (the 3D Visual Foundation 'island' is a sea islet). */
-window.GK_NATURE_KEEP = ['island'];
-
-</script>
-<script>/* stylized-nature.js */
-/* 3D Visual Foundation · stylized-nature.js — rounded, colourful nature models in the style of
-   blueprint/3d-visual-foundation/ART_DIRECTION.md. Load AFTER the Game Kit model libraries: models with the same name
-   replace the older flat ones, so every world that already places 'palm' or 'bush' gets the new look with no other change.
-   Front = +z, standing on y = 0, sizes in metres. Needs GK.Geo (src/gk-geo.js: smooth normals, blob, addData).
-     palm {h, lean, color} · bush {s, color, flower, lite} · fern {color} · bigTree {h, color, trunk, glow}
-     kenneyTree {h, color} · canopy {s, color} (a big leafy clump for the top edge of jungle walls)
-     grassTuft {s, small} · flowerPatch {color} · pebbles {color} · seaRock {s, color} · cliffRock {h, color}
-     mountain {h, r, color, snow} · island {r, color} (a little sea islet with palms) · skyCloud {seed} (for sky props)
-   Kenney models (CC0, see ASSET_CREDITS.md) come from GK.ModelData (assets/kenney-models.js); when that file is not
-   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks.
-   To keep a game's own version of a model, set window.GK_NATURE_KEEP = ['island', …] before this file loads. */
-(function () {
-  'use strict';
-  const U = GK.util, V = GK.vec, G = () => new GK.Geo(), keep = window.GK_NATURE_KEEP || [];
-  const M = { add: (name, fn) => (keep.indexOf(name) < 0 ? GK.Models.add(name, fn) : null), get: name => GK.Models.get(name) };
-  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
-  const seedOf = (...v) => Math.abs(Math.round(v.reduce((a, x) => a * 31 + (typeof x === 'string' ? x.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0) : (x || 0) * 997), 7))) % 2147483647 || 1;
-  const data = name => GK.ModelData && GK.ModelData[name];
-  /** Shift the greens of an imported model toward a warmer, sunnier green (Kenney greens are minty). */
-  const warmGreens = (d, k) => {
-    const map = {};
-    for (const h of d.pal) {
-      const c = U.color(h);
-      if (c[1] >= c[0] && c[1] >= c[2]) map[h] = [Math.min(1, c[0] * (k || 1.35)), c[1] * 1.02, c[2] * 0.62];
-    }
-    return map;
-  };
-
-  /** A leafy frond along +x: a spine that rises then droops, with jagged leaflets on both sides (palms, ferns). */
-  function frond(len, width, droop, col, col2) {
-    const g = G(), n = 6, spine = [];
-    for (let s = 0; s <= n; s++) { const u = s / n; spine.push([len * u, len * (0.28 * u - droop * u * u), 0]); }
-    for (let s = 0; s < n; s++) {
-      const u0 = s / n, u1 = (s + 1) / n;
-      const w = u => width * Math.sin(Math.PI * Math.min(1, u * 1.08 + 0.02)) * (s % 2 ? 1 : 0.78);
-      const a = spine[s], b = spine[s + 1], wa = w(u0), wb = w(u1) * 0.9;
-      for (const sd of [1, -1]) {
-        const ea = [a[0] + 0.12 * len / n, a[1] - wa * 0.22, a[2] + sd * wa], eb = [b[0] + 0.12 * len / n, b[1] - wb * 0.22, b[2] + sd * wb];
-        let nrm = V.norm(V.cross(V.sub(b, a), V.sub(ea, a)));
-        if (nrm[1] < 0) nrm = [-nrm[0], -nrm[1], -nrm[2]];
-        const c = sd > 0 ? col : col2;
-        g.triN(a, b, eb, nrm, c).triN(a, eb, ea, nrm, c);
-      }
-    }
-    return g;
-  }
-
-  // ----- palms: curved ringed trunk, drooping two-tone fronds, coconuts -----
-  M.add('palm', o => {
-    const h = o.h || 7, lean = o.lean == null ? 0.18 : o.lean, c = o.color || '#3fae49', g = G(), rnd = U.rng(seedOf(h, lean, c));
-    const n = 6, pts = [];
-    for (let i = 0; i <= n; i++) { const t = i / n; pts.push([lean * h * t * t, h * t, 0]); }
-    for (let i = 0; i < n; i++) {   // ringed segments: each one a little wider at the bottom
-      const a = pts[i], b = pts[i + 1], r0 = 0.27 - i * 0.018, r1 = 0.27 - (i + 1) * 0.018, d = V.sub(b, a), len = V.len(d), ang = Math.atan2(d[0], d[1]);
-      g.add(G().cyl(0, 0, 0, r0 * 1.06, len + 0.03, i % 2 ? '#a57d50' : '#8f6a42', { seg: 7, rTop: r1 * 0.9, noBottom: true, noTop: i < n - 1 }).rotZ(-ang).move(a[0], a[1], a[2]));
-    }
-    const top = pts[n], k = 8;
-    for (let i = 0; i < k; i++) {
-      const yaw = i / k * Math.PI * 2 + rnd() * 0.35, L = 2.5 + rnd() * 0.7, light = U.shade(c, 1.12 + rnd() * 0.1);
-      g.add(frond(L, 0.42, 0.75 + rnd() * 0.35, light, dk(c, 0.88)).rotZ(0.1 - rnd() * 0.15).rotY(yaw).move(top[0], top[1] - 0.05, top[2]));
-    }
-    for (let i = 0; i < 3; i++) { const a = i * 2.1; g.sphere(top[0] + Math.cos(a) * 0.2, top[1] - 0.26 - (i % 2) * 0.08, top[2] + Math.sin(a) * 0.2, 0.17, i % 2 ? '#6b4a2b' : '#5c3d22', { seg: 6, rings: 4 }); }
-    return g;
-  });
-
-  // ----- bushes and hedges: soft lumpy leaf balls, sometimes flowering -----
-  M.add('bush', o => {
-    const s = o.s || 1, c = o.color || '#2f8f3e', seed = seedOf(s, c, o.flower || ''), g = G();
-    const q = { seed, rough: 0.24, seg: 7, rings: o.lite ? 4 : 5 };
-    g.blob(0, 0.58 * s, 0, 0.8 * s, c, q).blob(0.58 * s, 0.42 * s, 0.18 * s, 0.56 * s, dk(c, 1.16), Object.assign({}, q, { seed: seed + 1 }));
-    if (!o.lite) g.blob(-0.55 * s, 0.4 * s, -0.12 * s, 0.52 * s, dk(c, 0.9), Object.assign({}, q, { seed: seed + 2 }));
-    if (o.flower) {
-      const rnd = U.rng(seed + 3);
-      for (let i = 0; i < (o.lite ? 3 : 5); i++) {
-        const a = rnd() * Math.PI * 2, y = 0.5 + rnd() * 0.6;
-        g.sphere(Math.cos(a) * 0.62 * s, y * s, Math.sin(a) * 0.62 * s + 0.15 * s, 0.1 * s, o.flower, { seg: 6, rings: 4, glow: 0.15 }).sphere(Math.cos(a) * 0.62 * s, y * s, Math.sin(a) * 0.62 * s + 0.2 * s, 0.045 * s, '#ffe066', { seg: 4, rings: 3, glow: 0.3 });
-      }
-    }
-    return g;
-  });
-  M.add('canopy', o => {   // a big leafy clump: hides the flat top edge of a jungle wall
-    const s = o.s || 1.6, c = o.color || '#2f7d32', seed = seedOf(s, c, 'canopy'), q = { seed, rough: 0.28, seg: 7, rings: 4, squash: 0.8 };
-    return G().blob(0, 0, 0, s, c, q).blob(s * 0.75, s * 0.25, s * 0.2, s * 0.68, dk(c, 1.18), Object.assign({}, q, { seed: seed + 1 }));
-  });
-  M.add('fern', o => {
-    const c = o.color || '#40c057', g = G(), rnd = U.rng(seedOf(c, 'fern'));
-    for (let k = 0; k < 7; k++) g.add(frond(0.95 + rnd() * 0.3, 0.16, 0.55, U.shade(c, 1.05), dk(c, 0.85)).rotY(k / 7 * Math.PI * 2 + rnd() * 0.4).move(0, 0.05, 0));
-    return g;
-  });
-
-  // ----- trees -----
-  M.add('bigTree', o => {
-    const h = o.h || 9, c = o.color || '#2f9e44', tr = o.trunk || '#7a5636', g = G(), seed = seedOf(h, c), rnd = U.rng(seed);
-    g.cyl(0, 0, 0, h * 0.065, h * 0.58, tr, { seg: 7, rTop: h * 0.035, noBottom: true, noTop: true });
-    for (let i = 0; i < 3; i++) g.add(G().cone(0, 0, 0, h * 0.035, h * 0.16, dk(tr, 0.9), { seg: 6, noBottom: true }).rotZ(1.0).rotY(i * Math.PI * 2 / 3 + 0.4).move(0, h * 0.06, 0));   // root flares
-    const q = { rough: 0.22, seg: 7, rings: 5, squash: 0.82 };
-    g.blob(0, h * 0.64, 0, h * 0.27, c, Object.assign({ seed }, q));
-    for (let i = 0; i < 3; i++) {
-      const a = i / 3 * Math.PI * 2 + rnd() * 0.6, d = h * (0.17 + rnd() * 0.05), y = h * (0.56 + rnd() * 0.12);
-      g.blob(Math.cos(a) * d, y, Math.sin(a) * d, h * (0.15 + rnd() * 0.05), dk(c, 0.88 + rnd() * 0.12), Object.assign({ seed: seed + i + 1 }, q));
-    }
-    g.blob(h * 0.04, h * 0.84, -h * 0.02, h * 0.17, dk(c, 1.18), Object.assign({ seed: seed + 9 }, q));
-    if (o.glow) g.sphere(-h * 0.14, h * 0.7, h * 0.2, h * 0.06, o.glow, { glow: 1, seg: 6, rings: 4 }).sphere(h * 0.18, h * 0.55, -h * 0.12, h * 0.05, o.glow, { glow: 1, seg: 6, rings: 4 });
-    return g;
-  });
-  M.add('kenneyTree', o => {   // Kenney Mini Arena tree (CC0), scaled to h metres, greens warmed up
-    const h = o.h || 6, d = data('kenney-tree');
-    if (!d) return M.get('bigTree')({ h, color: o.color });
-    const s = h / 1.917;
-    return G().addData(d, { scale: s, colors: warmGreens(d, 1.3) });
-  });
-
-  // ----- ground cover -----
-  M.add('grassTuft', o => {   // Kenney grass (CC0), tinted to match the island grass
-    const s = o.s || 1.7, d = data(o.small ? 'kenney-grass-small' : 'kenney-grass');
-    if (!d) { const g = G(); for (let i = 0; i < 5; i++) g.add(G().cone(0, 0, 0, 0.05, 0.35, '#5fae46', { seg: 4 }).rotZ((i - 2) * 0.25).rotY(i * 1.3)); return g.scale(s); }
-    return G().addData(d, { scale: s, colors: warmGreens(d, 1.45) });
-  });
-  M.add('flowerPatch', o => {
-    const c = o.color || '#ff6b6b', g = G(), rnd = U.rng(seedOf(c, 'flowers'));
-    for (let i = 0; i < 4; i++) {
-      const x = (rnd() - 0.5) * 0.7, z = (rnd() - 0.5) * 0.7, hh = 0.18 + rnd() * 0.15;
-      g.box(x, 0, z, 0.02, hh, 0.02, '#3f8f3a').sphere(x, hh + 0.03, z, 0.065, c, { seg: 5, rings: 3, glow: 0.12 }).sphere(x, hh + 0.06, z + 0.03, 0.025, '#fff3bf', { seg: 4, rings: 2, glow: 0.3 });
-    }
-    return g;
-  });
-  M.add('pebbles', o => {
-    const c = o.color || '#b8ab98', g = G(), rnd = U.rng(seedOf(c, 'pebbles'));
-    for (let i = 0; i < 4; i++) g.blob((rnd() - 0.5) * 0.8, 0.02, (rnd() - 0.5) * 0.8, 0.07 + rnd() * 0.07, dk(c, 0.85 + rnd() * 0.3), { seed: i + 3, rough: 0.4, seg: 5, rings: 3, flat: true, squash: 0.55 });
-    return g;
-  });
-
-  // ----- rocks and landforms -----
-  M.add('seaRock', o => {
-    const s = o.s || 1, c = o.color || '#8d8f96';
-    return G().blob(0, 0.3 * s, 0, 1.05 * s, c, { seed: 11, rough: 0.32, seg: 7, rings: 5, flat: true, squash: 0.62 }).blob(0.85 * s, 0.2 * s, 0.4 * s, 0.6 * s, dk(c, 1.12), { seed: 12, rough: 0.3, seg: 6, rings: 4, flat: true, squash: 0.7 });
-  });
-  M.add('cliffRock', o => {   // a pile of rounded boulders (hill tops, cave mouths)
-    const h = o.h || 4, c = o.color || '#8a7f73', q = { rough: 0.3, seg: 7, rings: 5, flat: true };
-    return G().blob(0, h * 0.35, 0, h * 0.5, c, Object.assign({ seed: 21, squash: 0.85 }, q))
-      .blob(h * 0.42, h * 0.22, h * 0.2, h * 0.33, dk(c, 0.86), Object.assign({ seed: 22 }, q))
-      .blob(-h * 0.38, h * 0.18, -h * 0.15, h * 0.3, dk(c, 1.1), Object.assign({ seed: 23 }, q));
-  });
-  M.add('mountain', o => {
-    const h = o.h || 40, r = o.r || 30, c = o.color || '#4a5568';
-    return G().cone(0, 0, 0, r, h, c, { seg: 14 }).cone(r * 0.35, 0, r * 0.2, r * 0.7, h * 0.7, dk(c, 0.9), { seg: 12 }).cone(0, h * 0.62, 0, r * 0.38, h * 0.38, o.snow || '#edf2f7', { seg: 14 });
-  });
-  M.add('island', o => {   // a small sea islet: sand rim, grassy hill, rocks and two palms
-    const r = o.r || 5, c = o.color || '#5aa84a', g = G();
-    g.cyl(0, -1, 0, r * 1.15, 1.25, '#efd9a0', { seg: 14, rTop: r, noBottom: true });
-    g.blob(0, 0.2, 0, r * 0.75, c, { seed: 31, rough: 0.2, seg: 9, rings: 5, squash: 0.45 });
-    g.blob(r * 0.6, 0.4, r * 0.5, r * 0.2, '#8d8f96', { seed: 32, rough: 0.3, seg: 6, rings: 4, flat: true });
-    g.add(M.get('palm')({ h: r * 0.75, lean: 0.2 }).move(-r * 0.3, r * 0.25, 0.1));
-    g.add(M.get('palm')({ h: r * 0.6, lean: 0.12 }).rotY(2).move(r * 0.25, r * 0.2, -r * 0.3));
-    return g;
-  });
-
-  // ----- sky -----
-  M.add('skyCloud', o => {   // a soft cumulus: a big puff on a flat, slightly bluish base (about 1 m wide: scale it up)
-    const rnd = U.rng(seedOf(o.seed || 1, 'cloud')), g = G(), q = { rough: 0.12, seg: 9, rings: 6 };
-    g.blob(0, 0.32, 0, 0.36, '#ffffff', Object.assign({ seed: 41 }, q));
-    for (let i = 0; i < 5; i++) {
-      const a = i / 5 * Math.PI * 2 + rnd(), d = 0.28 + rnd() * 0.12, r = 0.2 + rnd() * 0.1;
-      g.blob(Math.cos(a) * d * 1.3, 0.12 + rnd() * 0.12, Math.sin(a) * d * 0.7, r, i % 2 ? '#f4f8ff' : '#ffffff', Object.assign({ seed: 42 + i }, q));
-    }
-    g.blob(0, 0.05, 0, 0.5, '#dfe8f5', { seed: 49, rough: 0.08, seg: 10, rings: 5, squash: 0.25 });   // flat shaded base
-    return g;
-  });
-})();
-
-</script>
 <script>/* worlds/rush-city/world.js */
 /* World · rush-city — NEON CITY (Cyber Rush round 1, training): a night city of glowing towers, holo signs and an
    elevated train. Built by worlds/_course.js (see there for every named location / slot). ENVIRONMENT ONLY.
@@ -7449,6 +7412,310 @@ window.GK_NATURE_KEEP = ['island'];
     { k: 'lanes', left: 'tunnel', mid: 'hammer', right: 'bounce' }, { k: 'gate' },
     { k: 'finish' },
   ]));
+})();
+
+</script>
+<script>/* assets/models/stylized-characters.js */
+/* 3D Visual Foundation · stylized-characters.js — a rounded, friendly explorer for the Game Kit's animated character.
+   Replaces the boxy 'heroPart' / 'hero' models (load AFTER assets/models/people.js). Same joints and sizes as GK.HERO, so
+   walking, aiming and the third-person camera work unchanged. Big round head and eyes, soft limbs, short sleeves, boots,
+   an optional scarf (look.scarf: '#colour', default the accent colour; false = none) and backpack (look.pack: true | '#colour';
+   false = none).
+   A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail', shirt, pants, shoes,
+                       accent, scarf, pack, skirt } */
+(function () {
+  'use strict';
+  const M = GK.Models, G = () => new GK.Geo(), U = GK.util, V = GK.vec;
+  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
+  const HERO = GK.HERO || (GK.HERO = { hip: 0.86, shoulder: 1.38, neck: 1.42, arm: 0.68, height: 1.8 });
+  const D = { body: 'm', skin: '#e0ac69', hair: '#3b2a1a', hairStyle: 'short', shirt: '#2f80ed', pants: '#2d3436', shoes: '#6b4a2b', accent: '#4cc9f0' };
+  const L = o => Object.assign({}, D, o);
+  const shoulderX = o => (o.body === 'f' ? 0.255 : 0.285);
+  const S = { seg: 10, rings: 7 };
+
+  /** A rounded limb from a to b: a smooth tapered cylinder with ball ends. */
+  function limb(g, a, b, r0, r1, col) {
+    const d = V.sub(b, a), len = V.len(d), z = V.norm(d);
+    const s = G().cyl(0, 0, 0, r0, len, col, { seg: 9, rTop: r1, noBottom: true });
+    // turn +y onto the limb direction
+    const ang = Math.acos(U.clamp(z[1], -1, 1)), ax = V.norm(V.cross([0, 1, 0], z));
+    if (ang > 1e-4 && V.len(V.cross([0, 1, 0], z)) > 1e-6) {
+      const c = Math.cos(ang), sn = Math.sin(ang), k = ax, rot = v => {   // Rodrigues
+        const kv = V.cross(k, v), kd = V.dot(k, v);
+        return [v[0] * c + kv[0] * sn + k[0] * kd * (1 - c), v[1] * c + kv[1] * sn + k[1] * kd * (1 - c), v[2] * c + kv[2] * sn + k[2] * kd * (1 - c)];
+      };
+      s.map(rot, rot);
+    } else if (z[1] < 0) s.rotX(Math.PI);
+    g.add(s.move(a[0], a[1], a[2]));
+    return g.sphere(b[0], b[1], b[2], r1, col, { seg: 8, rings: 5 });
+  }
+
+  function torso(o) {
+    const g = G(), f = o.body === 'f', w = f ? 0.2 : 0.225, top = HERO.shoulder + 0.03, shirt = o.shirt;
+    g.add(G().cyl(0, 0, 0, w * 0.9, top - HERO.hip, shirt, { seg: 12, rTop: w * 1.08 }).scale(1, 1, 0.62).move(0, HERO.hip, 0));
+    g.add(G().sphere(0, 0, 0, w * 1.08, dk(shirt, 1.06), S).scale(1, 0.38, 0.62).move(0, top, 0));                           // rounded shoulders
+    g.add(G().cyl(0, 0, 0, w * 0.93, 0.07, dk(o.pants, 0.75), { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip, 0));         // belt
+    g.box(0, HERO.hip + 0.012, w * 0.6, 0.07, 0.05, 0.02, '#e9c46a');                                                        // buckle
+    g.add(G().cyl(0, 0, 0, w * 0.95, 0.16, o.pants, { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip - 0.12, 0));   // hips
+    g.box(f ? 0.07 : 0.09, HERO.hip + 0.34, w * 0.62 + 0.005, 0.06, 0.06, 0.012, o.accent, { glow: 1 });                    // glowing badge
+    if (o.scarf !== false) {
+      const scarf = o.scarf || o.accent;
+      g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                     // scarf
+      g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                // scarf tail
+    } else g.cyl(0, top - 0.02, 0, 0.075, 0.05, dk(o.shirt, 0.85), { seg: 10 });                                             // collar
+    if (o.pack !== false) {
+      const p = typeof o.pack === 'string' ? o.pack : '#8b5a2b';
+      g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });
+      g.blob(0, HERO.hip + 0.47, -0.2, 0.15, dk(p, 1.08), { seed: 5, rough: 0.05, seg: 8, rings: 5, squash: 0.55 });          // rolled top
+      g.box(0, HERO.hip + 0.18, -0.28, 0.2, 0.14, 0.04, dk(p, 0.85)).box(0, HERO.hip + 0.3, -0.3, 0.05, 0.05, 0.02, '#e9c46a');  // pocket + clasp
+      g.add(G().cyl(0, 0, 0, 0.065, 0.32, '#c9b27a', { seg: 8 }).rotZ(Math.PI / 2).move(-0.16, HERO.hip + 0.05, -0.2));     // bedroll
+      for (const x of [-0.1, 0.1]) g.box(x, HERO.hip + 0.12, w * 0.6, 0.04, 0.42, 0.015, dk(p, 0.8));                          // straps
+    }
+    if (o.skirt) g.add(G().cyl(0, 0, 0, w * 1.25, 0.3, dk(o.pants, 1.15), { seg: 12, rTop: w * 0.95 }).scale(1, 1, 0.75).move(0, HERO.hip - 0.26, 0));
+    return g;
+  }
+  function head(o) {
+    const g = G(), hs = o.hairStyle, h = o.hair, s = o.skin, R = 0.19, cy = 0.21;
+    g.cyl(0, -0.03, 0, 0.065, 0.1, dk(s, 0.92), { seg: 8 });                                                                  // neck
+    g.add(G().sphere(0, 0, 0, R, s, S).scale(1, 1.02, 0.95).move(0, cy, 0));                                                 // head
+    for (const x of [-1, 1]) g.add(G().sphere(0, 0, 0, 0.045, dk(s, 0.95), { seg: 7, rings: 5 }).scale(0.6, 1, 0.9).move(x * R * 0.98, cy, 0));   // ears
+    for (const x of [-0.072, 0.072]) {                                                                                        // big friendly eyes
+      g.add(G().sphere(0, 0, 0, 0.05, '#ffffff', { seg: 8, rings: 6 }).scale(0.85, 1.05, 0.45).move(x, cy + 0.02, R * 0.88));
+      g.add(G().sphere(0, 0, 0, 0.032, '#3b2a1a', { seg: 8, rings: 5 }).scale(0.9, 1.1, 0.5).move(x, cy + 0.015, R * 0.93));
+      g.sphere(x + 0.012, cy + 0.035, R * 0.96, 0.01, '#ffffff', { seg: 4, rings: 3, glow: 0.8 });                            // sparkle
+      g.add(G().box(0, 0, 0, 0.07, 0.016, 0.02, dk(h, 0.95)).rotZ(x > 0 ? -0.12 : 0.12).move(x, cy + 0.095, R * 0.88));      // eyebrows
+    }
+    g.add(G().sphere(0, 0, 0, 0.022, dk(s, 0.9), { seg: 6, rings: 4 }).move(0, cy - 0.025, R * 0.97));                      // nose
+    g.add(G().box(0, 0, 0, 0.06, 0.014, 0.02, '#9e4a3c').move(0, cy - 0.075, R * 0.9));                                     // smile
+    g.add(G().sphere(0, 0, 0, 0.026, '#f08a8a', { seg: 6, rings: 4 }).scale(1.2, 0.7, 0.4).move(-0.11, cy - 0.04, R * 0.82))
+      .add(G().sphere(0, 0, 0, 0.026, '#f08a8a', { seg: 6, rings: 4 }).scale(1.2, 0.7, 0.4).move(0.11, cy - 0.04, R * 0.82));   // rosy cheeks
+    // hair: a cap over the top and back, then the style
+    g.add(G().sphere(0, 0, 0, R * 1.06, h, S).scale(1, 0.78, 1).move(0, cy + 0.05, -0.02));
+    g.add(G().sphere(0, 0, 0, R * 1.02, h, S).scale(1, 0.95, 0.7).move(0, cy - 0.02, -0.07));
+    g.add(G().blob(0, 0, 0, 0.11, dk(h, 1.1), { seed: 3, rough: 0.2, seg: 8, rings: 5 }).scale(1.5, 0.55, 0.7).rotX(0.35).move(0.03, cy + 0.15, R * 0.62));   // fringe
+    if (hs === 'spiky' || hs === 'short') {
+      const n = hs === 'spiky' ? 9 : 5, len = hs === 'spiky' ? 0.16 : 0.09;
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2, rx = Math.cos(a) * 0.09, rz = Math.sin(a) * 0.09 - 0.02;
+        g.add(G().cone(0, 0, 0, 0.055, len, i % 2 ? h : dk(h, 1.12), { seg: 6 }).rotX(-0.5 + Math.sin(a) * 0.4).rotZ(-Math.cos(a) * 0.55).move(rx, cy + 0.17, rz));
+      }
+      g.add(G().cone(0, 0, 0, 0.06, len * 1.1, dk(h, 1.12), { seg: 6 }).rotX(-0.35).move(0.02, cy + 0.2, 0.03));
+    } else if (hs === 'long') {
+      g.add(G().blob(0, 0, 0, 0.2, h, { seed: 7, rough: 0.1, seg: 9, rings: 6 }).scale(1, 1.5, 0.45).move(0, cy - 0.15, -0.12));
+      for (const x of [-1, 1]) g.add(G().blob(0, 0, 0, 0.07, h, { seed: 8, rough: 0.1, seg: 7, rings: 5 }).scale(0.8, 2.4, 1).move(x * 0.17, cy - 0.09, 0.03));
+    } else if (hs === 'ponytail') {
+      g.add(G().cyl(0, 0, 0, 0.045, 0.05, o.accent, { seg: 8 }).rotX(1.3).move(0, cy + 0.06, -0.19));                          // hair band
+      limb(g, [0, cy + 0.06, -0.22], [0, cy - 0.3, -0.3], 0.07, 0.04, h);                                                      // the tail
+    }
+    return g;
+  }
+  function arm(o, right) {
+    const g = G(), s = o.shirt, sk = o.skin;
+    g.sphere(0, -0.03, 0, 0.085, dk(s, 1.04), { seg: 8, rings: 5 });                                                         // shoulder ball
+    limb(g, [0, -0.03, 0], [0, -0.3, 0], 0.08, 0.072, s);                                                                     // short sleeve
+    g.cyl(0, -0.31, 0, 0.074, 0.04, dk(s, 0.8), { seg: 9 });                                                                  // cuff
+    limb(g, [0, -0.3, 0], [0, -HERO.arm + 0.06, 0], 0.056, 0.05, sk);                                                         // forearm
+    if (right) g.cyl(0, -0.5, 0, 0.06, 0.04, '#5c4a2e', { seg: 8 });                                                          // wrist band
+    return g.blob(0, -HERO.arm + 0.02, 0.005, 0.062, sk, { seed: right ? 2 : 3, rough: 0.08, seg: 8, rings: 5 });             // hand
+  }
+  function leg(o) {
+    const g = G(), p = o.pants, sh = o.shoes;
+    limb(g, [0, 0, 0], [0, -0.42, 0], 0.095, 0.082, p);                                                                       // thigh (shorts)
+    g.cyl(0, -0.44, 0, 0.084, 0.04, dk(p, 0.85), { seg: 9 });                                                                 // hem
+    limb(g, [0, -0.42, 0], [0, -HERO.hip + 0.17, 0], 0.062, 0.056, o.skin);                                                   // shin
+    g.cyl(0, -HERO.hip + 0.07, 0.01, 0.075, 0.17, sh, { seg: 9, rTop: 0.068 });                                               // boot cuff
+    g.add(G().blob(0, 0, 0, 0.1, dk(sh, 1.08), { seed: 4, rough: 0.05, seg: 9, rings: 5 }).scale(0.85, 0.55, 1.45).move(0, -HERO.hip + 0.06, 0.05));   // boot toe
+    return g.box(0, -HERO.hip, 0.04, 0.17, 0.035, 0.29, dk(sh, 0.6));                                                         // sole
+  }
+  function part(name, o) {
+    if (name === 'torso') return torso(o);
+    if (name === 'head') return head(o);
+    if (name === 'armL') return arm(o, false);
+    if (name === 'armR') return arm(o, true);
+    return leg(o);
+  }
+
+  M.add('heroPart', look => { const o = L(look); return part(o.part || 'torso', o); });
+  M.add('hero', look => {
+    const o = L(look), g = torso(o), sx = shoulderX(o);
+    g.add(head(o).move(0, HERO.neck, 0));
+    g.add(arm(o, false).move(sx, HERO.shoulder, 0)).add(arm(o, true).move(-sx, HERO.shoulder, 0));
+    g.add(leg(o).move(-0.105, HERO.hip, 0)).add(leg(o).move(0.105, HERO.hip, 0));
+    return g;
+  });
+  GK.heroShoulderX = o => shoulderX(L(o));
+})();
+
+</script>
+<script>/* assets/models/stylized-nature.js */
+/* 3D Visual Foundation · stylized-nature.js — rounded, colourful nature models in the style of
+   blueprint/3d-visual-foundation/ART_DIRECTION.md. Load AFTER the Game Kit model libraries: models with the same name
+   replace the older flat ones, so every world that already places 'palm' or 'bush' gets the new look with no other change.
+   Front = +z, standing on y = 0, sizes in metres. Needs GK.Geo (src/gk-geo.js: smooth normals, blob, addData).
+     palm {h, lean, color} · bush {s, color, flower, lite} · fern {color} · bigTree {h, color, trunk, glow}
+     kenneyTree {h, color} · canopy {s, color} (a big leafy clump for the top edge of jungle walls)
+     grassTuft {s, small} · flowerPatch {color} · pebbles {color} · seaRock {s, color} · cliffRock {h, color}
+     mountain {h, r, color, snow} · island {r, color} (a little sea islet with palms) · skyCloud {seed} (for sky props)
+   Kenney models (CC0, see ASSET_CREDITS.md) come from GK.ModelData (assets/kenney-models.js); when that file is not
+   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks.
+   To keep a game's own version of a model, set window.GK_NATURE_KEEP = ['island', …] before this file loads. */
+(function () {
+  'use strict';
+  const U = GK.util, V = GK.vec, G = () => new GK.Geo(), keep = window.GK_NATURE_KEEP || [];
+  const M = { add: (name, fn) => (keep.indexOf(name) < 0 ? GK.Models.add(name, fn) : null), get: name => GK.Models.get(name) };
+  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
+  const seedOf = (...v) => Math.abs(Math.round(v.reduce((a, x) => a * 31 + (typeof x === 'string' ? x.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0) : (x || 0) * 997), 7))) % 2147483647 || 1;
+  const data = name => GK.ModelData && GK.ModelData[name];
+  /** Shift the greens of an imported model toward a warmer, sunnier green (Kenney greens are minty). */
+  const warmGreens = (d, k) => {
+    const map = {};
+    for (const h of d.pal) {
+      const c = U.color(h);
+      if (c[1] >= c[0] && c[1] >= c[2]) map[h] = [Math.min(1, c[0] * (k || 1.35)), c[1] * 1.02, c[2] * 0.62];
+    }
+    return map;
+  };
+
+  /** A leafy frond along +x: a spine that rises then droops, with jagged leaflets on both sides (palms, ferns). */
+  function frond(len, width, droop, col, col2) {
+    const g = G(), n = 6, spine = [];
+    for (let s = 0; s <= n; s++) { const u = s / n; spine.push([len * u, len * (0.28 * u - droop * u * u), 0]); }
+    for (let s = 0; s < n; s++) {
+      const u0 = s / n, u1 = (s + 1) / n;
+      const w = u => width * Math.sin(Math.PI * Math.min(1, u * 1.08 + 0.02)) * (s % 2 ? 1 : 0.78);
+      const a = spine[s], b = spine[s + 1], wa = w(u0), wb = w(u1) * 0.9;
+      for (const sd of [1, -1]) {
+        const ea = [a[0] + 0.12 * len / n, a[1] - wa * 0.22, a[2] + sd * wa], eb = [b[0] + 0.12 * len / n, b[1] - wb * 0.22, b[2] + sd * wb];
+        let nrm = V.norm(V.cross(V.sub(b, a), V.sub(ea, a)));
+        if (nrm[1] < 0) nrm = [-nrm[0], -nrm[1], -nrm[2]];
+        const c = sd > 0 ? col : col2;
+        g.triN(a, b, eb, nrm, c).triN(a, eb, ea, nrm, c);
+      }
+    }
+    return g;
+  }
+
+  // ----- palms: curved ringed trunk, drooping two-tone fronds, coconuts -----
+  M.add('palm', o => {
+    const h = o.h || 7, lean = o.lean == null ? 0.18 : o.lean, c = o.color || '#3fae49', g = G(), rnd = U.rng(seedOf(h, lean, c));
+    const n = 6, pts = [];
+    for (let i = 0; i <= n; i++) { const t = i / n; pts.push([lean * h * t * t, h * t, 0]); }
+    for (let i = 0; i < n; i++) {   // ringed segments: each one a little wider at the bottom
+      const a = pts[i], b = pts[i + 1], r0 = 0.27 - i * 0.018, r1 = 0.27 - (i + 1) * 0.018, d = V.sub(b, a), len = V.len(d), ang = Math.atan2(d[0], d[1]);
+      g.add(G().cyl(0, 0, 0, r0 * 1.06, len + 0.03, i % 2 ? '#a57d50' : '#8f6a42', { seg: 7, rTop: r1 * 0.9, noBottom: true, noTop: i < n - 1 }).rotZ(-ang).move(a[0], a[1], a[2]));
+    }
+    const top = pts[n], k = 8;
+    for (let i = 0; i < k; i++) {
+      const yaw = i / k * Math.PI * 2 + rnd() * 0.35, L = 2.5 + rnd() * 0.7, light = U.shade(c, 1.12 + rnd() * 0.1);
+      g.add(frond(L, 0.42, 0.75 + rnd() * 0.35, light, dk(c, 0.88)).rotZ(0.1 - rnd() * 0.15).rotY(yaw).move(top[0], top[1] - 0.05, top[2]));
+    }
+    for (let i = 0; i < 3; i++) { const a = i * 2.1; g.sphere(top[0] + Math.cos(a) * 0.2, top[1] - 0.26 - (i % 2) * 0.08, top[2] + Math.sin(a) * 0.2, 0.17, i % 2 ? '#6b4a2b' : '#5c3d22', { seg: 6, rings: 4 }); }
+    return g;
+  });
+
+  // ----- bushes and hedges: soft lumpy leaf balls, sometimes flowering -----
+  M.add('bush', o => {
+    const s = o.s || 1, c = o.color || '#2f8f3e', seed = seedOf(s, c, o.flower || ''), g = G();
+    const q = { seed, rough: 0.24, seg: 7, rings: o.lite ? 4 : 5 };
+    g.blob(0, 0.58 * s, 0, 0.8 * s, c, q).blob(0.58 * s, 0.42 * s, 0.18 * s, 0.56 * s, dk(c, 1.16), Object.assign({}, q, { seed: seed + 1 }));
+    if (!o.lite) g.blob(-0.55 * s, 0.4 * s, -0.12 * s, 0.52 * s, dk(c, 0.9), Object.assign({}, q, { seed: seed + 2 }));
+    if (o.flower) {
+      const rnd = U.rng(seed + 3);
+      for (let i = 0; i < (o.lite ? 3 : 5); i++) {
+        const a = rnd() * Math.PI * 2, y = 0.5 + rnd() * 0.6;
+        g.sphere(Math.cos(a) * 0.62 * s, y * s, Math.sin(a) * 0.62 * s + 0.15 * s, 0.1 * s, o.flower, { seg: 6, rings: 4, glow: 0.15 }).sphere(Math.cos(a) * 0.62 * s, y * s, Math.sin(a) * 0.62 * s + 0.2 * s, 0.045 * s, '#ffe066', { seg: 4, rings: 3, glow: 0.3 });
+      }
+    }
+    return g;
+  });
+  M.add('canopy', o => {   // a big leafy clump: hides the flat top edge of a jungle wall
+    const s = o.s || 1.6, c = o.color || '#2f7d32', seed = seedOf(s, c, 'canopy'), q = { seed, rough: 0.28, seg: 7, rings: 4, squash: 0.8 };
+    return G().blob(0, 0, 0, s, c, q).blob(s * 0.75, s * 0.25, s * 0.2, s * 0.68, dk(c, 1.18), Object.assign({}, q, { seed: seed + 1 }));
+  });
+  M.add('fern', o => {
+    const c = o.color || '#40c057', g = G(), rnd = U.rng(seedOf(c, 'fern'));
+    for (let k = 0; k < 7; k++) g.add(frond(0.95 + rnd() * 0.3, 0.16, 0.55, U.shade(c, 1.05), dk(c, 0.85)).rotY(k / 7 * Math.PI * 2 + rnd() * 0.4).move(0, 0.05, 0));
+    return g;
+  });
+
+  // ----- trees -----
+  M.add('bigTree', o => {
+    const h = o.h || 9, c = o.color || '#2f9e44', tr = o.trunk || '#7a5636', g = G(), seed = seedOf(h, c), rnd = U.rng(seed);
+    g.cyl(0, 0, 0, h * 0.065, h * 0.58, tr, { seg: 7, rTop: h * 0.035, noBottom: true, noTop: true });
+    for (let i = 0; i < 3; i++) g.add(G().cone(0, 0, 0, h * 0.035, h * 0.16, dk(tr, 0.9), { seg: 6, noBottom: true }).rotZ(1.0).rotY(i * Math.PI * 2 / 3 + 0.4).move(0, h * 0.06, 0));   // root flares
+    const q = { rough: 0.22, seg: 7, rings: 5, squash: 0.82 };
+    g.blob(0, h * 0.64, 0, h * 0.27, c, Object.assign({ seed }, q));
+    for (let i = 0; i < 3; i++) {
+      const a = i / 3 * Math.PI * 2 + rnd() * 0.6, d = h * (0.17 + rnd() * 0.05), y = h * (0.56 + rnd() * 0.12);
+      g.blob(Math.cos(a) * d, y, Math.sin(a) * d, h * (0.15 + rnd() * 0.05), dk(c, 0.88 + rnd() * 0.12), Object.assign({ seed: seed + i + 1 }, q));
+    }
+    g.blob(h * 0.04, h * 0.84, -h * 0.02, h * 0.17, dk(c, 1.18), Object.assign({ seed: seed + 9 }, q));
+    if (o.glow) g.sphere(-h * 0.14, h * 0.7, h * 0.2, h * 0.06, o.glow, { glow: 1, seg: 6, rings: 4 }).sphere(h * 0.18, h * 0.55, -h * 0.12, h * 0.05, o.glow, { glow: 1, seg: 6, rings: 4 });
+    return g;
+  });
+  M.add('kenneyTree', o => {   // Kenney Mini Arena tree (CC0), scaled to h metres, greens warmed up
+    const h = o.h || 6, d = data('kenney-tree');
+    if (!d) return M.get('bigTree')({ h, color: o.color });
+    const s = h / 1.917;
+    return G().addData(d, { scale: s, colors: warmGreens(d, 1.3) });
+  });
+
+  // ----- ground cover -----
+  M.add('grassTuft', o => {   // Kenney grass (CC0), tinted to match the island grass
+    const s = o.s || 1.7, d = data(o.small ? 'kenney-grass-small' : 'kenney-grass');
+    if (!d) { const g = G(); for (let i = 0; i < 5; i++) g.add(G().cone(0, 0, 0, 0.05, 0.35, '#5fae46', { seg: 4 }).rotZ((i - 2) * 0.25).rotY(i * 1.3)); return g.scale(s); }
+    return G().addData(d, { scale: s, colors: warmGreens(d, 1.45) });
+  });
+  M.add('flowerPatch', o => {
+    const c = o.color || '#ff6b6b', g = G(), rnd = U.rng(seedOf(c, 'flowers'));
+    for (let i = 0; i < 4; i++) {
+      const x = (rnd() - 0.5) * 0.7, z = (rnd() - 0.5) * 0.7, hh = 0.18 + rnd() * 0.15;
+      g.box(x, 0, z, 0.02, hh, 0.02, '#3f8f3a').sphere(x, hh + 0.03, z, 0.065, c, { seg: 5, rings: 3, glow: 0.12 }).sphere(x, hh + 0.06, z + 0.03, 0.025, '#fff3bf', { seg: 4, rings: 2, glow: 0.3 });
+    }
+    return g;
+  });
+  M.add('pebbles', o => {
+    const c = o.color || '#b8ab98', g = G(), rnd = U.rng(seedOf(c, 'pebbles'));
+    for (let i = 0; i < 4; i++) g.blob((rnd() - 0.5) * 0.8, 0.02, (rnd() - 0.5) * 0.8, 0.07 + rnd() * 0.07, dk(c, 0.85 + rnd() * 0.3), { seed: i + 3, rough: 0.4, seg: 5, rings: 3, flat: true, squash: 0.55 });
+    return g;
+  });
+
+  // ----- rocks and landforms -----
+  M.add('seaRock', o => {
+    const s = o.s || 1, c = o.color || '#8d8f96';
+    return G().blob(0, 0.3 * s, 0, 1.05 * s, c, { seed: 11, rough: 0.32, seg: 7, rings: 5, flat: true, squash: 0.62 }).blob(0.85 * s, 0.2 * s, 0.4 * s, 0.6 * s, dk(c, 1.12), { seed: 12, rough: 0.3, seg: 6, rings: 4, flat: true, squash: 0.7 });
+  });
+  M.add('cliffRock', o => {   // a pile of rounded boulders (hill tops, cave mouths)
+    const h = o.h || 4, c = o.color || '#8a7f73', q = { rough: 0.3, seg: 7, rings: 5, flat: true };
+    return G().blob(0, h * 0.35, 0, h * 0.5, c, Object.assign({ seed: 21, squash: 0.85 }, q))
+      .blob(h * 0.42, h * 0.22, h * 0.2, h * 0.33, dk(c, 0.86), Object.assign({ seed: 22 }, q))
+      .blob(-h * 0.38, h * 0.18, -h * 0.15, h * 0.3, dk(c, 1.1), Object.assign({ seed: 23 }, q));
+  });
+  M.add('mountain', o => {
+    const h = o.h || 40, r = o.r || 30, c = o.color || '#4a5568';
+    return G().cone(0, 0, 0, r, h, c, { seg: 14 }).cone(r * 0.35, 0, r * 0.2, r * 0.7, h * 0.7, dk(c, 0.9), { seg: 12 }).cone(0, h * 0.62, 0, r * 0.38, h * 0.38, o.snow || '#edf2f7', { seg: 14 });
+  });
+  M.add('island', o => {   // a small sea islet: sand rim, grassy hill, rocks and two palms
+    const r = o.r || 5, c = o.color || '#5aa84a', g = G();
+    g.cyl(0, -1, 0, r * 1.15, 1.25, '#efd9a0', { seg: 14, rTop: r, noBottom: true });
+    g.blob(0, 0.2, 0, r * 0.75, c, { seed: 31, rough: 0.2, seg: 9, rings: 5, squash: 0.45 });
+    g.blob(r * 0.6, 0.4, r * 0.5, r * 0.2, '#8d8f96', { seed: 32, rough: 0.3, seg: 6, rings: 4, flat: true });
+    g.add(M.get('palm')({ h: r * 0.75, lean: 0.2 }).move(-r * 0.3, r * 0.25, 0.1));
+    g.add(M.get('palm')({ h: r * 0.6, lean: 0.12 }).rotY(2).move(r * 0.25, r * 0.2, -r * 0.3));
+    return g;
+  });
+
+  // ----- sky -----
+  M.add('skyCloud', o => {   // a soft cumulus: a big puff on a flat, slightly bluish base (about 1 m wide: scale it up)
+    const rnd = U.rng(seedOf(o.seed || 1, 'cloud')), g = G(), q = { rough: 0.12, seg: 9, rings: 6 };
+    g.blob(0, 0.32, 0, 0.36, '#ffffff', Object.assign({ seed: 41 }, q));
+    for (let i = 0; i < 5; i++) {
+      const a = i / 5 * Math.PI * 2 + rnd(), d = 0.28 + rnd() * 0.12, r = 0.2 + rnd() * 0.1;
+      g.blob(Math.cos(a) * d * 1.3, 0.12 + rnd() * 0.12, Math.sin(a) * d * 0.7, r, i % 2 ? '#f4f8ff' : '#ffffff', Object.assign({ seed: 42 + i }, q));
+    }
+    g.blob(0, 0.05, 0, 0.5, '#dfe8f5', { seed: 49, rough: 0.08, seg: 10, rings: 5, squash: 0.25 });   // flat shaded base
+    return g;
+  });
 })();
 
 </script>
@@ -7788,7 +8055,7 @@ window.GK_NATURE_KEEP = ['island'];
         if (!O.has(o.type)) { report(where + ': unknown type "' + o.type + '"', 'error'); continue; }
         const ent = o.target || o.npc;
         if (ent && w && !other && !w.get(ent)) report(where + ': no entity "' + ent + '"', 'error');
-        if (o.type === 'reach' && o.zone && w && !w.zone(o.zone)) report(where + ': no zone or area "' + o.zone + '"', 'error');
+        if (o.type === 'reach' && o.zone && w && !other && !w.zone(o.zone)) report(where + ': no zone or area "' + o.zone + '"', 'error');
         if (o.type === 'solve' && !other && !puzzles.has(o.puzzle)) report(where + ': no puzzle "' + o.puzzle + '" (known: ' + [...puzzles].join(', ') + ')', 'error');
         if (o.type === 'collect' && o.item && !other && !items.has(o.item)) report(where + ': nothing gives item "' + o.item + '"', 'error');
         if (o.type === 'collect' && o.tag && w && !other && !w.entities.some(e => e.tags.indexOf(o.tag) >= 0)) report(where + ': nothing has tag "' + o.tag + '"', 'error');
@@ -7844,6 +8111,12 @@ window.GK_NATURE_KEEP = ['island'];
      reveal: 15 (or {cost: 15}) adds a "Show answer (−15)" button: it costs the points, marks the answer (choice) or
      shows it, and solving afterwards gives revealPoints (default 0) instead of points. Emits puzzle:revealed {id, cost}.
      kind: the scoring kind of the points (default 'puzzle'), e.g. 'academic'.
+     Challenge extras (any type): story (a situation shown above the question) · hint (💡 Hint button or H: first press
+     the hint, second press the answer + why; showing the answer gives revealPoints but never blocks) · why (shown on a
+     "well done" card after solving, with reward: 'text' and a Continue button) · variants {difficultyId: {…overrides}}
+     (e.g. a Grade 7 version). Quiz questions can have their own hint / why. Emits puzzle:hint {id, step} and, when a solved
+     puzzle's panel closes, puzzle:finished {id} (e.g. to show a story card after the "well done" card).
+     More types: pattern (continue a sequence of tiles) · build (craft: needs [{item}] in the inventory, then put the steps in order).
    Adds: interactions puzzle {puzzle:'id'|{…}} · input {question, store}; condition {solved:'id'};
          action {do:'puzzle', puzzle}; game.openPuzzle(ref, done(solved), entity); state.solved.
    New puzzle types: GK.Puzzles.add('name', { render(body, pz, api) }) — api.solve() · api.wrong(msg) · api.close() · api.note(msg) · api.game. */
@@ -7946,30 +8219,74 @@ window.GK_NATURE_KEEP = ['island'];
     },
   });
 
-  PZ.add('quiz', { // pz.questions: [{type:'choice'|'input', …}], pz.pass = how many must be right (default all)
+  PZ.add('quiz', { // pz.questions: [{type:'choice'|'input'|'order'|'sort'|'pattern', …, hint, why}], pz.pass = how many must be right (default all)
+    // pz.retry: a wrong answer stays on the same question (and with pass: 0 every question just has to be got right in the end).
+    // Each question's `hint` / `why` feed the panel's 💡 Hint button (H); a solved question's `why` is shown above the next one.
     render(body, pz, api) {
       const qs = pz.questions, pass = pz.pass == null ? qs.length : pz.pass;
-      let i = 0, right = 0, missed = false;
+      let i = 0, right = 0, missed = false, lastWhy = null;
       const next = () => {
         body.innerHTML = '';
         if (i >= qs.length) {
-          if (right >= pass) api.solve();
+          if (right >= pass) { api.lastWhy = lastWhy; api.solve(); }
           else { api.wrong('You got ' + right + ' of ' + qs.length + '. You need ' + pass + '.'); const b = U.el('button', 'gk-btn primary', 'Try again'); b.onclick = () => { i = 0; right = 0; next(); }; body.appendChild(b); }
           return;
         }
+        if (lastWhy) body.appendChild(U.el('div', 'gk-why', '✅ ' + U.fill(lastWhy, api.game.state.vars)));
         body.appendChild(U.el('div', 'gk-muted', 'Question ' + (i + 1) + ' of ' + qs.length));
         const q = qs[i], sub = U.el('div');
         body.appendChild(sub);
         missed = false;
-        PZ.get(q.type || 'choice').render(sub, q, {
+        const subApi = {
           game: api.game,
-          solve: () => { if (!missed) right++; i++; next(); },
-          wrong: msg => { missed = true; api.note(msg || 'Not quite.'); if (!pz.retry) { i++; setTimeout(next, 700); } },
+          solve: () => { if (!missed) right++; lastWhy = q.why || null; i++; next(); },
+          wrong: msg => {
+            missed = true; api.note(msg || 'Not quite.');
+            api.game.audio.play('wrong');
+            api.game.emit('puzzle:wrong', { id: api.id, question: i });
+            if (!pz.retry) { i++; setTimeout(next, 700); }
+          },
           close: api.close,
           note: api.note,
-        });
+        };
+        PZ.get(q.type || 'choice').render(sub, q, subApi);
+        api.cur = q; api.curReveal = subApi.onReveal || null;
+        if (api.resetHelp) api.resetHelp();
       };
       next();
+    },
+  });
+  PZ.add('pattern', { // continue a pattern: pz.sequence ['🍃','🪨','🍃','🪨'], pz.options ['🍃','🪨','🐚'], pz.correct (index or text)
+    render(body, pz, api) {
+      question(body, U.fill(pz.question, api.game.state.vars) || 'What comes next?');
+      const row = U.el('div', 'gk-pattern');
+      pz.sequence.forEach(s => row.appendChild(U.el('span', 'gk-ptile', s)));
+      row.appendChild(U.el('span', 'gk-ptile gk-ptile-q', '?'));
+      body.appendChild(row);
+      PZ.get('choice').render(body, Object.assign({}, pz, { question: null }), api);
+      body.querySelector('.gk-choices').classList.add('gk-pattern-options');
+    },
+  });
+  PZ.add('build', { // crafting: pz.needs [{item, label}] must all be carried, then pz.items (the build steps) go in the right order
+    render(body, pz, api) {
+      const g = api.game, list = U.el('div', 'gk-build-needs');
+      const missing = [];
+      pz.needs.forEach(n => {
+        const def = g.itemDef ? g.itemDef(n.item) : { name: n.item }, have = g.hasItem ? g.hasItem(n.item) : false;
+        if (!have) missing.push(n.label || def.name || n.item);
+        const it = U.el('div', 'gk-build-item' + (have ? ' have' : ' missing'));
+        it.innerHTML = '<span class="gk-build-icon">' + U.esc(def.icon || '•') + '</span><span>' + U.esc(n.label || def.name || n.item) + '</span><b>' + (have ? '✓' : '✗') + '</b>';
+        list.appendChild(it);
+      });
+      body.appendChild(U.el('div', 'gk-muted', 'Materials: ' + (pz.needs.length - missing.length) + ' of ' + pz.needs.length + ' collected'));
+      body.appendChild(list);
+      if (missing.length) {
+        body.appendChild(U.el('p', 'gk-build-missing', U.fill(pz.missingText || 'Still missing: ', g.state.vars) + missing.join(', ') + '.'));
+        return;
+      }
+      const sub = U.el('div', 'gk-build-steps');
+      body.appendChild(sub);
+      PZ.get('order').render(sub, Object.assign({}, pz, { question: pz.question || 'Put the building steps in order.' }), api);
     },
   });
   PZ.add('sort', { // pz.bins: ['Input', 'Output'], pz.items: [{text, bin: index | name, why}] — put every item in its group
@@ -8154,8 +8471,8 @@ window.GK_NATURE_KEEP = ['island'];
   /** Readable answer of a puzzle, for the teacher panel. */
   PZ.answerText = function (pz) {
     const t = pz.type || 'input';
-    if (t === 'choice') return U.list(pz.correct).map(c => (typeof c === 'number' ? pz.options[c] : c)).join(' / ');
-    if (t === 'order') return pz.items.join(' → ');
+    if (t === 'choice' || t === 'pattern') return U.list(pz.correct).map(c => (typeof c === 'number' ? pz.options[c] : c)).join(' / ');
+    if (t === 'order' || t === 'build') return pz.items.join(' → ');
     if (t === 'quiz') return pz.questions.map((q, i) => (i + 1) + ') ' + PZ.answerText(q)).join('   ');
     if (t === 'sort') return pz.bins.map((b, i) => (typeof b === 'string' ? b : b.name) + ': ' + pz.items.filter(it => it.bin === i || it.bin === (typeof b === 'string' ? b : b.name)).map(it => it.text).join(', ')).join(' | ');
     if (t === 'bits') { const n = pz.bits || 5; return pz.target + ' = ' + Number(pz.target).toString(2).padStart(n, '0'); }
@@ -8175,6 +8492,9 @@ window.GK_NATURE_KEEP = ['island'];
         if (!PZ.has(t)) report('Puzzle "' + id + '": unknown type "' + t + '"', 'error');
         else if (t === 'choice' && !(pz.options && pz.options.length && pz.correct !== undefined)) report('Puzzle "' + id + '": a choice puzzle needs options and correct', 'error');
         else if (t === 'order' && !(pz.items && pz.items.length > 1)) report('Puzzle "' + id + '": an order puzzle needs at least 2 items', 'error');
+        else if (t === 'pattern' && !(pz.sequence && pz.options && pz.correct !== undefined)) report('Puzzle "' + id + '": a pattern puzzle needs sequence, options and correct', 'error');
+        else if (t === 'build' && !(pz.needs && pz.needs.length && pz.items && pz.items.length > 1)) report('Puzzle "' + id + '": a build puzzle needs needs [{item}] and at least 2 steps (items)', 'error');
+        else if (t === 'quiz' && !(pz.questions && pz.questions.length)) report('Puzzle "' + id + '": a quiz needs questions', 'error');
         else if (t === 'sort' && !(pz.bins && pz.bins.length > 1 && pz.items && pz.items.length)) report('Puzzle "' + id + '": a sort puzzle needs bins (2 or more) and items', 'error');
         else if (t === 'bits' && typeof pz.target !== 'number') report('Puzzle "' + id + '": a bits puzzle needs a number target', 'error');
         else if (t === 'mix' && !(pz.target || pz.targets)) report('Puzzle "' + id + '": a mix puzzle needs target [r,g,b] or targets', 'error');
@@ -8193,15 +8513,23 @@ window.GK_NATURE_KEEP = ['island'];
       game.state.solved = {};
       /** Open a puzzle by id (config.puzzles) or inline definition. done(solved) is called when it closes. */
       game.openPuzzle = (ref, done, ent) => {
-        const base = typeof ref === 'string' ? (game.cfg.puzzles || {})[ref] : ref;
+        let base = typeof ref === 'string' ? (game.cfg.puzzles || {})[ref] : ref;
         if (!base) { console.warn('[GK] unknown puzzle', ref); if (done) done(false); return; }
+        // variants: {difficultyId: {…overrides}} — e.g. a harder Grade 7 version of the same challenge
+        if (base.variants && game.difficulty && base.variants[game.difficulty]) base = Object.assign({}, base, base.variants[game.difficulty]);
         const pz = Object.assign({ id: typeof ref === 'string' ? ref : (ent ? ent.id + ':puzzle' : 'puzzle') }, base);
         if (game.state.solved[pz.id] && !pz.repeatable) { game.ui.toast(pz.doneText || 'Already solved.'); if (done) done(false); return; }
-        let solved = false, attempts = 0, revealed = false;
+        let solved = false, attempts = 0, revealed = false, hints = 0, onKey = null;
+        const vars = game.state.vars;
         const body = U.el('div', 'gk-puzzle');
-        const h = game.ui.panel({ title: pz.title || (ent && ent.name) || 'Puzzle', body, buttons: [], wide: pz.wide, onClose: () => { if (!solved) game.emit('puzzle:closed', { id: pz.id }); if (done) done(solved); } });
+        const h = game.ui.panel({ title: pz.title || (ent && ent.name) || 'Puzzle', body, buttons: [], wide: pz.wide,
+          onClose: () => { if (onKey) document.removeEventListener('keydown', onKey); game.emit(solved ? 'puzzle:finished' : 'puzzle:closed', { id: pz.id }); if (done) done(solved); } });
+        // a story-based situation above the question
+        if (pz.story) body.appendChild(U.el('div', 'gk-story', U.fill(pz.story, vars)));
+        const inner = U.el('div', 'gk-puzzle-main');
+        body.appendChild(inner);
         const api = {
-          game, close: h.close, note: h.note,
+          game, id: pz.id, close: h.close, note: h.note,
           solve: () => {
             if (solved) return;
             solved = true;
@@ -8211,9 +8539,25 @@ window.GK_NATURE_KEEP = ['island'];
             game.audio.play('success');
             h.note(pz.solvedText || (pz.store && pz.answer === undefined ? 'Saved.' : 'Correct!'), true);
             if (pz.onSolve) GK.run(game, pz.onSolve, { entity: ent });
-            game.emit('puzzle:solved', { id: pz.id, revealed, attempts });
+            game.emit('puzzle:solved', { id: pz.id, revealed, attempts, hints });
             if (game.missions) game.missions.check();
-            setTimeout(h.close, 700);
+            const why = pz.why || api.lastWhy, last = pz.why && api.lastWhy;
+            if (!why && !pz.reward) { setTimeout(h.close, 700); return; }
+            // a "well done" card: why the answer is right + the reward, closed with Continue (or Esc)
+            if (helpRow) helpRow.remove();
+            inner.innerHTML = '';
+            const card = U.el('div', 'gk-done');
+            card.appendChild(U.el('div', 'gk-done-title', '✅ ' + U.fill(pz.solvedText || 'Correct!', vars)));
+            if (last) card.appendChild(U.el('div', 'gk-why', '✅ ' + U.fill(last, vars)));
+            if (why) card.appendChild(U.el('p', 'gk-done-why', U.fill(why, vars)));
+            if (pz.reward) card.appendChild(U.el('div', 'gk-done-reward', '🎁 ' + U.fill(pz.reward, vars)));
+            if (pts) card.appendChild(U.el('div', 'gk-muted', '+' + pts + ' points' + (revealed ? ' (answer was shown)' : '')));
+            const go = U.el('button', 'gk-btn primary big gk-continue', U.fill(pz.continueLabel || 'Continue ▶', vars));
+            go.onclick = h.close;
+            card.appendChild(go);
+            inner.appendChild(card);
+            const f = body.querySelector('.gk-feedback'); if (f) f.textContent = '';
+            setTimeout(() => go.focus(), 30);
           },
           wrong: msg => {
             attempts++;
@@ -8229,7 +8573,57 @@ window.GK_NATURE_KEEP = ['island'];
             }
           },
         };
-        PZ.get(pz.type || 'input').render(body, pz, api);
+        PZ.get(pz.type || 'input').render(inner, pz, api);
+        // 💡 help (pz.hint, or hints on quiz questions): the button or H shows a hint, then the answer with why it is right.
+        // Showing the answer marks the puzzle `revealed` (it then gives revealPoints) but never blocks solving it.
+        let helpRow = null;
+        const hasHelp = pz.hint || (pz.questions && pz.questions.some(q => q.hint));
+        if (hasHelp) {
+          let step = 0;
+          helpRow = U.el('div', 'gk-help');
+          const btn = U.el('button', 'gk-btn small gk-help-btn'), out = U.el('div', 'gk-help-out');
+          const draw = () => {
+            btn.innerHTML = step === 0 ? '💡 Hint <kbd>H</kbd>' : step === 1 ? '🔑 Show the answer <kbd>H</kbd>' : '🔑 Answer shown';
+            btn.disabled = step >= 2 || solved;
+          };
+          api.resetHelp = () => { step = 0; out.innerHTML = ''; out.className = 'gk-help-out'; draw(); };
+          const help = () => {
+            if (solved || step >= 2) return;
+            const q = api.cur || pz;
+            if (step === 0) {
+              step = 1; hints++;
+              out.className = 'gk-help-out hint';
+              out.textContent = '💡 ' + U.fill(q.hint || pz.hint || 'Read the question again slowly. Which answer makes the most sense?', vars);
+              game.emit('puzzle:hint', { id: pz.id, step: 1 });
+            } else {
+              step = 2; revealed = true;
+              const rv = api.cur ? api.curReveal : api.onReveal;
+              if (rv) rv();
+              out.className = 'gk-help-out answer';
+              out.innerHTML = '';
+              out.appendChild(U.el('b', '', '🔑 Answer: ' + PZ.answerText(q)));
+              const why = q.why || (!api.cur && pz.why);
+              if (why) out.appendChild(U.el('div', '', U.fill(why, vars)));
+              out.appendChild(U.el('div', 'gk-muted', 'Now try it yourself!'));
+              game.emit('puzzle:revealed', { id: pz.id, cost: 0, help: true });
+            }
+            game.audio.play('hint');
+            draw();
+          };
+          btn.onclick = help;
+          helpRow.append(btn, out);
+          body.appendChild(helpRow);
+          draw();
+          onKey = e => {
+            if ((e.key !== 'h' && e.key !== 'H') || e.ctrlKey || e.altKey || e.metaKey) return;
+            if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+            const modal = body.closest('.gk-modal');
+            if (!modal || modal.parentNode.lastElementChild !== modal) return;   // only the panel on top
+            e.preventDefault();
+            help();
+          };
+          document.addEventListener('keydown', onKey);
+        }
         if (pz.reveal) {
           const cost = typeof pz.reveal === 'number' ? pz.reveal : pz.reveal.cost || 0;
           const row = U.el('div', 'gk-reveal'), btn = U.el('button', 'gk-btn small gk-reveal-btn');
@@ -8538,6 +8932,29 @@ window.GK_NATURE_KEEP = ['island'];
     }
   }
 
+  /** gait: how a creature moves (drawn only, nothing changes in the game): 'waddle' (rocks side to side: crabs),
+      'trot' (bounces and nods: boars), 'hop' (jumps along), 'flap' (flutters up and down: bats), 'slither' (sways:
+      snakes), 'stomp' (heavy steps: big bosses). Shooters lean back before they throw and forward as they throw;
+      a hit knocks them back a little. */
+  function gait(ent, dt, moved) {
+    const g = ent.def.gait, t = ent.t || 0;
+    ent.gaitK = U.lerp(ent.gaitK || 0, moved > 0.001 ? 1 : 0, Math.min(1, dt * 8));
+    ent.gaitPh = (ent.gaitPh || 0) + moved * (g === 'hop' ? 3.2 : g === 'stomp' ? 2.4 : 6.5);
+    const k = ent.gaitK, ph = ent.gaitPh;
+    let lift = 0, roll = 0, pitch = 0;
+    if (g === 'waddle') { roll = Math.sin(ph) * 0.2 * k; lift = Math.abs(Math.sin(ph)) * 0.05 * k; }
+    else if (g === 'trot') { pitch = Math.sin(ph * 2) * 0.09 * k; lift = Math.abs(Math.sin(ph)) * 0.1 * k; }
+    else if (g === 'hop') lift = Math.abs(Math.sin(ph)) * 0.35 * k;
+    else if (g === 'flap') { lift = Math.sin(t * 11) * 0.1; roll = Math.sin(t * 5.5) * 0.18; }
+    else if (g === 'slither') { roll = Math.sin(t * 7) * 0.12 * (0.4 + k); lift = 0; }
+    else if (g === 'stomp') { roll = Math.sin(ph) * 0.07 * k; lift = Math.abs(Math.sin(ph)) * 0.16 * k; }
+    // throwing: lean back while about to shoot, snap forward when the shot leaves
+    if (ent.def.shoots && ent.sees && ent.shootT < 0.45) pitch -= (0.45 - Math.max(0, ent.shootT)) / 0.45 * 0.35;
+    if (ent.throwT > 0) { ent.throwT -= dt; pitch += ent.throwT / 0.3 * 0.4; }
+    if (ent.hurtT > 0) { ent.hurtT -= dt; pitch -= ent.hurtT / 0.25 * 0.3; lift += ent.hurtT * 0.3; }
+    ent.lift = lift; ent.roll = roll; ent.pitch = pitch;
+  }
+
   P.add('hazard', {
     defaults: { model: 'virus', solid: false, speed: 2, wait: 0.3, damage: 25, bob: 0.12, faceTravel: true, points: 50, hp: 0, contactEvery: 1, knockback: 5 },
     init(ent, game) {
@@ -8578,6 +8995,7 @@ window.GK_NATURE_KEEP = ['island'];
         }
       }
       if (ent.touching && !ent.state.off) { ent.contactT -= dt; if (ent.contactT <= 0) contact(ent, g); }
+      const x0 = ent.pos[0], z0 = ent.pos[2];
 
       // senses: distance to the player and line of sight, a few times a second
       const pl = g.player, eye = pl.eye();
@@ -8601,8 +9019,10 @@ window.GK_NATURE_KEEP = ['island'];
       const rage = d.rage && d.hp && ent.state.hp <= d.hp * (d.rage.below || 0.5) ? d.rage : null;
       const mul = rage ? rage.speed || 1.5 : 1;
 
-      // movement: chase · go back to the patrol · patrol
-      if (ent.chasing) {
+      // movement: chase · go back to the patrol · patrol (holdT: another mechanic holds it still, e.g. a boss winding up)
+      const held = ent.holdT > 0;
+      if (held) ent.holdT -= dt;
+      if (held) { /* standing still */ } else if (ent.chasing) {
         walk(ent, g, pl.pos[0], pl.pos[2], (d.chaseSpeed || d.speed * 1.3) * mul, dt);
         ent.yaw = Math.atan2(pl.pos[0] - ent.pos[0], pl.pos[2] - ent.pos[2]);
       } else if (ent.returning) {
@@ -8628,15 +9048,17 @@ window.GK_NATURE_KEEP = ['island'];
       }
 
       // shooting (turrets, bosses, ranged enemies)
-      if (d.shoots && g.enemyFire && ent.sees && ent.dist <= (d.shoots.range || 16)) {
+      if (d.shoots && g.enemyFire && ent.sees && !held && ent.dist <= (d.shoots.range || 16)) {
         if (!ent.chasing && !ent.path.length) ent.yaw = Math.atan2(eye[0] - ent.pos[0], eye[2] - ent.pos[2]);
         ent.shootT -= dt * (rage ? 1.6 : 1);
         if (ent.shootT <= 0) {
           ent.shootT = (d.shoots.every || 2) * (0.85 + Math.random() * 0.3);
           const c = eyeOf(ent);
           g.enemyFire(ent, c, [eye[0], eye[1] - 0.25, eye[2]], d.shoots);   // the same line it saw you along
+          ent.throwT = 0.3;
         }
       }
+      if (d.gait) gait(ent, dt, Math.hypot(ent.pos[0] - x0, ent.pos[2] - z0));
 
       // bosses bring their minions back
       if (d.summon && ent.state.engaged && !(d.armor !== undefined && d.summon.whileArmored === false && GK.test(g, d.armor))) {
@@ -8718,6 +9140,7 @@ window.GK_NATURE_KEEP = ['island'];
         if (d.boss) ent.state.engaged = true;
         game.emit('hazard:damaged', { id: ent.id });
         if (ent.state.hp <= 0) { defeat(ent, game, 'shot'); return 'defeated'; }
+        if (ent.def.gait) ent.hurtT = 0.25;
         game.audio.play('hit');
         return 'hit';
       };
@@ -8890,7 +9313,7 @@ window.GK_NATURE_KEEP = ['island'];
      { type: 'lowgrav', size: [w, h, d], gravity: 0.4 }   low-gravity region: floaty, higher jumps
      { type: 'sweeper', length: 8, spin: 1.2, y: 0.6 }    spinning bar: jump it or get knocked away
      { type: 'abyss', size: [w, h, d] }                   a pit floor you must not touch: fall in → back to the last checkpoint
-     party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'piston' (wall pusher), 'jumpbar' (low laser bar), 'glasstile' (glass bridge: one fake
+     party-game traps: 'pendulum' (swinging hammer), 'boulder' (rolls down a route), 'piston' (wall pusher), 'jumpbar' (low laser bar), 'glasstile' (glass bridge: one fake (or `fake: 0|1` per tile row)
      per row), 'dashdoor' (Door Dash: real doors break, fake ones bounce you), 'redlight' + 'watcher' (Red Light, Green
      Light), wind `pulse: [on, off]` (big fans). They use game.raceClock() and game.trapRandom(key) when present.
    Adds game.knock([dx, dz], power, {stun, up, kind, source}) → true if it landed. Before landing it asks
@@ -9197,12 +9620,14 @@ window.GK_NATURE_KEEP = ['island'];
       breaks as soon as you stand on it. game.trapRandom('glass:' + row) picks which: the same for the whole class. */
   P.add('glasstile', {
     defaults: { model: 'glassTile', solid: true, size: [3.4, 0.2, 3.2] },
-    init(e) { e.setLook({ size: e.def.size }); e.alpha = 0.62; e.state.broken = false; },
+    init(e) { e.setLook({ size: e.def.size }); e.alpha = e.def.alpha != null ? e.def.alpha : 0.62; e.state.broken = false; },   // alpha: 1 for solid-looking tiles (planks)
     restore(e) { if (e.state.broken) e.hide(); },
     update(e, dt, g) {
       if (e.state.broken) return;
-      const fake = (rand(g, 'glass:' + e.def.row) < 0.5 ? 0 : 1) === e.def.col;
-      e.label = fake && g.hasPower && g.hasPower('scan') ? '✖ FAKE GLASS' : null;
+      // def.fake (0 | 1): which column of the row is fake, set by the game (e.g. to match a clue); else random
+      const fake = (e.def.fake != null ? e.def.fake : (rand(g, 'glass:' + e.def.row) < 0.5 ? 0 : 1)) === e.def.col;
+      // a 'scan' power, or game.revealFakes (e.g. a clever pet nearby), marks the fake ones
+      e.label = fake && ((g.hasPower && g.hasPower('scan')) || (g.revealFakes && g.revealFakes(e))) ? (e.def.fakeLabel || '✖ FAKE GLASS') : null;
       if (!fake || g.state.mode !== 'playing') return;
       const b = e.collider(), pl = g.player;
       if (pl.grounded && Math.abs(pl.pos[1] - b.max[1]) < 0.1 && pl.pos[0] > b.min[0] - 0.1 && pl.pos[0] < b.max[0] + 0.1 && pl.pos[2] > b.min[2] - 0.1 && pl.pos[2] < b.max[2] + 0.1) {

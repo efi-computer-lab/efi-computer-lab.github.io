@@ -1,5 +1,15 @@
 # Integration guide
 
+## Built into the Game Kit source
+Since 2026-10-10 the Game Kit source has all of this built in, so every rebuild and publish keeps it:
+- `game-types/_spatial/geometry.js` is `src/gk-geo.js`, and `game-types/first-person-3d/renderer.js` is `src/gk-renderer.js`.
+- The part A hooks are already in `game-types/first-person-3d/type.js`.
+- `assets/models/` has `kenney-models.js`, `stylized-characters.js` and `stylized-nature.js`.
+- A game opts in to the models in its `game.js`. Island Escape uses `models: ['kenney-models', 'stylized-characters', 'stylized-nature']`, and Cyber Rush uses `models: ['stylized-characters', 'stylized-nature']` together with `window.GK_NATURE_KEEP = ['island']`.
+- World looks go in each world's `lighting`.
+
+Part A below is only for patching a game that is already bundled.
+
 ## A. Another Game Kit game (single-file HTML, first-person-3d type)
 SHRUNK!, Cyber Rush, Game Studio and others share the same kit, so the swap is mechanical.
 
