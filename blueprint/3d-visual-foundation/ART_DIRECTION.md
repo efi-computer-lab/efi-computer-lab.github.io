@@ -61,6 +61,10 @@ A colour outside these families gets no texture, which suits plastic, metal, clo
 - **Sky:** a gradient dome, procedural clouds (cover 0.38) and 9 big 3D cumulus clouds around the horizon.
 - **Depth:** distant islets and a mountain, plus fog that starts beyond the play area (70 m and up outdoors).
 
+**Neon and sci-fi worlds** (Cyber Rush) keep their own palette: dark floors with glowing grid lines, glowing signs and towers.
+- Only add soft shadows (strength 0.6–0.7), tinted haze clouds or none, and `water: false`.
+- Glowing parts (`glow` ≥ 0.5) skip tone mapping, so the neon stays bright.
+
 ## 5. Characters
 - Rounded explorer: big round head, big eyes with a white sparkle, rosy cheeks, hair cap plus style (spiky, short, long or ponytail).
 - Short sleeves, shorts, boots, a coloured scarf and a brown backpack.

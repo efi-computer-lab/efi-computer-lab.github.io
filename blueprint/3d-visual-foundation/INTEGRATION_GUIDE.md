@@ -16,6 +16,9 @@ python3 $F/tools/inline_blocks.py GAME.html \
 - `LAST_MODEL_BLOCK` is the last `<script>/* assets/models/… */` block in that game (in Island Escape it's `assets/models/wild.js`). To list the block names, run `grep -n "^<script>/\* " GAME.html`.
 - Skip `stylized-characters.js` if the game's characters should stay as they are.
 - Skip `stylized-nature.js` and `kenney-models.js` for indoor or sci-fi games.
+- **Keep a game's own version of a nature model:** add a tiny block before `stylized-nature.js` with `window.GK_NATURE_KEEP = ['island'];`. Cyber Rush does this to keep its floating sky islands.
+- **Characters without the explorer gear:** add `pack: false, scarf: false` to each character look, as Cyber Rush's racers do.
+- `kenney-models.js` is only needed for `grassTuft` and `kenneyTree`.
 
 **2. Add three small hooks** to the `game-types/first-person-3d/type.js` block. These are exactly what Island Escape uses:
 ```js
@@ -49,6 +52,7 @@ lighting: { sky: ['#2f7fd6', '#6fb6ef', '#bfe2f8'], fogColor: '#b7dcf5', fog: [7
 | `grid: false` | For natural worlds (no tile seams) |
 | `exposure`, `saturation`, `shadowStrength` | Fine-tune the mood |
 | `cloudProps: 0` | No 3D clouds |
+| `water: false` | Flat blue floors near y = 0 (ice, glass, blue tiles) are not drawn as animated water |
 
 **4. Dress the world.** Grid worlds built by `worlds/_wild.js` (or any builder that pushes `decorations`) can scatter extras with their own seeded random generator, so existing scenery keeps its place. The Island Escape version adds:
 - `canopy` clumps at the top of every jungle wall edge
