@@ -15,9 +15,9 @@
    reward. {{playerName}} = the name typed on the title screen. */
 window.GAME_CONTENT = {
   title: 'ISLAND ESCAPE: The Lost Expedition',
-  subtitle: 'Grade 6–7 · A 3D survival adventure: swim, climb, fight wild creatures, solve computer challenges and escape the island',
-  intro: 'A storm smashed your boat and washed you up on a wild island. A rescue ship will pass before nightfall! Swim the lagoon, climb cliffs, jump across a deep river, explore the Crystal Caverns and climb Signal Hill. Wild boars, coconut-throwing monkeys, giant crabs, cave spiders and an ancient TIKI GUARDIAN stand in your way. Every boat material is locked behind a computer challenge. Three acts, 6 island weapons, a trader, bosses and a leaderboard!',
-  winText: 'The rescue ship lowers a ladder and the crew cheer as {{playerName}} climbs aboard, with Kiko on your shoulder. You beat the Tiki Guardian, rescued Prof. Reyes and used your computer skills to survive: hardware, algorithms, patterns, files, checking sources, staying safe online, input-process-output and troubleshooting. Welcome home, explorer!',
+  subtitle: 'Grade 6–7 · A 3D survival adventure in 4 acts: swim, climb, fight wild creatures, solve computer challenges and escape the island',
+  intro: 'A storm smashed your boat and washed you up on a wild island. A rescue ship will pass before nightfall! Swim the lagoon, climb cliffs, jump across a deep river, explore the Crystal Caverns, climb Signal Hill and cross the lava of Ember Isle. Wild boars, coconut-throwing monkeys, giant crabs, cave spiders, an ancient TIKI GUARDIAN and a MAGMA GOLEM stand in your way. Every boat material is locked behind a computer challenge. Four acts, 6 island weapons, a trader, bosses and a leaderboard!',
+  winText: 'The rescue ship lowers a ladder and the crew cheer as {{playerName}} climbs aboard, with Kiko on your shoulder. You beat the Tiki Guardian and the Magma Golem, rescued Prof. Reyes, lit the old lighthouse and used your computer skills to survive: hardware, algorithms, patterns, files, checking sources, staying safe online, input-process-output, troubleshooting, backups and a careful digital footprint. Welcome home, explorer!',
 
   difficulty: {
     title: 'Your grade',
@@ -30,11 +30,11 @@ window.GAME_CONTENT = {
     max: 'Max', maxText: 'Strong swimmer', ravi: 'Ravi', raviText: 'Animal tracker', jun: 'Jun', junText: 'Sharp archer',
     aiko: 'Aiko', aikoText: 'Plant expert', nia: 'Nia', niaText: 'Fire maker', sofia: 'Sofia', sofiaText: 'Star navigator',
   },
-  acts: { coast: 'Act 1: Shipwreck Coast', caves: 'Act 2: The Crystal Caverns', peak: 'Act 3: Storm Peak' },
+  acts: { coast: 'Act 1: Shipwreck Coast', caves: 'Act 2: The Crystal Caverns', peak: 'Act 3: Storm Peak', ember: 'Act 4: Ember Isle' },
   items: {
     planks: 'Wooden planks', rope: 'Rope', cutter: 'Vine cutter', bamboo: 'Bamboo poles', cloth: 'Cloth sail', torch: 'Head torch',
     fasteners: 'Metal fasteners', strongRope: 'Strong rope', rudder: 'Wooden rudder', compass: 'Navigation compass', supplies: 'Hidden supplies',
-    barrel: 'Supply barrel', shard: 'Crystal shard', page: 'Journal page',
+    barrel: 'Supply barrel', shard: 'Crystal shard', page: 'Journal page', map: 'Island map',
   },
   labels: { challenge: 'Computer challenges', objective: 'Missions completed', collect: 'Exploration (hidden supplies + bonus)', boat: 'Boat assembly' },
   weapons: {
@@ -69,6 +69,17 @@ window.GAME_CONTENT = {
     tikiDownTitle: '🎉 The Tiki Guardian falls!',
     tikiDown: 'The stone Guardian crumbles into sand. The cove is safe! Build your boat at the workbench and sail to the rescue ship.',
     launchTitle: '⛵ Launch!',
+    emberTitle: '🌋 Act 4 · Ember Isle',
+    ember: 'Your boat races towards the ALBATROSS… then BOOM! The volcano on a little island nearby ERUPTS. A cloud of black ash covers the sea, and a huge wave throws your boat onto a beach of black sand.\n\nThe radio crackles: "ALBATROSS here! We cannot see ANYTHING in this ash! We will wait out at sea. If you can make a light, we will follow it!"\n\nKiko is with you. Talk to her!',
+    golemTitle: '🌋 The Magma Golem!',
+    golem: 'The ground shakes. Lava bursts out of a crack and a giant made of burning rock climbs out: the MAGMA GOLEM, the guardian of the volcano!\n\nIts lava is too hot to hurt. Turn the 3 COOLING VALVES round the point (press E and answer the question on each) to cool it down. Then attack!',
+    golemBackTitle: '🔥 It is heating up again!',
+    golemBack: 'The Golem roars and its cracks glow bright orange again! The valves have closed: answer their new questions to cool it once more, then finish it!',
+    golemDownTitle: '🎉 The Magma Golem falls!',
+    golemDown: 'The Golem cools into a pile of black stone. The volcano goes quiet. Now press E on the lighthouse to LIGHT THE LAMP!',
+    lighthouseTitle: '🗼 The old lighthouse',
+    beaconTitle: '🗼 THE LIGHT IS ON!',
+    beacon: 'A huge beam of light sweeps across the ash cloud. The radio crackles: "ALBATROSS here! WE SEE YOUR LIGHT! We are sending a lifeboat to the beach below the lighthouse!"\n\nTake the stairs down to the jetty beach and board the lifeboat!',
   },
 
   dialogue: {
@@ -106,6 +117,14 @@ window.GAME_CONTENT = {
     reyesAgain: ['Climb the rope ladder on the east shore, then defeat the Spider Queen. I\'ll follow you out once she\'s gone!'],
     reyesTrapped: ['Help! I\'m stuck in this web! Have you got something sharp to cut it?'],
     traderHello: ['Welcome, welcome! Shells for weapons, arrows and fruit!'],
+    kikoEmber: [
+      'SQUAWK! {{playerName}}! Are you OK? I flew after the boat! Look, everything is BLACK: black sand, black rocks, black sky!',
+      'The ship cannot see us in this ash. But there is an old LIGHTHOUSE at the top of this island. If we light it, the ship can find us!',
+      'The lighthouse keeper lived in that tent. His laptop had the map of the island… but it fell in the sea. Maybe he kept a BACKUP?',
+      'First: those ash crabs! SQUAWK!',
+    ],
+    kikoEmberAgain: ['Follow the path north, cross the lava on the stones (keep moving: they crumble!), then climb to the lighthouse. SQUAWK!'],
+    kikoJetty: ['SQUAWK! The lifeboat! Press E on it! We are going HOME, {{playerName}}!'],
   },
 
   objectives: {
@@ -154,8 +173,22 @@ window.GAME_CONTENT = {
     tiki: 'FINAL BOSS: defeat the Tiki Guardian',
     m10: 'Mission 10 · Build and Escape: build the boat',
     launch: 'Launch the boat and sail to the rescue ship!',
+    meetKiko4: 'Talk to Kiko on the black beach',
+    ashCrabs: 'Ash crabs! Defeat 4 of them',
+    m11: 'Mission 11 · The Soaked Laptop: recover the island map',
+    lavaCross: 'Cross the lava river on the crumbling stones',
+    emberBugs: 'Defeat 6 magma beetles and fire bats',
+    climbPoint: 'Climb the vine wall up to Lighthouse Point',
+    m12: 'Mission 12 · The Lighthouse Message: fix the lamp',
+    valves: 'Turn the 3 cooling valves to cool the Golem',
+    golemHalf: 'Attack the Magma Golem!',
+    valves2: 'It is heating up! Turn the 3 valves again',
+    golem: 'FINAL BOSS: defeat the Magma Golem',
+    lightBeacon: 'Light the lighthouse!',
+    toJetty: 'Take the stairs down to the jetty beach',
+    board: 'Board the lifeboat to the rescue ship!',
     caches: 'Bonus: find 5 hidden supply bags',
-    pages: 'Bonus: find 6 pages of Prof. Reyes\'s journal',
+    pages: 'Bonus: find 8 pages of Prof. Reyes\'s journal',
     bonus: 'Bonus: solve the Captain\'s Logbook',
   },
   tips: {
@@ -204,6 +237,20 @@ window.GAME_CONTENT = {
     tiki: 'Finish the Guardian before its shield comes back!',
     m10: 'The workbench is near the boat at the top of the beach.',
     launch: 'Your boat is ready. Press E on the boat to launch it!',
+    meetKiko4: 'Kiko is on the black beach, close to you. Press E to talk.',
+    ashCrabs: 'The dark ash crabs run along the beach. Jab or shoot them.',
+    m11: 'The keeper\'s laptop is on a desk by the grey tent on the beach. Press E on it.',
+    lavaCross: 'Go through the gate and north to the lava. Jump from stone to stone: they crumble, so keep moving! Lava = back to the checkpoint.',
+    emberBugs: 'Magma beetles crawl and fire bats fly over the obsidian fields. Watch out for rolling lava rocks and steam!',
+    climbPoint: 'Go east across the fields to the cliff with vines. Walk into the vines and HOLD W.',
+    m12: 'The lighthouse stands on the point. Press E on its door.',
+    valves: 'Press E on each cooling valve (they glow orange) and answer its question.',
+    golemHalf: 'The Golem is cool: shoot it! Dodge its fireballs.',
+    valves2: 'Answer the 3 valves again to cool the Golem.',
+    golem: 'Finish the Golem before it heats up!',
+    lightBeacon: 'Press E on the lighthouse to light the lamp.',
+    toJetty: 'The stairs go down from the south side of the point to the jetty beach.',
+    board: 'The lifeboat waits at the water\'s edge on the jetty beach. Press E on it!',
   },
   hints: {
     general: 'Look at the tip under your mission and follow the yellow marker. Press E on things to use them.',
@@ -252,6 +299,20 @@ window.GAME_CONTENT = {
     tiki: ['Keep shooting!'],
     m10: ['Near the boat.'],
     launch: ['The boat is next to the workbench.'],
+    meetKiko4: ['Kiko is right next to you.'],
+    ashCrabs: ['Crabs run along the black beach.'],
+    m11: ['East end of the beach, next to the tent.'],
+    lavaCross: ['Take a run and jump just before the edge of each stone.'],
+    emberBugs: ['Walk round the obsidian fields.'],
+    climbPoint: ['East end of the fields, through the narrow gap.'],
+    m12: ['The tall red-and-white tower.'],
+    valves: ['West, east and south of the point.'],
+    golemHalf: ['Shoot the Golem.'],
+    valves2: ['The same 3 valves.'],
+    golem: ['Keep shooting!'],
+    lightBeacon: ['The lighthouse.'],
+    toJetty: ['South side of the point.'],
+    board: ['East end of the jetty beach.'],
   },
 
   messages: {
@@ -287,6 +348,14 @@ window.GAME_CONTENT = {
     coveLocked: 'The lookout gate is locked. It opens from the transmitter on the summit.',
     boatNotReady: 'The boat is not finished yet. Use the workbench first.',
     exitClosed: 'The way out is blocked. Defeat the boss first!',
+    mapFound: '🗺️ The backup map opens! It shows the gate code too: the gate north swings open.',
+    keeperLocked: 'The keeper\'s gate is locked with a code. The code must be on his map…',
+    lavaHot: '🔥 Too hot! The lava sends you back to the checkpoint.',
+    lampFixed: '💡 The lamp is fixed! But the ground is shaking…',
+    lighthouseWait: 'The lamp is ready, but the volcano is still too angry. Deal with the Golem first!',
+    valvesCooled: '❄️ Cold water pours over the Golem: its lava is COOL! Attack!',
+    boarding: '🚤 You climb into the lifeboat and the sailors row you out!',
+    rumble: '🌋 The volcano rumbles…',
   },
   signs: {
     wreck: { title: 'Your boat', text: 'Your expedition boat, smashed by the storm. It will never sail again. You need to build a new one.' },
@@ -299,6 +368,8 @@ window.GAME_CONTENT = {
     p4: { title: '📜 Journal page 4', text: 'Day 12. A box appeared in my camp asking for my password to unlock a "reward". I almost typed it! Real friends never ask for your password.' },
     p5: { title: '📜 Journal page 5', text: 'Day 15. The old islanders built a stone guardian on the beach and three totems to control its shield. Legend says it wakes in a great storm.' },
     p6: { title: '📜 Journal page 6', text: 'Day 16. If anyone finds this: the radio station on Signal Hill still works if you fix its power. Check the cables first! - Prof. Reyes' },
+    p7: { title: '📜 Journal page 7', text: 'Day 18. We sailed to the little volcano island. An old keeper lived here with his laptop and his lighthouse. He kept a copy of every map on a USB stick, "because the sea eats laptops," he said.' },
+    p8: { title: '📜 Journal page 8', text: 'Day 19. The keeper told us about the Magma Golem: "When the volcano wakes, the Golem wakes. Cool it with the old water valves." I hope we never meet it! - Prof. Reyes' },
   },
 
   // ---------------- the challenges ----------------
@@ -600,6 +671,85 @@ window.GAME_CONTENT = {
       ],
     },
 
+    m11: {
+      title: '💻 Mission 11 · The Soaked Laptop',
+      story: 'The lighthouse keeper\'s laptop lies on his desk, still wet from the wave. The island map was saved on it… and now it will not open! Luckily, a USB stick hangs on a string next to it, labelled "BACKUP".',
+      reward: '🗺️ The island map (and the gate code)',
+      why: 'A BACKUP is a copy of your files in another place (a USB stick, a cloud drive). If your computer breaks or gets lost, the copy saves your work. Save often, and keep copies!',
+      questions: [
+        { type: 'choice', question: 'The map was saved ONLY on the laptop, and the laptop fell in the sea. What would have saved the map?', options: ['A BACKUP copy on a USB stick or in the cloud', 'A brighter screen', 'A faster mouse'], correct: 0,
+          hint: 'You need a second copy somewhere else.', why: 'A backup is a copy kept somewhere else, so one accident cannot destroy everything.' },
+        { type: 'choice', question: 'You are making a big project on the computer. When should you SAVE it?', options: ['Only at the very end', 'Often, every few minutes', 'Never: the computer remembers'], correct: 1,
+          hint: 'What if the power goes off in the middle?', why: 'Save often: if something goes wrong, you lose only a few minutes of work.' },
+        { type: 'sort', question: 'Which ones are real backups?', bins: ['✅ A backup', '❌ Not a backup'],
+          items: [
+            { text: 'A copy on a USB stick', bin: 0 }, { text: 'A copy in your school cloud drive', bin: 0 },
+            { text: 'The file renamed, on the same laptop', bin: 1 }, { text: 'Only one copy, on the laptop', bin: 1 },
+          ],
+          hint: 'A backup must be in ANOTHER place.', why: 'USB sticks and cloud drives are other places. A renamed file on the same laptop is lost with the laptop.' },
+      ],
+      variants: { g7: {
+        questions: [
+          { type: 'order', question: 'Put the steps to get the map back in order.', items: ['Plug the backup USB stick into the laptop', 'Open the folder "Island maps"', 'Copy the map file to the laptop', 'Open the map to check it works'],
+            hint: 'Connect, find, copy, check.', why: 'Connect the backup → find the file → copy it → check it opens.' },
+          { type: 'choice', question: 'The 3-2-1 rule: keep 3 copies, on 2 different kinds of storage, with 1 copy somewhere else. Which plan follows it?', options: ['1 copy on the laptop', 'Laptop + USB stick + cloud drive', 'Laptop + 2 copies in the same folder'], correct: 1,
+            hint: 'Count the copies and the places.', why: 'Laptop, USB stick and cloud = 3 copies, 2+ kinds of storage, and the cloud copy is somewhere else.' },
+          { type: 'choice', question: 'Which file name will help you find the map again in a year?', options: ['map final final2.png', 'ember_isle_map_2026-10.png', 'aaaa.png'], correct: 1,
+            hint: 'It should say WHAT it is and WHEN.', why: 'A clear name with the place and the date is easy to search for.' },
+          { type: 'sort', question: 'Which ones are real backups?', bins: ['✅ A backup', '❌ Not a backup'],
+            items: [
+              { text: 'A copy on a USB stick', bin: 0 }, { text: 'A copy in your school cloud drive', bin: 0 }, { text: 'A copy emailed to yourself', bin: 0 },
+              { text: 'The file renamed, on the same laptop', bin: 1 }, { text: 'A second copy in the same folder', bin: 1 }, { text: 'Only one copy, on the laptop', bin: 1 },
+            ],
+            hint: 'A backup survives if the laptop is lost.', why: 'Only copies stored somewhere else survive when the laptop is lost or broken.' },
+        ],
+      } },
+    },
+
+    m12: {
+      title: '🗼 Mission 12 · The Lighthouse Message',
+      story: 'The lighthouse lamp is controlled from a panel by the door. Next to it, the keeper kept bottles that washed back to the island: messages people threw into the sea years ago. His note says: "Anything you send out there can come back. Think before you send!"',
+      reward: '💡 The lighthouse lamp works',
+      why: 'Your DIGITAL FOOTPRINT is everything you post and share online. Like a message in a bottle, once it is out there, you cannot get it back: others can copy it and find it years later. Think before you post, keep private things private, and be kind.',
+      questions: [
+        { type: 'choice', question: 'You throw a message in a bottle into the sea. Can you get it back?', options: ['Yes, easily', 'No: once it is out there, anyone may find it', 'Only if it is short'], correct: 1,
+          hint: 'Posting online is just like this.', why: 'Like a post online: once it is out, you cannot control who finds it.' },
+        { type: 'sort', question: 'Is it OK to post online?', bins: ['👍 OK to post', '🛑 Do not post'],
+          items: [
+            { text: 'A drawing of a turtle you made', bin: 0 }, { text: 'A kind comment on a friend\'s project', bin: 0 },
+            { text: 'Your home address', bin: 1 }, { text: 'Your password', bin: 1 }, { text: 'A mean joke about a classmate', bin: 1 },
+          ],
+          hint: 'Private information and unkind words stay offline.', why: 'Share your work and kind words. Never share private details or mean posts.' },
+        { type: 'choice', question: 'Someone posts a mean comment about your friend. What is the best thing to do?', options: ['Post something mean back', 'Do not reply: save it and tell a trusted adult', 'Share it with everyone'], correct: 1,
+          hint: 'Do not make it bigger.', why: 'Do not reply to meanness: keep a copy and tell a trusted adult who can help.' },
+      ],
+      variants: { g7: {
+        questions: [
+          { type: 'choice', question: 'What is your DIGITAL FOOTPRINT?', options: ['Everything you do and share online that leaves a trace', 'The size of your shoes', 'How much battery your phone has'], correct: 0,
+            hint: 'Like footprints in the sand, but online.', why: 'Your posts, comments, photos and searches all leave a trace: your digital footprint.' },
+          { type: 'sort', question: 'Is it OK to post online?', bins: ['👍 OK to post', '🛑 Do not post'],
+            items: [
+              { text: 'Your score in a game', bin: 0 }, { text: 'A photo of a sunset (no people, no places)', bin: 0 }, { text: 'A kind comment on a friend\'s project', bin: 0 },
+              { text: 'A photo showing your school name', bin: 1 }, { text: 'Where you are right now', bin: 1 }, { text: 'A friend\'s photo without asking them', bin: 1 },
+            ],
+            hint: 'Could it tell a stranger who or where you are? Did everyone agree?', why: 'Keep places, schools and other people\'s photos private unless everyone agrees.' },
+          { type: 'choice', question: 'THINK before you post: is it True, Helpful, Inspiring, Necessary, Kind? A post is TRUE but UNKIND. Should you post it?', options: ['Yes, because it is true', 'No: it is not kind', 'Post it twice'], correct: 1,
+            hint: 'It has to pass more than one test.', why: 'True is not enough: if it is unkind, do not post it.' },
+          { type: 'choice', question: 'You deleted a post after 1 minute. Is it gone for sure?', options: ['Yes, deleted means gone', 'Not for sure: someone may already have a screenshot', 'Only if it was a photo'], correct: 1,
+            hint: 'Others can copy things very fast.', why: 'A screenshot or a share can keep it forever, even after you delete it.' },
+        ],
+      } },
+    },
+
+    // the Magma Golem's cooling valves: review questions (phase 1 = a, phase 2 = b)
+    valveTitle: '🚰 Cooling valve',
+    valve1a: { question: 'Where is the SAFEST place to keep an important school file?', options: ['Only on your laptop', 'On your laptop AND a backup (USB stick or cloud)', 'Nowhere'], correct: 1, hint: 'Think of the keeper\'s laptop.', why: 'Two copies in different places: if one is lost, the other is safe.' },
+    valve2a: { question: 'Which one is OK to share online?', options: ['Your password', 'A drawing you made', 'Your home address'], correct: 1, hint: 'Private things stay private.', why: 'Your own drawing is fine to share. Passwords and addresses are private.' },
+    valve3a: { type: 'pattern', question: 'The valve lights blink in a pattern. What comes next?', sequence: ['🌋', '🌊', '🌊', '🌋', '🌊'], options: ['🌋', '🌊'], correct: 1, hint: 'Volcano, wave, wave, then it repeats.', why: 'The pattern is 🌋 🌊 🌊, so after 🌋 🌊 comes 🌊.' },
+    valve1b: { question: 'Which part of a computer is the "brain" that processes information?', options: ['The CPU (processor)', 'The mouse', 'The speakers'], correct: 0, hint: 'You found it in Mission 1.', why: 'The CPU processes the information.' },
+    valve2b: { question: 'An email says: "Your account is LOCKED! Click here and type your password." This is…', options: ['A phishing trick', 'A friendly message', 'A normal update'], correct: 0, hint: 'Real companies never ask for your password like this.', why: 'It is phishing: a trick to steal your password.' },
+    valve3b: { question: 'Before you post a photo, you should…', options: ['Check it shows nothing private (address, school, other people)', 'Post it as fast as you can', 'Add your phone number'], correct: 0, hint: 'Think before you post.', why: 'Check for private details first: once it is out, you cannot take it back.' },
+
     // the Tiki Guardian's shield totems: quick review questions (phase 1 = a, phase 2 = b)
     totemTitle: '🗿 Shield totem',
     totem1a: { question: 'The totem shows a keyboard, a mouse and a monitor. Which one is an OUTPUT device?', options: ['Keyboard', 'Mouse', 'Monitor'], correct: 2, hint: 'Output = it shows you something.', why: 'The monitor shows the results: output.' },
@@ -613,7 +763,7 @@ window.GAME_CONTENT = {
 
 </script>
 <script>/* game.js */
-/* ISLAND ESCAPE: The Lost Expedition — Grade 6–7, first person (or third), THREE ACTS (scenes), single player, offline.
+/* ISLAND ESCAPE: The Lost Expedition — Grade 6–7, first person (or third), FOUR ACTS (scenes), single player, offline.
    Built like SHRUNK!: weapons bought with shells at a trader, enemies, traps, mini-bosses and a final boss, plus island
    moves: SWIMMING (lagoon, underground lake: stamina bar), CLIMBING (vine walls, a rope ladder), JUMPING (stepping
    stones over deep water, crumbling stones over a chasm), rolling boulders, spike traps, quicksand and steam vents.
@@ -624,12 +774,17 @@ window.GAME_CONTENT = {
        swim the underground lake, free Prof. Reyes (+ harpoon), Mission 7, the rope ladder, the SPIDER QUEEN, the exit.
      ACT 3 "Storm Peak" (world storm-peak): Kiko, monkeys, Mission 8, Signal Hill (stairs, boulders, a vine wall, steam
        vents), Mission 9, Escape Cove, the TIKI GUARDIAN (3 shield totems with questions, twice), Mission 10, the launch.
-   The 10 computer challenges use the kit's puzzle panel: story, mixed question types, retry, 💡 Hint / H (hint, then
+     ACT 4 "Ember Isle" (world ember-isle): the volcano erupts and the boat is thrown onto a volcanic island; Kiko, ash
+       crabs, Mission 11 (backups), the keeper's gate, crumbling stones over a LAVA river, magma beetles + fire bats,
+       rolling lava rocks and steam vents, the vine cliff, Mission 12 (digital footprint) at the lighthouse, the MAGMA
+       GOLEM (3 cooling valves with questions, twice), light the lighthouse, the lifeboat ride to the rescue ship.
+   The 12 computer challenges use the kit's puzzle panel: story, mixed question types, retry, 💡 Hint / H (hint, then
    answer + why), a "well done" card with the reward. Grade 6 / Grade 7 = the difficulty choice (variants.g7).
-   SCORE = 100: computer challenges 50 (M1–M4 5 each, M5–M9 6 each; 2 less if the answer was shown), missions 20
-   (2 × 10), exploration 15 (5 hidden supply bags × 2 + the bonus logbook 5), boat assembly 15. Creatures give SHELLS 🐚
+   SCORE = 100: computer challenges 50 (M1–M5 4 each, M6–M9 and M11–M12 5 each; 2 less if the answer was shown),
+   missions 20 (1 for each challenge mission + 2, 2, 2, 3 for finishing acts 1–4), exploration 15 (5 hidden supply bags
+   × 2 + the bonus logbook 5), boat assembly 15. Creatures give SHELLS 🐚
    (to spend at the trader), not points. Saves at every act and checkpoint (resume). Every word is in content.js.
-   tests/island-escape.html plays all three acts. */
+   tests/island-escape.html plays all four acts. */
 (function () {
   const C = window.GAME_CONTENT, PZ = C.puzzles, M = C.messages, T = C.tips, H = C.hints, O = C.objectives;
   const challenge = (id, points, onSolve, extra) => Object.assign({ type: 'quiz', retry: true, pass: 0, points, revealPoints: points - 2, kind: 'challenge', wide: true }, PZ[id], { onSolve }, extra);
@@ -651,7 +806,7 @@ window.GAME_CONTENT = {
   const spikes = (id, pos, phase) => ({ id, type: 'hazard', model: 'spikeTrap', name: 'spike trap', pos, pulse: [1.3, 1.7], phase: phase || 0, damage: 15, bob: 0, faceTravel: false, knockback: 6, points: 0, onHit: HURT });
   const quicksand = (id, pos, r) => ({ id, type: 'hazard', model: 'quicksand', name: 'quicksand', pos, look: { r: r || 1.6 }, damage: 4, contactEvery: 0.6, bob: 0, faceTravel: false, knockback: 0, points: 0, onHit: HURT });
   const vent = (id, pos, phase) => ({ id, type: 'hazard', model: 'steamVent', name: 'steam vent', pos, pulse: [1.2, 2], phase: phase || 0, damage: 12, bob: 0, faceTravel: false, knockback: 8, points: 0, onHit: HURT });
-  const boulder = (id, route, phase) => ({ id, type: 'boulder', route, speed: 6.5, gap: 2.5, r: 1.2, phase: phase || 0, color: '#8a7f73', power: 11 });
+  const boulder = (id, route, phase, color) => ({ id, type: 'boulder', route, speed: 6.5, gap: 2.5, r: 1.2, phase: phase || 0, color: color || '#8a7f73', power: 11 });
   const abyss = (id, pos, size) => ({ id, type: 'abyss', pos, size, color: '#74c0fc' });
   // ---- pickups ----
   const ammo = pos => ({ type: 'pickup', kind: 'ammo', model: 'arrowBundle', pos, respawn: 30 });
@@ -675,6 +830,19 @@ window.GAME_CONTENT = {
   const totemQ = (n, phase) => Object.assign({ type: 'choice', title: PZ.totemTitle, points: 0 }, PZ['totem' + n + phase],
     { onSolve: [{ do: 'flag', set: (phase === 'a' ? 't' : 'u') + n }, { do: 'var', name: phase === 'a' ? 'totems' : 'totems2', add: 1 }, { do: 'set', target: 'totem' + n, look: { off: true } }] });
   const stoneCrab = id => crab(id, { pos: [98, 0, 52] }, { visible: false, minion: true, chase: 40, coins: 5, look: { color: '#868e96' }, name: 'stone crab', tags: ['minion', 'enemy'] });
+  // ---- act 4 creatures and the Magma Golem's cooling valves ----
+  const ashCrab = (id, where) => crab(id, where, { name: 'ash crab', visible: false, look: { color: '#7a2e1a' }, tags: ['ashCrab', 'enemy'] });
+  const beetle = (id, where) => spider(id, where, { name: 'magma beetle', look: { color: '#5c1f0a', eyes: '#ffd43b' }, coins: 14, tags: ['emberBug', 'enemy'] });
+  const fireBat = (id, where, extra) => bat(id, where, Object.assign({ name: 'fire bat', look: { color: '#d9480f' }, coins: 8, tags: ['emberBug', 'enemy'] }, extra));
+  const emberling = id => crab(id, { pos: [92, 3, 28] }, { visible: false, minion: true, chase: 40, coins: 5, look: { color: '#c92a2a' }, name: 'emberling', tags: ['minion', 'enemy'] });
+  const valve = (n, at) => ({ id: 'valve' + n, model: 'coolingValve', name: 'cooling valve', at, look: { off: false },
+    interact: [
+      { type: 'puzzle', puzzle: 'valve' + n + 'a', prompt: 'Turn the', if: { not: 'v' + n } },
+      { type: 'puzzle', puzzle: 'valve' + n + 'b', prompt: 'Turn the', if: { all: ['golemPhase2', { not: 'w' + n }] } },
+    ] });
+  const valveQ = (n, phase) => Object.assign({ type: 'choice', title: PZ.valveTitle, points: 0 }, PZ['valve' + n + phase],
+    { onSolve: [{ do: 'flag', set: (phase === 'a' ? 'v' : 'w') + n }, { do: 'var', name: phase === 'a' ? 'valves' : 'valves2', add: 1 }, { do: 'set', target: 'valve' + n, look: { off: true } }] });
+  const coolGolem = [{ do: 'flag', set: 'coolDown' }, { do: 'set', target: 'golem', look: { cool: true } }, say('valvesCooled')];
 
   window.GAME = {
     id: 'island-escape',
@@ -687,7 +855,7 @@ window.GAME_CONTENT = {
     grade: '6-7',
     subject: 'Computing · hardware · algorithms · patterns · files · reliable sources · online safety · input-process-output · troubleshooting',
     player: { health: 100, respawnOnDeath: true, sprintSpeed: 7.5, sprintTime: 5, sprintRest: 4 },   // 5 s of running, then walk to rest (the meter shows it)
-    vars: { playerName: 'Explorer', totems: 0, totems2: 0 },
+    vars: { playerName: 'Explorer', totems: 0, totems2: 0, valves: 0, valves2: 0 },
     resume: { checkpoints: true },
     traversal: { swimStamina: 22 },
     difficulty: { default: 'g6', title: C.difficulty.title, choices: [
@@ -740,24 +908,28 @@ window.GAME_CONTENT = {
       barrel: { name: C.items.barrel, icon: '🛢️', color: '#8b5a2b', hidden: true },
       shard: { name: C.items.shard, icon: '💎', color: '#74c0fc', hidden: true },
       page: { name: C.items.page, icon: '📜', color: '#f1e3c1', hidden: true },
+      map: { name: C.items.map, icon: '🗺️', color: '#e9d8a6' },
     },
 
     puzzles: {
-      m1: challenge('m1', 5, [give('planks'), { do: 'giveWeapon', weapon: 'slingshot' }, say('slingFound')]),
-      m2: challenge('m2', 5, [give('rope'), { do: 'giveWeapon', weapon: 'bow' }, { do: 'remove', target: 'branches' }, say('bowFound'), say('branchesCleared')]),
-      m3: challenge('m3', 5, [{ do: 'show', target: 'cutterItem' }, { do: 'set', target: 'markerPost', look: { symbol: 'star' } }, say('cutterAppears')]),
-      m4: challenge('m4', 5, [give('bamboo'), { do: 'show', target: ['bridge', 'bridgeDeck'] }, { do: 'flag', set: 'bridgeBuilt' }, say('bridgeBuilt')]),
-      m5: challenge('m5', 6, [give('cloth'), give('torch'), { do: 'set', target: 'pack', look: { color: '#868e96' } }, { do: 'flag', set: 'caveOpen' }, { do: 'show', target: 'cavePortal' }, say('caveOpen')]),
-      m6: challenge('m6', 6, [give('fasteners'), { do: 'flag', set: 'routeFound' }, { do: 'open', target: 'barricade', force: true }, { do: 'remove', target: 'barricade', delay: 1.6 }, say('barricadeOpen')]),
-      m7: challenge('m7', 6, [give('strongRope'), { do: 'flag', set: 'trickSpotted' }, { do: 'set', target: 'trickBox', look: { open: true, locked: false } }, say('grateOpen')]),
-      m8: challenge('m8', 6, [give('rudder'), { do: 'flag', set: 'powerOn' }, { do: 'set', target: 'generator', look: { on: true } }, { do: 'set', target: 'locker', look: { open: true } }, { do: 'open', target: 'hillGate', force: true }, { do: 'remove', target: 'hillGate', delay: 1.6 }, say('generatorOn')]),
-      m9: challenge('m9', 6, [give('compass'), { do: 'flag', set: 'signalOn' }, { do: 'set', target: 'station', look: { on: true } }, { do: 'set', target: 'tower', look: { on: true } },
+      m1: challenge('m1', 4, [give('planks'), { do: 'giveWeapon', weapon: 'slingshot' }, say('slingFound')]),
+      m2: challenge('m2', 4, [give('rope'), { do: 'giveWeapon', weapon: 'bow' }, { do: 'remove', target: 'branches' }, say('bowFound'), say('branchesCleared')]),
+      m3: challenge('m3', 4, [{ do: 'show', target: 'cutterItem' }, { do: 'set', target: 'markerPost', look: { symbol: 'star' } }, say('cutterAppears')]),
+      m4: challenge('m4', 4, [give('bamboo'), { do: 'show', target: ['bridge', 'bridgeDeck'] }, { do: 'flag', set: 'bridgeBuilt' }, say('bridgeBuilt')]),
+      m5: challenge('m5', 4, [give('cloth'), give('torch'), { do: 'set', target: 'pack', look: { color: '#868e96' } }, { do: 'flag', set: 'caveOpen' }, { do: 'show', target: 'cavePortal' }, say('caveOpen')]),
+      m6: challenge('m6', 5, [give('fasteners'), { do: 'flag', set: 'routeFound' }, { do: 'open', target: 'barricade', force: true }, { do: 'remove', target: 'barricade', delay: 1.6 }, say('barricadeOpen')]),
+      m7: challenge('m7', 5, [give('strongRope'), { do: 'flag', set: 'trickSpotted' }, { do: 'set', target: 'trickBox', look: { open: true, locked: false } }, say('grateOpen')]),
+      m8: challenge('m8', 5, [give('rudder'), { do: 'flag', set: 'powerOn' }, { do: 'set', target: 'generator', look: { on: true } }, { do: 'set', target: 'locker', look: { open: true } }, { do: 'open', target: 'hillGate', force: true }, { do: 'remove', target: 'hillGate', delay: 1.6 }, say('generatorOn')]),
+      m9: challenge('m9', 5, [give('compass'), { do: 'flag', set: 'signalOn' }, { do: 'set', target: 'station', look: { on: true } }, { do: 'set', target: 'tower', look: { on: true } },
         { do: 'show', target: 'ship' }, { do: 'open', target: 'coveGate', force: true }, { do: 'remove', target: 'coveGate', delay: 1.6 }, say('signalOn')]),
       m10: Object.assign({ type: 'build', points: 15, revealPoints: 10, kind: 'boat', wide: true,
         needs: ['planks', 'rope', 'cutter', 'bamboo', 'cloth', 'fasteners', 'strongRope', 'rudder', 'compass'].map(item => ({ item })) }, PZ.m10,
       { onSolve: [{ do: 'flag', set: 'boatBuilt' }, { do: 'set', target: 'boat', look: { parts: 9 } }, say('boatBuilt')] }),
+      m11: challenge('m11', 5, [give('map'), { do: 'flag', set: 'mapFound' }, { do: 'open', target: 'keeperGate', force: true }, { do: 'remove', target: 'keeperGate', delay: 1.6 }, say('mapFound')]),
+      m12: challenge('m12', 5, [{ do: 'flag', set: 'lampFixed' }, say('lampFixed')]),
       bonus: challenge('bonus', 5, [], { kind: 'collect', revealPoints: 3 }),
       totem1a: totemQ(1, 'a'), totem2a: totemQ(2, 'a'), totem3a: totemQ(3, 'a'), totem1b: totemQ(1, 'b'), totem2b: totemQ(2, 'b'), totem3b: totemQ(3, 'b'),
+      valve1a: valveQ(1, 'a'), valve2a: valveQ(2, 'a'), valve3a: valveQ(3, 'a'), valve1b: valveQ(1, 'b'), valve2b: valveQ(2, 'b'), valve3b: valveQ(3, 'b'),
     },
 
     scenes: [
@@ -942,6 +1114,61 @@ window.GAME_CONTENT = {
           { id: 'shieldCove', type: 'powerup', power: 'shield', pos: [98, 0, 34], respawn: 30, points: 0 }, { id: 'healCove', type: 'powerup', power: 'heal', pos: [86, 0, 50], respawn: 30, points: 0 },
         ],
       },
+
+      // ===================================== ACT 4 =====================================
+      { id: 'ember', title: C.acts.ember, world: 'ember-isle', spawn: 'default',
+        music: { bpm: 112, root: 131, mode: 'minor', prog: [0, 5, 6, 4], wave: 'sawtooth', arpWave: 'triangle', drums: true, volume: 0.05 },
+        entities: [
+          // ---- Black Sand Bay ----
+          { id: 'kiko4', type: 'npc', model: 'parrot', name: 'Kiko', at: 'kikoBay', faceRange: 8, interact: [kikoTalk('kikoEmber', { not: done('meetKiko4') }), kikoTalk('kikoEmberAgain')] },
+          pad('cpBay', [20, 0, 74]),
+          ashCrab('ashCrab1', { route: 'ashRun1' }), ashCrab('ashCrab2', { route: 'ashRun2' }), ashCrab('ashCrab3', { pos: [34, 0, 80] }), ashCrab('ashCrab4', { pos: [12, 0, 72] }),
+          station('keeperLaptop', 'keeperDesk', 'workstation', 'm11', { name: 'keeper\'s laptop', color: '#6b5b4b' }),
+          gate('keeperGate', 'keeperGate', 'mapFound', M.keeperLocked, { width: 8.4, rot: 's', color: '#3b3330' }),
+          fruit([30, 0, 84]), ammo([46, 0, 82]), shells([8, 0, 76]),
+          // ---- the lava river: crumbling stones ----
+          pad('cpBank', [24, 0, 46]),
+          { id: 'lava1', type: 'crumble', pos: [30, -0.4, 40.3], size: [2.4, 0.4, 2.4], delay: 0.9, back: 4, color: '#3b3330' },
+          { id: 'lava2', type: 'crumble', pos: [32.6, -0.4, 38.0], size: [2.4, 0.4, 2.4], delay: 0.9, back: 4, color: '#3b3330' },
+          { id: 'lava3', type: 'crumble', pos: [30, -0.4, 35.7], size: [2.4, 0.4, 2.4], delay: 0.9, back: 4, color: '#3b3330' },
+          { id: 'lavaPit', type: 'abyss', pos: [34, -1.6, 38], size: [60, 1.15, 8], color: '#ff6b1a' },
+          // ---- the obsidian fields ----
+          pad('cpFields', [30, 0, 30]),
+          boulder('lavaRockA', 'lavaRoll', 0, '#3b3330'), boulder('lavaRockB', 'lavaRoll', 0.5, '#3b3330'),
+          vent('ventF1', [40, 0, 20], 0), vent('ventF2', [48, 0, 12], 1), vent('ventF3', [24, 0, 14], 0.5), vent('ventF4', [54, 0, 20], 1.5),
+          beetle('beetle1', { pos: [20, 0, 20] }), beetle('beetle2', { pos: [44, 0, 8] }), beetle('beetle3', { pos: [14, 0, 12] }),
+          fireBat('fbat1', { route: 'batsFields' }), fireBat('fbat2', { pos: [36, 0, 26] }, { path: [[36, 26], [56, 10]] }), fireBat('fbat3', { pos: [8, 0, 20] }, { path: [[8, 20], [28, 6]] }),
+          shop('trader4', 'traderSpot'), page('page7', 'page7', 'p7'), ammo([18, 0, 28]), fruit([50, 0, 28]), lootCrate('crateFields', [26, 0, 8]),
+          pad('cpCliff', [58, 0, 14]),
+          { id: 'obsidianVines', type: 'climb', pos: [65.6, 0, 14], rot: 'w', size: [7.6, 3.6, 1.0] },
+          // ---- Lighthouse Point: the lighthouse and the Magma Golem ----
+          pad('cpPoint', [70, 3, 14]),
+          { id: 'lighthouse', type: 'terminal', model: 'lighthouse', at: 'lighthouseSpot', name: 'old lighthouse', look: { on: false }, light: { color: '#ffe066', range: 8, intensity: 0.5 },
+            interact: [
+              { type: 'puzzle', puzzle: 'm12', prompt: 'Fix the lamp of the', if: { not: 'lampFixed' } },
+              { type: 'activate', prompt: 'Light the', if: { all: ['golemDown', { not: 'beaconLit' }] }, once: true,
+                actions: [{ do: 'flag', set: 'beaconLit' }, { do: 'set', target: 'lighthouse', look: { on: true } }, { do: 'show', target: ['ship', 'lifeboat', 'kikoJ'] },
+                  { do: 'message', title: C.story.beaconTitle, text: C.story.beacon }] },
+              { type: 'inspect', title: C.story.lighthouseTitle, text: M.lighthouseWait, if: { not: 'beaconLit' } },
+            ] },
+          valve(1, 'valve1'), valve(2, 'valve2'), valve(3, 'valve3'),
+          { id: 'golem', type: 'hazard', model: 'magmaGolem', name: 'FINAL BOSS · MAGMA GOLEM', gait: 'stomp', at: 'golemSpot', visible: false, scale: 1.4, bodyRadius: 2.0, boss: true, engage: 40,
+            hp: 48, damage: 22, speed: 1.3, chase: 40, chaseSpeed: 1.5, knockback: 10, bob: 0, points: 0, coins: 300, faceTravel: true, tags: ['golem', 'enemy'],
+            armor: { not: 'coolDown' }, shoots: { every: 2.1, range: 30, speed: 10, damage: 12, color: '#ff6b1a' },
+            summon: { every: 9, ids: ['em1', 'em2', 'em3', 'em4'], max: 3, first: 4 }, rage: { below: 0.3, speed: 1.4 }, onHit: HURT,
+            onDefeat: [{ do: 'flag', set: 'golemDown' }, { do: 'message', title: C.story.golemDownTitle, text: C.story.golemDown }] },
+          emberling('em1'), emberling('em2'), emberling('em3'), emberling('em4'),
+          fireBat('fbat4', { route: 'batsPoint' }, { tags: ['pointBat', 'enemy'] }),
+          page('page8', 'page8', 'p8'), ammo([74, 3, 8]), fruit([110, 3, 40]), ammo([108, 3, 8]),
+          { id: 'shieldPoint', type: 'powerup', power: 'shield', pos: [74, 3, 40], respawn: 30, points: 0 }, { id: 'healPoint', type: 'powerup', power: 'heal', pos: [108, 3, 22], respawn: 30, points: 0 },
+          // ---- the jetty beach: the lifeboat ----
+          { id: 'kikoJ', type: 'npc', model: 'parrot', name: 'Kiko', at: 'kikoJetty', faceRange: 8, visible: false, interact: [kikoTalk('kikoJetty')] },
+          { id: 'lifeboat', model: 'escapeBoat', at: 'boatSpot', name: 'lifeboat', look: { parts: 9 }, solid: false, visible: false,
+            interact: [{ type: 'activate', prompt: 'Board the', if: { flag: 'beaconLit' }, once: true, actions: [{ do: 'flag', set: 'boarding' }, say('boarding')] }] },
+          { id: 'ship', model: 'rescueShip', at: 'shipSpot', name: 'rescue ship', visible: false, solid: false, light: { color: '#ffe066', range: 30, intensity: 0.8 } },
+          fruit([80, 0, 70]),
+        ],
+      },
     ],
 
     intro: [{ do: 'message', title: C.story.openTitle, text: C.story.open }],
@@ -957,6 +1184,13 @@ window.GAME_CONTENT = {
       // a story card as each act begins
       { on: 'scene:enter', match: { id: 'caves' }, once: true, actions: [{ do: 'message', title: C.story.cavesTitle, text: C.story.caves }] },
       { on: 'scene:enter', match: { id: 'peak' }, once: true, actions: [{ do: 'message', title: C.story.peakTitle, text: C.story.peak }] },
+      { on: 'scene:enter', match: { id: 'ember' }, once: true, actions: [{ do: 'message', title: C.story.emberTitle, text: C.story.ember }] },
+      { on: 'terrain:fell', match: { id: 'lavaPit' }, actions: [say('lavaHot', 'bad')] },
+      // the Magma Golem heats up again at half health
+      { on: 'hazard:damaged', match: { id: 'golem' }, if: { all: [{ hp: { id: 'golem', lte: 24 } }, { not: 'golemPhase2' }] }, once: true,
+        actions: [{ do: 'flag', set: 'golemPhase2', clear: 'coolDown' }, { do: 'set', target: 'golem', look: { cool: false } },
+          { do: 'set', target: 'valve1', look: { off: false } }, { do: 'set', target: 'valve2', look: { off: false } }, { do: 'set', target: 'valve3', look: { off: false } },
+          { do: 'message', title: C.story.golemBackTitle, text: C.story.golemBack }] },
       // the ship is spotted after the player closes Mission 9's "well done" card
       { on: 'puzzle:finished', match: { id: 'm9' }, once: true, actions: [{ do: 'message', title: C.story.shipTitle, text: C.story.ship }] },
       // the Tiki Guardian rebuilds its shield at two thirds of its health
@@ -971,46 +1205,46 @@ window.GAME_CONTENT = {
       { id: 'meetKiko', type: 'talk', target: 'kiko', title: O.meetKiko, tip: T.meetKiko, points: 0, hints: H.meetKiko },
       { id: 'radio', type: 'flag', flag: 'heardRadio', target: 'radio', title: O.radio, tip: T.radio, points: 0, hints: H.radio },
       { id: 'crabs', type: 'defeat', tag: 'beachCrab', count: 4, title: O.crabs, tip: T.crabs, points: 0, hints: H.crabs, onStart: [{ do: 'show', target: ['crab1', 'crab2', 'crab3', 'crab4'] }] },
-      { id: 'm1', type: 'solve', puzzle: 'm1', target: 'crate', title: O.m1, tip: T.m1, points: 2, hints: H.m1, checkpoint: true },
+      { id: 'm1', type: 'solve', puzzle: 'm1', target: 'crate', title: O.m1, tip: T.m1, points: 1, hints: H.m1, checkpoint: true },
       { id: 'slingTargets', type: 'defeat', tag: 'slingTarget', count: 3, title: O.slingTargets, tip: T.slingTargets, points: 0, hints: H.slingTargets },
       { id: 'trader', type: 'event', event: 'shop:open', target: 'trader1', title: O.trader, tip: T.trader, points: 0, hints: H.trader },
       { id: 'barrels', type: 'collect', item: 'barrel', count: 3, title: O.barrels, tip: T.barrels, points: 0, hints: H.barrels },
       { id: 'trail', type: 'reach', zone: 'camp', title: O.trail, tip: T.trail, points: 0, hints: H.trail },
       { id: 'boars', type: 'defeat', tag: 'boar', count: 3, title: O.boars, tip: T.boars, points: 0, hints: H.boars, onStart: [{ do: 'show', target: ['boar1', 'boar2', 'boar3'] }] },
-      { id: 'm2', type: 'solve', puzzle: 'm2', target: 'campBox', title: O.m2, tip: T.m2, points: 2, hints: H.m2, checkpoint: true },
+      { id: 'm2', type: 'solve', puzzle: 'm2', target: 'campBox', title: O.m2, tip: T.m2, points: 1, hints: H.m2, checkpoint: true },
       { id: 'bowTargets', type: 'defeat', tag: 'bowTarget', count: 4, title: O.bowTargets, tip: T.bowTargets, points: 0, hints: H.bowTargets },
       { id: 'climb', type: 'reach', zone: 'grove', title: O.climb, tip: T.climb, points: 0, hints: H.climb, checkpoint: true },
       { id: 'monkeys', type: 'defeat', tag: 'monkey', count: 2, title: O.monkeys, tip: T.monkeys, points: 0, hints: H.monkeys },
-      { id: 'm3', type: 'solve', puzzle: 'm3', target: 'markerPost', title: O.m3, tip: T.m3, points: 2, hints: H.m3, checkpoint: true },
+      { id: 'm3', type: 'solve', puzzle: 'm3', target: 'markerPost', title: O.m3, tip: T.m3, points: 1, hints: H.m3, checkpoint: true },
       { id: 'getCutter', type: 'collect', item: 'cutter', title: O.getCutter, tip: T.getCutter, points: 0, hints: H.getCutter },
       { id: 'cutVines', type: 'flag', flag: 'vinesCut', target: 'vines', title: O.cutVines, tip: T.cutVines, points: 0, hints: H.cutVines },
       { id: 'stones', type: 'reach', zone: 'isle', title: O.stones, tip: T.stones, points: 0, hints: H.stones },
-      { id: 'm4', type: 'solve', puzzle: 'm4', target: 'bridgePlan', title: O.m4, tip: T.m4, points: 2, hints: H.m4, checkpoint: true },
+      { id: 'm4', type: 'solve', puzzle: 'm4', target: 'bridgePlan', title: O.m4, tip: T.m4, points: 1, hints: H.m4, checkpoint: true },
       { id: 'kingClaw', type: 'flag', flag: 'clawDown', target: 'kingClaw', title: O.kingClaw, tip: T.kingClaw, points: 0, hints: H.kingClaw,
         onStart: [{ do: 'show', target: 'kingClaw' }, say('clawAppears', 'bad')] },
-      { id: 'm5', type: 'solve', puzzle: 'm5', target: 'pack', title: O.m5, tip: T.m5, points: 2, hints: H.m5, checkpoint: true },
-      { id: 'enterCave', type: 'flag', flag: 'act1Done', target: 'cavePortal', title: O.enterCave, tip: T.enterCave, points: 0, hints: H.enterCave },
+      { id: 'm5', type: 'solve', puzzle: 'm5', target: 'pack', title: O.m5, tip: T.m5, points: 1, hints: H.m5, checkpoint: true },
+      { id: 'enterCave', type: 'flag', flag: 'act1Done', target: 'cavePortal', title: O.enterCave, tip: T.enterCave, points: 2, hints: H.enterCave },
       // ---- act 2 ----
       { id: 'shards', type: 'collect', item: 'shard', count: 5, title: O.shards, tip: T.shards, points: 0, hints: H.shards,
         onComplete: [{ do: 'set', target: 'lamp1', look: { on: true } }, { do: 'set', target: 'lamp2', look: { on: true, color: '#b197fc' } }, { do: 'set', target: 'lamp3', look: { on: true, color: '#63e6be' } }, { do: 'set', target: 'lamp4', look: { on: true, color: '#f783ac' } }, say('lampsOn')] },
       { id: 'caveBugs', type: 'defeat', tag: 'caveBug', count: 6, title: O.caveBugs, tip: T.caveBugs, points: 0, hints: H.caveBugs },
-      { id: 'm6', type: 'solve', puzzle: 'm6', target: 'notes', title: O.m6, tip: T.m6, points: 2, hints: H.m6, checkpoint: true },
+      { id: 'm6', type: 'solve', puzzle: 'm6', target: 'notes', title: O.m6, tip: T.m6, points: 1, hints: H.m6, checkpoint: true },
       { id: 'chasm', type: 'reach', zone: 'shoreS', title: O.chasm, tip: T.chasm, points: 0, hints: H.chasm, checkpoint: true },
       { id: 'swim', type: 'reach', zone: 'northShore', title: O.swim, tip: T.swim, points: 0, hints: H.swim, checkpoint: true },
       { id: 'freeReyes', type: 'flag', flag: 'reyesFree', target: 'reyes', title: O.freeReyes, tip: T.freeReyes, points: 0, hints: H.freeReyes },
-      { id: 'm7', type: 'solve', puzzle: 'm7', target: 'trickBox', title: O.m7, tip: T.m7, points: 2, hints: H.m7, checkpoint: true },
+      { id: 'm7', type: 'solve', puzzle: 'm7', target: 'trickBox', title: O.m7, tip: T.m7, points: 1, hints: H.m7, checkpoint: true },
       { id: 'ledge', type: 'reach', zone: 'ledge', title: O.ledge, tip: T.ledge, points: 0, hints: H.ledge, checkpoint: true },
       { id: 'spiderQueen', type: 'flag', flag: 'queenDown', target: 'spiderQueen', title: O.spiderQueen, tip: T.spiderQueen, points: 0, hints: H.spiderQueen,
         onStart: [{ do: 'show', target: 'spiderQueen' }, say('queenAppears', 'bad')] },
-      { id: 'toPeak', type: 'flag', flag: 'act2Done', target: 'exitPortal', title: O.toPeak, tip: T.toPeak, points: 0, hints: H.toPeak },
+      { id: 'toPeak', type: 'flag', flag: 'act2Done', target: 'exitPortal', title: O.toPeak, tip: T.toPeak, points: 2, hints: H.toPeak },
       // ---- act 3 ----
       { id: 'meetKiko3', type: 'talk', target: 'kiko3', title: O.meetKiko3, tip: T.meetKiko3, points: 0, hints: H.meetKiko3 },
       { id: 'gladeMonkeys', type: 'defeat', tag: 'gMonkey', count: 3, title: O.gladeMonkeys, tip: T.gladeMonkeys, points: 0, hints: H.gladeMonkeys },
-      { id: 'm8', type: 'solve', puzzle: 'm8', target: 'generator', title: O.m8, tip: T.m8, points: 2, hints: H.m8, checkpoint: true },
+      { id: 'm8', type: 'solve', puzzle: 'm8', target: 'generator', title: O.m8, tip: T.m8, points: 1, hints: H.m8, checkpoint: true },
       { id: 'terrace1', type: 'reach', zone: 't1', title: O.terrace1, tip: T.terrace1, points: 0, hints: H.terrace1 },
       { id: 'terrace2', type: 'reach', zone: 't2', title: O.terrace2, tip: T.terrace2, points: 0, hints: H.terrace2, checkpoint: true },
       { id: 'summit', type: 'reach', zone: 'summit', title: O.summit, tip: T.summit, points: 0, hints: H.summit, checkpoint: true },
-      { id: 'm9', type: 'solve', puzzle: 'm9', target: 'station', title: O.m9, tip: T.m9, points: 2, hints: H.m9, checkpoint: true },
+      { id: 'm9', type: 'solve', puzzle: 'm9', target: 'station', title: O.m9, tip: T.m9, points: 1, hints: H.m9, checkpoint: true },
       { id: 'toCove', type: 'reach', zone: 'arena', title: O.toCove, tip: T.toCove, points: 0, hints: H.toCove,
         onComplete: [{ do: 'show', target: 'tiki' }, { do: 'message', title: C.story.tikiTitle, text: C.story.tiki }] },
       { id: 'totems', type: 'var', name: 'totems', count: 3, title: O.totems, tip: T.totems, points: 0, hints: H.totems,
@@ -1020,10 +1254,28 @@ window.GAME_CONTENT = {
         onComplete: [{ do: 'flag', set: 'shieldsDown' }, say('shieldsDown')] },
       { id: 'tiki', type: 'flag', flag: 'tikiDown', target: 'tiki', title: O.tiki, tip: T.tiki, points: 0, hints: H.tiki },
       { id: 'm10', type: 'solve', puzzle: 'm10', target: 'workbench', title: O.m10, tip: T.m10, points: 0, hints: H.m10, checkpoint: true },
-      { id: 'launch', type: 'flag', flag: 'escaped', target: 'boat', title: O.launch, tip: T.launch, points: 2, hints: H.launch },
+      { id: 'launch', type: 'flag', flag: 'escaped', target: 'boat', title: O.launch, tip: T.launch, points: 2, hints: H.launch,
+        onComplete: [{ do: 'flag', set: 'act3Done' }, { do: 'goto', scene: 'ember' }] },
+      // ---- act 4 ----
+      { id: 'meetKiko4', type: 'talk', target: 'kiko4', title: O.meetKiko4, tip: T.meetKiko4, points: 0, hints: H.meetKiko4 },
+      { id: 'ashCrabs', type: 'defeat', tag: 'ashCrab', count: 4, title: O.ashCrabs, tip: T.ashCrabs, points: 0, hints: H.ashCrabs,
+        onStart: [{ do: 'show', target: ['ashCrab1', 'ashCrab2', 'ashCrab3', 'ashCrab4'] }] },
+      { id: 'm11', type: 'solve', puzzle: 'm11', target: 'keeperLaptop', title: O.m11, tip: T.m11, points: 1, hints: H.m11, checkpoint: true },
+      { id: 'lavaCross', type: 'reach', zone: 'fields', title: O.lavaCross, tip: T.lavaCross, points: 0, hints: H.lavaCross, checkpoint: true },
+      { id: 'emberBugs', type: 'defeat', tag: 'emberBug', count: 6, title: O.emberBugs, tip: T.emberBugs, points: 0, hints: H.emberBugs },
+      { id: 'climbPoint', type: 'reach', zone: 'point', title: O.climbPoint, tip: T.climbPoint, points: 0, hints: H.climbPoint, checkpoint: true },
+      { id: 'm12', type: 'solve', puzzle: 'm12', target: 'lighthouse', title: O.m12, tip: T.m12, points: 1, hints: H.m12, checkpoint: true,
+        onComplete: [{ do: 'show', target: 'golem' }, { do: 'message', title: C.story.golemTitle, text: C.story.golem }] },
+      { id: 'valves', type: 'var', name: 'valves', count: 3, title: O.valves, tip: T.valves, points: 0, hints: H.valves, onComplete: coolGolem },
+      { id: 'golemHalf', type: 'flag', flag: 'golemPhase2', target: 'golem', title: O.golemHalf, tip: T.golemHalf, points: 0, hints: H.golemHalf },
+      { id: 'valves2', type: 'var', name: 'valves2', count: 3, title: O.valves2, tip: T.valves2, points: 0, hints: H.valves2, onComplete: coolGolem },
+      { id: 'golem', type: 'flag', flag: 'golemDown', target: 'golem', title: O.golem, tip: T.golem, points: 0, hints: H.golem },
+      { id: 'lightBeacon', type: 'flag', flag: 'beaconLit', target: 'lighthouse', title: O.lightBeacon, tip: T.lightBeacon, points: 0, hints: H.lightBeacon },
+      { id: 'toJetty', type: 'reach', zone: 'jetty', title: O.toJetty, tip: T.toJetty, points: 0, hints: H.toJetty },
+      { id: 'board', type: 'flag', flag: 'rescued', target: 'lifeboat', title: O.board, tip: T.board, points: 3, hints: H.board },
       // ---- bonus (never blocks the story) ----
       { id: 'caches', type: 'collect', item: 'supplies', count: 5, title: O.caches, optional: true, points: 0, marker: false },
-      { id: 'pages', type: 'collect', item: 'page', count: 6, title: O.pages, optional: true, points: 0, marker: false },
+      { id: 'pages', type: 'collect', item: 'page', count: 8, title: O.pages, optional: true, points: 0, marker: false },
       { id: 'bonus', type: 'solve', puzzle: 'bonus', title: O.bonus, optional: true, points: 0, marker: false },
     ],
 
@@ -1031,7 +1283,7 @@ window.GAME_CONTENT = {
     timer: { limit: null },
     scoring: { objective: 0, hint: 0, wrongAnswer: 0, respawn: 0, stars: [50, 75, 90], labels: C.labels },
     winText: C.winText,
-    ui: { accent: '#2fb344', winTitle: 'Rescued!', labelRange: 9, showHintKey: false,
+    ui: { accent: '#2fb344', winTitle: 'Rescued!', labelRange: 9, showHintKey: false, beacon: true,
       controls: [['W A S D', 'Move'], ['Mouse', 'Look'], ['Click', 'Attack'], ['Right click', 'Aim'], ['1-6', 'Weapons'], ['R', 'Reload'], ['E', 'Use / talk'], ['Space', 'Jump / swim up'], ['Shift', 'Run'], ['H', 'Hint'], ['V', 'Camera'], ['Esc', 'Pause']],
       askName: true, leaderboard: true, minimap: true, vignette: true, menuUrl: '../../index.html', menuLabel: 'All games' },
   };
@@ -1082,7 +1334,8 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-stat { padding: 8px 14px; font-size: 20px; font-weight: 700; display: flex; gap: 8px; align-items: center; font-variant-numeric: tabular-nums; }
 .gk-stat span { font-size: 16px; opacity: .8; }
 .gk-timer.warn b { color: var(--gk-bad); animation: gk-pulse 1s infinite; }
-.gk-health { position: absolute; left: 50%; bottom: 96px; width: 220px; margin-left: -110px; height: 10px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
+.gk-health { position: absolute; left: 50%; bottom: 14px; width: 260px; margin-left: -130px; height: 14px; border-radius: 7px; background: rgba(0,0,0,.55); border: 2px solid rgba(255,255,255,.7); box-shadow: 0 2px 8px rgba(0,0,0,.5); overflow: hidden; }
+.gk-health-heart { position: absolute; left: 50%; bottom: 8px; margin-left: -162px; font-size: 22px; line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .gk-health i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #e74c3c, #2ecc71); transition: width .25s; }
 
 /* prompt */
@@ -1090,14 +1343,17 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-prompt.show { opacity: 1; }
 
 /* inventory */
-.gk-inv { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 8px; }
+.gk-inv { position: absolute; left: 14px; bottom: 14px; display: flex; flex-wrap: wrap-reverse; gap: 6px; max-width: 300px; }
+.gk-inv .gk-slot { width: 54px; height: 54px; }
+.gk-inv .gk-slot-icon { font-size: 21px; }
+.gk-inv .gk-slot small { font-size: 9px; max-width: 50px; }
 .gk-slot { --slot: var(--gk-accent); position: relative; width: 64px; height: 64px; border-radius: 12px; background: var(--gk-panel); border: 2px solid var(--slot); display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .gk-slot-icon { font-size: 24px; line-height: 1; }
 .gk-slot small { font-size: 10px; opacity: .85; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
 .gk-slot b { position: absolute; right: 4px; top: 2px; font-size: 12px; }
 .gk-keys { position: absolute; right: 16px; bottom: 16px; display: flex; gap: 8px; font-size: 12px; opacity: .8; }
 .gk-keys span { background: var(--gk-panel); padding: 5px 9px; border-radius: 8px; }
-.gk-lockhint { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--gk-panel); padding: 6px 12px; border-radius: 8px; font-size: 13px; display: none; }
+.gk-lockhint { position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%); background: var(--gk-panel); padding: 6px 12px; border-radius: 8px; font-size: 13px; display: none; }
 .gk-lockhint.show { display: block; }
 
 /* toasts */
@@ -1110,7 +1366,11 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 
 /* labels & marker */
 .gk-label { position: absolute; left: 0; top: 0; padding: 3px 9px; border-radius: 8px; background: rgba(10,14,20,.7); font-size: 13px; font-weight: 600; white-space: nowrap; will-change: transform; }
-.gk-label.marker { background: none; color: var(--gk-hint); font-size: 14px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+.gk-label.marker { background: rgba(10,14,20,.6); color: var(--gk-hint); font-size: 22px; font-weight: 900; padding: 3px 12px; border: 2px solid var(--gk-hint); border-radius: 14px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 0 14px rgba(0,0,0,.45); animation: gk-mark-bob 1s ease-in-out infinite; }
+.gk-label.marker.edge { font-size: 20px; animation: gk-mark-pulse 0.9s ease-in-out infinite; }
+@keyframes gk-mark-bob { 0%, 100% { margin-top: 0; } 50% { margin-top: -8px; } }
+@keyframes gk-mark-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 
 /* modal panels */
 .gk-modal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(5,8,12,.45); animation: gk-fade .15s; user-select: text; }
@@ -1300,7 +1560,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-hud.hidden .gk-minimap { display: none; }
 
 /* weapon energy, hit marker, boss bar */
-.gk-weapon { position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 10px; background: var(--gk-panel); font-size: 13px; font-weight: 700; pointer-events: none; }
+.gk-weapon { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 10px; background: var(--gk-panel); font-size: 13px; font-weight: 700; pointer-events: none; }
 .gk-weapon.show { display: flex; }
 .gk-weapon i { display: block; width: 130px; height: 9px; border-radius: 5px; background: rgba(255,255,255,.15); overflow: hidden; }
 .gk-weapon b { display: block; height: 100%; background: linear-gradient(90deg, var(--gk-accent), #fff); transition: width .1s; }
@@ -1381,13 +1641,13 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-end-extra td, .gk-end-extra th { padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,.12); }
 .gk-end-extra th { text-align: left; color: var(--gk-hint); }
 /* mechanics/traversal: swim / climb meter */
-.gk-tr-meter { position: absolute; left: 50%; bottom: 200px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px; background: var(--gk-panel); font-weight: 800; font-size: 14px; pointer-events: none; }
+.gk-tr-meter { position: absolute; left: 50%; bottom: 210px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px; background: var(--gk-panel); font-weight: 800; font-size: 14px; pointer-events: none; }
 .gk-tr-meter.show { display: flex; }
 .gk-tr-meter i { display: block; width: 180px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
 .gk-tr-meter b { display: block; height: 100%; width: 100%; background: #4cc9f0; transition: width .2s; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","assets/models/island","assets/models/wild","worlds/_wild","worlds/wild-coast/world","worlds/crystal-caverns/world","worlds/storm-peak/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/weapons/weapons","mechanics/terrain/terrain","mechanics/traversal/traversal","mechanics/music/music"],"local":["island.js"],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","hazards","powerups","weapons","terrain","traversal","music"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_course","assets/models/island","assets/models/wild","worlds/_wild","worlds/wild-coast/world","worlds/crystal-caverns/world","worlds/storm-peak/world","worlds/ember-isle/world","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/hazards/hazards","mechanics/powerups/powerups","mechanics/weapons/weapons","mechanics/terrain/terrain","mechanics/traversal/traversal","mechanics/music/music"],"local":["island.js"],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","hazards","powerups","weapons","terrain","traversal","music"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -1463,6 +1723,7 @@ GK_LIBRARY.worlds = {
   'wild-coast': { name: 'Shipwreck Coast', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 1 (worlds/_wild.js): shipwreck beach, swimming lagoon, jungle trail, camp clearing, 3 m cliff to the Marker Grove plateau, deep river with stepping-stone spots, Bamboo Isle, east bank, delta beach, cave mouth' },
   'crystal-caverns': { name: 'Crystal Caverns', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 2: dark roofed caves: crystal hall, 4 m chasm, underground lake (swim), north shore camp + niche, crystal cliff up to the +3 m ledge (boss)' },
   'storm-peak': { name: 'Storm Peak', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 3: stormy waterfall glade, Signal Hill (terraces +2/+4/+6 m, stairs, vine-wall spot), long stairs down to Escape Cove (boss arena, workbench, boat)' },
+  'ember-isle': { name: 'Ember Isle', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 4: volcanic island: black sand bay, ash path, lava river (crumbling-stone spot), obsidian fields, a 3 m cliff to Lighthouse Point (+3 m, boss arena), stairs down to the jetty beach' },
   _template: { name: 'Blank room', about: 'one room: copy it to start a world' },
 };
 
@@ -1996,7 +2257,7 @@ GK_LIBRARY.worlds = {
         '<div class="gk-crosshair"></div>',
         '<div class="gk-card gk-obj"><div class="gk-obj-title"></div><div class="gk-bar"><i></i></div><ul class="gk-obj-list"></ul></div>',
         '<div class="gk-stats"><div class="gk-card gk-stat gk-timer"><span>⏱</span><b></b></div><div class="gk-card gk-stat gk-score"><span>★</span><b>0</b></div><div class="gk-card gk-stat gk-coins" style="display:none"><span>🪙</span><b>0</b><em></em></div></div>',
-        '<div class="gk-health"><i></i></div>',
+        '<div class="gk-health"><i></i></div><div class="gk-health-heart">❤️</div>',
         '<div class="gk-chips"></div>',
         '<div class="gk-boss"><span></span><i><b></b></i></div>',
         '<div class="gk-weapon"><div class="gk-w-slots"></div><div class="gk-w-main"><span class="gk-w-name"></span><span class="gk-w-ammo"></span></div><i class="gk-w-reload"><b></b></i><div class="gk-w-hint"></div></div>',
@@ -2014,7 +2275,7 @@ GK_LIBRARY.worlds = {
       const q = s => this.hud.querySelector(s);
       this.$ = {
         objTitle: q('.gk-obj-title'), objList: q('.gk-obj-list'), bar: q('.gk-bar i'), obj: q('.gk-obj'),
-        timer: q('.gk-timer'), timerVal: q('.gk-timer b'), score: q('.gk-score b'), health: q('.gk-health'), healthBar: q('.gk-health i'),
+        timer: q('.gk-timer'), timerVal: q('.gk-timer b'), score: q('.gk-score b'), health: q('.gk-health'), healthBar: q('.gk-health i'), heart: q('.gk-health-heart'),
         prompt: q('.gk-prompt'), inv: q('.gk-inv'), chips: q('.gk-chips'), boss: q('.gk-boss'), weapon: q('.gk-weapon'), crosshair: q('.gk-crosshair'), coins: q('.gk-coins'), flash: q('.gk-flash'), keys: q('.gk-keys'), toasts: q('.gk-toasts'), lockhint: q('.gk-lockhint'), debug: q('.gk-debug'),
       };
       this.labelPool = [];
@@ -2033,7 +2294,7 @@ GK_LIBRARY.worlds = {
       if (cfg.ui.showHintKey !== false) this.$.keys.appendChild(el('span', '', 'H  Hint' + hintCost));
       this.$.keys.appendChild(el('span', '', 'Esc  Pause'));
       this.$.timer.style.display = cfg.timer.show === false ? 'none' : '';
-      this.$.health.style.display = !cfg.player || cfg.player.health == null ? 'none' : '';
+      this.$.health.style.display = this.$.heart.style.display = !cfg.player || cfg.player.health == null ? 'none' : '';
       this.$.obj.style.display = cfg.ui.objectives === false ? 'none' : '';
       this.cache = {};
     }
@@ -4866,7 +5127,7 @@ GK_LIBRARY.worlds = {
     }
     /** ASCII grid. Legend entries: {wall, floor, block (floor you cannot walk on: water), raise: h (a solid block h m high you
         walk on top of: ledges, plateaus, hills; `side` colour), sink: d (the floor is d m lower: pits, lagoons; `bank` colour
-        for the sides), water: colour (with sink: a water surface 0.3 m below ground level), spawn, door, entity|entities,
+        for the sides), water: colour (with sink: a water surface 0.3 m below ground level; waterGlow 0..1), spawn, door, entity|entities,
         zone, location:'name' ('#' → auto number)}. Locations, spawns and tiles on raised / sunk cells get their height. */
     buildGrid(map, pending) {
       const rows = map.grid, cs = this.cell, H = this.wallH;
@@ -4917,7 +5178,7 @@ GK_LIBRARY.worlds = {
                 const nx = p[0] + dc * cs, nz = p[2] + dr * cs;
                 this.statics.push({ min: [nx - cs / 2, h - 0.5, nz - cs / 2], max: [nx + cs / 2, hn - 0.5, nz + cs / 2], color: bank, kind: 'wall', noDraw: true });   // under the neighbour's own floor (no bump at the edge)
               }
-              if (L.water) this.geo.plane(p[0], -0.3, p[2], cs, cs, L.water, { glow: 0.08 });
+              if (L.water) this.geo.plane(p[0], -0.3, p[2], cs, cs, L.water, { glow: L.waterGlow != null ? L.waterGlow : 0.08 });   // waterGlow: e.g. lava shines
             }
             this.tiles.push({ x: p[0], z: p[2], w: cs, d: cs, y: h, color: L.water || fc });
           } else if (hasFloor(L)) {
@@ -5577,6 +5838,8 @@ GK_LIBRARY.worlds = {
    Animation: the held tool follows game.viewModel (kick, reload dip + tilt, raise after a switch, bow / sling draw,
    spear thrust); while game.climbing / game.swimming (mechanics/traversal) both hands climb hand over hand or swim
    breaststroke instead (game.climbPhase / swimPhase), in third person too. A hard landing dips the camera.
+   The objective marker is a big bobbing "▼ 17 m" tag; when the target is off screen it moves to the left or right edge
+   ("◀ 17 m"). ui.beacon: true (or a colour) also stands a tall beam of light on the target.
    Uses the shared _spatial layer for world, body, physics and checkpoints. */
 (function () {
   'use strict';
@@ -5784,6 +6047,15 @@ GK_LIBRARY.worlds = {
         const mesh = r.cached('zone' + s.join(',') + col, () => new GK.Geo().box(0, 0, 0, s[0], 0.05, s[1], col, { glow: 1 }));
         items.push({ mesh, pos: [z.center[0], z.center[1] + 0.01, z.center[2]], alpha: 0.35 + Math.sin(g.state.time * 3) * 0.1 });
       }
+      // ui.beacon: a tall beam of light on the objective, seen from far away
+      if (g.cfg.ui.beacon && g.cfg.ui.markers !== false && g.missions && (g.state.mode === 'playing' || g.state.mode === 'paused')) {
+        const t = g.missions.targetOf(g.missions.current());
+        if (t && Math.hypot(t[0] - eye[0], t[2] - eye[2]) > 5) {
+          const col = typeof g.cfg.ui.beacon === 'string' ? g.cfg.ui.beacon : '#ffe066';
+          const beam = r.cached('gk:beacon' + col, () => new GK.Geo().cyl(0, 0, 0, 0.32, 36, col, { glow: 1, seg: 8 }));
+          items.push({ mesh: beam, pos: [t[0], t[1] + 0.4, t[2]], alpha: 0.3 + Math.sin(g.state.time * 3) * 0.08 });
+        }
+      }
       const blob = r.cached('gk:blob', () => new GK.Geo().cyl(0, 0, 0, 1, 0.01, '#000000', { seg: 16 }));
       const barBg = r.cached('gk:barBg', () => new GK.Geo().box(0, 0, 0, 1, 0.14, 0.03, '#10131a', { glow: 1 }));
       const barOk = r.cached('gk:barOk', () => new GK.Geo().box(0, 0.02, 0, 0.96, 0.1, 0.05, '#2ecc71', { glow: 1 }));
@@ -5823,7 +6095,19 @@ GK_LIBRARY.worlds = {
       else if (g.player.punchK >= 0 && g.state.mode === 'playing') this.drawPunch(items, eye);
       r.render(items);
 
-      g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => { const s = r.project(l.pos); return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null; }).filter(Boolean));
+      const W = this.canvas.clientWidth, Hh = this.canvas.clientHeight;
+      g.ui.drawLabels(GK.Spatial.labels(g, eye).map(l => {
+        const s = r.project(l.pos);
+        if (l.cls === 'marker' && (!s.visible || s.x < 40 || s.x > W - 40 || s.y < 60 || s.y > Hh - 20)) {
+          // the objective is off screen: an arrow at the left or right edge points the way
+          const dx = l.pos[0] - eye[0], dz = l.pos[2] - eye[2], f = g.player.forward(), rgt = [Math.cos(g.player.yaw), -Math.sin(g.player.yaw)];
+          const side = dx * rgt[0] + dz * rgt[1], ahead = dx * f[0] + dz * f[2];
+          const dist = l.text.replace(/^\S+\s*/, '');
+          if (ahead > 0 && s.visible && s.x >= 40 && s.x <= W - 40) return { text: '▼ ' + dist, x: s.x, y: Math.min(Math.max(s.y, 90), Hh - 120), cls: 'marker' };   // above or below: keep it on screen
+          return side >= 0 ? { text: dist + ' ▶', x: W - 70, y: Hh * 0.56, cls: 'marker edge' } : { text: '◀ ' + dist, x: 70, y: Hh * 0.56, cls: 'marker edge' };
+        }
+        return s.visible ? { text: l.text, x: s.x, y: s.y, cls: l.cls } : null;
+      }).filter(Boolean));
       if (this.mini) this.drawMinimap();
     }
     /** An animated character that is not the player (other players online, race rivals, NPCs): entity.figure =
@@ -7276,7 +7560,8 @@ GK_LIBRARY.worlds = {
               (the look keys animate them: mechanics/weapons sets them from the weapon's `anim`)
    Shots:     arrowShot · pebbleShot · dartShot · harpoonShot · coconutShot (a weapon's `projectile`, pointing +z)
    Creatures: boar · monkey (sits on a stump, throws coconuts) · snake · spider {crown, eyes} · tikiGuardian (boss) ·
-              totem {off} (a shield totem)
+              totem {off} (a shield totem) · magmaGolem {cool} (boss) · coolingValve {off} (its shield valves)
+   Places:    lighthouse {on}
    Traps:     spikeTrap {off} · quicksand {r} · steamVent {off}
    Props:     traderHut · archeryTarget · floatBarrel · crystalLamp {on} · web {w, h} · tikiTorch · shellPile · fruit ·
               arrowBundle · journalPage */
@@ -7416,6 +7701,36 @@ GK_LIBRARY.worlds = {
     return g.box(-0.7, 2.2, 0, 0.5, 0.1, 0.3, '#5d4037').box(0.7, 2.2, 0, 0.5, 0.1, 0.3, '#5d4037').sphere(0, 3.05, 0, 0.3, gem, { seg: 6, rings: 4, glow: gl });
   });
 
+  M.add('magmaGolem', o => {   // the MAGMA GOLEM (act 4 final boss): a hulking body of black rock with glowing lava cracks;
+    // look.cool = its lava has cooled (dark cracks: the shield is down)
+    const rock = o.color || '#2b2522', lava = o.cool ? '#5c3d2e' : (o.lava || '#ff6b1a'), gl = o.cool ? 0 : 1, g = G();
+    g.box(-0.55, 0, 0, 0.8, 1.3, 0.9, rock).box(0.55, 0, 0, 0.8, 1.3, 0.9, rock);                         // legs
+    g.box(0, 1.2, 0, 2.4, 1.9, 1.6, rock, { top: dk(rock, 1.3) }).box(0, 3.0, 0.05, 1.3, 1.0, 1.2, dk(rock, 1.15));   // body, head
+    g.box(-1.6, 1.4, 0.1, 0.8, 1.9, 0.8, rock).box(1.6, 1.4, 0.1, 0.8, 1.9, 0.8, rock);                    // arms
+    g.box(-1.6, 0.9, 0.15, 1.0, 0.7, 1.0, dk(rock, 1.2)).box(1.6, 0.9, 0.15, 1.0, 0.7, 1.0, dk(rock, 1.2));   // fists
+    for (const [x, y, w, h] of [[-0.6, 1.5, 0.12, 1.2], [0.3, 1.9, 0.1, 1.0], [0.7, 1.4, 0.5, 0.1], [-0.2, 2.6, 0.7, 0.08], [0.55, 1.1, 0.08, 0.6]])
+      g.box(x, y, 0.81, w, h, 0.03, lava, { glow: gl });                                                    // lava cracks
+    g.box(-0.3, 3.45, 0.66, 0.3, 0.16, 0.04, lava, { glow: 1 }).box(0.3, 3.45, 0.66, 0.3, 0.16, 0.04, lava, { glow: 1 });   // eyes
+    return g.box(0, 3.15, 0.66, 0.6, 0.08, 0.04, lava, { glow: gl }).cone(-0.4, 4.0, 0, 0.18, 0.5, dk(rock, 1.3), { seg: 4 }).cone(0.4, 4.0, 0, 0.18, 0.5, dk(rock, 1.3), { seg: 4 });
+  });
+  M.add('coolingValve', o => {   // a cooling-water pipe with a big wheel valve (look.off = turned: the water flows, blue light)
+    const g = G(), on = !o.off;
+    g.box(0, 0, 0, 0.9, 0.3, 0.9, '#495057').cyl(0, 0.3, 0, 0.22, 1.4, '#868e96', { seg: 8 });
+    g.add(G().cyl(0, -0.05, 0, 0.5, 0.1, '#c92a2a', { seg: 10 }).rotX(Math.PI / 2).move(0, 1.35, 0.25));   // wheel
+    g.box(0, 1.35, 0.25, 0.9, 0.06, 0.06, '#a61e1e').box(0, 1.35, 0.25, 0.06, 0.9, 0.06, '#a61e1e');
+    return g.sphere(0, 1.95, 0, 0.18, on ? '#ff922b' : '#4dabf7', { glow: 1, seg: 6, rings: 4 });             // light: orange = hot, blue = cooled
+  });
+  M.add('lighthouse', o => {   // an old red-and-white lighthouse (about 11 m) with a gallery and a lamp room; look.on = the lamp shines
+    const g = G(), on = !!o.on;
+    g.cyl(0, 0, 0, 2.0, 0.6, '#5c5048', { seg: 10 });                                                       // stone base
+    for (let i = 0; i < 6; i++) g.cyl(0, 0.6 + i * 1.4, 0, 1.6 - i * 0.12, 1.4, i % 2 ? '#e03131' : '#f1f3f5', { seg: 10 });
+    g.cyl(0, 9.0, 0, 1.4, 0.25, '#343a40', { seg: 10 });                                                    // gallery
+    for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; g.box(Math.cos(a) * 1.3, 9.25, Math.sin(a) * 1.3, 0.06, 0.6, 0.06, '#343a40'); }
+    g.cyl(0, 9.25, 0, 0.8, 1.3, on ? '#fff3bf' : '#5c6b77', { seg: 8, glow: on ? 1 : 0 });                  // lamp room
+    g.cone(0, 10.55, 0, 1.0, 0.9, '#343a40', { seg: 8 });
+    return g.box(0, 0.6, 1.58, 0.9, 1.6, 0.1, '#5c3d2e').box(0, 1.45, 1.6, 0.9, 0.12, 0.08, '#343a40');   // door (front +z)
+  });
+
   // ----- traps -----
   M.add('spikeTrap', o => {   // sharpened bamboo spikes in a frame; look.off = spikes down (safe to cross)
     const w = o.w || 2.4, up = !o.off, g = G().box(0, 0, 0, w, 0.08, w, '#5d4037');
@@ -7489,13 +7804,14 @@ GK_LIBRARY.worlds = {
                      decorations, locations, spawns, areas, routes, offFloor, roofs: [[x0, z0, x1, z1, y]],
                      keep: [[x, z, r]] (no scattered scenery here), wallHeight, colors, cave: true (crystals, no plants) })
    Symbols (2 m cells):
-     ground:  , sand  . grass  : path  c cave floor  S spawn (sand)
+     ground:  , sand  . grass  : path  c cave floor  S spawn (sand)  b black volcanic sand  a ash ground
      water:   ~ sea (cannot enter)  r river (cannot enter)  p pool (cannot enter)
               w lagoon: 1.4 m deep, water surface (wade / swim: add a `swim` area)  v deep water 3 m (add an `abyss`)
               l lava 1 m below (add an `abyss` / hazard)  x dark chasm 4 m deep (add an `abyss`)
      raised:  ^ grass +3 m  = path +3 m  h grass +2 m  H grass +4 m  P path +4 m  M rock +6 m  Q path +6 m  C cave +3 m
-              u sand +0.6 m (a low sandbar / rock step)
-     walls:   T jungle (4.5 m)  J tall jungle (8 m, around raised ground)  R rock (7 m)  K cave rock (6 m)  V volcano rock (9 m) */
+              u sand +0.6 m (a low sandbar / rock step)  O obsidian +3 m
+     walls:   T jungle (4.5 m)  J tall jungle (8 m, around raised ground)  R rock (7 m)  K cave rock (6 m)  V volcano rock (9 m)
+   lights: [{pos, color, range, intensity}] (e.g. a glow over lava) are passed through to the world. */
 (function () {
   'use strict';
   const SAND = '#f3e0a8', SAND2 = '#efd99c', GRASS = '#6aa84f', PATH = '#b08d57', CAVE = '#5c5550', CLIFF = '#8a7f73';
@@ -7503,18 +7819,19 @@ GK_LIBRARY.worlds = {
     '~': { floor: { color: '#1e88c7' }, block: true }, r: { floor: { color: '#2b9fd6' }, block: true }, p: { floor: { color: '#45b8e8' }, block: true },
     w: { floor: { color: '#d9c48d' }, sink: 1.4, water: '#2f9fd8', bank: '#9c8457' },
     v: { floor: { color: '#174a6e' }, sink: 3, water: '#1b78b8', bank: '#6d5a40' },
-    l: { floor: { color: '#3b1c0f' }, sink: 1, water: '#ff5a1f', bank: '#3b2a24' },
+    l: { floor: { color: '#3b1c0f' }, sink: 1, water: '#ff5a1f', waterGlow: 0.85, bank: '#3b2a24' },
     x: { floor: { color: '#141216' }, sink: 4, bank: '#2b2624' },
     ',': { floor: { color: SAND } }, S: { floor: { color: SAND }, spawn: { rot: 'n' } }, '.': { floor: { color: GRASS } }, ':': { floor: { color: PATH } }, c: { floor: { color: CAVE } },
     '^': { floor: { color: '#74b35a' }, raise: 3, side: CLIFF }, '=': { floor: { color: PATH }, raise: 3, side: CLIFF },
     h: { floor: { color: '#6faa52' }, raise: 2, side: CLIFF }, H: { floor: { color: '#79b85a' }, raise: 4, side: CLIFF },
     P: { floor: { color: PATH }, raise: 4, side: CLIFF }, M: { floor: { color: '#9a9088' }, raise: 6, side: '#7d7268' }, Q: { floor: { color: PATH }, raise: 6, side: '#7d7268' },
     C: { floor: { color: '#665e57' }, raise: 3, side: '#4e4640' }, u: { floor: { color: SAND2 }, raise: 0.6, side: '#c9b27a' },
+    b: { floor: { color: '#4a4440' } }, a: { floor: { color: '#6e6259' } }, O: { floor: { color: '#5a5048' }, raise: 3, side: '#2f2925' },
     T: { wall: { height: 4.5, color: '#2f6b2c', top: '#3f8f3a' } }, J: { wall: { height: 8, color: '#2c632a', top: '#3f8f3a' } },
     R: { wall: { height: 7, color: CLIFF, top: '#a39787' } }, K: { wall: { height: 6, color: '#5a514b', top: '#6b625b' } }, V: { wall: { height: 9, color: '#4a3f3a', top: '#5c4f48' } },
   };
-  const RAISE = { '^': 3, '=': 3, h: 2, H: 4, P: 4, M: 6, Q: 6, C: 3, u: 0.6 };
-  const WALKABLE = ',.:cS^=hHPMQCu';
+  const RAISE = { '^': 3, '=': 3, h: 2, H: 4, P: 4, M: 6, Q: 6, C: 3, u: 0.6, O: 3 };
+  const WALKABLE = ',.:cS^=hHPMQCubaO';
 
   GK.Wild = {
     LEGEND,
@@ -7559,10 +7876,11 @@ GK_LIBRARY.worlds = {
         }
       }
       for (const [x0, z0, x1, z1, y] of def.roofs || []) deco.push({ model: 'box', pos: [(x0 + x1) / 2, y || 5.9, (z0 + z1) / 2], look: { size: [x1 - x0, 0.4, z1 - z0] }, color: '#2b2522', solid: false });
-      if (def.sea !== false) deco.push({ model: 'seaPlane', pos: [grid[0].length, -0.04, grid.length], look: { size: 1000, color: def.seaColor || '#1c7ed6' }, solid: false });
+      // the open sea round the island: just under the lagoon / lava surfaces (0.3 m down), so it never covers them
+      if (def.sea !== false) deco.push({ model: 'seaPlane', pos: [grid[0].length, -0.36, grid.length], look: { size: 1000, color: def.seaColor || '#1c7ed6' }, solid: false });
       return {
         name: def.name, description: def.description, mergeScenery: true, offFloor: def.offFloor || [],
-        lighting: def.lighting,
+        lighting: def.lighting, lights: def.lights || [],
         map: {
           cell: 2, wallHeight: def.wallHeight || 4.5,
           colors: Object.assign({ wall: '#2f6b2c', wallTop: '#3f8f3a', floor: GRASS, floor2: '#64a14a', stairs: '#9c8f80', platform: CLIFF }, def.colors),
@@ -7892,6 +8210,111 @@ GK_LIBRARY.worlds = {
     routes: {
       boulderT1: [[49, 2, 52], [69, 2, 52]], boulderT2: [[69, 4, 36], [49, 4, 36]], snakeGlade: [[14, 76], [40, 76]], crabCove: [[86, 64], [110, 64]],
       launch: [[111, 26], [196, 30]],
+    },
+  }));
+})();
+
+</script>
+<script>/* worlds/ember-isle/world.js */
+/* World · ember-isle — ISLAND ESCAPE act 4: a small volcanic island (built by worlds/_wild.js).
+   BLACK SAND BAY (south-west: the boat washes up here) → an ASH PATH north (gate spot keeperGate) → the south bank of a
+   LAVA RIVER (1 m down, glowing: room for crumbling stones, add an `abyss`) → the OBSIDIAN FIELDS (north bank: open
+   ash ground for vents, rolling rocks and creatures) → a corridor east to a 3 m CLIFF (vine-wall spot cliffFace) →
+   LIGHTHOUSE POINT (+3 m: the lighthouse spot and a boss arena) → stairs down south → the JETTY BEACH (east, open sea).
+   ENVIRONMENT ONLY.
+   Named locations:
+     bay · keeperDesk · kikoBay · wreck · keeperGate · southBank · tile1-3 · northBank · traderSpot · page7 · fieldsCentre ·
+     cliffFace (face west) · pointTop · lighthouseSpot · golemSpot · valve1-3 · page8 · stairsTop · jetty · boatSpot ·
+     kikoJetty · shipSpot · rescueEnd
+   Spawns: default (bay) · fields · point · jetty
+   Areas: bay · path · southBank · fields · point · arena · jetty
+   Routes: ashRun1 · ashRun2 · lavaRoll · batsFields · batsPoint · rescue */
+(function () {
+  GK.Worlds.add('ember-isle', GK.Wild.world({
+    name: 'Ember Isle',
+    description: 'Act 4 of Island Escape: a volcanic island with black sand, a lava river, obsidian fields and an old lighthouse.',
+    seed: 41, offFloor: ['shipSpot', 'rescueEnd', 'rescue'], seaColor: '#1864ab',
+    lighting: { sky: ['#3b2a2a', '#7a4b3a', '#d08a5a'], fog: [60, 220], fogColor: '#8a6a58', sun: { dir: [0.4, 1, 0.35], color: '#ffe0bf', intensity: 0.6 }, ambient: { sky: '#bba595', ground: '#5a4a40' }, grid: false },
+    grid: [
+    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', // 0
+    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', // 1
+    '~~VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV~~', // 2
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 3
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 4
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 5
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 6
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 7
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 8
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 9
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 10
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 11
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 12
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 13
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 14
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 15
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 16
+    '~~VllllllllllllllllllllllllllllVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 17
+    '~~VllllllllllllllllllllllllllllVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 18
+    '~~VllllllllllllllllllllllllllllVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 19
+    '~~VllllllllllllllllllllllllllllVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 20
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 21
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVOOOOOOOOOOOOOOOOOOOOOOOOV~~', // 22
+    '~~VaaaaaaaaaaaaaaaaaaaaaaaaaaaaVVVVVVVVVVVVVbbVVVVVVVVVVVV~~', // 23
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVbbVVVVVVVVVVV~~~', // 24
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVbbVVVVVVVVVVV~~~', // 25
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 26
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 27
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 28
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 29
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 30
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 31
+    '~~VVVVVVVVaaaaVVVVVVVVVVVVVVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 32
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 33
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 34
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 35
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 36
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 37
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 38
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 39
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 40
+    '~~VbbbbbbbbbbbbbbbbbbbbbbbbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 41
+    '~~Vb~bbbb~bbbb~bbbb~bbbb~bbVVVVVVbbbbbbbbbbbbbbbbbbbbbbbb~~~', // 42
+    '~~VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV~~~~~~~~~~~~~~~~~~~~~~~~~~~', // 43
+    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', // 44
+    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', // 45
+    ],
+    keep: [[20, 78, 5], [24, 64, 5], [31, 38, 6], [62, 14, 5], [90, 48, 5], [100, 12, 5]],
+    stairs: [{ pos: [90, 0, 52], dir: 'n', steps: 12, rise: 0.25, run: 0.5, width: 4, color: '#5c5048' }],
+    lights: [[10, 38], [22, 38], [34, 38], [46, 38], [58, 38]].map(([x, z]) => ({ pos: [x, 0.4, z], color: '#ff6b1a', range: 10, intensity: 0.9 })),
+    decorations: [
+      { model: 'mountain', pos: [60, 0, -70], look: { h: 70, r: 55, color: '#3b302b', snow: '#ff6b00' }, solid: false },
+      { model: 'escapeBoat', pos: [9, 0, 82], rot: 'e', look: { parts: 9 }, merge: false },
+      { model: 'tent', pos: [42, 0, 70], rot: 's', color: '#7d6b5a' }, { model: 'campfire', pos: [38, 0, 76], look: { lit: false }, solid: false },
+      { model: 'cliffRock', pos: [6, 0, 70], look: { h: 3, color: '#3b3330' }, solid: false }, { model: 'cliffRock', pos: [50, 0, 84], look: { h: 2, color: '#3b3330' }, solid: false },
+      { model: 'cliffRock', pos: [10, 0, 12], look: { h: 3, color: '#3b3330' }, solid: false }, { model: 'cliffRock', pos: [56, 0, 30], look: { h: 2.5, color: '#3b3330' }, solid: false },
+      { model: 'brokenPosts', pos: [112, 0, 60], rot: 'e', solid: false }, { model: 'driftwood', pos: [76, 0, 82], solid: false },
+      { model: 'island', pos: [-70, 0, 150], look: { r: 14 }, solid: false },
+    ],
+    locations: {
+      bay: { pos: [20, 0, 78], rot: 'n' }, keeperDesk: { pos: [38, 0, 70], rot: 'w' }, kikoBay: { pos: [26, 0, 76], rot: 'w' }, wreck: { pos: [9, 0, 82] },
+      keeperGate: { pos: [24, 0, 64.6], rot: 's' }, southBank: { pos: [30, 0, 45] },
+      tile1: { pos: [30, 0, 40.3] }, tile2: { pos: [32.6, 0, 38.0] }, tile3: { pos: [30, 0, 35.7] }, northBank: { pos: [30, 0, 31] },
+      traderSpot: { pos: [9, 0, 8.6], rot: 's' }, page7: { pos: [8, 0, 28] }, fieldsCentre: { pos: [34, 0, 20] },
+      cliffFace: { pos: [64, 0, 14], rot: 'e' }, pointTop: { pos: [70, 3, 14] }, lighthouseSpot: { pos: [100, 3, 12], rot: 's' },
+      golemSpot: { pos: [92, 3, 28] }, valve1: { pos: [72, 3, 30], rot: 'e' }, valve2: { pos: [110, 3, 30], rot: 'w' }, valve3: { pos: [80, 3, 43], rot: 'n' },
+      page8: { pos: [112, 3, 8] }, stairsTop: { pos: [90, 3, 45] }, jetty: { pos: [90, 0, 56] }, boatSpot: { pos: [110, 0, 74], rot: 'e' },
+      kikoJetty: { pos: [104, 0, 64], rot: 'w' }, shipSpot: { pos: [215, 0, 74], rot: 'w' }, rescueEnd: { pos: [196, 0, 74] },
+    },
+    spawns: { default: { pos: [20, 0, 78], rot: 'n' }, fields: { pos: [30, 0, 30], rot: 'n' }, point: { pos: [70, 3, 14], rot: 'e' }, jetty: { pos: [90, 0, 56], rot: 's' } },
+    areas: {
+      bay: { pos: [30, 0, 76], size: [48, 6, 20] }, path: { pos: [24, 0, 57], size: [8, 6, 18] }, southBank: { pos: [34, 0, 45], size: [56, 6, 6] },
+      fields: { pos: [34, 0, 20], size: [56, 6, 24] }, point: { pos: [90, 3, 26], size: [46, 6, 38] }, arena: { pos: [92, 3, 30], size: [40, 6, 28] },
+      jetty: { pos: [90, 0, 70], size: [46, 6, 30] },
+    },
+    routes: {
+      ashRun1: [[14, 72], [44, 74]], ashRun2: [[16, 82], [46, 80]], lavaRoll: [[60, 0, 25], [7, 0, 25]],
+      batsFields: [[12, 1.6, 16], [48, 1.6, 16], [48, 1.6, 8], [12, 1.6, 8]], batsPoint: [[74, 4.6, 20], [108, 4.6, 20]],
+      rescue: [[110, 74], [196, 74]],
     },
   }));
 })();
@@ -10819,15 +11242,18 @@ GK_LIBRARY.worlds = {
 /* Island Escape — the game's own script (loaded through GAME.scripts, before the game starts):
    · a boat-materials counter ("🛶 Boat materials 4/9") each time a material is added
    · mastery: per challenge, wrong tries, hints and shown answers (state.vars.mastery, so it is saved with the game)
-   · the launch: after "Launch" on the finished boat, the boat sails out with the player on board towards the rescue
-     ship (about 9 s), then the flag `escaped` completes the last mission and the game is won
+   · two boat rides (about 9 s each), the player on board: act 3's launch ("Launch" on the finished boat: flags
+     launching → escaped, route `launch`; then the volcano erupts and act 4 begins) and act 4's lifeboat ("Board the
+     lifeboat": boarding → rescued, route `rescue`: the last mission, the game is won)
    · a storm in act 3 ("peak"): lightning flashes the screen white now and then, with thunder
+   · act 4 ("ember"): the volcano rumbles now and then (the screen shakes, a boom)
    · the end screen's mission table (hooks.endHtml). */
 (function () {
   const C = window.GAME_CONTENT, esc = t => GK.util.esc(t);   // GK is used only once the game runs (this file may load before the kit)
   const MATERIALS = ['planks', 'rope', 'cutter', 'bamboo', 'cloth', 'fasteners', 'strongRope', 'rudder', 'compass'];
   const MISSIONS = [['m1', 'The Shipwreck'], ['m2', 'The Fallen Trees'], ['m3', 'The Jungle Trail'], ['m4', 'The Broken Crossing'], ['m5', 'The Lost Explorer\'s Pack'],
-    ['m6', 'The Cave of Clues'], ['m7', 'The Dangerous Message'], ['m8', 'The Waterfall Generator'], ['m9', 'Signal Hill'], ['m10', 'Build the Boat']];
+    ['m6', 'The Cave of Clues'], ['m7', 'The Dangerous Message'], ['m8', 'The Waterfall Generator'], ['m9', 'Signal Hill'], ['m10', 'Build the Boat'],
+    ['m11', 'The Soaked Laptop'], ['m12', 'The Lighthouse Message']];
   const LAUNCH_TIME = 9;
 
   const mastery = (g, id) => {
@@ -10862,30 +11288,49 @@ GK_LIBRARY.worlds = {
     setTimeout(() => g.audio.play('boom'), 600);
   };
 
-  // ----- the launch: ride the boat out to the rescue ship -----
-  hooks.update = (g, dt) => {
-    storm(g, dt);
+  // ----- act 4: the volcano rumbles every 14-25 s -----
+  let nextRumble = 10;
+  const rumble = (g, dt) => {
+    if (g.stageId !== 'ember' || g.state.flags.golemDown || g.state.mode !== 'playing') return;
+    nextRumble -= dt;
+    if (nextRumble > 0) return;
+    nextRumble = 14 + ((g.state.time * 5.1) % 11);
+    if (g.shake) g.shake(0.7, 0.07);
+    g.audio.play('boom');
+  };
+
+  // ----- the boat rides: out to sea with the player on board -----
+  const RIDES = [
+    { scene: 'peak', start: 'launching', end: 'escaped', boat: 'boat', route: 'launch', t: 'launchT', event: 'island:escaped' },
+    { scene: 'ember', start: 'boarding', end: 'rescued', boat: 'lifeboat', route: 'rescue', t: 'rescueT', event: 'island:rescued' },
+  ];
+  const ride = (g, dt, R) => {
     const f = g.state.flags;
-    if (!f.launching || f.escaped) return;
-    const v = g.state.vars, boat = g.world.get('boat'), ship = g.world.get('ship'), route = g.world.routes.launch;
-    if (!boat || !route) { f.escaped = true; return; }
-    if (v.launchT == null) {
-      v.launchT = 0;
+    if (g.stageId !== R.scene || !f[R.start] || f[R.end]) return;
+    const v = g.state.vars, boat = g.world.get(R.boat), ship = g.world.get('ship'), route = g.world.routes[R.route];
+    if (!boat || !route) { f[R.end] = true; return; }
+    if (v[R.t] == null) {
+      v[R.t] = 0;
       g.player.yaw = -Math.PI / 2; g.player.pitch = 0;   // look out to sea (east)
       if (ship) ship.show();
     }
-    const t0 = v.launchT;
-    v.launchT += dt;
-    const k = Math.min(1, v.launchT / LAUNCH_TIME), e = k * k * (3 - 2 * k);   // smooth start and stop
+    const t0 = v[R.t];
+    v[R.t] += dt;
+    const k = Math.min(1, v[R.t] / LAUNCH_TIME), e = k * k * (3 - 2 * k);   // smooth start and stop
     const a = route[0], b = route[route.length - 1];
-    boat.pos = [a[0] + (b[0] - a[0]) * e, -0.25 + Math.sin(v.launchT * 2.2) * 0.06, a[2] + (b[2] - a[2]) * e];
+    boat.pos = [a[0] + (b[0] - a[0]) * e, -0.25 + Math.sin(v[R.t] * 2.2) * 0.06, a[2] + (b[2] - a[2]) * e];
     g.player.pos[0] = boat.pos[0] - 0.6; g.player.pos[1] = boat.pos[1] + 0.68; g.player.pos[2] = boat.pos[2];
     g.player.vel = [0, 0, 0];
     if (ship && ship.home == null) ship.home = ship.pos.slice();
     if (ship) ship.pos = [ship.home[0] - 10 * e, 0, ship.home[2]];
-    if (t0 < 1.5 && v.launchT >= 1.5) g.ui.toast(C.messages.shipTurns, 'good');
-    if (t0 < 5 && v.launchT >= 5) { g.ui.toast(C.messages.horn, 'good'); g.audio.play('objective'); }
-    if (k >= 1) { f.escaped = true; g.emit('island:escaped', {}); if (g.missions) g.missions.check(); }
+    if (t0 < 1.5 && v[R.t] >= 1.5) g.ui.toast(C.messages.shipTurns, 'good');
+    if (t0 < 5 && v[R.t] >= 5) { g.ui.toast(C.messages.horn, 'good'); g.audio.play('objective'); }
+    if (k >= 1) { f[R.end] = true; g.emit(R.event, {}); if (g.missions) g.missions.check(); }
+  };
+  hooks.update = (g, dt) => {
+    storm(g, dt);
+    rumble(g, dt);
+    for (const R of RIDES) ride(g, dt, R);
   };
 
   // ----- end screen: how each mission went -----
@@ -10899,7 +11344,8 @@ GK_LIBRARY.worlds = {
       return '<tr><td>' + (i + 1) + '. ' + esc(name) + '</td><td>' + icon + '</td><td>' + (r.wrong || 0) + '</td></tr>';
     }).join('');
     const found = g.state.collected ? g.state.collected.supplies || 0 : 0;
-    return '<p><b>🧠 Mastery: ' + alone + ' / ' + MISSIONS.length + ' challenges solved without seeing the answer</b> · 🎒 hidden supplies ' + found + ' / 5' +
+    const pages = g.state.collected ? g.state.collected.page || 0 : 0;
+    return '<p><b>🧠 Mastery: ' + alone + ' / ' + MISSIONS.length + ' challenges solved without seeing the answer</b> · 🎒 hidden supplies ' + found + ' / 5 · 📜 journal pages ' + pages + ' / 8' +
       (g.state.solved && g.state.solved.bonus ? ' · 📖 logbook ✓' : '') + ' · ' + esc(g.difficulty === 'g7' ? 'Grade 7' : 'Grade 6') + '</p>' +
       '<table><tr><th>Mission</th><th>Result</th><th>Wrong tries</th></tr>' + rows + '</table>';
   };
