@@ -1,7 +1,8 @@
 /* 3D Visual Foundation · stylized-characters.js — a rounded, friendly explorer for the Game Kit's animated character.
    Replaces the boxy 'heroPart' / 'hero' models (load AFTER assets/models/people.js). Same joints and sizes as GK.HERO, so
    walking, aiming and the third-person camera work unchanged. Big round head and eyes, soft limbs, short sleeves, boots,
-   an optional scarf (look.scarf, default the accent colour) and backpack (look.pack: true | '#colour').
+   an optional scarf (look.scarf: '#colour', default the accent colour; false = none) and backpack (look.pack: true | '#colour';
+   false = none).
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail', shirt, pants, shoes,
                        accent, scarf, pack, skirt } */
 (function () {
@@ -39,9 +40,11 @@
     g.box(0, HERO.hip + 0.012, w * 0.6, 0.07, 0.05, 0.02, '#e9c46a');                                                        // buckle
     g.add(G().cyl(0, 0, 0, w * 0.95, 0.16, o.pants, { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip - 0.12, 0));   // hips
     g.box(f ? 0.07 : 0.09, HERO.hip + 0.34, w * 0.62 + 0.005, 0.06, 0.06, 0.012, o.accent, { glow: 1 });                    // glowing badge
-    const scarf = o.scarf || o.accent;
-    g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                       // scarf
-    g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                  // scarf tail
+    if (o.scarf !== false) {
+      const scarf = o.scarf || o.accent;
+      g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                     // scarf
+      g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                // scarf tail
+    } else g.cyl(0, top - 0.02, 0, 0.075, 0.05, dk(o.shirt, 0.85), { seg: 10 });                                             // collar
     if (o.pack !== false) {
       const p = typeof o.pack === 'string' ? o.pack : '#8b5a2b';
       g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });

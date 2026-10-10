@@ -7,10 +7,12 @@
      grassTuft {s, small} · flowerPatch {color} · pebbles {color} · seaRock {s, color} · cliffRock {h, color}
      mountain {h, r, color, snow} · island {r, color} (a little sea islet with palms) · skyCloud {seed} (for sky props)
    Kenney models (CC0, see ASSET_CREDITS.md) come from GK.ModelData (assets/kenney-models.js); when that file is not
-   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks. */
+   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks.
+   To keep a game's own version of a model, set window.GK_NATURE_KEEP = ['island', …] before this file loads. */
 (function () {
   'use strict';
-  const U = GK.util, V = GK.vec, M = GK.Models, G = () => new GK.Geo();
+  const U = GK.util, V = GK.vec, G = () => new GK.Geo(), keep = window.GK_NATURE_KEEP || [];
+  const M = { add: (name, fn) => (keep.indexOf(name) < 0 ? GK.Models.add(name, fn) : null), get: name => GK.Models.get(name) };
   const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
   const seedOf = (...v) => Math.abs(Math.round(v.reduce((a, x) => a * 31 + (typeof x === 'string' ? x.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0) : (x || 0) * 997), 7))) % 2147483647 || 1;
   const data = name => GK.ModelData && GK.ModelData[name];

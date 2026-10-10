@@ -4690,7 +4690,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
 /* 3D Visual Foundation · stylized-characters.js — a rounded, friendly explorer for the Game Kit's animated character.
    Replaces the boxy 'heroPart' / 'hero' models (load AFTER assets/models/people.js). Same joints and sizes as GK.HERO, so
    walking, aiming and the third-person camera work unchanged. Big round head and eyes, soft limbs, short sleeves, boots,
-   an optional scarf (look.scarf, default the accent colour) and backpack (look.pack: true | '#colour').
+   an optional scarf (look.scarf: '#colour', default the accent colour; false = none) and backpack (look.pack: true | '#colour';
+   false = none).
    A character look: { body: 'm' | 'f', skin, hair, hairStyle: 'short' | 'spiky' | 'long' | 'ponytail', shirt, pants, shoes,
                        accent, scarf, pack, skirt } */
 (function () {
@@ -4728,9 +4729,11 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     g.box(0, HERO.hip + 0.012, w * 0.6, 0.07, 0.05, 0.02, '#e9c46a');                                                        // buckle
     g.add(G().cyl(0, 0, 0, w * 0.95, 0.16, o.pants, { seg: 12 }).scale(1, 1, 0.66).move(0, HERO.hip - 0.12, 0));   // hips
     g.box(f ? 0.07 : 0.09, HERO.hip + 0.34, w * 0.62 + 0.005, 0.06, 0.06, 0.012, o.accent, { glow: 1 });                    // glowing badge
-    const scarf = o.scarf || o.accent;
-    g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                       // scarf
-    g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                  // scarf tail
+    if (o.scarf !== false) {
+      const scarf = o.scarf || o.accent;
+      g.add(G().cyl(0, 0, 0, 0.115, 0.08, scarf, { seg: 12 }).scale(1, 1, 0.9).move(0, top - 0.01, 0));                     // scarf
+      g.add(G().box(0, -0.16, 0, 0.09, 0.17, 0.03, dk(scarf, 0.9)).rotX(-0.15).move(0.05, top + 0.02, 0.1));                // scarf tail
+    } else g.cyl(0, top - 0.02, 0, 0.075, 0.05, dk(o.shirt, 0.85), { seg: 10 });                                             // collar
     if (o.pack !== false) {
       const p = typeof o.pack === 'string' ? o.pack : '#8b5a2b';
       g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });
@@ -5763,7 +5766,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     'uniform vec3 uEye;', 'uniform vec3 uFogColor;', 'uniform vec2 uFog;', 'uniform float uAlpha;', 'uniform float uHi;',
     'uniform int uNL;', 'uniform vec3 uLP[' + MAX_LIGHTS + '];', 'uniform vec3 uLC[' + MAX_LIGHTS + '];', 'uniform float uLR[' + MAX_LIGHTS + '];',
     'uniform float uGrid;', 'uniform vec3 uGridCol;', 'uniform float uCell;',
-    'uniform float uTime;', 'uniform float uDetail;', 'uniform float uExposure;', 'uniform float uSat;',
+    'uniform float uTime;', 'uniform float uDetail;', 'uniform float uExposure;', 'uniform float uSat;', 'uniform float uWater;',
     'uniform float uShadowOn;', 'uniform sampler2D uShadowMap;', 'uniform float uShadowTexel;', 'uniform float uShadowK;',
     'varying vec3 vCol;', 'varying vec3 vNor;', 'varying vec3 vWorld;', 'varying float vGlo;', 'varying vec4 vLight;',
   ], NOISE, [ACES,
@@ -5799,7 +5802,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     '    float brown = warm * (1.0 - sand);',
     '    float wood = brown * smoothstep(0.55, 0.65, sat);',
     '    float grey = 1.0 - smoothstep(0.08, 0.2, sat);',
-    '    water = step(0.97, n.y) * step(vWorld.y, 0.25) * smoothstep(0.1, 0.25, base.b - base.r) * step(base.g, base.b);',
+    '    water = uWater * step(0.97, n.y) * step(vWorld.y, 0.25) * smoothstep(0.1, 0.25, base.b - base.r) * step(base.g, base.b);',
     '    float big = fbm(p * 0.16);',
     '    float fine = vnoise(p * 7.0);',
     '    float d = 1.0;',
@@ -5952,7 +5955,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       for (const n of ['aPos', 'aNor', 'aCol', 'aGlo']) this.a[n] = gl.getAttribLocation(this.prog, n);
       this.u = {};
       for (const n of ['uVP', 'uM', 'uLVP', 'uSunDir', 'uSun', 'uSky', 'uGround', 'uHorizon', 'uTint', 'uEye', 'uGlow', 'uHi', 'uFogColor', 'uFog', 'uAlpha',
-        'uNL', 'uLP', 'uLC', 'uLR', 'uGrid', 'uGridCol', 'uCell', 'uTime', 'uDetail', 'uExposure', 'uSat', 'uShadowOn', 'uShadowMap', 'uShadowTexel', 'uShadowK']) {
+        'uNL', 'uLP', 'uLC', 'uLR', 'uGrid', 'uGridCol', 'uCell', 'uTime', 'uDetail', 'uExposure', 'uSat', 'uWater', 'uShadowOn', 'uShadowMap', 'uShadowTexel', 'uShadowK']) {
         this.u[n] = gl.getUniformLocation(this.prog, n);
       }
       gl.enable(gl.DEPTH_TEST);
@@ -5984,7 +5987,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     }
     /** env: {sun:{dir,color,intensity}, ambient:{sky,ground}, fog:[near,far], fogColor, grid: colour of the floor traces,
         sky: [top, middle, horizon] colours (drawn as a dome; omit for a see-through canvas), clouds: true | {cover 0..1, color, shade},
-        shadows: false (no sun shadows, e.g. caves), shadowStrength 0..1, exposure, saturation} */
+        shadows: false (no sun shadows, e.g. caves), shadowStrength 0..1, exposure, saturation,
+        water: false (blue floors near y = 0 are NOT animated water: ice, glass, blue tiles)} */
     setEnv(env) {
       const sun = env.sun || {}, amb = env.ambient || {}, sky = U.list(env.sky), cl = env.clouds === true ? {} : env.clouds;
       this.env = {
@@ -6001,6 +6005,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         shadowK: env.shadowStrength == null ? 0.78 : env.shadowStrength,
         exposure: env.exposure == null ? 0.92 : env.exposure,
         saturation: env.saturation == null ? 1.15 : env.saturation,
+        water: env.water !== false,
       };
       if (env.grid) this.gridColor = U.color(env.grid);
     }
@@ -6066,7 +6071,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       gl.uniform3fv(u.uEye, eye); gl.uniform3fv(u.uFogColor, e.fogColor); gl.uniform2fv(u.uFog, fog);
       gl.uniform3fv(u.uGridCol, this.gridColor); gl.uniform1f(u.uCell, this.cell);
       gl.uniform1f(u.uTime, this.time); gl.uniform1f(u.uDetail, detail ? 1 : 0);
-      gl.uniform1f(u.uExposure, e.exposure); gl.uniform1f(u.uSat, e.saturation);
+      gl.uniform1f(u.uExposure, e.exposure); gl.uniform1f(u.uSat, e.saturation); gl.uniform1f(u.uWater, e.water ? 1 : 0);
       gl.uniform1f(u.uShadowOn, shadowOn ? 1 : 0); gl.uniform1f(u.uShadowK, e.shadowK);
       gl.uniform1f(u.uShadowTexel, this.sh ? 1 / this.sh.size : 0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, shadowOn && this.sh ? this.sh.tex : null); gl.uniform1i(u.uShadowMap, 1);
@@ -8305,10 +8310,12 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
      grassTuft {s, small} · flowerPatch {color} · pebbles {color} · seaRock {s, color} · cliffRock {h, color}
      mountain {h, r, color, snow} · island {r, color} (a little sea islet with palms) · skyCloud {seed} (for sky props)
    Kenney models (CC0, see ASSET_CREDITS.md) come from GK.ModelData (assets/kenney-models.js); when that file is not
-   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks. */
+   loaded, grassTuft / kenneyTree / skyCloud fall back to hand-built shapes, so nothing breaks.
+   To keep a game's own version of a model, set window.GK_NATURE_KEEP = ['island', …] before this file loads. */
 (function () {
   'use strict';
-  const U = GK.util, V = GK.vec, M = GK.Models, G = () => new GK.Geo();
+  const U = GK.util, V = GK.vec, G = () => new GK.Geo(), keep = window.GK_NATURE_KEEP || [];
+  const M = { add: (name, fn) => (keep.indexOf(name) < 0 ? GK.Models.add(name, fn) : null), get: name => GK.Models.get(name) };
   const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
   const seedOf = (...v) => Math.abs(Math.round(v.reduce((a, x) => a * 31 + (typeof x === 'string' ? x.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0) : (x || 0) * 997), 7))) % 2147483647 || 1;
   const data = name => GK.ModelData && GK.ModelData[name];

@@ -51,7 +51,7 @@
     'uniform vec3 uEye;', 'uniform vec3 uFogColor;', 'uniform vec2 uFog;', 'uniform float uAlpha;', 'uniform float uHi;',
     'uniform int uNL;', 'uniform vec3 uLP[' + MAX_LIGHTS + '];', 'uniform vec3 uLC[' + MAX_LIGHTS + '];', 'uniform float uLR[' + MAX_LIGHTS + '];',
     'uniform float uGrid;', 'uniform vec3 uGridCol;', 'uniform float uCell;',
-    'uniform float uTime;', 'uniform float uDetail;', 'uniform float uExposure;', 'uniform float uSat;',
+    'uniform float uTime;', 'uniform float uDetail;', 'uniform float uExposure;', 'uniform float uSat;', 'uniform float uWater;',
     'uniform float uShadowOn;', 'uniform sampler2D uShadowMap;', 'uniform float uShadowTexel;', 'uniform float uShadowK;',
     'varying vec3 vCol;', 'varying vec3 vNor;', 'varying vec3 vWorld;', 'varying float vGlo;', 'varying vec4 vLight;',
   ], NOISE, [ACES,
@@ -87,7 +87,7 @@
     '    float brown = warm * (1.0 - sand);',
     '    float wood = brown * smoothstep(0.55, 0.65, sat);',
     '    float grey = 1.0 - smoothstep(0.08, 0.2, sat);',
-    '    water = step(0.97, n.y) * step(vWorld.y, 0.25) * smoothstep(0.1, 0.25, base.b - base.r) * step(base.g, base.b);',
+    '    water = uWater * step(0.97, n.y) * step(vWorld.y, 0.25) * smoothstep(0.1, 0.25, base.b - base.r) * step(base.g, base.b);',
     '    float big = fbm(p * 0.16);',
     '    float fine = vnoise(p * 7.0);',
     '    float d = 1.0;',
@@ -240,7 +240,7 @@
       for (const n of ['aPos', 'aNor', 'aCol', 'aGlo']) this.a[n] = gl.getAttribLocation(this.prog, n);
       this.u = {};
       for (const n of ['uVP', 'uM', 'uLVP', 'uSunDir', 'uSun', 'uSky', 'uGround', 'uHorizon', 'uTint', 'uEye', 'uGlow', 'uHi', 'uFogColor', 'uFog', 'uAlpha',
-        'uNL', 'uLP', 'uLC', 'uLR', 'uGrid', 'uGridCol', 'uCell', 'uTime', 'uDetail', 'uExposure', 'uSat', 'uShadowOn', 'uShadowMap', 'uShadowTexel', 'uShadowK']) {
+        'uNL', 'uLP', 'uLC', 'uLR', 'uGrid', 'uGridCol', 'uCell', 'uTime', 'uDetail', 'uExposure', 'uSat', 'uWater', 'uShadowOn', 'uShadowMap', 'uShadowTexel', 'uShadowK']) {
         this.u[n] = gl.getUniformLocation(this.prog, n);
       }
       gl.enable(gl.DEPTH_TEST);
@@ -272,7 +272,8 @@
     }
     /** env: {sun:{dir,color,intensity}, ambient:{sky,ground}, fog:[near,far], fogColor, grid: colour of the floor traces,
         sky: [top, middle, horizon] colours (drawn as a dome; omit for a see-through canvas), clouds: true | {cover 0..1, color, shade},
-        shadows: false (no sun shadows, e.g. caves), shadowStrength 0..1, exposure, saturation} */
+        shadows: false (no sun shadows, e.g. caves), shadowStrength 0..1, exposure, saturation,
+        water: false (blue floors near y = 0 are NOT animated water: ice, glass, blue tiles)} */
     setEnv(env) {
       const sun = env.sun || {}, amb = env.ambient || {}, sky = U.list(env.sky), cl = env.clouds === true ? {} : env.clouds;
       this.env = {
@@ -289,6 +290,7 @@
         shadowK: env.shadowStrength == null ? 0.78 : env.shadowStrength,
         exposure: env.exposure == null ? 0.92 : env.exposure,
         saturation: env.saturation == null ? 1.15 : env.saturation,
+        water: env.water !== false,
       };
       if (env.grid) this.gridColor = U.color(env.grid);
     }
@@ -354,7 +356,7 @@
       gl.uniform3fv(u.uEye, eye); gl.uniform3fv(u.uFogColor, e.fogColor); gl.uniform2fv(u.uFog, fog);
       gl.uniform3fv(u.uGridCol, this.gridColor); gl.uniform1f(u.uCell, this.cell);
       gl.uniform1f(u.uTime, this.time); gl.uniform1f(u.uDetail, detail ? 1 : 0);
-      gl.uniform1f(u.uExposure, e.exposure); gl.uniform1f(u.uSat, e.saturation);
+      gl.uniform1f(u.uExposure, e.exposure); gl.uniform1f(u.uSat, e.saturation); gl.uniform1f(u.uWater, e.water ? 1 : 0);
       gl.uniform1f(u.uShadowOn, shadowOn ? 1 : 0); gl.uniform1f(u.uShadowK, e.shadowK);
       gl.uniform1f(u.uShadowTexel, this.sh ? 1 / this.sh.size : 0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, shadowOn && this.sh ? this.sh.tex : null); gl.uniform1i(u.uShadowMap, 1);

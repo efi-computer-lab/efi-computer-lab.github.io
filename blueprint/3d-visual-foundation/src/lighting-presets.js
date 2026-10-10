@@ -30,6 +30,12 @@
       sun: { dir: [0.3, 1, 0.2], color: '#c8d2ff', intensity: 0.42 }, ambient: { sky: '#7c84b4', ground: '#3a332f' },
       shadows: false, exposure: 0.8, grid: false,
     },
+    /** Cyber Rush "Neon City": a night city of glowing towers. Grid floors, soft shadows, no clouds; blue floors stay solid. */
+    neonNight: {
+      sky: ['#0b1026', '#2a1b4d', '#5b2a6e'], fogColor: '#2a1b4d', fog: [60, 230],
+      sun: { dir: [0.3, 1, 0.2], color: '#c8b6ff', intensity: 0.38 }, ambient: { sky: '#7a6be0', ground: '#2a2350' },
+      water: false, shadowStrength: 0.6, exposure: 1.0,
+    },
     /** Indoor / sci-fi rooms (the older Game Kit look): grid floors, no sky dome detail. */
     indoorLab: {
       sky: ['#7fb8f0', '#d9ecfb'], fog: [30, 90],
