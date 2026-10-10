@@ -7514,7 +7514,6 @@ GK_LIBRARY.worlds = {
       g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });
       g.blob(0, HERO.hip + 0.47, -0.2, 0.15, dk(p, 1.08), { seed: 5, rough: 0.05, seg: 8, rings: 5, squash: 0.55 });          // rolled top
       g.box(0, HERO.hip + 0.18, -0.28, 0.2, 0.14, 0.04, dk(p, 0.85)).box(0, HERO.hip + 0.3, -0.3, 0.05, 0.05, 0.02, '#e9c46a');  // pocket + clasp
-      g.add(G().cyl(0, 0, 0, 0.065, 0.32, '#c9b27a', { seg: 8 }).rotZ(Math.PI / 2).move(-0.16, HERO.hip + 0.05, -0.2));     // bedroll
       for (const x of [-0.1, 0.1]) g.box(x, HERO.hip + 0.12, w * 0.6, 0.04, 0.42, 0.015, dk(p, 0.8));                          // straps
     }
     if (o.skirt) g.add(G().cyl(0, 0, 0, w * 1.25, 0.3, dk(o.pants, 1.15), { seg: 12, rTop: w * 0.95 }).scale(1, 1, 0.75).move(0, HERO.hip - 0.26, 0));

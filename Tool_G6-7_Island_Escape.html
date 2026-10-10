@@ -1551,7 +1551,7 @@ window.GAME_CONTENT = {
           // ---- the courtyard ----
           pad('cpYard', [21, 0, 40]),
           pirate('pirate1', { route: 'pirateYard' }, { visible: false }), pirate('pirate2', { pos: [44, 0, 34] }, { visible: false }), pirate('pirate3', { pos: [14, 0, 22] }, { visible: false }),
-          gunner('pirate4', { pos: [50, 0, 22] }, { visible: false, path: [[50, 22], [50, 40]] }), gunner('pirate5', { pos: [6, 0, 30] }, { visible: false }),
+          gunner('pirate4', { pos: [50, 0, 22] }, { visible: false, path: [[50, 22], [50, 40]] }), gunner('pirate5', { pos: [10, 0, 30] }, { visible: false }),
           { id: 'boom1', type: 'sweeper', pos: [30, 0, 26], length: 8, spin: 1.3, y: 0.6 }, { id: 'boom2', type: 'sweeper', pos: [42, 0, 36], length: 7, spin: -1.5, y: 0.6 },
           station('lookoutDesk', 'lookoutDesk', 'workstation', 'm15', { name: 'lookout\'s desk', color: '#6b5b4b' }),
           { id: 'clueBoard', model: 'noticeBoard', at: 'clueBoard', name: 'pirate note', interact: { type: 'inspect', title: C.signs.planks.title, text: C.signs.planks.text } },
@@ -1562,7 +1562,7 @@ window.GAME_CONTENT = {
           { id: 'moat', type: 'abyss', pos: [72, -4, 32], size: [20, 2.6, 16], color: '#4dabf7' },
           // ---- the keep: cannons, the map chest, Bosun Barnacle ----
           pad('cpKeep', [88, 0, 32]),
-          cannon('cannon1', [108, 0, 30], 'w'), cannon('cannon2', [100, 0, 13], 's'),
+          cannon('cannon1', [108, 0, 30], 'w'), cannon('cannon2', [92, 0, 44], 'e'),
           station('mapChest', 'mapChest', 'supplyBox', 'm16', { name: 'Grimtide\'s map chest', color: '#5c3d2e' }),
           { id: 'bosun', type: 'hazard', model: 'pirate', name: 'MINI-BOSS · BOSUN BARNACLE', gait: 'stomp', at: 'bosunSpot', visible: false, scale: 1.8, look: { shirt: '#1864ab', pants: '#212529', skin: '#c68642', hat: '#343a40' },
             bodyRadius: 1.0, boss: true, engage: 30, hp: 80, damage: 18, speed: 1.6, chase: 30, chaseSpeed: 2.2, knockback: 10, bob: 0, points: 0, coins: 250, tags: ['bosun', 'enemy'],
@@ -1766,6 +1766,119 @@ window.GAME_CONTENT = {
         ['🔄', 'R', 'Reload'], ['✋', 'E', 'Use / talk'], ['⬆️', 'Space', 'Jump / swim up'], ['🏃', 'Shift', 'Run (short)'], ['🧗', 'Hold W', 'Climb vines'], ['🐾', 'B', 'Choose pets'], ['💡', 'H', 'Hint'], ['🎥', 'V', 'Camera'], ['⏸️', 'Esc', 'Pause']],
       askName: true, leaderboard: true, minimap: true, vignette: true, menuUrl: '../../index.html', menuLabel: 'All games' },
   };
+
+  // ---- twice the creatures and traps (the user asked for double): every enemy and trap gets a twin "<id>x" ----
+  // Positions come from a script that ran in every act and checked the ground height, walls, water, chasms, line of sight
+  // and distance to spawns, checkpoints and pickups. Twins on a patrol walk it the other way; traps and boulders are out of
+  // step with their twin. Bosses, their helpers, cannons, targets and crates are not doubled; "defeat N" goals keep N.
+  const TWINS = {
+    coast: [
+      ['crab1', {path: [[52, 0, 78], [34, 0, 78]]}],
+      ['crab2', {path: [[50, 0, 84], [30, 0, 84]]}],
+      ['crab3', {pos: [43.2, 0, 81.3]}],
+      ['crab4', {pos: [35.5, 0, 74]}],
+      ['boulderA', {phase: 0.25}],
+      ['boulderB', {phase: 0.75}],
+      ['boar1', {pos: [19.5, 0, 36]}],
+      ['boar2', {pos: [39.5, 0, 44]}],
+      ['boar3', {pos: [35.2, 0, 34.3]}],
+      ['monkey1', {pos: [46.8, 3, 10]}],
+      ['monkey2', {pos: [10.8, 3, 23]}],
+      ['snake1', {path: [[40, 3, 13], [16, 3, 13]]}],
+      ['spikes1', {pos: [34.8, 3, 16], phase: 1.5}],
+      ['spikes2', {pos: [46.8, 3, 16], phase: 2.9}],
+      ['sand1', {pos: [101.5, 0, 40]}],
+      ['sand2', {pos: [115.2, 0, 53.3]}],
+      ['sand3', {pos: [103.5, 0, 60]}],
+    ],
+    caves: [
+      ['bat1', {path: [[24, 1.2, 70], [80, 1.2, 70], [80, 1.2, 58], [22, 1.2, 58]]}],
+      ['bat2', {pos: [71.1, 0, 69.3]}],
+      ['bat3', {pos: [28.5, 0, 61.1]}],
+      ['spider1', {path: [[70, 0, 66], [34, 0, 66]]}],
+      ['spider2', {pos: [80.6, 0, 73.5]}],
+      ['spider3', {pos: [20.8, 0, 68]}],
+      ['bat4', {pos: [31.1, 0, 23.3]}],
+    ],
+    peak: [
+      ['gMonkey1', {pos: [7.1, 0, 72.6]}],
+      ['gMonkey2', {pos: [36.6, 0, 84.9]}],
+      ['gMonkey3', {pos: [32.1, 0, 72.8]}],
+      ['snake2', {path: [[40, 0, 76], [14, 0, 76]]}],
+      ['boulderT1a', {phase: 0.25}],
+      ['boulderT1b', {phase: 0.75}],
+      ['boulderT2a', {phase: 0.5}],
+      ['vent1', {pos: [57.5, 4, 32], phase: 1.6}],
+      ['vent2', {pos: [67.2, 4, 31.3], phase: 2.8}],
+      ['vent3', {pos: [61.5, 4, 40.5], phase: 2.2}],
+      ['crab5', {path: [[110, 0, 64], [86, 0, 64]]}],
+    ],
+    ember: [
+      ['ashCrab1', {path: [[44, 0, 74], [14, 0, 72]]}],
+      ['ashCrab2', {path: [[46, 0, 80], [16, 0, 82]]}],
+      ['ashCrab3', {pos: [36.1, 0, 82.8]}],
+      ['ashCrab4', {pos: [14.1, 0, 74.8]}],
+      ['lavaRockA', {phase: 0.25}],
+      ['lavaRockB', {phase: 0.75}],
+      ['ventF1', {pos: [43.3, 0, 21.1], phase: 1.6}],
+      ['ventF2', {pos: [51.3, 0, 13.1], phase: 2.6}],
+      ['ventF3', {pos: [27.3, 0, 15.1], phase: 2.1}],
+      ['ventF4', {pos: [57.3, 0, 21.1], phase: 3.1}],
+      ['beetle1', {pos: [22.8, 0, 22]}],
+      ['beetle2', {pos: [46.8, 0, 10]}],
+      ['beetle3', {pos: [16.8, 0, 14]}],
+      ['fbat1', {path: [[12, 1.6, 8], [48, 1.6, 8], [48, 1.6, 16], [12, 1.6, 16]]}],
+      ['fbat2', {pos: [39.5, 0, 26]}],
+      ['fbat3', {pos: [11.5, 0, 20]}],
+      ['fbat4', {path: [[108, 4.6, 20], [74, 4.6, 20]]}],
+    ],
+    reef: [
+      ['jelly1', {pos: [17.3, -0.95, 67.1], phase: 1.6}],
+      ['jelly2', {pos: [29.3, -0.95, 64.1], phase: 2.7}],
+      ['jelly3', {pos: [21.3, -0.95, 56.1], phase: 2.2}],
+      ['jelly4', {pos: [33.3, -0.95, 54.1], phase: 0.2}],
+      ['jelly5', {pos: [12.3, -0.95, 58.1], phase: 0.8}],
+      ['reefCrab1', {path: [[36, 0, 30], [8, 0, 30]]}],
+      ['reefCrab2', {path: [[36, 0, 44], [10, 0, 44]]}],
+      ['reefCrab3', {pos: [31.1, 0, 37.3]}],
+      ['reefCrab4', {pos: [7.4, 0, 42.3]}],
+      ['eel1', {path: [[92, -0.9, 36], [82, -0.9, 30]]}],
+      ['eel2', {path: [[82, -0.9, 36], [92, -0.9, 30]]}],
+      ['eel3', {pos: [89.1, -0.9, 37.3]}],
+      ['anchor1', {pos: [50.75, 0, 38], phase: 1.5}],
+      ['anchor2', {pos: [56.25, 0, 38], phase: 2.9}],
+      ['anchor3', {pos: [45.25, 0, 38], phase: 4.75}],
+    ],
+    fort: [
+      ['ballA', {phase: 0.25}],
+      ['ballB', {phase: 0.75}],
+      ['pirate1', {path: [[12, 0, 38], [40, 0, 38], [40, 0, 26], [12, 0, 26]]}],
+      ['pirate2', {pos: [46.8, 0, 36]}],
+      ['pirate3', {pos: [16.8, 0, 24]}],
+      ['pirate4', {pos: [52.8, 0, 24]}],
+      ['pirate5', {pos: [12, 0, 36]}],
+      ['boom1', {pos: [39, 0, 26], spin: -1.3}],
+      ['boom2', {pos: [33, 0, 36], spin: 1.5}],
+    ],
+  };
+  const twinIds = {};
+  for (const sc of window.GAME.scenes) for (const [id, t] of TWINS[sc.id] || []) {
+    const d = sc.entities.find(e => e.id === id);
+    if (!d) { console.warn('[island] no entity to twin: ' + id); continue; }
+    const c = JSON.parse(JSON.stringify(d));
+    c.id = id + 'x';
+    if (t.pos || t.path) { delete c.at; delete c.route; delete c.path; delete c.pos; }
+    Object.assign(c, t);
+    sc.entities.push(c);
+    twinIds[id] = c.id;
+  }
+  // "show these enemies" actions show their twins too
+  (function walk(o) {
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    if (!o || typeof o !== 'object') return;
+    if (o.do === 'show' && o.target) { const l = [].concat(o.target); const more = l.filter(id => twinIds[id]).map(id => twinIds[id]); if (more.length) o.target = l.concat(more); }
+    for (const k in o) if (o[k] && typeof o[k] === 'object') walk(o[k]);
+  })(window.GAME);
 })();
 
 </script>
@@ -9634,7 +9747,6 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       g.box(0, HERO.hip + 0.12, -0.2, 0.3, 0.36, 0.14, p, { top: dk(p, 1.12) });
       g.blob(0, HERO.hip + 0.47, -0.2, 0.15, dk(p, 1.08), { seed: 5, rough: 0.05, seg: 8, rings: 5, squash: 0.55 });          // rolled top
       g.box(0, HERO.hip + 0.18, -0.28, 0.2, 0.14, 0.04, dk(p, 0.85)).box(0, HERO.hip + 0.3, -0.3, 0.05, 0.05, 0.02, '#e9c46a');  // pocket + clasp
-      g.add(G().cyl(0, 0, 0, 0.065, 0.32, '#c9b27a', { seg: 8 }).rotZ(Math.PI / 2).move(-0.16, HERO.hip + 0.05, -0.2));     // bedroll
       for (const x of [-0.1, 0.1]) g.box(x, HERO.hip + 0.12, w * 0.6, 0.04, 0.42, 0.015, dk(p, 0.8));                          // straps
     }
     if (o.skirt) g.add(G().cyl(0, 0, 0, w * 1.25, 0.3, dk(o.pants, 1.15), { seg: 12, rTop: w * 0.95 }).scale(1, 1, 0.75).move(0, HERO.hip - 0.26, 0));
