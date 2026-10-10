@@ -1,0 +1,6 @@
+Kenney · Mini Arena (1.0) — model used here: tree.glb, Textures/colormap.png
+
+Source:  https://github.com/KenneyNL/Starter-Kit-Basic-Scene  (official Kenney repository; the CC0 Mini Arena pack ships
+         in sample/Mini Arena/Models/GLB format/)
+Commit:  a6927e66ff8dd8e173660ce4825abe773c65f683
+Licence: Creative Commons Zero (CC0) — see License.txt next to this file (copied unchanged from the pack).

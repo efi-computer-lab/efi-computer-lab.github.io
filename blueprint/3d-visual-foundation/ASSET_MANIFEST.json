@@ -1,0 +1,113 @@
+{
+  "name": "3d-visual-foundation",
+  "description": "Downloaded third-party assets used by the 3D Visual Foundation and by Tool_G6-7_Island_Escape.html. Every asset is CC0 (public domain). Paths are relative to blueprint/3d-visual-foundation/.",
+  "total_new_asset_bytes": 117000,
+  "assets": [
+    {
+      "name": "Kenney grass tuft",
+      "local_path": "assets/models/kenney-platformer-kit/grass.glb",
+      "texture": "assets/models/kenney-platformer-kit/Textures/colormap.png",
+      "format": "glTF binary (.glb) + PNG colour swatch texture",
+      "triangles": 72,
+      "bytes": 9028,
+      "sha256": "acb29df8a75b08e985e27a0ed8170b8f3d135abd24ccf5aa4d631cb2cd15cfda",
+      "source_url": "https://github.com/KenneyNL/Starter-Kit-3D-Platformer/blob/3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0/models/grass.glb",
+      "source_repository": "https://github.com/KenneyNL/Starter-Kit-3D-Platformer",
+      "source_commit": "3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0",
+      "author": "Kenney (www.kenney.nl)",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "license_evidence": "Repository README: 'Assets included in this package (2D sprites, 3D models and sound effects) are CC0 licensed'",
+      "attribution_required": false,
+      "converted_as": "GK.ModelData['kenney-grass'] in assets/kenney-models.js",
+      "used_by": ["stylized-nature.js model 'grassTuft'"]
+    },
+    {
+      "name": "Kenney small grass tuft",
+      "local_path": "assets/models/kenney-platformer-kit/grass-small.glb",
+      "texture": "assets/models/kenney-platformer-kit/Textures/colormap.png",
+      "format": "glTF binary (.glb) + PNG colour swatch texture",
+      "triangles": 72,
+      "bytes": 9048,
+      "sha256": "4b94e8dd9cbdc3eedff99cbf614fe828f0c2342d21a7d0edb125b129d0422d51",
+      "source_url": "https://github.com/KenneyNL/Starter-Kit-3D-Platformer/blob/3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0/models/grass-small.glb",
+      "source_repository": "https://github.com/KenneyNL/Starter-Kit-3D-Platformer",
+      "source_commit": "3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0",
+      "author": "Kenney (www.kenney.nl)",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "license_evidence": "Repository README: 'Assets included in this package (2D sprites, 3D models and sound effects) are CC0 licensed'",
+      "attribution_required": false,
+      "converted_as": "GK.ModelData['kenney-grass-small'] in assets/kenney-models.js",
+      "used_by": ["stylized-nature.js model 'grassTuft' with {small: true}"]
+    },
+    {
+      "name": "Kenney Platformer Kit colour map",
+      "local_path": "assets/models/kenney-platformer-kit/Textures/colormap.png",
+      "format": "PNG 512x512",
+      "bytes": 10108,
+      "sha256": "106cf02e0d6dccded6d9f90c2ae6a51eb94c6301645fea159e834c44ed4708a3",
+      "source_url": "https://github.com/KenneyNL/Starter-Kit-3D-Platformer/blob/3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0/models/Textures/colormap.png",
+      "author": "Kenney (www.kenney.nl)",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "used_by": ["tools/glb_to_geo.py (sampled into vertex colours; not loaded at run time)"]
+    },
+    {
+      "name": "Kenney Mini Arena tree",
+      "local_path": "assets/models/kenney-mini-arena/tree.glb",
+      "texture": "assets/models/kenney-mini-arena/Textures/colormap.png",
+      "format": "glTF binary (.glb) + PNG colour swatch texture",
+      "triangles": 330,
+      "bytes": 34164,
+      "sha256": "f8632c9758a78f60aa4ca68bf0e5ac972770167a5608e179293a12552d8fc2ef",
+      "source_url": "https://github.com/KenneyNL/Starter-Kit-Basic-Scene/blob/a6927e66ff8dd8e173660ce4825abe773c65f683/sample/Mini%20Arena/Models/GLB%20format/tree.glb",
+      "source_repository": "https://github.com/KenneyNL/Starter-Kit-Basic-Scene",
+      "source_commit": "a6927e66ff8dd8e173660ce4825abe773c65f683",
+      "author": "Kenney (www.kenney.nl), additional credit Tony Schär",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "license_evidence": "assets/models/kenney-mini-arena/License.txt (copied unchanged from the pack)",
+      "attribution_required": false,
+      "converted_as": "GK.ModelData['kenney-tree'] in assets/kenney-models.js",
+      "used_by": ["stylized-nature.js model 'kenneyTree'"]
+    },
+    {
+      "name": "Kenney Mini Arena colour map",
+      "local_path": "assets/models/kenney-mini-arena/Textures/colormap.png",
+      "format": "PNG 512x512",
+      "bytes": 10306,
+      "sha256": "cdc845e1c8704c69d87dbf872c9004b470fc838f4b2830fb7e4fc4a530c80e10",
+      "source_url": "https://github.com/KenneyNL/Starter-Kit-Basic-Scene/blob/a6927e66ff8dd8e173660ce4825abe773c65f683/sample/Mini%20Arena/Models/GLB%20format/Textures/colormap.png",
+      "author": "Kenney (www.kenney.nl)",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "used_by": ["tools/glb_to_geo.py (sampled into vertex colours; not loaded at run time)"]
+    }
+  ],
+  "generated": [
+    {
+      "local_path": "assets/kenney-models.js",
+      "format": "classic <script> (works from file://): GK.ModelData = {name: {q, p, n, i, pal}}",
+      "bytes": 34875,
+      "made_with": "python3 tools/glb_to_geo.py assets/kenney-models.js kenney-grass=assets/models/kenney-platformer-kit/grass.glb kenney-grass-small=assets/models/kenney-platformer-kit/grass-small.glb kenney-tree=assets/models/kenney-mini-arena/tree.glb",
+      "inlined_in": ["Tool_G6-7_Island_Escape.html (block <script>/* assets/kenney-models.js */)"]
+    }
+  ],
+  "first_party_reference": [
+    {
+      "local_path": "reference/3d-style-reference.jpg",
+      "description": "The visual style reference supplied by the teacher (main image + environment, character, lighting and materials examples). Not shipped in any game."
+    },
+    {
+      "local_path": "reference/island-escape-before-after.jpg",
+      "description": "Island Escape act 1, third person: before (left) and after (right) this foundation."
+    },
+    {
+      "local_path": "reference/demo-screenshot.jpg",
+      "description": "examples/island-demo.html, tropical day preset."
+    }
+  ]
+}
