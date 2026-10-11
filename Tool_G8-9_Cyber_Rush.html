@@ -831,7 +831,7 @@ window.GAME_CONTENT = {};
       crumble: { type: 'crumble', delay: 0.6, back: 4 },
       abyss: { type: 'abyss' },
       // the later rounds' cyber obstacles (mechanics/cybertraps)
-      press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
+      press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, sentry: { type: 'sentry' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
       wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
       popup: { type: 'popup' }, bumper: { type: 'bumper' }, captcha: { type: 'captcha' }, lbridge: { type: 'loadbridge' },
       lift: { type: 'lift' }, proxy: { type: 'turnstile' }, bdisk: { type: 'balancedisk' }, spring: { type: 'springtrap' },
@@ -2079,9 +2079,12 @@ GK_LIBRARY.worlds = {
       const list = (this.game.cfg.difficulty && this.game.cfg.difficulty.choices) || this.game.difficultyChoices(), tag = id => {
         const c = list && id && list.find(x => x.id === id);
         return c ? ' <span class="gk-diff-tag d-' + U.esc(c.id) + '">' + U.esc(c.short || c.label || c.id) + '</span>' : '';
+      }, clist = this.game.combatChoices(), ctag = id => {
+        const c = clist && id && clist.find(x => x.id === id);
+        return c ? ' <span class="gk-diff-tag d-' + U.esc(c.id) + '">' + U.esc(c.short || c.label || c.id) + '</span>' : '';
       };
       return '<table class="gk-leaders"><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th></tr>' +
-        rows.slice(0, max || 5).map((r, i) => '<tr' + (i + 1 === highlight ? ' class="me"' : '') + '><td>' + (i + 1) + '</td><td>' + U.esc(r.name) + tag(r.difficulty) + '</td><td>' + r.score + '</td><td>' + U.time(r.time) + '</td></tr>').join('') + '</table>';
+        rows.slice(0, max || 5).map((r, i) => '<tr' + (i + 1 === highlight ? ' class="me"' : '') + '><td>' + (i + 1) + '</td><td>' + U.esc(r.name) + tag(r.difficulty) + ctag(r.combat) + '</td><td>' + r.score + '</td><td>' + U.time(r.time) + '</td></tr>').join('') + '</table>';
     }
     floatScore(points) {
       const f = el('div', 'gk-float ' + (points < 0 ? 'neg' : ''), (points > 0 ? '+' : '') + points);
@@ -2220,7 +2223,7 @@ GK_LIBRARY.worlds = {
         const day = isNaN(when) ? '' : when.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
         cont = '<div class="gk-resume"><div class="gk-lead-title">💾 Saved game on this computer</div>' +
           '<p>' + U.esc(r.title || ('Part ' + r.part)) + (r.parts ? ' (' + r.part + ' of ' + r.parts + ')' : '') +
-          (r.name ? ' · <b>' + U.esc(r.name) + '</b>' : '') + this.diffName(r.difficulty) + ' · ' + (r.score || 0) + ' points' + (day ? '<br><span class="gk-muted">Saved ' + U.esc(day) + '</span>' : '') + '</p>' +
+          (r.name ? ' · <b>' + U.esc(r.name) + '</b>' : '') + this.diffName(r.difficulty) + this.combatName(r.combat) + ' · ' + (r.score || 0) + ' points' + (day ? '<br><span class="gk-muted">Saved ' + U.esc(day) + '</span>' : '') + '</p>' +
           '<button class="gk-btn primary big" data-a="resume">▶ Continue' + (r.name ? ' as ' + U.esc(r.name) : '') + '</button>' +
           '<p class="gk-muted">Not you? Type your name below and start a new game.</p></div>';
       }
@@ -2240,11 +2243,16 @@ GK_LIBRARY.worlds = {
       const diff = choices ? '<div class="gk-diff"><div class="gk-diff-title">' + U.esc((cfg.difficulty && cfg.difficulty.title) || 'Difficulty') + '</div><div class="gk-diff-row">' +
         dlabels.map(c => '<button type="button" class="gk-diff-btn d-' + U.esc(c.id) + (c.id === this.game.difficulty ? ' on' : '') + '" data-diff="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.difficulty) + '">' +
           '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
+      // a second choice (difficulty.combat, e.g. Easy / Hard fights): its own row of buttons
+      const combats = this.game.combatChoices(), ccfg = cfg.difficulty && cfg.difficulty.combat, clabels2 = (ccfg && ccfg.choices) || combats;
+      const comb = combats ? '<div class="gk-diff gk-combat"><div class="gk-diff-title">' + U.esc((ccfg && ccfg.title) || 'Level') + '</div><div class="gk-diff-row">' +
+        clabels2.map(c => '<button type="button" class="gk-diff-btn d-' + U.esc(c.id) + (c.id === this.game.combat ? ' on' : '') + '" data-combat="' + U.esc(c.id) + '" aria-pressed="' + (c.id === this.game.combat) + '">' +
+          '<b>' + U.esc(c.label || c.id) + '</b>' + (c.text ? '<span>' + U.esc(c.text) + '</span>' : '') + '</button>').join('') + '</div></div>' : '';
       const s = this.screen('gk-title-screen',
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
         (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
-        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + who + diff + cam +
+        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + who + diff + comb + cam +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
         (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
@@ -2268,6 +2276,12 @@ GK_LIBRARY.worlds = {
         b.onclick = () => {
           this.game.setDifficulty(b.getAttribute('data-diff'));
           s.querySelectorAll('[data-diff]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+        };
+      });
+      s.querySelectorAll('[data-combat]').forEach(b => {
+        b.onclick = () => {
+          this.game.setCombat(b.getAttribute('data-combat'));
+          s.querySelectorAll('[data-combat]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
         };
       });
       this.game.emit('ui:title', { screen: s, nameBox });   // mechanics may add to the title screen (e.g. an online room box)
@@ -2300,6 +2314,11 @@ GK_LIBRARY.worlds = {
       const list = this.game.difficultyChoices(), c = list && id && list.find(x => x.id === id);
       const lab = c && ((this.game.cfg.difficulty && (this.game.cfg.difficulty.choices.find(x => x.id === id) || {}).label) || c.label || c.id);
       return lab ? ' · ' + U.esc(lab) : '';
+    }
+    /** ' · Hard' for a saved game's combat choice ('' without the setting). */
+    combatName(id) {
+      const list = this.game.combatChoices(), c = list && id && list.find(x => x.id === id);
+      return c ? ' · ' + U.esc(c.label || c.id) : '';
     }
     showPause(cfg, h) {
       const s = this.screen('gk-pause-screen',
@@ -2640,7 +2659,7 @@ GK_LIBRARY.worlds = {
     audio: { muted: false, volume: 0.7, sounds: {} },
     teacher: { pin: null },
     resume: false,  // scene games: save on THIS computer as each scene (act) starts; the title screen offers "Continue"
-    difficulty: null,  // {default: 'hard', choices: [{id, label, text, …options}]}: the title screen asks; mechanics read game.difficultyOpts()
+    difficulty: null,  // {default: 'hard', choices: [{id, label, text, …options}], combat?: {default, title, choices}}: the title screen asks; mechanics read game.difficultyOpts()
     characters: null,  // {default, title, choices: [{id, label, text, look}]}: who you play; views read game.characterLook()
     controls: {},
     hooks: {},      // setup(game) start(game) update(game, dt) win(game) lose(game)
@@ -2670,6 +2689,7 @@ GK_LIBRARY.worlds = {
       this.teacher = new GK.Teacher(this);
 
       this.difficulty = this.validDifficulty(this.options.difficulty || (location.search.match(/[?&]difficulty=(\w+)/) || [])[1]);
+      this.combat = this.validCombat(this.options.combat || (location.search.match(/[?&]combat=(\w+)/) || [])[1]);
       this.character = this.validCharacter(this.options.character || (location.search.match(/[?&]character=(\w+)/) || [])[1]);
       const first = this.options.level != null ? this.options.level : this.sceneMode ? Math.max(0, this.stageIndex(config.startScene || 0)) : 0;
       this.configure(first);
@@ -2740,8 +2760,9 @@ GK_LIBRARY.worlds = {
       for (const f of U.list(cfg.flags)) this.state.flags[f] = true;
       if (this.playerName) this.state.vars.playerName = this.playerName;   // typed on the title screen; kept on restart
       if (this.difficulty) this.state.vars.difficulty = this.difficulty;   // chosen on the title screen; kept on restart
+      if (this.combat) this.state.vars.combat = this.combat;
       if (this.character) this.state.vars.character = this.character;
-      this.builtFor = this.difficulty;   // the scene was built for this difficulty (a new choice rebuilds it)
+      this.builtFor = this.buildKey();   // the scene was built for this difficulty (a new choice rebuilds it)
       this.scoring = new GK.Scoring(this, cfg.scoring);
       this.ui.clearLayer();
       this.view.setup();
@@ -2792,8 +2813,29 @@ GK_LIBRARY.worlds = {
       return list.some(c => c.id === d) ? d : list[list.length - 1].id;
     }
     setDifficulty(id) { this.difficulty = this.validDifficulty(id); if (this.state) this.state.vars.difficulty = this.difficulty; }
-    /** Options of the chosen difficulty (e.g. {enemies: 0.5}); {} for a game without the setting. */
-    difficultyOpts() { const list = this.difficultyChoices(); return (list && list.find(c => c.id === this.difficulty)) || {}; }
+    /** A second, separate choice: difficulty.combat {default, title, choices: [{id, label, short, text, …options}]} — e.g.
+        Grade 6 / Grade 7 questions (difficulty) AND Easy / Hard fights (combat). Its options join difficultyOpts(). */
+    combatChoices() { const d = this.base.difficulty && this.base.difficulty.combat; return d && Array.isArray(d.choices) && d.choices.length ? d.choices : null; }
+    validCombat(id) {
+      const list = this.combatChoices();
+      if (!list) return null;
+      if (list.some(c => c.id === id)) return id;
+      const d = this.base.difficulty.combat.default;
+      return list.some(c => c.id === d) ? d : list[list.length - 1].id;
+    }
+    /** What a scene is built for: the difficulty (and the combat choice, when the game has one). */
+    buildKey() { return this.combat ? this.difficulty + '|' + this.combat : this.difficulty; }
+    setCombat(id) { this.combat = this.validCombat(id); if (this.state) this.state.vars.combat = this.combat; }
+    /** Options of the chosen difficulty (e.g. {enemies: 0.5}) and of the chosen combat choice; {} without the setting.
+        `without: ['tag', …]` (either choice) leaves out the entities with one of those tags when a scene is built. */
+    difficultyOpts() {
+      const list = this.difficultyChoices(), d = (list && list.find(c => c.id === this.difficulty)) || {};
+      const cl = this.combatChoices(), c = cl && cl.find(x => x.id === this.combat);
+      if (!c) return d;
+      const o = Object.assign({}, d);
+      for (const k in c) if (['id', 'label', 'short', 'text'].indexOf(k) < 0) o[k] = k === 'without' ? U.list(d.without).concat(c.without) : c[k];
+      return o;
+    }
     // ================= characters (config.characters) =================
     characterChoices() { const d = this.base.characters; return d && Array.isArray(d.choices) && d.choices.length ? d.choices : null; }
     validCharacter(id) {
@@ -2821,7 +2863,7 @@ GK_LIBRARY.worlds = {
       this.ui.showTitle(this.cfg, i => {
         this.audio.unlock();
         this.store.remove('resume');   // a new game replaces the old resume point
-        if (i !== this.levelIndex || this.builtFor !== this.difficulty) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); }
+        if (i !== this.levelIndex || this.builtFor !== this.buildKey()) this.loadLevel(i); else { this.ui.hideScreens(); this.begin(); }
       }, levels ? { count: this.levelCount, unlocked: this.unlockedLevels(), names: this.stages.map((l, k) => l.title || ('Level ' + (k + 1))) } : null,
       saved ? { info: saved, onResume: () => { this.audio.unlock(); this.resumeSaved(saved); } } : null);
     }
@@ -2836,7 +2878,7 @@ GK_LIBRARY.worlds = {
       this.store.set('resume', {
         v: 1, id: this.base.id || 'game', at: new Date().toISOString(), scene: this.stageId, spawn: spawn || null, mid: mid || undefined,
         part: this.levelIndex + 1, parts: this.levelCount, title: this.cfg.stageTitle || stage.id || '',
-        name: this.playerName || '', difficulty: this.difficulty, character: this.character, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
+        name: this.playerName || '', difficulty: this.difficulty, combat: this.combat, character: this.character, score: this.scoring.total, time: Math.round(this.state.time), snap: this.snapshot(),
       });
     }
     /** The resume point on this computer, or null (none, another game's, or damaged). */
@@ -2853,6 +2895,7 @@ GK_LIBRARY.worlds = {
         this.ui.hideScreens();
         if (r.name) this.setPlayerName(r.name);
         this.difficulty = this.validDifficulty(r.difficulty || (r.snap.state && r.snap.state.vars && r.snap.state.vars.difficulty));
+        this.combat = this.validCombat(r.combat || (r.snap.state && r.snap.state.vars && r.snap.state.vars.combat));
         this.character = this.validCharacter(r.character || (r.snap.state && r.snap.state.vars && r.snap.state.vars.character));
         this.sceneMemory = {};
         this.restore(r.snap);   // mode is 'title' here, so nothing starts yet
@@ -2966,6 +3009,7 @@ GK_LIBRARY.worlds = {
       if (won && this.cfg.ui.leaderboard) {
         const entry = { name: this.playerName || this.state.vars.playerName || 'Player', score: res.total, time: Math.round(this.state.time), stars: res.stars || 0, at: new Date().toISOString() };
         if (this.difficulty) entry.difficulty = this.difficulty;
+        if (this.combat) entry.combat = this.combat;
         const list = this.leaders().concat([entry]).sort((a, b) => b.score - a.score || a.time - b.time).slice(0, 10);
         this.store.set('leaders', list);
         res.leaders = list;
@@ -4716,7 +4760,9 @@ GK_LIBRARY.worlds = {
           if (tpl) this.add(U.merge(tpl, L.data, { id: n, at: n }, this.routes[n] ? { route: n } : {}));
         }
       }
-      for (const d of U.list(cfg.entities)) this.add(d);
+      // difficulty `without: ['tag', …]` (e.g. an Easy choice leaves out the extra enemies) skips entities with those tags
+      const without = U.list(this.game && this.game.difficultyOpts ? this.game.difficultyOpts().without : null);
+      for (const d of U.list(cfg.entities)) if (!without.length || !U.list(d.tags).some(t => without.indexOf(t) >= 0)) this.add(d);
       for (const z of U.list(cfg.zones)) this.addZone(z);
     }
 
@@ -6415,6 +6461,8 @@ GK_LIBRARY.worlds = {
      airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps) ·
      press-N {size, phase, period} · cannon-N {range} · bdoor-N {size} · flip-N {size, group, period} · wave-N {size, len} ·
      port-N {row, index, n, size} · disk-N {r, spin} · rain-N {area} · bdisk-N {r, spin}
+     sentry-N {kind: 'cannon' | 'archer', phase} (theme.sentries {every: m, from: m, until: m, kinds}: shooting towers just
+       OUTSIDE the course edge, every `every` m along the course, on alternating random sides, facing the course)
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
    Areas: none (the game makes zones from slots). Spawns: default = start-1. */
 (function () {
@@ -7204,11 +7252,40 @@ GK_LIBRARY.worlds = {
     }
 
     /** Finish: drop scenery standing on the course, add the ground, the far ring, lights; return the world def. */
+    /** Shooting towers just outside the course edge (theme.sentries = {every, from, until, kinds}), facing the course. */
+    sentries(o) {
+      const pts = this.routes.course;
+      if (!o || !pts || pts.length < 2) return;
+      const inside = (x, z, m) => this.rects.some(q => x > q.x0 - m && x < q.x1 + m && z > q.z0 - m && z < q.z1 + m);
+      const kinds = o.kinds || ['cannon', 'archer'], end = courseLength(pts) - (o.until || 30);
+      let acc = 0, next = o.from || 40, n = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i], L = Math.hypot(b[0] - a[0], b[2] - a[2]);
+        if (!L) continue;
+        const dx = (b[0] - a[0]) / L, dz = (b[2] - a[2]) / L;
+        for (; next <= acc + L && next < end; next += o.every || 34) {
+          const t = next - acc, cx = a[0] + dx * t, cz = a[2] + dz * t;
+          for (const s of this.rnd() < 0.5 ? [1, -1] : [-1, 1]) {
+            const nx = -dz * s, nz = dx * s;
+            let k = 0;
+            while (k < 40 && inside(cx + nx * k, cz + nz * k, 0)) k += 0.5;
+            const x = cx + nx * (k + 2.6), z = cz + nz * (k + 2.6);
+            if (k >= 40 || inside(x, z, 1.6)) continue;
+            const name = 'sentry-' + this.num('sentry');
+            this.locs[name] = { pos: [x, 0, z], rot: Math.round(Math.atan2(-nx, -nz) * 180 / Math.PI), data: { kind: kinds[n++ % kinds.length], phase: Math.round(this.rnd() * 100) / 100 } };
+            break;
+          }
+        }
+        acc += L;
+      }
+    }
     world(name, sectors) {
       const T = this.T;
       for (const s of sectors) this[s.k](s);
+      this.sentries(T.sentries);
       // scenery must never stand on the course (the snake passes near itself)
-      const clear = d => { const r = (d.r || 1.5) + 1; return !this.rects.some(q => d.pos[0] > q.x0 - r && d.pos[0] < q.x1 + r && d.pos[2] > q.z0 - r && d.pos[2] < q.z1 + r); };
+      const towers = Object.keys(this.locs).filter(n => /^sentry-/.test(n)).map(n => this.locs[n].pos);
+      const clear = d => { const r = (d.r || 1.5) + 1; return !this.rects.some(q => d.pos[0] > q.x0 - r && d.pos[0] < q.x1 + r && d.pos[2] > q.z0 - r && d.pos[2] < q.z1 + r) && !towers.some(t => Math.hypot(d.pos[0] - t[0], d.pos[2] - t[2]) < r + 1.5); };
       this.scenery = this.scenery.filter(d => !d.r || clear(d));
       let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
       for (const q of this.rects) { x0 = Math.min(x0, q.x0); x1 = Math.max(x1, q.x1); z0 = Math.min(z0, q.z0); z1 = Math.max(z1, q.z1); }
@@ -7233,7 +7310,7 @@ GK_LIBRARY.worlds = {
         decorations: this.scenery, locations: this.locs, routes: this.routes,
         spawns: { default: { pos: spawn.pos, rot: spawn.rot } },
         lights: this.lights, course: { length: courseLength(this.routes.course), gates: this.gateN, bounds: [x0, z0, x1, z1] },
-        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder', 'proxy', 'abyss', 'bdisk'],   // locations / routes that float or move over a gap on purpose (proxy: a revolving door round its own solid hub)
+        offFloor: ['life', 'mover', 'bridge', 'crumble', 'glass', 'boulder', 'proxy', 'abyss', 'bdisk', 'sentry'],   // locations / routes that float or move over a gap on purpose (proxy: a revolving door round its own solid hub)
       };
     }
   }
@@ -7255,7 +7332,7 @@ GK_LIBRARY.worlds = {
 (function () {
   const pick = (r, list) => list[Math.floor(r() * list.length)];
   GK.Worlds.add('rush-city', GK.Course.world('rush-city', {
-    name: 'Neon City', seed: 11, dir: 'e',
+    name: 'Neon City', seed: 11, dir: 'e', sentries: { every: 30 },   // 💣 cannon and 🏹 archer towers beside the course (cybertraps 'sentry')
     lighting: { sky: ['#0b1026', '#2a1b4d', '#5b2a6e'], fog: [60, 230], fogColor: '#2a1b4d', sun: { dir: [0.3, 1, 0.2], color: '#c8b6ff', intensity: 0.38 }, ambient: { sky: '#7a6be0', ground: '#2a2350' }, water: false, shadowStrength: 0.6, exposure: 1.0 },
     floor: '#2d3250', floor2: '#343a5e', plaza: '#3a3f66', wall: '#232946', wallTop: '#4cc9f0', fence: '#1c1f3a', divider: '#2b2f55',
     gate: '#3a0d2e', gateGlow: '#ff4d6d', walk: '#41477a', walkTop: '#5c63a8', stairs: '#41477a', pit: '#0f3460', pitGlow: 0.45,
@@ -7292,7 +7369,7 @@ GK_LIBRARY.worlds = {
 (function () {
   const pick = (r, list) => list[Math.floor(r() * list.length)];
   GK.Worlds.add('rush-forest', GK.Course.world('rush-forest', {
-    name: 'Digital Forest', seed: 23, dir: 'e',
+    name: 'Digital Forest', seed: 23, dir: 'e', sentries: { every: 28 },   // 💣 cannon and 🏹 archer towers beside the course (cybertraps 'sentry')
     lighting: { sky: ['#04151f', '#0b3d3a', '#1f6f5c'], fog: [55, 210], fogColor: '#0d3a37', sun: { dir: [-0.3, 1, 0.4], color: '#d8ffe6', intensity: 0.45 }, ambient: { sky: '#7fd8c0', ground: '#1d3b2a' }, water: false, shadowStrength: 0.65, exposure: 1.0,
       clouds: { cover: 0.3, color: '#2f7a6a', shade: '#0f3f3a' }, cloudProps: 0 },
     floor: '#3b5d3a', floor2: '#44693f', plaza: '#35553a', wall: '#3a2f28', wallTop: '#7df9ff', fence: '#4a3b2f', fenceTop: '#7df9ff', divider: '#2f5a37', dividerH: 3.2,
@@ -7333,7 +7410,7 @@ GK_LIBRARY.worlds = {
 (function () {
   const pick = (r, list) => list[Math.floor(r() * list.length)];
   GK.Worlds.add('rush-factory', GK.Course.world('rush-factory', {
-    name: 'Data Factory', seed: 37, dir: 'e',
+    name: 'Data Factory', seed: 37, dir: 'e', sentries: { every: 26 },   // 💣 cannon and 🏹 archer towers beside the course (cybertraps 'sentry')
     lighting: { sky: ['#1a1410', '#3d2b1f', '#8a4f2a'], fog: [50, 200], fogColor: '#46301f', sun: { dir: [0.4, 1, -0.2], color: '#ffd8a8', intensity: 0.5 }, ambient: { sky: '#d6a77a', ground: '#3a2a1e' }, water: false, shadowStrength: 0.7, exposure: 0.95,
       clouds: { cover: 0.5, color: '#b07a52', shade: '#4a3020' }, cloudProps: 0 },
     floor: '#4a4f57', floor2: '#555b64', plaza: '#3f444b', wall: '#2d3238', wallTop: '#f6ad55', fence: '#ecc94b', fenceTop: '#1a202c', divider: '#3a3f46',
@@ -7376,7 +7453,7 @@ GK_LIBRARY.worlds = {
 (function () {
   const pick = (r, list) => list[Math.floor(r() * list.length)];
   GK.Worlds.add('rush-ocean', GK.Course.world('rush-ocean', {
-    name: 'Digital Ocean', seed: 41, dir: 'e',
+    name: 'Digital Ocean', seed: 41, dir: 'e', sentries: { every: 24 },   // 💣 cannon and 🏹 archer towers beside the course (cybertraps 'sentry')
     lighting: { sky: ['#03203a', '#0a5f8a', '#8fd8ff'], fog: [70, 260], fogColor: '#4aa8d8', sun: { dir: [0.5, 1, 0.3], color: '#fff6e0', intensity: 0.6 }, ambient: { sky: '#a3dcff', ground: '#1c5a7a' }, water: false, shadowStrength: 0.75, exposure: 0.92,
       clouds: { cover: 0.4 } },
     floor: '#b89a6e', floor2: '#c6a87b', plaza: '#a88b62', wall: '#2c5f7c', wallTop: '#4fd1c5', fence: '#e2e8f0', fenceTop: '#4fd1c5', divider: '#2c5f7c',
@@ -7419,7 +7496,7 @@ GK_LIBRARY.worlds = {
 (function () {
   const pick = (r, list) => list[Math.floor(r() * list.length)];
   GK.Worlds.add('rush-core', GK.Course.world('rush-core', {
-    name: 'Cyber Core', seed: 53, dir: 'e',
+    name: 'Cyber Core', seed: 53, dir: 'e', sentries: { every: 22 },   // 💣 cannon and 🏹 archer towers beside the course (cybertraps 'sentry')
     lighting: { sky: ['#0a0a1f', '#2b1055', '#d53a9d'], fog: [60, 240], fogColor: '#3a1462', sun: { dir: [-0.4, 0.8, 0.5], color: '#ffc4e8', intensity: 0.5 }, ambient: { sky: '#b28dff', ground: '#24124a' }, water: false, shadowStrength: 0.65, exposure: 1.0,
       clouds: { cover: 0.28, color: '#c96bb8', shade: '#4a1f6a' }, cloudProps: 0 },
     floor: '#3d3d5c', floor2: '#47476b', plaza: '#33334f', wall: '#2b2b44', wallTop: '#ff4fd8', fence: '#5a5a80', fenceTop: '#4cc9f0', divider: '#3a3a5a',
@@ -9831,6 +9908,8 @@ GK_LIBRARY.worlds = {
      { type: 'turnstile', r: 6.5, spin: 0.6 }                            ROTATING PROXY: a giant revolving door
      { type: 'springtrap', s: 2.4, power: 14 }                           SPRING TRAP: a floor tile that throws you BACKWARD
      { type: 'balancedisk', r: 9.5, spin: 0.35, tilt: 0.022 }            CYBER BALANCE DISK: a turning, tipping disk over a laser floor
+     { type: 'sentry', kind: 'cannon' | 'archer' }                       SENTRY TOWERS beside the course: they turn to you, blink red, then
+                                                                         fire a cannonball (stunned 2 s) or an arrow (1.2 s); walls block them
    Timing is RANDOM but shared: presses slam at a different moment each cycle, pop-ups pop up at random times, cannons skip
    shots and change speed, waves come late or early, the bit-flip half is chosen at random, doors and disks speed up and slow
    down (each from game.trapRandom(key + cycle), so every PC agrees). There is always a warning before a hit.
@@ -10385,6 +10464,88 @@ GK_LIBRARY.worlds = {
         S.cd = 0.8; S.pop = 0.3;
         const f = fwd(e);
         if (hit(g, e, 'spring', [-f[0], -f[1]], d.power, 0.5, d.up)) { g.audio.play('boing'); burst(g, [pl.pos[0], pl.pos[1] + 0.3, pl.pos[2]], '#ff6b35', 12); }
+      }
+    },
+  });
+
+  // ---------- SENTRY TOWERS: cannons and archers that shoot at you ----------
+  /** {type: 'sentry', kind: 'cannon' | 'archer', range, period, speed, stun, phase} — a tower beside the course (outside the fence)
+      that turns to the racer, blinks red, then fires: a cannonball (stun 2 s) or an arrow (stun 1.2 s). Shots happen on the
+      shared race clock; whether a tower fires in a cycle is shared random (game.trapRandom), and it aims at THIS PC's racer
+      (every racer is the target on their own screen). Walls block its view; dodge sideways or duck behind cover. */
+  const SENTRY = {
+    cannon: { model: 'sentryCannon', shot: 'sentryBall', range: 30, period: 3.4, speed: 15, stun: 2.0, power: 6, warn: 0.8, color: '#ff4d6d' },
+    archer: { model: 'sentryArcher', shot: 'sentryArrow', range: 26, period: 2.5, speed: 22, stun: 1.2, power: 4, warn: 0.6, color: '#ffd166' },
+  };
+  M.add('sentryCannon', o => {   // a tower with a turret; the barrel points +z
+    const warn = o.warn, glow = warn ? '#ff4d6d' : '#4cc9f0', g = G().cyl(0, -0.3, 0, 0.75, 4.1, '#2d3748', { seg: 10 })
+      .cyl(0, 3.6, 0, 1.0, 0.3, '#4a5568', { seg: 12 }).cyl(0, 3.0, 0, 0.8, 0.12, glow, { seg: 12, glow: 0.9 });
+    g.box(0, 3.9, 0, 1.3, 0.8, 1.3, '#1a202c', { top: '#4a5568' });
+    g.add(G().cyl(0, 0, 0, 0.32, 1.5, '#1a202c', { seg: 10 }).rotX(Math.PI / 2).move(0, 4.3, 0.55));
+    g.add(G().cyl(0, 0, 0, 0.36, 0.18, glow, { seg: 10, glow: warn ? 1 : 0.5 }).rotX(Math.PI / 2).move(0, 4.3, 1.3));
+    return g;
+  });
+  M.add('sentryArcher', o => {   // a little archer robot on a tower, bow held out in front (+z)
+    const warn = o.warn, glow = warn ? '#ff4d6d' : '#ffd166', g = G().cyl(0, -0.3, 0, 0.6, 3.9, '#2d3748', { seg: 8 })
+      .cyl(0, 3.6, 0, 0.9, 0.25, '#4a5568', { seg: 10 });
+    g.box(0, 3.85, 0, 0.55, 0.8, 0.4, '#3a3f66', { top: '#4c5490' }).sphere(0, 4.95, 0, 0.3, '#3a3f66', { seg: 10, rings: 7 });
+    g.box(0, 4.98, 0.25, 0.42, 0.1, 0.06, glow, { glow: 1 });   // the visor (red = about to shoot)
+    g.box(0, 4.45, 0.45, 0.12, 0.12, 0.6, '#3a3f66');            // arms out to the bow
+    for (let i = -3; i <= 3; i++) g.box(0, 4.45 + i * 0.16, 0.8 - Math.abs(i) * 0.05, 0.07, 0.17, 0.07, '#8b5a2b');   // the bow
+    g.box(0, 4.45, 0.62, 0.02, 0.95, 0.02, '#e2e8f0');   // the string
+    return g;
+  });
+  M.add('sentryBall', () => G().sphere(0, 0, 0, 0.38, '#1a202c', { seg: 10, rings: 7 }).sphere(0, 0, 0, 0.42, '#ff4d6d', { seg: 8, rings: 6, glow: 0.6 }));
+  M.add('sentryArrow', () => G().box(0, 0, 0, 0.07, 0.07, 1.1, '#8b5a2b').box(0, 0, 0.6, 0.16, 0.16, 0.18, '#ffd166', { glow: 0.9 }).box(0, 0, -0.5, 0.2, 0.02, 0.2, '#e2e8f0'));
+  P.add('sentryshot', { defaults: { model: 'sentryBall', solid: false } });
+  P.add('sentry', {
+    defaults: { model: 'sentryCannon', solid: false, kind: 'cannon', phase: 0 },
+    init(e) {
+      const k = SENTRY[e.def.kind] ? e.def.kind : 'cannon', o = e.opt = Object.assign({}, e.def, SENTRY[k]);
+      for (const key of ['range', 'period', 'speed', 'stun', 'power', 'warn']) if (e.def[key] != null) o[key] = e.def[key];   // a slot may change these
+      e.kind = k; e.setModel(o.model, { warn: false });
+      e.shotEnt = e.world.add({ id: e.id + '-shot', type: 'sentryshot', model: o.shot, pos: e.pos.slice(), visible: false });
+      e.shotEnt.hide();
+      e.label = k === 'cannon' ? '💣' : '🏹'; e.labelRange = 18;
+      e.state.k = null; e.state.warn = false;
+      e.botZone = { kind: 'sentry', len: 8, chance: 0.3, pause: k === 'cannon' ? 2 : 1.2 };
+    },
+    update(e, dt, g) {
+      const o = e.opt, S = e.state, pl = g.player, t = clockOf(g) / o.period + (o.phase || 0), k = Math.floor(t), left = (1 - (t - k)) * o.period;
+      const muzzle = [e.pos[0] + Math.sin(e.yaw) * 1.3, e.pos[1] + (e.kind === 'cannon' ? 4.3 : 4.45), e.pos[2] + Math.cos(e.yaw) * 1.3];
+      const chest = [pl.pos[0], pl.pos[1] + 1.1, pl.pos[2]], dist = Math.hypot(chest[0] - e.pos[0], chest[2] - e.pos[2]);
+      const near = live(g) && e.enabled && dist < o.range;
+      // turn towards the racer (a slow look-around when nobody is near)
+      const want = near ? Math.atan2(chest[0] - e.pos[0], chest[2] - e.pos[2]) : e.yaw + dt * 0.5;
+      let dy = want - e.yaw; while (dy > Math.PI) dy -= Math.PI * 2; while (dy < -Math.PI) dy += Math.PI * 2;
+      e.yaw += dy * Math.min(1, dt * (near ? 6 : 1));
+      // the warning: the next shot will fire (shared random) and the racer is in range → blink red
+      const fires = n => rand(g, 'sentry:' + e.id + ':' + n) > 0.25;
+      const warn = near && fires(k + 1) && left < o.warn && Math.floor(left * 8) % 2 === 0;
+      if (warn !== S.warn) { S.warn = warn; e.setModel(o.model, { warn }); }
+      // a new cycle: fire if it is a firing cycle and the tower can see the racer
+      if (S.k !== k) {
+        const first = S.k == null; S.k = k;
+        if (!first && near && fires(k)) {
+          const d = [chest[0] - muzzle[0], chest[1] - muzzle[1], chest[2] - muzzle[2]], L = Math.hypot(d[0], d[1], d[2]) || 1, dir = [d[0] / L, d[1] / L, d[2] / L];
+          // it must SEE you: visible walls block it (the invisible walls that keep racers on the course do not)
+          const blocked = g.world.statics.some(b => !b.noDraw && b.max[1] > 0.3 && (() => { const t = GK.Physics.rayBox(muzzle, dir, b); return t >= 0 && t < L - 0.6; })());
+          if (!blocked) {
+            S.shot = { p: muzzle.slice(), v: [dir[0] * o.speed, dir[1] * o.speed, dir[2] * o.speed], life: L / o.speed + 0.6 };
+            if (g.audio) g.audio.play(e.kind === 'cannon' ? 'boom' : 'whoosh');
+            burst(g, muzzle, o.color, 6);
+          }
+        }
+      }
+      // the shot in flight (only this PC's racer can be hit by it)
+      const sh = S.shot, b = e.shotEnt;
+      if (!sh) { b.hide(); return; }
+      sh.life -= dt; sh.p = [sh.p[0] + sh.v[0] * dt, sh.p[1] + sh.v[1] * dt, sh.p[2] + sh.v[2] * dt];
+      if (sh.life <= 0 || sh.p[1] < -0.5) { S.shot = null; b.hide(); return; }
+      b.show(); b.pos = sh.p.slice(); b.yaw = Math.atan2(sh.v[0], sh.v[2]);
+      if (live(g) && Math.hypot(sh.p[0] - chest[0], sh.p[2] - chest[2]) < 0.75 && Math.abs(sh.p[1] - chest[1]) < 1.0) {
+        S.shot = null; b.hide();
+        if (hit(g, e, e.kind === 'cannon' ? 'cannonball' : 'arrow', [sh.v[0], sh.v[2]], o.power, o.stun, 2.5)) { g.audio.play('splat'); burst(g, chest, o.color, 14); if (g.ui) g.ui.toast(e.kind === 'cannon' ? '💥 Cannonball! Stunned' : '🏹 Arrow! Stunned', 'bad'); }
       }
     },
   });
