@@ -777,7 +777,7 @@ window.GAME_CONTENT = {};
     scoring: { objective: 0, wrongAnswer: 0, hint: 0, allowNegative: true },
     win: false,
     online: { rate: 3, ghostAlpha: 1, labelRange: 45, dot: '#ffd166' },
-    race: { roundTime: 480, timeChoices: [360, 480], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
+    race: { roundTime: 480, timeChoices: [480, 600, 720], prep: 12, soloPrep: 7, multipliers: [1, 1, 1.1, 1.25, 1.5], bots: 7, texts: 'content:texts' },
     quiz: { bank: 'content:quiz', perGate: 2, reward: { easy: 5, medium: 6, hard: 8, case: 15, comeback: 90, shortcut: 15 }, revealCost: 0.5, freeze: 4, retry: 0.5, kind: 'academic' },
     // gadgets come from ❓ boxes on the course (no loadout); racers further behind get more of the helpful ones
     gadgets: { pickup: true, recover: 2.5, weights: { glove: [2.5, 3], bowling: [1.5, 3], banana: [3, 1], freeze: [1.5, 2.5], balloon: [1.5, 2.5], bomb: [2, 2.5], jetpack: [1, 4], jumppad: [2, 2.5], mega: [0.7, 2.5] } },
@@ -12706,13 +12706,14 @@ window.GK_ONLINE_CONFIG = {
     try { if (!qRoom) qRoom = sessionStorage.getItem('gk.rush.room') || ''; } catch (e) { /* storage off */ }
     const box = U.el('div', 'rush-join');
     // play with bots (no internet): how many, how good, and which world to start in (kept on this PC)
-    const pref = GK.Settings.get('rushBots', { n: 7, skill: 'normal', round: 0 }), rounds = (g.cfg.content && g.cfg.content.rounds) || [];
+    const rc = cfgOf(g), pref = GK.Settings.get('rushBots', { n: 7, skill: 'normal', round: 0, len: rc.roundTime }), rounds = (g.cfg.content && g.cfg.content.rounds) || [];
     const opt = (list, cur) => list.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + U.esc(t) + '</option>').join('');
     // big buttons and pictures, very few words (students do not read long texts)
     box.innerHTML = '<button class="gk-btn primary big rush-playbtn" data-a="solo">🤖 PLAY ▶</button>' +
       '<div class="row rush-botset"><select data-a="bn" title="Bots">' + opt([[3, '🤖 3'], [5, '🤖 5'], [7, '🤖 7'], [11, '🤖 11'], [15, '🤖 15']], pref.n) + '</select>' +
       '<select data-a="bs" title="Bot level">' + opt([['easy', '😊 Easy'], ['normal', '🙂 Normal'], ['hard', '😈 Hard']], pref.skill) + '</select>' +
-      '<select data-a="br" title="World">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, '🗺 ' + (i + 1) + ' ' + (rounds[i] ? rounds[i].name : '')]), pref.round) + '</select></div>' +
+      '<select data-a="br" title="World">' + opt(Array.from({ length: g.levelCount }, (_, i) => [i, '🗺 ' + (i + 1) + ' ' + (rounds[i] ? rounds[i].name : '')]), pref.round) + '</select>' +
+      '<select data-a="bt" title="Round time">' + opt(rc.timeChoices.map(t => [t, '⏱ ' + (t / 60) + ' min']), rc.timeChoices.indexOf(pref.len) >= 0 ? pref.len : rc.roundTime) + '</select></div>' +
       (online ? '<div class="row rush-joinrow"><input class="gk-input" data-a="room" maxlength="16" placeholder="🌐 CODE" value="' + U.esc(qRoom.toUpperCase()) + '"><button class="gk-btn" data-a="join">JOIN ▶</button></div>' : '') +
       '<div class="st"></div>' +
       '<div class="rush-keys"><span><b>WASD</b>🏃</span><span><b>SPACE</b>⤴⤴</span><span><b>SHIFT</b>⚡</span><span><b>🖱</b>👊🎁</span><span><b>E</b>❓</span></div>' +
@@ -12725,9 +12726,9 @@ window.GK_ONLINE_CONFIG = {
     const go = (mode, level) => { R.mode = mode; R.reset(); g.audio.unlock(); g.ui.hideScreens(); g.loadLevel(level || 0); };
     box.querySelector('[data-a=solo]').onclick = () => {
       if (!nameOk()) return;
-      const v = a => box.querySelector('[data-a=' + a + ']').value, p = { n: Number(v('bn')), skill: v('bs'), round: Number(v('br')) };
+      const v = a => box.querySelector('[data-a=' + a + ']').value, p = { n: Number(v('bn')), skill: v('bs'), round: Number(v('br')), len: Number(v('bt')) };
       GK.Settings.set('rushBots', p);
-      R.botCount = p.n; R.botSkill = p.skill;
+      R.botCount = p.n; R.botSkill = p.skill; R.roundTime = p.len;   // ⏱ round time (solo)
       GK.QuizDeck.reset((g.playerName || 'p') + Math.random());
       go('solo', p.round);
     };
