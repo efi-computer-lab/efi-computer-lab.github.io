@@ -7158,6 +7158,9 @@ GK_LIBRARY.worlds = {
       let v = -half;
       for (const g of gaps) { this.wall(F, 5.7, 6.3, v, g - gw / 2, H, T.gate); this.box(F, 5.7, 6.3, g - gw / 2, g + gw / 2, 3.4, H - 3.4, T.gate); v = g + gw / 2; }
       this.wall(F, 5.7, 6.3, v, half, H, T.gate);
+      // nobody jumps over a firewall (double jump, jump pad, jetpack): an invisible wall up to 20 m over it and its fences
+      this.box(F, 5.4, 6.6, -half - 0.6, half + 0.6, H, 20 - H, null, { invisible: true });
+      for (const s of [-1, 1]) this.box(F, 0, L, s < 0 ? -half - 0.6 : half, s < 0 ? -half : half + 0.6, 9, 11, null, { invisible: true });
       this.deco(F, 'glowStrip', 6, 0, H, 0, { size: [W, 0.25, 0.7], color: T.gateGlow || '#ff4d6d' }, null, { solid: false });
       this.deco(F, 'neonSign', 6, -half + 2.5, H, 180, { color: T.gateGlow || '#ff4d6d', w: 4, h: 1.8, y: 0.2 }, null, { solid: false });
       ['a', 'b', 'c'].forEach((s, i) => {
@@ -12299,6 +12302,15 @@ window.GK_ONLINE_CONFIG = {
       const pr = C.project(game.player.pos, st.seg);
       st.seg = pr.seg; st.dist = pr.d;
       if (st.phase === 'running' && !st.finished) {
+        // no skipping a firewall (double jumps, jump pads, jetpacks…): past a CLOSED one = straight back in front of it
+        const shut = C.gates.find(gt => !game.state.flags['gate-' + gt.n + '-open']);
+        if (shut && !R.noGateGuard && pr.d > shut.d + 1.2 && pr.d < shut.d + 40 && pr.off < 30) {   // (R.noGateGuard: tests that teleport)
+          const q = C.at(shut.d - 3.5);
+          game.player.place([q.x, 0, q.z]); game.player.vel = [0, 0, 0]; game.player.stun = Math.max(game.player.stun || 0, 0.6);
+          st.best = Math.min(st.best, shut.d - 3.5);
+          game.ui.toast('🔥 Answer the firewall first! ❓', 'bad'); game.emit('race:blocked', { gate: shut.n });
+          return;
+        }
         if (pr.d > st.best && pr.d - st.best < 40) st.best = pr.d;
         // checkpoints: falling into a pit puts you back at the last one you passed
         while (C.cps[st.cp + 1] && st.best >= C.cps[st.cp + 1].d - 1) { st.cp++; const cp = C.cps[st.cp]; game.checkpoint = { pos: cp.pos.slice(), rot: cp.rot }; game.emit('race:checkpoint', { i: st.cp }); }
