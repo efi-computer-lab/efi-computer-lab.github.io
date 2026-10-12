@@ -308,6 +308,7 @@
       if (a.slow < 4) return null;
       a.slow = 0;
       for (const k of ['shadows', 'detail', 'bloom']) if (this.quality[k]) { this.quality[k] = false; return k; }
+      if (this.pixelRatio > 0.55) { this.pixelRatio = Math.max(0.5, Math.round((this.pixelRatio - 0.2) * 100) / 100); return 'resolution'; }   // fewer pixels
       return null;
     }
     /** lights: [{pos:[x,y,z], color:'#hex' | [r,g,b], range, intensity}] — the renderer uses the first `quality.lights`. */
@@ -582,5 +583,38 @@
       this.cache = {};
     }
   }
+  /** What this computer can draw, decided BEFORE the renderer is made (antialias is fixed when the canvas starts).
+      Returns {tier: 'minimal' | 'low' | 'medium' | 'high', reason, antialias, pixelRatio, quality} for
+      new GK.Renderer(canvas, {antialias, pixelRatio}) + renderer.setQuality(quality).
+      - minimal: no real graphics chip (software drawing: SwiftShader, llvmpipe, "Microsoft Basic Render Driver")
+      - low:     old built-in Intel graphics (HD 2000-5000, GMA), or 4 GB memory / 2 cores or fewer
+      - medium:  newer built-in graphics (Intel UHD / Iris, AMD Radeon Vega in a laptop chip), or 8 GB memory or less
+      - high:    a real graphics card (NVIDIA GeForce, AMD Radeon RX) with more memory
+      School lab default (nothing detectable): medium. renderer.adapt() still lowers it further while playing. */
+  Renderer.detect = function () {
+    const nav = window.navigator || {}, mem = nav.deviceMemory || 0, cores = nav.hardwareConcurrency || 0;
+    let gpu = '';
+    try {
+      const c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (gl) {
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        gpu = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) || '');
+        const lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
+      }
+    } catch (e) { /* no WebGL info: keep the defaults */ }
+    let tier = 'medium', reason = 'school lab default';
+    if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(gpu)) { tier = 'minimal'; reason = 'software drawing (no graphics chip): ' + gpu; }
+    else if (/intel.*(hd graphics( [2-5]\d{3})?\b|gma|g4[15]|q45)/i.test(gpu) && !/uhd|iris/i.test(gpu)) { tier = 'low'; reason = 'old built-in graphics: ' + gpu; }
+    else if ((mem && mem <= 4) || (cores && cores <= 2)) { tier = 'low'; reason = 'small computer: ' + (mem || '?') + ' GB, ' + (cores || '?') + ' cores'; }
+    else if (/nvidia|geforce|quadro|radeon (rx|pro)|\brx ?\d{3,4}/i.test(gpu) && (!mem || mem >= 8)) { tier = 'high'; reason = 'graphics card: ' + gpu; }
+    else if (gpu) reason = 'built-in graphics: ' + gpu + (mem ? ', ' + mem + ' GB' : '');
+    const T = {
+      minimal: { antialias: false, pixelRatio: 0.5, quality: { shadows: false, detail: false, bloom: false, lights: 2, sky: true } },
+      low: { antialias: false, pixelRatio: 0.75, quality: { shadows: false, detail: false, bloom: false, lights: 4, sky: true } },
+      medium: { antialias: false, pixelRatio: 1, quality: { shadows: true, shadowSize: 1024, shadowRange: 30, detail: true, bloom: false, lights: 6, sky: true } },
+      high: { antialias: true, pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5), quality: { shadows: true, shadowSize: 2048, shadowRange: 42, detail: true, bloom: true, lights: 8, sky: true } },
+    };
+    return Object.assign({ tier, reason, gpu, memory: mem, cores }, T[tier]);
+  };
   GK.Renderer = Renderer;
 })();

@@ -50,6 +50,19 @@ if (mode === 'playing') { const off = this.renderer.adapt(dt); if (off) g.ui.toa
 ```
 Optional: with real shadows on, the round contact shadows (`gk:blob` items) look better at about half their alpha.
 
+**2b. School-lab hardware detection** (recommended for every game; the starter already has it). In the type.js constructor and `applySettings()`:
+```js
+// constructor, instead of the plain new GK.Renderer(...)
+this.detected = GK.Renderer.detect ? GK.Renderer.detect() : null;   // minimal | low | medium | high
+this.renderer = new GK.Renderer(this.canvas, { pixelRatio: 1, antialias: r.antialias != null ? r.antialias : !this.detected || this.detected.antialias, far: r.far });
+
+// applySettings(): "normal" = the best this computer can do
+const det = this.detected;
+if (low) { this.renderer.pixelRatio = Math.min(r.pixelRatio || 1, window.devicePixelRatio || 1) * 0.6; this.renderer.setQuality({ bloom: false, lights: 3, shadows: false, detail: false }); }
+else if (det) { this.renderer.pixelRatio = Math.min(r.pixelRatio || det.pixelRatio, det.pixelRatio); this.renderer.setQuality(Object.assign({}, det.quality, r.bloom === false ? { bloom: false } : {}, r.shadows === false ? { shadows: false } : {})); }
+```
+`tools/make_starter.py` contains exactly these two edits (`LAB_HOOKS`).
+
 **3. Set the look per world** in the world's `lighting` (or the game's `environment`). Start from a preset in `src/lighting-presets.js`:
 ```js
 lighting: { sky: ['#2f7fd6', '#6fb6ef', '#bfe2f8'], fogColor: '#b7dcf5', fog: [70, 280],
@@ -78,6 +91,18 @@ Always use `solid: false`, and respect the world's `keep` circles.
 - Low graphics works (teacher panel).
 - Third person works.
 - Triangle count stays under about 120k. To check it, run `game.world.geo.count / 3` in the console with `?debug=1`.
+
+## A2. Fastest way to start a NEW Game Kit 3D game
+1. Copy `starter/starter-game.js` to a new file and change it:
+   - **world:** grid rows, `locations`, `decorations`, `lighting`
+   - **words:** the `W` block
+   - **game rules:** `puzzles`, `objectives`, `entities`
+2. Build the single-file game from the starter engine:
+   ```bash
+   python3 tools/make_starter.py ../../Tool_G6-7_Island_Escape.html MyGame.html
+   ```
+   It reads `starter/starter-game.js`, so either edit that file or copy the tool and change its path.
+3. Or, in the Game Kit source project, make a normal new game and paste the world and `GAME` config from the starter.
 
 ## B. A new game without the Game Kit (plain WebGL page)
 Load the scripts in this order. They're classic scripts, so they also work from `file://`:
