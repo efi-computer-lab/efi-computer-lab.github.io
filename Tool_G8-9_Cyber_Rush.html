@@ -831,7 +831,7 @@ window.GAME_CONTENT = {};
       crumble: { type: 'crumble', delay: 0.6, back: 4 },
       abyss: { type: 'abyss' },
       // the later rounds' cyber obstacles (mechanics/cybertraps)
-      press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, sentry: { type: 'sentry' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
+      press: { type: 'stamper' }, cannon: { type: 'spamcannon' }, sentry: { type: 'sentry' }, safe: { type: 'safezone' }, bdoor: { type: 'bufferdoor' }, flip: { type: 'fliptile' },
       wave: { type: 'tsunami' }, port: { type: 'portgate' }, disk: { type: 'spindisk' }, rain: { type: 'pixelrain' },
       popup: { type: 'popup' }, bumper: { type: 'bumper' }, captcha: { type: 'captcha' }, lbridge: { type: 'loadbridge' },
       lift: { type: 'lift' }, proxy: { type: 'turnstile' }, bdisk: { type: 'balancedisk' }, spring: { type: 'springtrap' },
@@ -6461,6 +6461,7 @@ GK_LIBRARY.worlds = {
      airzone-N {zone: 'air', len, y} (a stretch where the course is in the air: bots hop the gaps) ·
      press-N {size, phase, period} · cannon-N {range} · bdoor-N {size} · flip-N {size, group, period} · wave-N {size, len} ·
      port-N {row, index, n, size} · disk-N {r, spin} · rain-N {area} · bdisk-N {r, spin}
+     safe-N {r} (safe circles in a Red Light arena: the towers do not shoot there) ·
      sentry-N {kind: 'cannon' | 'archer', phase} (theme.sentries {every: m, from: m, until: m, kinds}: shooting towers just
        OUTSIDE the course edge, every `every` m along the course, on alternating random sides, facing the course)
    Routes: course (centre line start → finish: progress and rivals), drone-N, life-N.
@@ -6846,6 +6847,8 @@ GK_LIBRARY.worlds = {
       this.loc('watcher-' + n, F, 60, 0, 0, 180, { w: W + 3.4 });   // its posts stand outside the fences
       for (const u of [6, 58]) this.deco(F, 'plane', u, 0, 0.02, 0, { size: [W, 0.8], color: u === 6 ? '#ffffff' : '#ffd166', glow: 0.8 });
       for (let u = 12; u < 56; u += 8) for (const v of [-half + 1, half - 1]) this.deco(F, 'glowStrip', u, v, 0.05, 0, { size: [0.4, 0.1, 3], color: '#ff4fd8' });
+      // SAFE CIRCLES (🛡): stand in one and the shooting towers leave you alone (rows every 7 m, staggered)
+      for (let u = 11, row = 0; u < 56; u += 7, row++) for (const v of row % 2 ? [-7.5, 0, 7.5] : [-11, -3.7, 3.7, 11]) this.slot('safe', F, u, v, 0, 0, { r: 2.2 });
       this.sides(F, L);
       this.course(F, L, 0);
       this.advance(F, L);
@@ -9832,6 +9835,7 @@ GK_LIBRARY.worlds = {
       if (ph !== 'red' || !inside || !e.enabled || g.state.mode !== 'playing') return;
       if (t - e.redAt < d.grace) return;   // a moment to react
       const p = g.player.pos;
+      if (g.state.knockT > 0) { e.redPos = null; return; }   // pushed by something (a tower's shot, a gadget): that is not YOUR move
       if (!e.redPos) { e.redPos = p.slice(); return; }
       if (Math.hypot(p[0] - e.redPos[0], p[2] - e.redPos[2]) > d.tol || Math.abs(p[1] - e.redPos[1]) > 0.6) {
         const back = d.back && g.world.locations[d.back];
@@ -9910,6 +9914,8 @@ GK_LIBRARY.worlds = {
      { type: 'balancedisk', r: 9.5, spin: 0.35, tilt: 0.022 }            CYBER BALANCE DISK: a turning, tipping disk over a laser floor
      { type: 'sentry', kind: 'cannon' | 'archer' }                       SENTRY TOWERS beside the course: they turn to you, blink red, then
                                                                          fire a cannonball (stunned 2 s) or an arrow (1.2 s); walls block them
+     { type: 'safezone', r: 2.2 }                                        SAFE CIRCLE (🛡 green ring): towers do not shoot at you inside it,
+                                                                         and a shot that reaches you there fizzles (e.g. in a Red Light arena)
    Timing is RANDOM but shared: presses slam at a different moment each cycle, pop-ups pop up at random times, cannons skip
    shots and change speed, waves come late or early, the bit-flip half is chosen at random, doors and disks speed up and slow
    down (each from game.trapRandom(key + cycle), so every PC agrees). There is always a warning before a hit.
@@ -10498,6 +10504,19 @@ GK_LIBRARY.worlds = {
   M.add('sentryBall', () => G().sphere(0, 0, 0, 0.38, '#1a202c', { seg: 10, rings: 7 }).sphere(0, 0, 0, 0.42, '#ff4d6d', { seg: 8, rings: 6, glow: 0.6 }));
   M.add('sentryArrow', () => G().box(0, 0, 0, 0.07, 0.07, 1.1, '#8b5a2b').box(0, 0, 0.6, 0.16, 0.16, 0.18, '#ffd166', { glow: 0.9 }).box(0, 0, -0.5, 0.2, 0.02, 0.2, '#e2e8f0'));
   P.add('sentryshot', { defaults: { model: 'sentryBall', solid: false } });
+  M.add('safeRing', o => {   // a glowing green ring on the floor with a soft dome of light
+    const r = o.r || 2.2, g = G().cyl(0, 0.02, 0, r, 0.06, '#2ecc71', { seg: 24, glow: 0.9 }).cyl(0, 0.03, 0, r - 0.25, 0.06, '#0b3d2a', { seg: 24, glow: 0.2 });
+    return g.cyl(0, 0.04, 0, 0.6, 0.05, '#7cfc00', { seg: 12, glow: 0.8 });
+  });
+  P.add('safezone', {
+    defaults: { model: 'safeRing', solid: false, r: 2.2 },
+    init(e) { e.setLook({ r: e.def.r }); e.label = '🛡'; e.labelRange = 26; e.labelCls = 'itembox'; },
+  });
+  /** Is the racer standing in a safe circle? (towers leave them alone there) */
+  const inSafe = (g, p) => {
+    if (!g.safeZones || g.safeZonesFor !== g.world) { g.safeZonesFor = g.world; g.safeZones = g.world.entities.filter(e => e.type === 'safezone'); }
+    return g.safeZones.some(z => z.active && Math.hypot(p[0] - z.pos[0], p[2] - z.pos[2]) < z.def.r && Math.abs(p[1] - z.pos[1]) < 1.5);
+  };
   P.add('sentry', {
     defaults: { model: 'sentryCannon', solid: false, kind: 'cannon', phase: 0 },
     init(e) {
@@ -10514,7 +10533,7 @@ GK_LIBRARY.worlds = {
       const o = e.opt, S = e.state, pl = g.player, t = clockOf(g) / o.period + (o.phase || 0), k = Math.floor(t), left = (1 - (t - k)) * o.period;
       const muzzle = [e.pos[0] + Math.sin(e.yaw) * 1.3, e.pos[1] + (e.kind === 'cannon' ? 4.3 : 4.45), e.pos[2] + Math.cos(e.yaw) * 1.3];
       const chest = [pl.pos[0], pl.pos[1] + 1.1, pl.pos[2]], dist = Math.hypot(chest[0] - e.pos[0], chest[2] - e.pos[2]);
-      const near = live(g) && e.enabled && dist < o.range;
+      const safe = inSafe(g, pl.pos), near = live(g) && e.enabled && dist < o.range && !safe;
       // turn towards the racer (a slow look-around when nobody is near)
       const want = near ? Math.atan2(chest[0] - e.pos[0], chest[2] - e.pos[2]) : e.yaw + dt * 0.5;
       let dy = want - e.yaw; while (dy > Math.PI) dy -= Math.PI * 2; while (dy < -Math.PI) dy += Math.PI * 2;
@@ -10545,6 +10564,7 @@ GK_LIBRARY.worlds = {
       b.show(); b.pos = sh.p.slice(); b.yaw = Math.atan2(sh.v[0], sh.v[2]);
       if (live(g) && Math.hypot(sh.p[0] - chest[0], sh.p[2] - chest[2]) < 0.75 && Math.abs(sh.p[1] - chest[1]) < 1.0) {
         S.shot = null; b.hide();
+        if (safe) { burst(g, chest, '#2ecc71', 10); return; }   // the safe circle stops it
         if (hit(g, e, e.kind === 'cannon' ? 'cannonball' : 'arrow', [sh.v[0], sh.v[2]], o.power, o.stun, 2.5)) { g.audio.play('splat'); burst(g, chest, o.color, 14); if (g.ui) g.ui.toast(e.kind === 'cannon' ? '💥 Cannonball! Stunned' : '🏹 Arrow! Stunned', 'bad'); }
       }
     },
