@@ -70,7 +70,17 @@ A colour outside these families gets no texture, which suits plastic, metal, clo
 - Short sleeves, shorts, boots, a coloured scarf and a brown backpack.
 - One accent colour per character (scarf), and shirts in clear hues.
 
-## 6. Budget (ordinary school computers)
+## 6. Budget (school lab: old PCs, 4–8 GB memory, no graphics card)
+- **New games: about 60k triangles per world**, about 80k at the very most. Old built-in graphics draw every triangle twice when shadows are on.
+- Prefer a few big, readable shapes over many small ones. Scatter grass and flowers sparingly (10–25% of cells).
+- Keep moving enemies and props under about 40 per scene, and point lights at 4 or fewer in view.
+- The game must look good at **minimal** (no shadows, no surface detail, half resolution). So:
+  - choose clear, contrasting colours
+  - don't rely on shadows to show where things are
+  - keep the round contact shadows under characters and items
+- Test with the teacher's "low graphics" on before you publish.
+
+### Older budget (Island Escape level)
 - Outdoor world: about **120k triangles or fewer**, including scenery (Island Escape act 1 is 115k). The shadow pass draws them again.
 - Per model, roughly:
 

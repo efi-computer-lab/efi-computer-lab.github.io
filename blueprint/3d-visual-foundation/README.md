@@ -26,6 +26,9 @@ Used in:
 | `assets/models/` | The original Kenney `.glb` files, colour maps and licence notes (kept so they can be reconverted) |
 | `tools/glb_to_geo.py` | Converts small `.glb` models (Kenney or Quaternius style) into `GK.ModelData` scripts. Python 3 + Pillow |
 | `tools/inline_blocks.py` | Puts `src/` files inside a single-file Game Kit game as named `<script>/* … */` blocks (re-runnable) |
+| `starter/Starter_3D_Game.html` | **Start every new 3D game here.** A complete little Game Kit game (talk to a parrot, collect 3 shells, a quiz box, walk to the boat) with the whole engine, the foundation and the lab-hardware detection in one offline file |
+| `starter/starter-game.js` | The only part of the starter you edit: world grid, words, puzzles, objectives. Rebuild with `tools/make_starter.py` |
+| `tools/make_starter.py` | Rebuilds the starter from any published Game Kit 3D game (engine only) plus the latest `src/` |
 | `examples/island-demo.html` | A standalone page that uses only this folder: a little island with presets and a low-graphics toggle. Open it straight from disk |
 | `ART_DIRECTION.md` | Visual rules: shapes, palette, light, budgets |
 | `INTEGRATION_GUIDE.md` | How to add this to another game (Game Kit or not) |
@@ -41,6 +44,20 @@ Used in:
 - **Look first:** open `examples/island-demo.html`.
 - **Upgrade a Game Kit game:** follow `INTEGRATION_GUIDE.md` part A. Roughly 5 blocks swapped or added, plus 3 small hooks in the game type.
 - **Start a new game:** give Claude `PROMPT_TEMPLATE.md`.
+
+## School lab computers (old PCs, 4–8 GB memory, no graphics card)
+Every game made with this foundation checks the computer when it starts (`GK.Renderer.detect()`) and picks a quality level:
+
+| Level | Computers | What is drawn |
+|---|---|---|
+| **minimal** | No graphics chip at all (software drawing) | Rounded shapes and the sky; no shadows, detail or glow; half the pixels |
+| **low** | Old Intel HD graphics, or 4 GB memory / 2 cores | Same as minimal, three-quarters of the pixels |
+| **medium** (lab default) | Newer built-in graphics, 8 GB memory | Small shadow map (1024), surface detail, no glow |
+| **high** | A real graphics card | Everything |
+
+While playing, `renderer.adapt()` keeps watching the frame rate. If a game stays below about 24 fps, it turns off shadows, then detail, then glow, then lowers the resolution in steps.
+
+The teacher's "low graphics" setting still forces the lightest look. In the browser console, `[GK] graphics: …` shows which level was chosen and why.
 
 ## Quality and performance
 | Setting | What happens |

@@ -25,7 +25,7 @@
   <button data-preset="storm">⛈️ Storm</button>
   <button id="low">🐢 Low graphics</button>
 </div>
-<div class="tip">Drag to look around · scroll or pinch to zoom · everything here comes from <code>src/</code> and <code>assets/</code></div>
+<div class="tip"><span id="tier"></span>Drag to look around · scroll or pinch to zoom · everything here comes from <code>src/</code> and <code>assets/</code></div>
 
 <!-- The foundation: plain classic scripts, so this page also works when opened straight from the disk (file://). -->
 <script src="../src/gk-core-math.js"></script>
@@ -40,7 +40,9 @@
   'use strict';
   const G = () => new GK.Geo(), M = GK.Models;
   const canvas = document.getElementById('view');
-  const r = new GK.Renderer(canvas, { far: 220 });
+  const det = GK.Renderer.detect();   // minimal | low | medium | high: what this computer can draw
+  const r = new GK.Renderer(canvas, { far: 220, antialias: det.antialias });
+  r.pixelRatio = det.pixelRatio;
   const place = (geo, model, look, x, y, z, yaw) => geo.add(G().add(M.shape(model, look || {}, 'demo').geo).rotY(yaw || 0).move(x, y, z));
 
   // ---- one merged mesh for all the still scenery (fast: one draw call) ----
@@ -74,13 +76,14 @@
   // ---- presets and quality ----
   let preset = 'tropicalDay', low = false;
   const applyEnv = () => { r.setEnv(GK.LightingPresets[preset]); r.setSkyProps(GK.LightingPresets[preset].cloudProps === 0 ? [] : clouds); };
-  const applyQuality = () => r.setQuality(low ? { bloom: false, lights: 3, shadows: false, detail: false } : { bloom: true, lights: 8, shadows: true, detail: true });
+  const applyQuality = () => r.setQuality(low ? { bloom: false, lights: 3, shadows: false, detail: false } : det.quality);
   document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
     preset = b.dataset.preset; applyEnv();
     document.querySelectorAll('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
   });
   document.getElementById('low').onclick = e => { low = !low; e.currentTarget.classList.toggle('on', low); applyQuality(); };
   applyEnv(); applyQuality();
+  document.getElementById('tier').textContent = 'Graphics: ' + det.tier + ' · ';
 
   // ---- orbit camera ----
   let yaw = 0.6, pitch = 0.32, dist = 16, drag = null;

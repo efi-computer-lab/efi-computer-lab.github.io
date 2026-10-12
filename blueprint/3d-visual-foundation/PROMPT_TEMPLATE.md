@@ -1,24 +1,32 @@
-# Prompt template: reuse the 3D style in a new tool
+# Prompt template: a new game in the same 3D style
 
 Copy, fill in the brackets and give it to Claude:
 
 ---
 
-Build/upgrade **[GAME FILE or idea, e.g. "Tool_G8-9_Shrunk_Virus_Hunt.html" / "a Grade 7 jungle maths race"]** using the existing 3D Visual Foundation in `blueprint/3d-visual-foundation/`. Don't rebuild it.
+Make **[game idea, e.g. "a Grade 7 internet-safety jungle adventure, 3 short levels, about 30 minutes"]** using the
+3D Visual Foundation in `blueprint/3d-visual-foundation/`. Don't rebuild it.
 
 1. Read `blueprint/3d-visual-foundation/README.md`, `ART_DIRECTION.md` and `INTEGRATION_GUIDE.md` first.
-2. Use the foundation as-is:
-   - Game Kit game: follow INTEGRATION_GUIDE part A (`tools/inline_blocks.py` plus the three type.js hooks).
-   - New page: follow part B.
-   Keep the game a single offline HTML file.
-3. Look: **[preset: tropicalDay / goldenHour / storm / cave / indoorLab]**, with these scene changes: **[e.g. "volcano island at sunset", "underwater ruins", "school computer lab"]**. Follow the palette, shapes and budgets in ART_DIRECTION.md (about 120k triangles max outdoors, low-graphics path kept).
-4. Reuse the models in `src/stylized-nature.js` and `src/stylized-characters.js`. Add new models in the same rounded style. Only download new assets if they clearly help: CC0 from official sources (Kenney, Quaternius, Poly Haven, ambientCG). Check the licence on the source page, convert with `tools/glb_to_geo.py`, and record them in ASSET_MANIFEST.json and ASSET_CREDITS.md.
-5. Keep gameplay, controls, scoring and saves unchanged unless I ask otherwise.
-6. Validate: no console errors, every level loads, low graphics works, before/after screenshots. Report changes, assets, checks and remaining issues briefly.
+2. **Start from the starter game:** `starter/starter-game.js` and `tools/make_starter.py`, or the Game Kit source project if you have it. Keep the game a single offline HTML file.
+3. **Our lab computers are old:** 4–8 GB memory, no graphics card, Windows, Chrome or Edge.
+   - Keep the hardware detection (`GK.Renderer.detect`) and `renderer.adapt()`.
+   - Stay within about 60k triangles per world.
+   - The game must look good and be fully playable at the **minimal** level (no shadows, no surface detail).
+4. **Look:** **[preset: tropicalDay / goldenHour / storm / cave / neonNight / indoorLab]**, with scene ideas **[e.g. "jungle temple", "space station"]**. Follow ART_DIRECTION.md.
+5. **Content:** grade **[ ]**, topic **[ ]**, lesson goal **[ ]**. Questions: **[paste them, or "write them for me"]**.
+6. **Must-haves:** **[levels / scoring / leaderboard / teacher mode / time limit / online play]**.
+7. Reuse the models in `src/stylized-nature.js` and `src/stylized-characters.js`, and make new ones in the same rounded style. Only download new assets if they clearly help: CC0 from official sources (Kenney, Quaternius, Poly Haven, ambientCG). Check the licence, convert with `tools/glb_to_geo.py`, and record them in ASSET_MANIFEST.json and ASSET_CREDITS.md.
+8. **Validate:**
+   - no console errors
+   - every level can be finished
+   - the browser console shows the `[GK] graphics:` level
+   - teacher low graphics works
+
+   Then publish it and add it to the site's home page and sitemap.
 
 ---
 
 **Tips**
-- Name the game file and the acts or levels that matter most.
-- Attach a reference image if the new game needs a different mood. It goes in `blueprint/3d-visual-foundation/reference/`.
-- If the foundation itself should improve (for example a new water style), ask for the change in `src/` **and** for every game that uses it to be rebuilt.
+- Attach a reference image for a new mood. It goes in `blueprint/3d-visual-foundation/reference/`.
+- To change the style for every game (for example, new water), ask for the change in `src/`, then rebuild the starter and every game that uses it.
