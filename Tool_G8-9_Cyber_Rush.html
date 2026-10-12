@@ -10907,7 +10907,8 @@ window.GK_ONLINE_CONFIG = {
         try { let w = window; top = window.top && window.top.document ? window.top : window; while (w) { if (w.GK_FAKE_HOST) { top = w; break; } if (w === w.parent) break; w = w.parent; } } catch (e) { /* another origin */ }
         const net = top.GK_FAKE_NET || (top.GK_FAKE_NET = new FakeNet());
         const client = 'c' + Math.random().toString(36).slice(2, 8);
-        return Promise.resolve({ name: 'fake', net, client, ref: p => fakeRef(net, client, p), offset: 0, onConnected: fn => fn(true), close: () => net.disconnect(client) });
+        const conn = [];
+        return Promise.resolve({ name: 'fake', net, client, ref: p => fakeRef(net, client, p), offset: 0, onConnected: fn => { conn.push(fn); fn(true); }, close: () => { net.disconnect(client); conn.forEach(fn => fn(false)); } });
       },
     },
     firebase: {
@@ -10977,13 +10978,18 @@ window.GK_ONLINE_CONFIG = {
           const S = this.session = {
             T, room, base, id, name: String(opts.name || 'Player').slice(0, 16), char: opts.char || null, isHost: !!opts.host,
             player: !opts.host || !opts.watch, players: {}, handlers: [], joinedAt: Date.now() + T.offset, game: null, sentAt: 0, last: null,
+            connected: true,
           };
           if (opts.host) T.ref(base + '/meta').set({ host: id, at: Date.now() + T.offset });
           if (S.player) {
             const me = T.ref(base + '/players/' + id);
-            me.update({ name: S.name, char: S.char || '', on: 1, f: 0 });
+            me.update({ name: S.name, char: S.char || '', on: 1, f: 0, h: Date.now() + T.offset });
             me.onDisconnect().update({ on: 0 });   // keep the record: a refresh rejoins with the same id and progress
-            T.onConnected(ok => { if (ok && O.session === S) { me.onDisconnect().update({ on: 0 }); me.update({ on: 1 }); } });
+            T.onConnected(ok => { S.connected = ok; if (ok && O.session === S) { me.onDisconnect().update({ on: 0 }); me.update({ on: 1, h: Date.now() + T.offset }); } });
+            // heartbeat: every 10 s a connected player says "still here" (on: 1). After a Wi-Fi blip the server may run the old
+            // connection's onDisconnect (on: 0) up to a minute late, AFTER the reconnect; this (and the self-repair in upsert)
+            // puts the player back on the teacher's list instead of leaving them "offline" while they play.
+            S.beat = setInterval(() => { if (O.session === S && S.connected && S.players[id]) me.update({ on: 1, h: Date.now() + T.offset }); }, 10000);
           }
           T.ref(base + '/players').on('child_added', s => upsert(S, s.key, s.val(), true));
           T.ref(base + '/players').on('child_changed', s => upsert(S, s.key, s.val(), false));
@@ -11005,6 +11011,7 @@ window.GK_ONLINE_CONFIG = {
       if (!S) return;
       const T = S.T;
       for (const p of ['/players', '/ev']) T.ref(S.base + p).off();
+      clearInterval(S.beat);
       if (S.player) { T.ref(S.base + '/kick/' + S.id).off(); if (!kicked) T.ref(S.base + '/players/' + S.id).update({ on: 0 }); }
       for (const id in S.players) dropGhost(S, id);
       this.session = null;
@@ -11020,8 +11027,14 @@ window.GK_ONLINE_CONFIG = {
   /** A remote player's data arrived (new or changed). */
   function upsert(S, id, v, added) {
     if (!v) return;
+    if (!v.name) {   // a stray late write re-created a removed (kicked) record without a name: not a player
+      if (S.players[id]) { delete S.players[id]; dropGhost(S, id); emit(S, 'online:leave', { id }); emit(S, 'online:players', {}); }
+      return;
+    }
     const old = S.players[id], P = S.players[id] = old || { id, pos: null, vel: [0, 0, 0], yaw: 0, at: 0 };
     P.name = v.name; P.char = v.char; P.on = v.on !== 0; P.f = v.f || 0; P.me = id === S.id; P.raw = v;
+    // self-repair: my record says "offline" but I am connected and playing (a late onDisconnect from an old connection)
+    if (P.me && v.on === 0 && S.player && S.connected && O.session === S) S.T.ref(S.base + '/players/' + S.id).update({ on: 1, h: Date.now() + S.T.offset });
     if (v.p && !P.me) {
       const n = String(v.p).split(',').map(Number);
       if (n.length >= 6 && n.every(isFinite)) { P.pos = [n[0], n[1], n[2]]; P.yaw = n[3]; P.vel = [n[4], 0, n[5]]; P.at = performance.now(); }
