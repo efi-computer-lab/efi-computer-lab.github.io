@@ -1,5 +1,7 @@
 # EFI Computer Lab: standing instructions for Claude
 
+Read `PROJECT_NOTES.md` first (history and open items).
+
 This is the teacher's (Ray's) public site of offline computer-class games and tools for Grades 6–12:
 https://efi-computer-lab.github.io/ (GitHub Pages from `main`).
 
