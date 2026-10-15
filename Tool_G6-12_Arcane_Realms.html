@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-15T10:25:24.447Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-15T15:52:43.919Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -2981,6 +2981,7 @@ window.GK_ONLINE_CONFIG = {
       this.s.clock = { startedAt: this.now(), pausedAt: 0, pausedTotal: 0 };
       this.s.teams.forEach((t, ti) => t.members.forEach((pid, mi) => this.startPlayer(this.s.players[pid], ti, mi)));
       this.sim.startRound();
+      if (this.bots) this.bots.reset();
       this.touchG();
       return { ok: true };
     }
@@ -3209,6 +3210,7 @@ window.GK_ONLINE_CONFIG = {
         if (pi.phase.id !== this._lastPhase) { this._lastPhase = pi.phase.id; this.touchG(); }
         const dt = Math.min(0.25, Math.max(0, (now - (this._lastTick || now)) / 1000));
         if (dt > 0) this.sim.step(dt);
+        if (dt > 0 && this.bots) this.bots.step(dt);   // Practice with bots (src/server/bots.js)
         if (pi.left <= 0 && this.s.phase === 'running') this.end('time');
       }
       this._lastTick = now;
@@ -3218,7 +3220,7 @@ window.GK_ONLINE_CONFIG = {
     gView() {
       const s = this.s;
       return {
-        ph: s.phase, bank: s.bankId, map: s.mapId, round: s.round, locked: s.locked, practice: this.practice,
+        ph: s.phase, bank: s.bankId, map: s.mapId, round: s.round, locked: s.locked, practice: this.practice, bots: this.bots ? 1 : 0,
         teams: s.teams.map(t => ({ id: t.id, name: t.name, color: t.color, sym: t.sym, members: t.members.slice(), size0: t.size0, mult: U.r2(t.mult), out: t.out ? 1 : 0, sc: s.phase === 'running' ? this.sim.teamView(t.id) : 0 })),
         clock: { s: s.clock.startedAt, p: s.clock.pausedAt, pz: s.clock.pausedTotal, e: s.clock.endedAt || 0 },
         dur: B().round.durationSec, ann: s.ann, res: s.results, hist: s.history || [],
@@ -3229,7 +3231,7 @@ window.GK_ONLINE_CONFIG = {
     pView(pid) {
       const P = this.player(pid); if (!P) return null;
       return { n: P.name, gid: P.gid, tm: P.team || '', on: P.online ? 1 : 0, mo: P.motion || AR.Motion.fresh(), gold: U.r2(P.gold), earned: U.r2(P.earned), shr: P.shrine ? 1 : 0, look: P.look, sp: P.sp || 0, mu: P.muted ? 1 : 0, late: P.late ? 1 : 0,
-        hp: Math.ceil(P.hp == null ? B().player.health : P.hp), dead: P.dead || 0, sh: P.shieldUntil || 0, out: P.out ? 1 : 0, rep: P.repairing || '' };
+        hp: Math.ceil(P.hp == null ? B().player.health : P.hp), dead: P.dead || 0, sh: P.shieldUntil || 0, out: P.out ? 1 : 0, rep: P.repairing || '', bot: P.bot ? 1 : 0 };
     }
     /** Private record: only this student's screen uses it (the current question WITHOUT its answer, feedback, notes). */
     pvView(pid) {
@@ -3275,6 +3277,307 @@ window.GK_ONLINE_CONFIG = {
 
   AR.Server = Server;
   AR.cleanLook = cleanLook;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>/* src/server/bots.js */
+/* Arcane Realms · src/server/bots.js — computer players for Practice ("Play with bots", teacher's request 2026-10-15).
+   Bots run INSIDE the host's server, so they follow exactly the same rules as students: they earn gold at their own
+   shrine (answering questions with a skill-based accuracy), buy buildings inside their kingdom, recruit troops, send
+   their army to attack when enemy kingdoms open, defend their Heartkeep, walk around and fire lightning beams.
+   They never cheat: every purchase / order goes through the normal server checks (sim.build, sim.recruit, ...).
+   Practice only — a classroom room never has bots. */
+(function (root) {
+  'use strict';
+  const AR = root.AR = root.AR || {};
+  const B = () => AR.Balance, U = () => AR.util;
+
+  const NAMES = ['Ava', 'Bryn', 'Cato', 'Dara', 'Elio', 'Faye', 'Gus', 'Hana', 'Ivo', 'Juno', 'Kai', 'Lumi', 'Milo', 'Nia', 'Odin', 'Pia',
+    'Quin', 'Rex', 'Sol', 'Tali', 'Uma', 'Vex', 'Wren', 'Xan', 'Yuki', 'Zed', 'Ari', 'Bo', 'Cyra', 'Dex'];
+  const SKILL = {   // accuracy at the shrine, seconds per question, seconds between decisions, how keen they are to fight
+    easy:   { acc: 0.6, qSec: 10, think: 1.6, fight: 0.4, aim: 0.5 },
+    normal: { acc: 0.78, qSec: 7.5, think: 1.1, fight: 0.65, aim: 0.3 },
+    hard:   { acc: 0.92, qSec: 5.5, think: 0.7, fight: 0.9, aim: 0.15 },
+  };
+  // what a team wants, in order (each bot picks among the first few things it can afford, so teams differ a little)
+  const PLAN = [
+    ['b', 'elvenLodge', 1], ['b', 'archerTower', 3], ['u', 'ranger', 4], ['b', 'dwarvenForge', 1], ['u', 'guardian', 3],
+    ['b', 'stoneWall', 4], ['u', 'ranger', 7], ['b', 'healingGrove', 1], ['u', 'stonebreaker', 2], ['b', 'wizardSpire', 1],
+    ['u', 'healer', 2], ['b', 'arcaneSanctum', 1], ['b', 'dragonRoost', 1], ['u', 'emberDrake', 2], ['b', 'boulderBastion', 1],
+    ['r', 'armour', 1], ['u', 'mage', 3], ['u', 'guardian', 6], ['b', 'wizardSpire', 2], ['u', 'ancientDragon', 1], ['u', 'emberDrake', 4],
+    ['b', 'archerTower', 5], ['u', 'ranger', 10], ['b', 'elvenLodge', 2],
+  ];
+
+  class Bots {
+    /** S = AR.Server. opts: {skill: 'easy'|'normal'|'hard'} */
+    constructor(S, opts) {
+      this.S = S; this.skill = SKILL[(opts && opts.skill) || 'normal'] || SKILL.normal; this.skillId = (opts && opts.skill) || 'normal';
+      this.brains = {}; this.n = 0;
+    }
+    get sim() { return this.S.sim; }
+    /** Make one bot player (not in a team yet). Returns its player id. */
+    create() {
+      const S = this.S, i = this.n++, pid = 'bot' + i.toString(36) + Math.floor(S.rnd() * 1e6).toString(36) + 'xx';
+      const look = { robe: Math.floor(S.rnd() * 10), hat: Math.floor(S.rnd() * 4), skin: Math.floor(S.rnd() * 6), hair: Math.floor(S.rnd() * 8), gem: Math.floor(S.rnd() * 6), trim: Math.floor(S.rnd() * 6) };
+      const r = S.join(pid, 'Bot ' + NAMES[i % NAMES.length], look);
+      if (!r.ok) return null;
+      r.player.bot = true;
+      this.brains[pid] = this.fresh();
+      return pid;
+    }
+    fresh() { return { mode: 'study', until: 0, next: this.S.rnd() * 2, path: [], goal: null, lastPath: 0, armyAt: 0, fightUntil: 0, chatAt: 0, stuck: 0 }; }
+    /** New round: forget plans (the world was reset). */
+    reset() { for (const pid in this.brains) this.brains[pid] = this.fresh(); }
+    ids() { return Object.keys(this.brains).filter(pid => this.S.player(pid)); }
+
+    // ===================== every server tick =====================
+    step(dt) {
+      const S = this.S;
+      if (S.s.phase !== 'running' || S.s.clock.pausedAt) return;
+      for (const pid of this.ids()) {
+        const P = S.player(pid), m = this.brains[pid];
+        if (!P.team || !P.pos || P.out) continue;
+        if (P.dead) { m.path = []; m.mode = 'study'; m.until = 0; continue; }
+        if (P.shrine) this.studyTick(P, m, dt);
+        else this.walk(P, m, dt);
+        m.next -= dt;
+        if (m.next <= 0) { m.next = this.skill.think * (0.7 + S.rnd() * 0.6); try { this.think(P, m); } catch (e) { this.errors = (this.errors || 0) + 1; this.lastError = e; /* a bot must never stop the game */ } }
+      }
+    }
+
+    // ===================== decisions =====================
+    think(P, m) {
+      const S = this.S, sim = this.sim, now = S.now(), t = S.elapsed(), ph = S.phaseInfo().phase, base = this.base(P);
+      const hp = P.hp == null ? B().player.health : P.hp;
+      // 1) danger: low health → stop fighting and go back to the shrine (it protects; shopping still happens on the way out)
+      if (hp < 35 && ph.enemyDamage && m.mode === 'fight') { m.mode = 'study'; m.until = 0; }
+      // 2) beams at enemies close by
+      if (ph.enemyDamage && !P.shrine) this.shoot(P);
+      // 3) army orders
+      if (now >= m.armyAt && !P.shrine) { m.armyAt = now + 6000 + S.rnd() * 4000; this.orderArmy(P, ph); }   // (no orders from inside the shrine)
+      // 4) what to do with my body
+      if (m.mode === 'study') {
+        if (P.shrine) {
+          if ((now >= m.until && (P.gold >= 150 || now >= m.until + 30000)) || (ph.enemyDamage && P.gold >= 60 && this.threat(P))) { S.leaveShrine(P.id, 'left'); m.mode = 'spend'; }
+          return;
+        }
+        if (this.dist(P, base.shrine) < B().shrine.useRange - 1) {
+          S.enterShrine(P.id);
+          if (P.shrine) { m.until = now + (25 + S.rnd() * 35) * 1000; m.qAt = now + this.skill.qSec * 1000; }
+          return;
+        }
+        this.goTo(P, m, base.shrine[0] - base.dir[0] * 2, base.shrine[1] - base.dir[1] * 2);
+        return;
+      }
+      if (m.mode === 'spend') {
+        let bought = 0;
+        while (bought < 8 && P.gold >= 35 && this.buy(P)) bought++;   // spend most of it, like a keen student
+        m.mode = ph.enemyDamage && hp >= 35 && S.rnd() < this.skill.fight ? 'fight' : 'guard';
+        m.fightUntil = now + (30 + S.rnd() * 40) * 1000;
+        return;
+      }
+      if (now > m.fightUntil) { m.mode = 'study'; m.until = 0; return; }
+      if (m.mode === 'fight' && ph.enemyBaseEntry) {
+        const foe = this.nearestEnemy(P, 40, true) || this.enemyKeep(P);
+        if (foe) { const d = Math.hypot(foe.x - P.pos[0], foe.z - P.pos[2]); if (d > 11) this.goTo(P, m, foe.x, foe.z, 10); else m.path = []; }
+        return;
+      }
+      // guard: stroll around the front of my kingdom
+      if (!m.path.length && S.rnd() < 0.5) {
+        const gate = [base.center[0] - base.dir[0] * (this.S.map().baseR - 4), base.center[1] - base.dir[1] * (this.S.map().baseR - 4)];
+        const a = S.rnd() * Math.PI * 2, r = 3 + S.rnd() * 8;
+        this.goTo(P, m, gate[0] + Math.cos(a) * r, gate[1] + Math.sin(a) * r);
+      }
+      if (t > 60 && S.rnd() < 0.02 && now > m.chatAt) { m.chatAt = now + 60000; S.chat(P.id, 'quick', { i: Math.floor(S.rnd() * B().chat.quick.length) }); }
+    }
+    /** Try to buy the next thing on the plan. Returns true when something was bought. */
+    buy(P) {
+      const S = this.S, sim = this.sim, choices = [];
+      for (const [kind, ty, want] of PLAN) {
+        if (kind === 'b') {
+          const D = B().structures[ty]; if (!D || P.gold < D.cost) continue;
+          if (sim.count(P.team, ty) >= Math.min(want, B().structureLimits[ty] || 99)) continue;
+          if (D.unlockMin && S.elapsed() < D.unlockMin * 60) continue;
+          choices.push([kind, ty]);
+        } else if (kind === 'u') {
+          const n = Object.values(sim.w.u).filter(u => u.tm === P.team && u.ty === ty).length;
+          if (n >= want || sim.recruitProblem(P, ty)) continue;
+          choices.push([kind, ty]);
+        } else if (kind === 'r') {
+          const R = B().research[ty]; if (sim.team(P.team).res[ty] || P.gold < R.cost || !sim.hasBuilt(P.team, R.from)) continue;
+          choices.push([kind, ty]);
+        }
+        if (choices.length >= 4) break;
+      }
+      // a spell now and then, when the team has a Sanctum and an enemy is in view
+      if (S.elapsed() >= B().spells.unlockMin * 60 && S.rnd() < 0.25) {
+        const tgt = this.spellTarget(P);
+        if (tgt) for (const ty of ['thunderstorm', 'thunderbolt']) if (!sim.spellProblem(P, ty, tgt.x, tgt.z)) { sim.cast(P.id, ty, tgt.x, tgt.z, 1, 0); return true; }
+      }
+      if (!choices.length) {   // the plan is done: keep spending like a student would (more troops, then more defences)
+        const units = ['ancientDragon', 'emberDrake', 'mage', 'guardian', 'stonebreaker', 'ranger', 'healer'].filter(ty => !sim.recruitProblem(P, ty));
+        if (units.length) choices.push(['u', units[Math.floor(S.rnd() * Math.min(3, units.length))]]);
+        for (const ty of ['wizardSpire', 'archerTower', 'boulderBastion', 'healingGrove']) {
+          const D = B().structures[ty]; if (P.gold >= D.cost && sim.count(P.team, ty) < (B().structureLimits[ty] || 99)) { choices.push(['b', ty]); break; }
+        }
+      }
+      if (!choices.length) return false;
+      const price = c => c[0] === 'b' ? B().structures[c[1]].cost : c[0] === 'u' ? B().units[c[1]].cost : B().research[c[1]].cost;
+      if (P.gold > 500) choices.sort((a, b) => price(b) - price(a));   // rich: the big things first (Roost, Sanctum, dragons)
+      if (choices.length > 1 && S.rnd() < 0.5) choices.push(choices.shift());   // a little variety between bots
+      for (const [kind, ty] of choices) {   // first one that works (a crowded kingdom may have no room for a big building)
+        if (kind === 'u' && (sim.recruit(P.id, ty) || {}).ok) return true;
+        if (kind === 'r' && (sim.research(P.id, ty) || {}).ok) return true;
+        if (kind === 'b') { const spot = this.spot(P, ty); if (spot && (sim.build(P.id, ty, spot[0], spot[1], S.rnd() * Math.PI * 2) || {}).ok) return true; }
+      }
+      return false;
+    }
+    /** A legal place for a building inside my kingdom (towers and walls towards the gate, the rest further in). */
+    spot(P, ty) {
+      const S = this.S, sim = this.sim, L = S.map(), b = this.base(P), D = B().structures[ty];
+      const maxR = L.baseR - D.radius - B().buildZoneMargin - 0.5, front = ty === 'archerTower' || ty === 'stoneWall' || ty === 'boulderBastion' || ty === 'wizardSpire';
+      const out = Math.atan2(-b.dir[1], -b.dir[0]);   // direction of the gate (towards the middle of the map)
+      for (let i = 0; i < 40; i++) {
+        const a = front ? out + (S.rnd() - 0.5) * 1.6 : S.rnd() * Math.PI * 2, r = front ? maxR * (0.6 + S.rnd() * 0.4) : maxR * (0.3 + S.rnd() * 0.7);
+        const x = Math.round((b.center[0] + Math.cos(a) * r) * 10) / 10, z = Math.round((b.center[1] + Math.sin(a) * r) * 10) / 10;
+        if (!sim.placeProblem(P.team, ty, x, z) && !sim.sealProblem(P.team, ty, x, z)) return [x, z];
+      }
+      return null;
+    }
+    /** Send my own troops: defend when enemies are in my kingdom, attack when the army is big enough and battle is on. */
+    orderArmy(P, ph) {
+      const S = this.S, sim = this.sim, b = this.base(P), L = S.map();
+      const mine = Object.values(sim.w.u).filter(u => u.own === P.id && u.st !== 'sum');
+      if (!mine.length) return;
+      const ids = mine.map(u => u.id);
+      // defend
+      const threat = this.threat(P);
+      if (threat && ph.enemyDamage) { sim.command(P.id, ids, 'attack', 0, 0, threat.id); return; }
+      if (!ph.enemyBaseEntry) return;
+      const team = Object.values(sim.w.u).filter(u => u.tm === P.team && u.st !== 'sum').length;
+      const idle = mine.filter(u => !u.order || u.order.k !== 'attack' || !sim.target(u.order.target || ''));
+      if (team < 6 || !idle.length) return;   // wait for a group, then go together
+      const tgt = this.attackTarget(P, idle[0]);
+      if (tgt) sim.command(P.id, idle.map(u => u.id), 'attack', 0, 0, tgt.id);
+    }
+    /** Weakest-looking enemy kingdom: its nearest defence first, then the Heartkeep. */
+    attackTarget(P, from) {
+      const sim = this.sim, S = this.S, alive = S.s.teams.filter(t => t.id !== P.team && !t.out);
+      if (!alive.length) return null;
+      const T = alive[(S.teamIndex(P.team) + Math.floor(S.now() / 120000)) % alive.length];   // focus one enemy at a time, switch every 2 minutes
+      let best = null, bd = 1e9;
+      for (const s of Object.values(sim.w.b)) {
+        if (s.tm !== T.id) continue;
+        const d = Math.hypot(s.x - from.x, s.z - from.z) + (s.ty === 'heartkeep' ? 25 : 0);
+        if (d < bd) { bd = d; best = s; }
+      }
+      return best ? sim.target(best.id) : null;
+    }
+    /** An enemy troop or mage inside (or right at) my kingdom. */
+    threat(P) {
+      const b = this.base(P), L = this.S.map(); let best = null, bd = 1e9;
+      for (const t of this.sim.targets()) {
+        if (t.tm === P.team || t.kind === 'b') continue;
+        const d = Math.hypot(t.x - b.center[0], t.z - b.center[1]);
+        if (d < L.baseR + 6 && d < bd) { bd = d; best = t; }
+      }
+      return best;
+    }
+    enemyKeep(P) {
+      const sim = this.sim, k = Object.values(sim.w.b).filter(s => s.ty === 'heartkeep' && s.tm !== P.team && !(this.S.team(s.tm) || {}).out);
+      if (!k.length) return null;
+      k.sort((a, b) => Math.hypot(a.x - P.pos[0], a.z - P.pos[2]) - Math.hypot(b.x - P.pos[0], b.z - P.pos[2]));
+      return k[0];
+    }
+    nearestEnemy(P, range, mobileOnly) {
+      const sim = this.sim; let best = null, bd = range;
+      for (const t of sim.targets()) {
+        if (t.tm === P.team || (mobileOnly && t.kind === 'b') || !sim.canHurt(t)) continue;
+        const d = Math.hypot(t.x - P.pos[0], t.z - P.pos[2]);
+        if (d < bd) { bd = d; best = t; }
+      }
+      return best;
+    }
+    spellTarget(P) {
+      const sim = this.sim; let best = null, bn = 0;
+      for (const t of sim.targets()) {
+        if (t.tm === P.team || t.kind === 'p' || !sim.sees(P.team, t.x, t.z)) continue;
+        let n = 0; for (const o of sim.targets()) if (o.tm === t.tm && Math.hypot(o.x - t.x, o.z - t.z) < 6) n += o.kind === 'b' ? 2 : 1;
+        if (n > bn) { bn = n; best = t; }
+      }
+      return bn >= 3 ? best : null;
+    }
+    shoot(P) {
+      const S = this.S, foe = this.nearestEnemy(P, B().player.bolt.range - 1, false);
+      if (!foe) return;
+      const miss = this.skill.aim * (S.rnd() - 0.5) * 2, a = Math.atan2(foe.z - P.pos[2], foe.x - P.pos[0]) + miss;
+      const d = Math.hypot(foe.x - P.pos[0], foe.z - P.pos[2]);
+      P.pos[3] = Math.atan2(Math.cos(a), Math.sin(a));   // face the target
+      this.sim.bolt(P.id, P.pos[0] + Math.cos(a) * d, P.pos[2] + Math.sin(a) * d);
+      this.S.dirty.pos = true;
+    }
+
+    // ===================== the shrine =====================
+    studyTick(P, m, dt) {
+      const S = this.S, now = S.now();
+      if (now < (m.qAt || 0)) return;
+      m.qAt = now + this.skill.qSec * (0.7 + S.rnd() * 0.6) * 1000;
+      if (S.rnd() < this.skill.acc) {
+        const r = S.rnd(), kind = r < 0.6 ? 'standard' : r < 0.9 ? 'applied' : 'puzzle', base = B().gold.reward[kind], reward = U().r2(base * P.mult);
+        P.gold = U().r2(P.gold + reward); P.earned = U().r2(P.earned + reward); P.earnedRaw += base; P.right++;
+      } else P.wrong++;
+      S.touchP(P.id);
+    }
+
+    // ===================== walking =====================
+    base(P) { return this.S.map().bases[this.S.teamIndex(P.team)]; }
+    dist(P, pt) { return Math.hypot(P.pos[0] - pt[0], P.pos[2] - pt[1]); }
+    goTo(P, m, x, z, stopAt) {
+      const now = this.S.now();
+      if (m.goal && Math.hypot(m.goal[0] - x, m.goal[1] - z) < 2 && m.path.length && now - m.lastPath < 4000) return;
+      m.goal = [x, z]; m.lastPath = now; m.stopAt = stopAt || 0;
+      const p = this.sim.grid().find(P.pos[0], P.pos[2], x, z);
+      m.path = p ? p.slice() : [[x, z]];
+    }
+    walk(P, m, dt) {
+      const S = this.S, L = S.map();
+      if (!m.path.length) return;
+      if (m.stopAt && m.goal && Math.hypot(m.goal[0] - P.pos[0], m.goal[1] - P.pos[2]) <= m.stopAt) { m.path = []; return; }
+      let left = B().player.speed * 0.9 * dt, x = P.pos[0], z = P.pos[2], yaw = P.pos[3];
+      while (left > 0 && m.path.length) {
+        const wp = m.path[0], dx = wp[0] - x, dz = wp[1] - z, d = Math.hypot(dx, dz);
+        if (d < 1e-3) { m.path.shift(); continue; }
+        const k = Math.min(1, left / d);
+        x += dx * k; z += dz * k; left -= d * k; yaw = Math.atan2(dx, dz);
+        if (k >= 1) m.path.shift(); else break;   // (never loop on rounding leftovers)
+      }
+      const ph = S.phaseInfo().phase, ti = S.teamIndex(P.team);
+      if (!L.inBounds(x, z) || (!ph.enemyBaseEntry && L.inEnemyBase(x, z, ti))) { m.path = []; return; }
+      P.pos = [x, L.height(x, z), z, yaw]; P.posAt = S.now();
+      S.dirty.pos = true;
+    }
+  }
+
+  /** Practice with bots: the student plus bot teammates in team 1, bot enemies in the other teams. */
+  function setupPractice(S, humanPid, opts) {
+    const k = U().clamp(Math.round(Number(opts.teams) || 2), 2, 6), per = U().clamp(Math.round(Number(opts.size) || 3), 1, 5);
+    const bots = S.bots = new Bots(S, { skill: opts.skill });
+    const teams = [];
+    for (let i = 0; i < k; i++) {
+      const K = AR.Teams.KINGDOMS[i], members = i === 0 ? [humanPid] : [];
+      while (members.length < per) { const pid = bots.create(); if (!pid) break; members.push(pid); }
+      teams.push({ id: K.id, name: K.name, color: K.color, sym: K.sym, members, size0: 0, mult: 1 });
+    }
+    S.s.teams = teams;
+    for (const P of Object.values(S.s.players)) { P.team = null; S.touchP(P.id); }
+    for (const t of teams) for (const pid of t.members) S.s.players[pid].team = t.id;
+    S.s.teamCount = k; S._map = null; S.touchG();
+    return { ok: true, teams: k, size: per };
+  }
+
+  AR.Bots = Bots;
+  AR.Bots.setupPractice = setupPractice;
+  AR.Bots.SKILLS = Object.keys(SKILL);
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5594,7 +5897,7 @@ window.GK_ONLINE_CONFIG = {
         h('div.actions',
           h('button.btn.big', { onclick: () => this.startHost() }, h('span.ico', '🏰'), 'Host a game', h('small', 'Teacher: make a room')),
           h('button.btn.big.primary', { onclick: () => this.showJoin() }, h('span.ico', '🔑'), 'Join by code', h('small', 'Student: type the room code')),
-          h('button.btn.big', { onclick: () => this.startPractice() }, h('span.ico', '📖'), 'Practice', h('small', 'Play alone (not online)'))),
+          h('button.btn.big', { onclick: () => this.showPracticeSetup() }, h('span.ico', '📖'), 'Practice', h('small', 'Alone or with bots (not online)'))),
         h('div.howto', [['⛩', 'Visit your shrine'], ['❓', 'Answer questions'], ['🪙', 'Earn gold'], ['🏰', 'Build & defend'], ['🐉', 'Summon dragons']].map(([i, t]) => h('div', h('span', i), t))),
         h('button.link.settings', { onclick: () => this.showSettings() }, '⚙ Settings')));
       sel();
@@ -5637,7 +5940,26 @@ window.GK_ONLINE_CONFIG = {
       this.endSession();
       this.session = new StudentSession(this, link, practice);
     },
-    startPractice() {
+    /** Practice setup: alone, or with bot teammates and bot enemies (src/server/bots.js). */
+    showPracticeSetup() {
+      const o = Object.assign({ bots: true, teams: 3, size: 3, skill: 'normal', quick: true }, LS.get('ar.practice', {}));
+      const pick = (key, label, opts) => h('label', label, h('select.text', { onchange: e => { o[key] = isNaN(e.target.value) ? e.target.value : Number(e.target.value); } },
+        opts.map(([v, t]) => h('option', { value: v, selected: String(o[key]) === String(v) }, t))));
+      const extra = h('div.col',
+        pick('teams', 'How many teams (kingdoms)', [2, 3, 4, 5, 6].map(n => [n, n + ' teams'])),
+        pick('size', 'Players in each team (you count in your team)', [1, 2, 3, 4, 5].map(n => [n, n === 1 ? '1 (just you vs bots)' : n + ' players'])),
+        pick('skill', 'Bot skill', [['easy', '🙂 Easy'], ['normal', '😐 Normal'], ['hard', '😈 Hard']]),
+        h('label.check', h('input', { type: 'checkbox', checked: o.quick, onchange: e => { o.quick = e.target.checked; } }), ' Start the battle sooner (Preparation lasts 1 minute instead of 5)'));
+      const mode = (on, label, sub) => h('label.check', h('input', { type: 'radio', name: 'pmode', checked: o.bots === on, onchange: () => { o.bots = on; extra.hidden = !on; } }), ' ', h('b', label), ' · ', sub);
+      extra.hidden = !o.bots;
+      const m = modal('📖 Practice', h('div.col',
+        mode(false, 'Alone', 'explore the world, the shrine and the shop'),
+        mode(true, '🤖 With bots', 'computer teammates and enemies play a real match'),
+        extra,
+        h('p.small', 'Bots answer questions, build, recruit troops, attack and defend just like students. Practice is not online.')),
+        [h('button.btn', { onclick: () => m.close() }, 'Cancel'), h('button.btn.primary', { onclick: () => { m.close(); LS.set('ar.practice', o); this.startPractice(o.bots ? o : null); } }, '▶ Play')]);
+    },
+    startPractice(botOpts) {
       this.endSession();
       AR.Net.resetPractice();
       AR.Host.open({ transport: 'local', bankId: this.bankId, practice: true }).then(host => {
@@ -5645,7 +5967,13 @@ window.GK_ONLINE_CONFIG = {
         return AR.Client.join({ room: host.room, name: nm, look: this.look, transport: 'local' }).then(link => {
           this.startStudent(link, true);
           this.session.practiceHost = host;
-          const tryStart = () => { if (host.S.player(link.id)) { host.S.shuffleTeams(1); host.S.start(); host.flush(); } else setTimeout(tryStart, 50); };
+          const tryStart = () => {
+            if (!host.S.player(link.id)) return setTimeout(tryStart, 50);
+            if (botOpts && AR.Bots) AR.Bots.setupPractice(host.S, link.id, botOpts); else host.S.shuffleTeams(1);
+            host.S.start();
+            if (botOpts && botOpts.quick) host.S.s.clock.startedAt -= 4 * 60000;   // Preparation: 1 minute left
+            host.flush();
+          };
           tryStart();
         });
       }).catch(e => toast(e.message, 'warn'));
@@ -5835,7 +6163,7 @@ window.GK_ONLINE_CONFIG = {
       chatIn.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && chatIn.value.trim()) { this.link.send('chat', { x: chatIn.value }); chatIn.value = ''; } if (e.key === 'Escape') chatIn.blur(); });
       this.chatIn = chatIn;
       ui.appendChild(h('div.hud',
-        h('div.panel.hud-gold', h('div.coin', '🪙'), h('div', this.goldEl, this.earnEl), this.practice ? h('div.tag', 'PRACTICE · only you') : h('div.tag', 'Room ' + this.link.room)),
+        h('div.panel.hud-gold', h('div.coin', '🪙'), h('div', this.goldEl, this.earnEl), this.practice ? h('div.tag', this.link.g && this.link.g.bots ? 'PRACTICE · with 🤖 bots' : 'PRACTICE · only you') : h('div.tag', 'Room ' + this.link.room)),
         h('div.hud-top', this.phaseEl, h('div.announce', { hidden: true }), h('div.netwarn', { hidden: true }, '⚠ Connection lost: reconnecting…')),
         h('div.panel.hud-team', h('div.team-head'), this.rosterEl),
         h('div.panel.hud-chat', h('div.chat-head', '💬 Team chat ', h('span.small', '👁 Your teacher can read team chat')), this.chatList,
@@ -5873,8 +6201,8 @@ window.GK_ONLINE_CONFIG = {
         const me = pid === this.link.id, muted = this.muted.has(pid);
         el.appendChild(h('div.rrow' + (me ? '.me' : ''), h('span.dot' + (p.on ? '.on' : ''), '●'), h('span.rname', p.n || '…'), h('span.gid', p.gid || ''),
           p.shr ? h('span.tag', '⛩') : null, h('span.rgold', '🪙' + gold(p.gold)),
-          me ? null : h('button.mini', { title: muted ? 'Unmute' : 'Mute in my chat', 'aria-label': (muted ? 'Unmute ' : 'Mute ') + (p.n || ''), onclick: () => { muted ? this.muted.delete(pid) : this.muted.add(pid); LS.set('ar.muted.' + this.link.room, Array.from(this.muted)); this.rosterDirty = true; this.drawChat(); } }, muted ? '🔇' : '🔈'),
-          me ? null : h('button.mini', { title: 'Report to teacher', 'aria-label': 'Report ' + (p.n || ''), onclick: () => this.report(pid, p.n) }, '⚑')));
+          me || p.bot ? null : h('button.mini', { title: muted ? 'Unmute' : 'Mute in my chat', 'aria-label': (muted ? 'Unmute ' : 'Mute ') + (p.n || ''), onclick: () => { muted ? this.muted.delete(pid) : this.muted.add(pid); LS.set('ar.muted.' + this.link.room, Array.from(this.muted)); this.rosterDirty = true; this.drawChat(); } }, muted ? '🔇' : '🔈'),
+          me || p.bot ? null : h('button.mini', { title: 'Report to teacher', 'aria-label': 'Report ' + (p.n || ''), onclick: () => this.report(pid, p.n) }, '⚑')));
       }
       if (head) { clear(head); head.appendChild(AR.ui.teamBadge(t)); head.appendChild(h('span.small', ' team gold 🪙' + gold(total))); }
     }
@@ -5933,7 +6261,7 @@ window.GK_ONLINE_CONFIG = {
           res.rows.map(r => h('tr' + (r.id === myTeam ? '.mine' : '') + (res.winners.indexOf(r.id) >= 0 ? '.win' : ''), h('td', r.sym + ' ' + r.name), h('td', gold(r.gold)), h('td', gold(r.infra)), h('td', gold(r.troops)), h('td', h('b', gold(r.total)))))),
         h('p.small', 'Total wealth = everyone\'s unspent gold + surviving buildings + surviving troops.' + (res.reason === 'last kingdom' ? ' The last kingdom standing wins straight away.' : '')),
         (g.hist || []).length > 1 ? h('div.history', h('b', 'Every round so far (each round has its own winner):'), (g.hist || []).map(r => h('div', 'Round ' + r.round + ' · ' + (r.mapName || r.map) + ': ', h('b', r.winners.map(id => { const row = r.rows.find(x => x.id === id) || {}; return row.sym + ' ' + row.name; }).join(' & '))))) : null,
-        h('div.row.end', this.practice ? [res.round === 1 ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost; this.resultsEl.remove(); this.resultsEl = null; H.S.resetRound('stormcrest'); H.S.shuffleTeams(1); H.S.start(); H.flush(); } }, '▶ Round 2: Stormcrest Valley') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', 'Waiting for your teacher…')));
+        h('div.row.end', this.practice ? [res.round === 1 ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost; this.resultsEl.remove(); this.resultsEl = null; H.S.resetRound('stormcrest'); if (!H.S.bots) H.S.shuffleTeams(1); H.S.start(); H.flush(); } }, '▶ Round 2: Stormcrest Valley') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', 'Waiting for your teacher…')));
       this.app.ui.appendChild(this.resultsEl);
     }
 
