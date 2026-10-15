@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-15T09:43:32.441Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-15T10:16:11.001Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -349,6 +349,18 @@ tr.mine td:first-child { font-weight: 800; }
   .motion-controls .btn { font-size: 13px; padding: 6px 9px; }
   .motion-controls .look-buttons { flex-basis: 100%; justify-content: center; }
 }
+
+/* 🎯 aim mode: a clear target sight in the centre of the screen */
+.hud > .aim-reticle { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; pointer-events: none; z-index: 6; }
+.hud > .aim-reticle[hidden] { display: none; }
+.aim-reticle i { position: absolute; display: block; background: #fff; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.7); }
+.aim-reticle .r-ring { inset: 9px; background: none; border: 2px solid #ffd166; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+.aim-reticle .r-dot { left: 21px; top: 21px; width: 4px; height: 4px; border-radius: 50%; background: #ff6b6b; }
+.aim-reticle .r-l, .aim-reticle .r-r { top: 22px; width: 10px; height: 2px; } .aim-reticle .r-l { left: 0; } .aim-reticle .r-r { right: 0; }
+.aim-reticle .r-t, .aim-reticle .r-b { left: 22px; width: 2px; height: 10px; } .aim-reticle .r-t { top: 0; } .aim-reticle .r-b { bottom: 0; }
+.aim-reticle.fire .r-ring { animation: aimfire 0.25s ease-out; }
+@keyframes aimfire { from { transform: scale(0.7); border-color: #fff; } to { transform: scale(1); } }
+.motion-controls .aim-toggle.primary { background: linear-gradient(#e0a92e, #b97f12); color: #1b1404; }
 
 </style>
 </head>
@@ -5085,12 +5097,8 @@ window.GK_ONLINE_CONFIG = {
     click(x, y) {
       const S = this.S, m = this.me();
       if (!this.link.g || this.link.g.ph !== 'running') return false;
-      if (S.view === 'third') {   // cast a magic bolt where the student aims
-        if (m.dead || m.out || (this.link.pv && this.link.pv.in)) return true;
-        if (S.sc.cam.perspective === 'first') { const cv = S.sc.canvas; x = cv.clientWidth / 2; y = cv.clientHeight / 2; }   // first person: aim at the centre dot
-        const p = S.sc.pick(x, y) || this.forwardPoint();
-        this.link.send('bolt', { x: p[0], z: p[2] });
-        S.castAt = performance.now();
+      if (S.view === 'third') {   // normal view: clicks never fire by accident. Bolts: right-click to aim (🎯), then left-click (camera-controls.js)
+        if (!S.aiming && !m.dead && !m.out && !(this.link.pv && this.link.pv.in) && performance.now() - (this.aimHintAt || 0) > 8000) { this.aimHintAt = performance.now(); toast('🎯 To cast a magic bolt: RIGHT-click to aim, then LEFT-click.', 'info'); }
         return true;
       }
       const p = S.sc.pick(x, y);
@@ -5648,7 +5656,7 @@ window.GK_ONLINE_CONFIG = {
       const cv = this.canvas;
       let drag = null;
       window.addEventListener('pointerdown', () => { this.lastInputAt = performance.now(); }, true);
-      cv.addEventListener('pointerdown', e => { drag ={ x: e.clientX, y: e.clientY, moved: 0, button: e.button }; cv.setPointerCapture(e.pointerId); });
+      cv.addEventListener('pointerdown', e => { drag ={ x: e.clientX, y: e.clientY, moved: 0, button: e.button }; try { cv.setPointerCapture(e.pointerId); } catch (err) { /* no capture: dragging still works */ } });
       cv.addEventListener('pointermove', e => {
         this.mouse = { x: e.clientX, y: e.clientY };
         if (!drag) return;
@@ -6200,22 +6208,53 @@ window.GK_ONLINE_CONFIG = {
 
 </script>
 <script>/* src/client/camera-controls.js */
-/* Mouse-follow and first/third-person perspective. Add after app.js and movement-controls.js. */
+/* Arcane Realms · src/client/camera-controls.js — how the mouse moves the view (teacher's choice, 2026-10-15):
+   - NORMAL: the view never follows the mouse. The mouse is free for buttons, menus, chat and building.
+   - AIM (🎯): RIGHT-CLICK on the world switches aiming on: a target sight appears in the centre, moving the mouse turns
+     the view (the mouse is captured when the browser allows it), and LEFT-CLICK casts a magic bolt at the sight.
+     Right-click again, Esc, or the 🎯 button switches aiming off. Opening the Command view, a menu, the shrine or a pop-up
+     also ends aiming.
+   - V (or the button) switches first / third person. The arrow keys and the ↶ ↷ ↑ ↓ buttons still turn the view.
+   Loaded after app.js and movement-controls.js; it decorates their hooks. (Based on Codex's mouse-look module.) */
 (function () {
   'use strict';
   const AR = window.AR, App = AR.App, P = AR.StudentSession.prototype, h = AR.ui.h;
-  const blocked = S => !S || S.mode !== 'game' || S.view === 'over' || !S.link.g || S.link.g.ph !== 'running' ||
-    !!S.link.g.clock.p || !!(S.link.pv && S.link.pv.in) || !!document.querySelector('.modal-back');
-  function release() { if (document.pointerLockElement === App.canvas && document.exitPointerLock) document.exitPointerLock(); }
+  const busy = S => !S || S.mode !== 'game' || S.view === 'over' || !S.link.g || S.link.g.ph !== 'running' || !!S.link.g.clock.p ||
+    !!(S.link.pv && S.link.pv.in) || !!document.querySelector('.modal-back') || !!(S.cmd && (S.cmd.pop || S.cmd.placing || S.cmd.aim));
+  const locked = () => document.pointerLockElement === App.canvas;
+  function release() { if (locked() && document.exitPointerLock) document.exitPointerLock(); }
+
   P.lookBy = function (dx, dy) {
     const c = this.sc.cam, first = c.perspective === 'first';
     c.yaw += dx * 0.006;
     c.pitch = AR.util.clamp(c.pitch + dy * 0.004, first ? -1.2 : 0.05, 1.2);
-    // In first person the mage aims with the camera; the host still validates position.
-    if (first && this.view !== 'over') this.yaw = Math.atan2(Math.sin(c.yaw), -Math.cos(c.yaw));
+    if (first && this.view !== 'over') this.yaw = Math.atan2(Math.sin(c.yaw), -Math.cos(c.yaw));   // first person: the mage faces where you look
   };
+  // dragging: still pans the Command view map; never turns the normal view (no accidental spinning)
   const oldDrag = P.drag;
-  P.drag = function (dx, dy) { if (this.view === 'over') oldDrag.call(this, dx, dy); else this.lookBy(dx, dy); };
+  P.drag = function (dx, dy) { if (this.view === 'over') oldDrag.call(this, dx, dy); };
+
+  /** Switch aiming on/off. */
+  P.setAim = function (on, quiet) {
+    on = !!on && !busy(this) && !(this.me() || {}).dead && !(this.me() || {}).out;
+    if (on === !!this.aiming) return;
+    this.aiming = on;
+    if (on) {
+      try { const r = App.canvas.requestPointerLock && App.canvas.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* not allowed here: the mouse still turns the view */ }
+      if (!this.aimTold) { this.aimTold = true; AR.ui.toast('🎯 Aiming: move the mouse to turn. LEFT-click casts at the sight. Right-click again (or Esc) to stop.', 'info'); }
+    } else release();
+    this.refreshCameraButtons();
+  };
+  /** Cast a magic bolt at the centre of the screen (the target sight). */
+  P.castAtSight = function () {
+    const m = this.me() || {};
+    if (m.dead || m.out || (this.link.pv && this.link.pv.in)) return;
+    const cv = this.sc.canvas, p = this.sc.pick(cv.clientWidth / 2, cv.clientHeight / 2) || (this.cmd && this.cmd.forwardPoint());
+    if (!p) return;
+    this.link.send('bolt', { x: p[0], z: p[2] });
+    this.castAt = performance.now();
+    if (this.aimReticle) { this.aimReticle.classList.remove('fire'); void this.aimReticle.offsetWidth; this.aimReticle.classList.add('fire'); }
+  };
   P.togglePerspective = function () {
     const c = this.sc.cam;
     c.perspective = c.perspective === 'first' ? 'third' : 'first';
@@ -6225,67 +6264,86 @@ window.GK_ONLINE_CONFIG = {
   };
   P.refreshCameraButtons = function () {
     if (this.perspectiveButton) {
-      this.perspectiveButton.textContent = this.sc.cam.perspective === 'first' ? 'First person' : 'Third person';
+      this.perspectiveButton.textContent = this.sc.cam.perspective === 'first' ? '👁 First person' : '🧙 Third person';
       this.perspectiveButton.setAttribute('aria-pressed', String(this.sc.cam.perspective === 'first'));
     }
-    if (this.mouseLockButton) this.mouseLockButton.textContent = document.pointerLockElement === this.app.canvas ? 'Unlock mouse' : 'Lock mouse';
-    if (this.viewReticle) this.viewReticle.hidden = this.view === 'over' || this.sc.cam.perspective !== 'first';
+    if (this.aimButton) { this.aimButton.textContent = this.aiming ? '🎯 Stop aiming' : '🎯 Aim'; this.aimButton.classList.toggle('primary', !!this.aiming); }
+    if (this.aimReticle) this.aimReticle.hidden = !this.aiming;
+    if (this.viewReticle) this.viewReticle.hidden = !!this.aiming || this.view === 'over' || this.sc.cam.perspective !== 'first';
     const hint = this.app.ui.querySelector('.motion-hint');
-    if (hint) hint.textContent = document.pointerLockElement === this.app.canvas ? 'Mouse locked · Esc releases · V switches view' : 'Move mouse to look · V switches view';
+    if (hint) hint.textContent = this.aiming ? '🎯 Left-click = cast · right-click / Esc = stop aiming' : 'Right-click = 🎯 aim · V = first/third person';
   };
   const oldHud = P.buildHud;
   P.buildHud = function () {
     oldHud.call(this);
-    this.perspectiveButton = h('button.btn.view-toggle', { onclick: () => this.togglePerspective(), title: 'Switch first / third person (V)' }, 'Third person');
-    this.mouseLockButton = h('button.btn.mouse-lock', { title: 'Optional: capture the mouse for continuous looking. Click Unlock mouse or press Escape to release.', onclick: () => {
-      if (document.pointerLockElement === this.app.canvas) { release(); return; }
-      if (blocked(this)) return;
-      try {
-        if (!this.app.canvas.requestPointerLock) throw new Error('unavailable');
-        Promise.resolve(this.app.canvas.requestPointerLock()).catch(() => AR.ui.toast('Mouse capture unavailable here. Move over the world to look around.'));
-      } catch (e) { AR.ui.toast('Move over the world to look around.'); }
-    } }, 'Lock mouse');
+    this.aiming = false;
+    this.perspectiveButton = h('button.btn.view-toggle', { onclick: () => this.togglePerspective(), title: 'Switch first / third person (V)' }, '🧙 Third person');
+    this.aimButton = h('button.btn.aim-toggle', { onclick: () => this.setAim(!this.aiming), title: 'Aim with a target sight (or right-click the world)' }, '🎯 Aim');
     const controls = this.app.ui.querySelector('.motion-controls');
+    controls.insertBefore(this.aimButton, controls.querySelector('.look-buttons'));
     controls.insertBefore(this.perspectiveButton, controls.querySelector('.look-buttons'));
-    controls.insertBefore(this.mouseLockButton, controls.querySelector('.look-buttons'));
-    controls.querySelector('.motion-hint').textContent = 'Move mouse to look · V switches view';
     this.viewReticle = h('div.view-reticle', { 'aria-hidden': 'true', hidden: true });
-    this.app.ui.querySelector('.hud').appendChild(this.viewReticle);
+    this.aimReticle = h('div.aim-reticle', { 'aria-hidden': 'true', hidden: true }, h('i.r-ring'), h('i.r-dot'), h('i.r-l'), h('i.r-r'), h('i.r-t'), h('i.r-b'));
+    const hud = this.app.ui.querySelector('.hud');
+    hud.appendChild(this.viewReticle); hud.appendChild(this.aimReticle);
     this.refreshCameraButtons();
   };
   const oldKey = P.key;
   P.key = function (e) {
     if (e.code === 'KeyV' && this.mode === 'game') { e.preventDefault(); if (!e.repeat) this.togglePerspective(); return; }
+    if (e.code === 'Escape' && this.aiming) { this.setAim(false); return; }
     oldKey.call(this, e);
   };
+  const oldToggleView = P.toggleView;
+  P.toggleView = function () { if (this.aiming) this.setAim(false); return oldToggleView.apply(this, arguments); };
   const oldUpdate = P.update;
   P.update = function (dt) {
-    // Follow camera direction even when standing still in first person.
-    if (this.sc.cam.perspective === 'first' && this.view !== 'over') this.yaw = Math.atan2(Math.sin(this.sc.cam.yaw), -Math.cos(this.sc.cam.yaw));
-    if (blocked(this)) release();
+    if ((this.sc.cam.perspective === 'first' || this.aiming) && this.view !== 'over') this.yaw = Math.atan2(Math.sin(this.sc.cam.yaw), -Math.cos(this.sc.cam.yaw));   // face where you look / aim
+    if (this.aiming && (busy(this) || (this.me() || {}).dead)) this.setAim(false);
     oldUpdate.call(this, dt);
     this.refreshCameraButtons();
   };
+  // third person while aiming: the camera eases in over the mage's RIGHT shoulder, so the sight looks past the mage
+  const oldThird = AR.Scene.prototype.thirdPerson;
+  AR.Scene.prototype.thirdPerson = function (target) {
+    const c = this.cam, k = c.aimBlend || 0;
+    if (k > 0.001 && c.perspective !== 'first') {
+      const right = [Math.cos(c.yaw), Math.sin(c.yaw)], s = 1.25 * k;
+      target = [target[0] + right[0] * s, target[1] + 0.25 * k, target[2] + right[1] * s];
+    }
+    return oldThird.call(this, target);
+  };
+  const oldUpdate2 = P.update;
+  P.update = function (dt) {
+    const c = this.sc.cam, want = this.aiming ? 1 : 0;
+    if (c.aimBlend == null) c.aimBlend = 0;
+    if (c.normalDist == null || (!this.aiming && c.aimBlend < 0.01)) c.normalDist = c.dist;
+    c.aimBlend += (want - c.aimBlend) * Math.min(1, dt * 10);
+    c.dist = c.normalDist + (4.6 - c.normalDist) * c.aimBlend;   // closer while aiming, back to your zoom after
+    oldUpdate2.call(this, dt);
+  };
   const oldStop = P.stop;
-  P.stop = function () { release(); this.sc.cam.perspective = 'third'; oldStop.call(this); };
+  P.stop = function () { this.aiming = false; release(); this.sc.cam.perspective = 'third'; oldStop.call(this); };
+
   const oldBind = App.bindInput;
   App.bindInput = function () {
     oldBind.call(this);
     const cv = this.canvas; let last = null;
-    cv.style.cursor = 'crosshair';
-    cv.addEventListener('mouseenter', e => { last = [e.clientX, e.clientY]; });
-    cv.addEventListener('mouseleave', () => { last = null; });
-    cv.addEventListener('mousemove', e => {
-      const previous = last; last = [e.clientX, e.clientY];
-      // Dragging already goes through the original pointer handler; never turn twice.
-      if (!previous || e.buttons || document.pointerLockElement === cv || blocked(this.session)) return;
-      this.session.lookBy(e.clientX - previous[0], e.clientY - previous[1]);
+    cv.style.cursor = 'default';
+    const S = () => this.session && this.session.setAim ? this.session : null;
+    // mousedown sees every button separately (pointer events merge a 2nd button into a move)
+    cv.addEventListener('mousedown', e => {
+      const s = S(); if (!s || s.view === 'over') return;
+      if (e.button === 2) { e.preventDefault(); s.setAim(!s.aiming); last = [e.clientX, e.clientY]; }
+      else if (e.button === 0 && s.aiming) { e.preventDefault(); s.castAtSight(); }
     });
     document.addEventListener('mousemove', e => {
-      if (document.pointerLockElement === cv && !blocked(this.session)) this.session.lookBy(e.movementX, e.movementY);
+      const s = S(); if (!s || !s.aiming) { last = null; return; }
+      if (locked()) s.lookBy(e.movementX, e.movementY);
+      else { if (last) s.lookBy(e.clientX - last[0], e.clientY - last[1]); last = [e.clientX, e.clientY]; }   // no capture allowed: turn while the mouse moves
     });
-    document.addEventListener('pointerlockchange', () => { last = null; if (this.session && this.session.refreshCameraButtons) this.session.refreshCameraButtons(); });
-    window.addEventListener('blur', release);
+    document.addEventListener('pointerlockchange', () => { const s = S(); if (s && s.aiming && !locked() && s._lockWas) s.setAim(false); if (s) s._lockWas = locked(); if (s && s.refreshCameraButtons) s.refreshCameraButtons(); });
+    window.addEventListener('blur', () => { const s = S(); if (s && s.aiming) s.setAim(false); });
   };
 })();
 
