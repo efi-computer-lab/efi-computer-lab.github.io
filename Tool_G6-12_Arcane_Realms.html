@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-15T10:16:11.001Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-15T10:25:24.447Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -4404,6 +4404,22 @@ window.GK_ONLINE_CONFIG = {
     for (let y = 14; y > 0; y -= 2) { const nx = x + (Math.sin(y * 7.1) * 0.9), nz = z + Math.cos(y * 3.3) * 0.9; g.add(G().box(0, 0, 0, 0.18, 2.3, 0.18, '#fff3bf', { glow: 1 }).move((x + nx) / 2, y - 2, (z + nz) / 2)); x = nx; z = nz; }
     return g;
   }
+  /** Mage's lightning beam: a crackling zig-zag along +z from 0 to 1 (scale z to the length). White-hot core inside a
+      team-colour glow, built from crossed ribbons so it looks solid from every side. `seed` picks one of a few shapes. */
+  function beam(color, seed) {
+    const g = G(), n = 9, pts = [[0, 0, 0]];
+    for (let i = 1; i < n; i++) pts.push([Math.sin(i * 5.3 + seed * 2.1) * 0.3, Math.cos(i * 3.7 + seed * 1.3) * 0.24, i / n]);
+    pts.push([0, 0, 1]);
+    const ribbon = (w, col, glow) => {
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i], b = pts[i + 1];
+        g.quad([a[0] - w, a[1], a[2]], [b[0] - w, b[1], b[2]], [b[0] + w, b[1], b[2]], [a[0] + w, a[1], a[2]], col, null, glow);
+        g.quad([a[0], a[1] - w, a[2]], [b[0], b[1] - w, b[2]], [b[0], b[1] + w, b[2]], [a[0], a[1] + w, a[2]], col, null, glow);
+      }
+    };
+    ribbon(0.12, color, 1); ribbon(0.045, '#ffffff', 1);
+    return g;
+  }
   function stormCloud() { const g = G(); for (let i = 0; i < 6; i++) g.blob(Math.cos(i) * 3, 0, Math.sin(i * 1.7) * 3, 2.6, '#495057', { seed: i + 1, rough: 0.3, seg: 7, rings: 4, flat: true, squash: 0.5 }); return g; }
   function tornado() { const g = G(); for (let i = 0; i < 7; i++) g.cyl(Math.sin(i) * 0.4, i * 1.3, Math.cos(i) * 0.4, 0.6 + i * 0.45, 1.2, '#ced4da', { seg: 8, flat: true, noTop: true, noBottom: true }); return g; }
   function wave() { const g = G(); g.box(0, 0, 0, 1, 1.6, 1.2, '#4dabf7', { glow: 0.2 }); g.box(0, 1.6, 0.3, 1, 0.5, 0.5, '#e7f5ff', { glow: 0.3 }); return g; }   // scale x to the lane width
@@ -4412,7 +4428,7 @@ window.GK_ONLINE_CONFIG = {
   function fireball() { return G().sphere(0, 0, 0, 0.3, '#ff922b', { seg: 6, rings: 4, flat: true, glow: 1 }); }
 
   AR.Models3 = { dwarvenForge, boulderBastion, wizardSpire, dragonRoost, arcaneSanctum, healingGrove, stoneWall, guardian, stonebreaker, mage: mageUnit, healer, emberDrake, ancientDragon,
-    bridge, crystalBig, crystalSpire, warnDisc, lane, lightning, stormCloud, tornado, wave, wardDome, boulder, fireball };
+    bridge, crystalBig, crystalSpire, warnDisc, lane, lightning, beam, stormCloud, tornado, wave, wardDome, boulder, fireball };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -4445,7 +4461,7 @@ window.GK_ONLINE_CONFIG = {
       const now = performance.now();
       for (const e of list) {
         const d = Math.hypot(e.x2 - e.x1, e.z2 - e.z1), moving = 'abrmfh'.indexOf(e.k) >= 0 && d > 0.2;
-        if (moving) this.fx.push({ k: e.k, a: [e.x1, e.z1], b: [e.x2, e.z2], t0: now, dur: Math.max(140, d / (e.k === 'r' ? 14 : e.k === 'b' ? 28 : e.k === 'h' ? 12 : 30) * 1000), tm: e.tm });
+        if (moving) this.fx.push({ k: e.k, a: [e.x1, e.z1], b: [e.x2, e.z2], t0: now, dur: e.k === 'b' ? 380 : Math.max(140, d / (e.k === 'r' ? 14 : e.k === 'h' ? 12 : 30) * 1000), tm: e.tm });
         else this.fx.push({ k: e.k, a: [e.x1, e.z1], t0: now, dur: e.k === 'x' ? 900 : e.k[0] === 'z' ? 450 : 600, tm: e.tm, seed: Math.random() });
         if (e.k === 'x') this.rubble.push({ x: e.x1, z: e.z1, until: now + 25000 });
       }
@@ -4561,6 +4577,14 @@ window.GK_ONLINE_CONFIG = {
           if (f.k === 'a') items.push({ mesh: this.mesh('arrow', () => M2().arrow()), pos: [x, y, z], yaw: Math.atan2(f.b[0] - f.a[0], f.b[1] - f.a[1]), noShadow: true });
           else if (f.k === 'r') items.push({ mesh: this.mesh('boulder', () => M3().boulder()), pos: [x, y, z], yaw: now / 100, noShadow: true });
           else if (f.k === 'f') items.push({ mesh: this.mesh('fire', () => M3().fireball()), pos: [x, y, z], noShadow: true });
+          else if (f.k === 'b') {   // mage's lightning beam: appears at once from hand to target, crackles, then fades
+            const c = this.colorOf(f.tm), dx = f.b[0] - f.a[0], dz = f.b[1] - f.a[1], len = Math.hypot(dx, dz), y0 = L.height(f.a[0], f.a[1]) + 1.5;
+            const shape = Math.floor(now / 50) % 3, fade = Math.max(0, 1 - t * t);
+            items.push({ mesh: this.mesh('beam' + c + shape, () => M3().beam(c, shape)), pos: [f.a[0], y0, f.a[1]], yaw: Math.atan2(dx, dz), scale: [1 + t, 1 + t, len], alpha: fade, noShadow: true });
+            items.push({ mesh: this.mesh('burst#fff3bf', () => M2().burst('#fff3bf')), pos: [f.b[0], L.height(f.b[0], f.b[1]) + 1.2, f.b[1]], scale: 0.3 + t * 1.2, alpha: fade * 0.8, noShadow: true });
+            items.push({ mesh: this.mesh('orb' + c, () => M2().orb(c)), pos: [f.a[0] + dx / (len || 1) * 0.5, y0, f.a[1] + dz / (len || 1) * 0.5], scale: 1.6 - t, alpha: fade, noShadow: true });
+            continue;
+          }
           else { const c = f.k === 'b' ? this.colorOf(f.tm) : FX_COL[f.k] || '#ffffff'; items.push({ mesh: this.mesh('orb' + c, () => M2().orb(c)), pos: [x, y, z], scale: f.k === 'h' ? 0.6 : 1, noShadow: true }); }
         } else if (f.k[0] === 'z') {   // spell pulses: lightning strikes / gusts
           if (f.k === 'zh') continue;
@@ -5098,7 +5122,7 @@ window.GK_ONLINE_CONFIG = {
       const S = this.S, m = this.me();
       if (!this.link.g || this.link.g.ph !== 'running') return false;
       if (S.view === 'third') {   // normal view: clicks never fire by accident. Bolts: right-click to aim (🎯), then left-click (camera-controls.js)
-        if (!S.aiming && !m.dead && !m.out && !(this.link.pv && this.link.pv.in) && performance.now() - (this.aimHintAt || 0) > 8000) { this.aimHintAt = performance.now(); toast('🎯 To cast a magic bolt: RIGHT-click to aim, then LEFT-click.', 'info'); }
+        if (!S.aiming && !m.dead && !m.out && !(this.link.pv && this.link.pv.in) && performance.now() - (this.aimHintAt || 0) > 8000) { this.aimHintAt = performance.now(); toast('⚡ To fire a lightning beam: RIGHT-click to aim, then LEFT-click.', 'info'); }
         return true;
       }
       const p = S.sc.pick(x, y);
@@ -5821,7 +5845,7 @@ window.GK_ONLINE_CONFIG = {
           h('button.btn.small', { onclick: () => this.showLook() }, '🎨'),
           h('button.btn.small', { onclick: () => this.app.showSettings() }, '⚙'))),
         this.promptEl,
-        h('div.controls', [['WASD', 'move'], ['drag', 'look'], ['click / F', 'magic bolt'], ['E', 'shrine'], ['Tab', 'command view'], ['Enter', 'chat']].map(([k, t]) => h('span', h('kbd', k), ' ' + t)))));
+        h('div.controls', [['W / S', 'walk'], ['A / D', 'turn'], ['right-click', 'aim ⚡'], ['E', 'shrine'], ['Tab', 'command view'], ['Enter', 'chat']].map(([k, t]) => h('span', h('kbd', k), ' ' + t)))));
       this.shrine = new AR.ShrinePanel(ui, this.link, () => this.mult());
       this.advisor = new AR.Advisor(ui, { tips: this.app.settings.tips !== false });
       if (this.wv) this.wv.clear();
@@ -5929,7 +5953,7 @@ window.GK_ONLINE_CONFIG = {
       this.view = this.view === 'third' ? 'over' : 'third';
       this.usedMap = true;
       if (this.view === 'over' && this.pos) { this.sc.cam.over.x = this.pos[0]; this.sc.cam.over.z = this.pos[2]; }
-      toast(this.view === 'over' ? '🗺 Command view: click your troops or buildings, drag or WASD to move the view. Tab to go back.' : '🧙 Back to your mage. Click (or F) to cast a magic bolt.');
+      toast(this.view === 'over' ? '🗺 Command view: click your troops or buildings, drag or WASD to move the view. Tab to go back.' : '🧙 Back to your mage. A / D turn · RIGHT-click to aim, LEFT-click fires a lightning beam.');
     }
     drag(dx, dy) {
       const c = this.sc.cam;
@@ -6211,10 +6235,12 @@ window.GK_ONLINE_CONFIG = {
 /* Arcane Realms · src/client/camera-controls.js — how the mouse moves the view (teacher's choice, 2026-10-15):
    - NORMAL: the view never follows the mouse. The mouse is free for buttons, menus, chat and building.
    - AIM (🎯): RIGHT-CLICK on the world switches aiming on: a target sight appears in the centre, moving the mouse turns
-     the view (the mouse is captured when the browser allows it), and LEFT-CLICK casts a magic bolt at the sight.
+     the view (the mouse is captured when the browser allows it), and LEFT-CLICK fires a lightning beam at the sight.
      Right-click again, Esc, or the 🎯 button switches aiming off. Opening the Command view, a menu, the shrine or a pop-up
      also ends aiming.
    - V (or the button) switches first / third person. The arrow keys and the ↶ ↷ ↑ ↓ buttons still turn the view.
+   - CHASE CAMERA (teacher's request, 2026-10-15): A / D (and ← / →) TURN the mage and the camera turns with it, so you
+     can look around by walking. W / S walk forward / back. While aiming, A / D side-step instead (the mouse turns).
    Loaded after app.js and movement-controls.js; it decorates their hooks. (Based on Codex's mouse-look module.) */
 (function () {
   'use strict';
@@ -6241,7 +6267,7 @@ window.GK_ONLINE_CONFIG = {
     this.aiming = on;
     if (on) {
       try { const r = App.canvas.requestPointerLock && App.canvas.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* not allowed here: the mouse still turns the view */ }
-      if (!this.aimTold) { this.aimTold = true; AR.ui.toast('🎯 Aiming: move the mouse to turn. LEFT-click casts at the sight. Right-click again (or Esc) to stop.', 'info'); }
+      if (!this.aimTold) { this.aimTold = true; AR.ui.toast('🎯 Aiming: move the mouse to turn. LEFT-click fires a ⚡ lightning beam at the sight. Right-click again (or Esc) to stop.', 'info'); }
     } else release();
     this.refreshCameraButtons();
   };
@@ -6271,7 +6297,7 @@ window.GK_ONLINE_CONFIG = {
     if (this.aimReticle) this.aimReticle.hidden = !this.aiming;
     if (this.viewReticle) this.viewReticle.hidden = !!this.aiming || this.view === 'over' || this.sc.cam.perspective !== 'first';
     const hint = this.app.ui.querySelector('.motion-hint');
-    if (hint) hint.textContent = this.aiming ? '🎯 Left-click = cast · right-click / Esc = stop aiming' : 'Right-click = 🎯 aim · V = first/third person';
+    if (hint) hint.textContent = this.aiming ? '⚡ Left-click = fire · right-click / Esc = stop aiming' : 'A / D = turn · Right-click = 🎯 aim · V = first/third person';
   };
   const oldHud = P.buildHud;
   P.buildHud = function () {
@@ -6321,6 +6347,21 @@ window.GK_ONLINE_CONFIG = {
     c.aimBlend += (want - c.aimBlend) * Math.min(1, dt * 10);
     c.dist = c.normalDist + (4.6 - c.normalDist) * c.aimBlend;   // closer while aiming, back to your zoom after
     oldUpdate2.call(this, dt);
+  };
+  // chase camera: A / D turn the mage, the camera stays behind it; W walks where you face
+  const TURN = 2.2;   // radians per second
+  const oldMove = P.move;
+  P.move = function (dt) {
+    const K = this.app.keys, c = this.sc.cam;
+    if (this.view === 'over' || this.aiming) return oldMove.call(this, dt);
+    const a = K.KeyA, d = K.KeyD, turn = (d ? 1 : 0) - (a ? 1 : 0);
+    if (turn && this.canMove()) {
+      c.yaw += turn * TURN * dt;
+      if (!(K.KeyW || K.KeyS || K.ArrowUp || K.ArrowDown)) this.yaw = Math.atan2(Math.sin(c.yaw), -Math.cos(c.yaw));   // turning on the spot
+    }
+    K.KeyA = K.KeyD = false;
+    try { oldMove.call(this, dt); } finally { K.KeyA = a; K.KeyD = d; }
+    if (this.walking && (K.KeyS || K.ArrowDown) && !(K.KeyW || K.ArrowUp)) this.yaw = Math.atan2(Math.sin(c.yaw), -Math.cos(c.yaw));   // step back facing forward
   };
   const oldStop = P.stop;
   P.stop = function () { this.aiming = false; release(); this.sc.cam.perspective = 'third'; oldStop.call(this); };
