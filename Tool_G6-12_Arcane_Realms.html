@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-15T15:52:43.919Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-16T00:18:34.736Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -361,6 +361,67 @@ tr.mine td:first-child { font-weight: 800; }
 .aim-reticle.fire .r-ring { animation: aimfire 0.25s ease-out; }
 @keyframes aimfire { from { transform: scale(0.7); border-color: #fff; } to { transform: scale(1); } }
 .motion-controls .aim-toggle.primary { background: linear-gradient(#e0a92e, #b97f12); color: #1b1404; }
+
+</style>
+<style>/* src/client/rts.css */
+/* Arcane Realms · rts.css — the Command & Conquest layout: a sidebar on the right (minimap + Build / Train / Magic / Learn),
+   the rest of the HUD to its left. Only active in a game (body.rts); the command-view-only parts use body.rts-over. */
+body.rts #ui > .hud { padding-right: 344px; }
+body.rts .cmdbar, body.rts .cmdpop { display: none !important; }
+body.rts .hud-map .minimap { display: none; }
+body.rts.rts-over #ui > .hud > .motion-controls { visibility: hidden; }
+body.rts .hud .prompt { bottom: 30%; }
+
+.rts-side { position: fixed; right: 10px; top: 10px; bottom: 10px; width: 322px; display: flex; flex-direction: column; gap: 6px; padding: 8px; pointer-events: auto; z-index: 12;
+  border: 2px solid rgba(255, 209, 102, 0.55); background: linear-gradient(rgba(22, 28, 44, 0.95), rgba(14, 18, 30, 0.95)); }
+.rts-map { display: flex; justify-content: center; }
+.rts-map .minimap { width: 200px !important; height: 200px !important; border: 2px solid #3d4a66; border-radius: 6px; cursor: crosshair; display: block !important; }
+.rts-mapbtns { justify-content: center; gap: 4px; flex-wrap: wrap; }
+.rts-mapbtns .btn.small { padding: 4px 7px; font-size: 12px; }
+.rts-status { font-size: 13px; text-align: center; color: var(--muted); }
+.rts-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.rts-tab { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 2px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.06); color: var(--text); cursor: pointer; font: inherit; font-size: 12px; }
+.rts-tab span { font-size: 18px; line-height: 1; }
+.rts-tab.on { background: linear-gradient(#e0a92e, #b97f12); color: #1b1404; border-color: #ffd166; }
+.rts-tab.ping:not(.on) { animation: rtsping 1s ease-in-out infinite; border-color: var(--accent); }
+@keyframes rtsping { 50% { box-shadow: 0 0 0 3px rgba(128, 255, 219, 0.6); } }
+@media (prefers-reduced-motion: reduce) { .rts-tab.ping:not(.on) { animation: none; box-shadow: 0 0 0 3px rgba(128, 255, 219, 0.6); } }
+.rts-body, .rts-learn { flex: 1; overflow: auto; min-height: 0; }
+.rts-body[hidden], .rts-learn[hidden] { display: none; }
+.rts-body .pophead { font-weight: bold; margin: 2px 0 6px; }
+.rts-body .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.rts-body .card { min-width: 0; padding: 6px; font-size: 12px; }
+.rts-body .card .ct { display: none; }
+.rts-body .card .ci { font-size: 22px; }
+.rts-body .card .why { font-size: 11px; }
+.rts-group { margin: 8px 0 4px; font-size: 13px; }
+.rts-queue { font-size: 12px; margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.rts-queue .qitem { background: rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 1px 6px; }
+.rts-learnstart { text-align: center; padding: 10px 4px; }
+.rts-learnstart[hidden] { display: none; }
+.rts-side .shrine { position: static; transform: none; width: auto; max-height: none; box-shadow: none; border-width: 1px; padding: 10px; font-size: 14px; }
+.rts-side .shrine .question { font-size: 1.05em; }
+.rts-side .shrine .choice { font-size: 14px; }
+
+.rts-box { position: fixed; border: 1.5px solid #80ffdb; background: rgba(128, 255, 219, 0.12); pointer-events: none; z-index: 30; }
+.rts-box[hidden] { display: none; }
+body.rts .selpanel { left: calc(50% - 170px); bottom: 64px; }
+
+@media (max-width: 1100px) {
+  body.rts #ui > .hud { padding-right: 274px; }
+  .rts-side { width: 256px; }
+  .rts-map .minimap { width: 150px !important; height: 150px !important; }
+  .rts-body .cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  body.rts #ui > .hud { padding-right: 214px; }
+  .rts-side { width: 200px; padding: 5px; }
+  .rts-map .minimap { width: 110px !important; height: 110px !important; }
+  .rts-tab b { display: none; }
+}
+body.rts .hud-map .row > .btn:first-child { display: none; }   /* the sidebar has the view button */
+.rts-side .shrine .shield { display: none; }
+.rts-side .shrine-title { font-size: 1.1em; }
 
 </style>
 </head>
@@ -1400,7 +1461,7 @@ window.GK_ONLINE_CONFIG = {
     features: { shop: true, combat: true },
     // what can be bought (Milestone 3: everything)
     shop: {
-      structures: ['elvenLodge', 'archerTower', 'stoneWall', 'dwarvenForge', 'boulderBastion', 'wizardSpire', 'healingGrove', 'arcaneSanctum', 'dragonRoost'],
+      structures: ['elvenLodge', 'archerTower', 'stoneWall', 'healingGrove', 'dwarvenForge', 'boulderBastion', 'wizardTower', 'wizardSpire', 'arcaneSanctum', 'dragonRoost'],
       units: ['ranger', 'healer', 'guardian', 'stonebreaker', 'mage', 'emberDrake', 'ancientDragon'],
     },
     // two rounds, two maps; everything resets between rounds except the teams
@@ -1410,9 +1471,10 @@ window.GK_ONLINE_CONFIG = {
     round: {
       durationSec: 20 * 60,
       phases: [   // from = seconds since the round started
-        { id: 'prep', from: 0, name: 'Preparation', text: 'No enemy damage. Enemy kingdoms are closed.', enemyDamage: false, enemyBaseEntry: false },
-        { id: 'early', from: 5 * 60, name: 'Battle begins', text: 'Heartkeeps take 80% less damage, base buildings 50% less.', enemyDamage: true, enemyBaseEntry: true, heartkeepReduction: 0.8, baseStructureReduction: 0.5 },
-        { id: 'full', from: 10 * 60, name: 'Full battle', text: 'Advanced magic and Ancient Dragons unlock (when you meet their requirements).', enemyDamage: true, enemyBaseEntry: true, heartkeepReduction: 0, baseStructureReduction: 0 },
+        // RTS pacing (2026-10-16): a short build-up, then skirmishes, then all-out war: first fights by minute 3
+        { id: 'prep', from: 0, name: 'Build-up', text: 'No enemy damage. Enemy kingdoms are closed. Answer, build, train!', enemyDamage: false, enemyBaseEntry: false },
+        { id: 'early', from: 3 * 60, name: 'Skirmish', text: 'Heartkeeps take 50% less damage, base buildings 30% less.', enemyDamage: true, enemyBaseEntry: true, heartkeepReduction: 0.5, baseStructureReduction: 0.3 },
+        { id: 'full', from: 10 * 60, name: 'All-out war', text: 'Advanced magic and Ancient Dragons unlock (when you meet their requirements).', enemyDamage: true, enemyBaseEntry: true, heartkeepReduction: 0, baseStructureReduction: 0 },
       ],
       warnBeforeSec: 30,          // banner warning before each phase change
     },
@@ -1429,8 +1491,8 @@ window.GK_ONLINE_CONFIG = {
 
     // ---------- gold ----------
     gold: {
-      start: 100,
-      reward: { standard: 20, applied: 30, puzzle: 40 },
+      start: 300,                 // RTS pacing: enough for a Lodge and a tower straight away
+      reward: { standard: 30, applied: 45, puzzle: 60 },
       // unlock milestones count question-earned gold AFTER the team-size multiplier (true) or before it (false)
       milestoneUsesAdjustedGold: true,
       decimals: 2,                // gold is stored to 2 decimals; the interface rounds for display
@@ -1438,7 +1500,8 @@ window.GK_ONLINE_CONFIG = {
 
     // ---------- knowledge shrine ----------
     shrine: {
-      useRange: 5.5,              // stand this close to your own team's shrine to enter it
+      anywhere: true,             // RTS: the Learn panel answers questions from anywhere (no walking, no protection)
+      useRange: 5.5,              // stand this close to your own team's shrine to enter it (the real shrine still works, and protects)
       leaveRange: 2.5,            // moving more than this from where you entered ends the visit
       revisitAfter: 3,            // a missed concept comes back after this many other questions
       sameQuestionAfter: 6,       // the very same question only returns after this many others
@@ -1459,18 +1522,19 @@ window.GK_ONLINE_CONFIG = {
     // ---------- structures (Milestone 2–3) ----------
     // value = purchase cost; health = full health. Free starter defenses have zero scoring value.
     structures: {
-      heartkeep:  { name: 'Heartkeep', cost: 0, health: 6000, radius: 6, provided: true, text: 'Central stronghold. If it falls, the team is eliminated.' },
-      elvenLodge: { name: 'Elven Lodge', cost: 120, health: 1200, radius: 3.5, build: 20, text: 'Recruit elven troops.' },
-      dwarvenForge: { name: 'Dwarven Forge', cost: 150, health: 1500, radius: 3.5, build: 25, text: 'Recruit dwarves and research armour.' },
-      archerTower: { name: 'Archer Tower', cost: 100, health: 900, radius: 2, build: 15, attack: { damage: 22, interval: 0.8, range: 18, targets: ['ground', 'air'] }, text: 'Fast single-target defense. Hits air and ground.' },
-      boulderBastion: { name: 'Boulder Bastion', cost: 180, health: 1400, radius: 3, build: 25, attack: { damage: 70, interval: 3.0, range: 20, splash: 3, targets: ['ground'] }, text: 'Slow area damage against ground units.' },
-      wizardSpire: { name: 'Wizard Spire', cost: 220, health: 1000, radius: 2.5, build: 25, attack: { damage: 45, interval: 1.6, range: 20, splash: 1.5, targets: ['ground', 'air'] }, text: 'Magic attacks against air and ground.' },
-      dragonRoost: { name: 'Dragon Roost', cost: 400, health: 1800, radius: 4.5, build: 35, unlockMin: 5, text: 'Summon dragons.' },
-      arcaneSanctum: { name: 'Arcane Sanctum', cost: 280, health: 1200, radius: 3.5, build: 30, text: 'Unlocks advanced magic and support spells.' },
-      healingGrove: { name: 'Healing Grove', cost: 160, health: 900, radius: 3, build: 20, heal: { perSec: 6, range: 10, maxPerUnitPerMin: 120 }, text: 'Limited healing for nearby friendly troops.' },
+      heartkeep:  { name: 'Heartkeep', cost: 0, health: 4000, radius: 6, provided: true, text: 'Central stronghold. If it falls, the team is eliminated.' },
+      elvenLodge: { name: 'Elven Lodge', cost: 120, health: 1200, radius: 3.5, build: 10, text: 'Barracks: trains Elven Rangers and Grove Healers.' },
+      dwarvenForge: { name: 'Dwarven Forge', cost: 150, health: 1500, radius: 3.5, build: 14, requires: ['elvenLodge'], text: 'Trains Dwarven Guardians and Stonebreakers; armour research.' },
+      wizardTower: { name: 'Wizard Academy', cost: 200, health: 1100, radius: 3, build: 16, requires: ['dwarvenForge'], text: 'Trains Apprentice Mages. Opens the Spire, Sanctum and Dragon Roost.' },
+      archerTower: { name: 'Archer Tower', cost: 100, health: 900, radius: 2, build: 8, attack: { damage: 18, interval: 0.8, range: 18, targets: ['ground', 'air'] }, text: 'Fast single-target defense. Hits air and ground.' },
+      boulderBastion: { name: 'Boulder Bastion', cost: 180, health: 1400, radius: 3, build: 14, requires: ['dwarvenForge'], attack: { damage: 70, interval: 3.0, range: 20, splash: 3, targets: ['ground'] }, text: 'Slow area damage against ground units.' },
+      wizardSpire: { name: 'Wizard Spire', cost: 220, health: 1000, radius: 2.5, build: 14, requires: ['wizardTower'], attack: { damage: 45, interval: 1.6, range: 20, splash: 1.5, targets: ['ground', 'air'] }, text: 'Magic attacks against air and ground.' },
+      dragonRoost: { name: 'Dragon Roost', cost: 400, health: 1800, radius: 4.5, build: 20, unlockMin: 6, requires: ['wizardTower'], text: 'Summon dragons.' },
+      arcaneSanctum: { name: 'Arcane Sanctum', cost: 280, health: 1200, radius: 3.5, build: 16, requires: ['wizardTower'], text: 'Unlocks advanced magic and support spells.' },
+      healingGrove: { name: 'Healing Grove', cost: 160, health: 900, radius: 3, build: 10, requires: ['elvenLodge'], heal: { perSec: 6, range: 10, maxPerUnitPerMin: 120 }, text: 'Limited healing for nearby friendly troops.' },
       stoneWall: { name: 'Stone Wall', cost: 20, health: 500, radius: 1.2, build: 4, text: 'Delays ground movement. Cannot seal a base.' },
     },
-    structureLimits: { elvenLodge: 2, dwarvenForge: 2, archerTower: 8, boulderBastion: 4, wizardSpire: 4, dragonRoost: 1, arcaneSanctum: 1, healingGrove: 2, stoneWall: 30 },
+    structureLimits: { elvenLodge: 2, dwarvenForge: 2, wizardTower: 2, archerTower: 8, boulderBastion: 4, wizardSpire: 4, dragonRoost: 1, arcaneSanctum: 1, healingGrove: 2, stoneWall: 30 },
     // repair price per health point = max(cost / health, goldPerHp), so a repair never adds more value than it costs.
     // Repairs stop for blockedAfterHitSec after a hit and are capped per building, so focused attacks still win.
     repair: { goldPerHp: 0.1, maxHpPerSec: 15, maxPerStructurePerSec: 25, blockedAfterHitSec: 4, range: 7 },
@@ -1481,15 +1545,17 @@ window.GK_ONLINE_CONFIG = {
     // ---------- troops (Milestone 2–3): the single source for simulation AND interface ----------
     // health, damage per hit, interval (s between hits), range (m), speed (m/s), targets, capacity (army slots)
     units: {
-      ranger:      { name: 'Elven Ranger', cost: 35, from: 'elvenLodge', health: 90, damage: 14, buildingDamage: 7, interval: 1.0, range: 14, speed: 5.0, targets: ['ground', 'air', 'building'], layer: 'ground', capacity: 1, summon: 6, text: 'Ranged attacks against air and ground. Fragile against melee pressure.' },
-      guardian:    { name: 'Dwarven Guardian', cost: 50, from: 'dwarvenForge', health: 320, damage: 20, interval: 1.2, range: 2, speed: 3.5, targets: ['ground'], layer: 'ground', capacity: 1, summon: 8, text: 'Durable frontline fighter. Slow; cannot attack flying units.' },
-      stonebreaker:{ name: 'Dwarven Stonebreaker', cost: 80, from: 'dwarvenForge', health: 220, damage: 12, buildingDamage: 70, interval: 2.0, range: 2.5, speed: 3.0, targets: ['ground', 'building'], layer: 'ground', capacity: 2, summon: 10, text: 'Siege damage against buildings. Slow and vulnerable to mobile troops.' },
-      mage:        { name: 'Apprentice Mage', cost: 70, from: 'arcaneSanctum', health: 80, damage: 26, splash: 2, interval: 2.0, range: 12, speed: 4.2, targets: ['ground', 'air'], layer: 'ground', capacity: 1, summon: 8, text: 'Small-area magic damage. Low health, slower attacks.' },
-      healer:      { name: 'Grove Healer', cost: 80, from: 'elvenLodge', health: 100, damage: 0, heal: 10, interval: 1.5, range: 8, speed: 4.5, targets: [], layer: 'ground', capacity: 1, summon: 8, text: 'Heals friendly troops. No attack; healing does not stack freely.' },
-      emberDrake:  { name: 'Ember Drake', cost: 180, from: 'dragonRoost', health: 420, damage: 30, interval: 1.4, range: 6, speed: 6.5, targets: ['ground', 'air', 'building'], layer: 'air', capacity: 3, summon: 15, unlockMin: 5, text: 'Entry-level flying dragon. Vulnerable to archers and wizard defenses.' },
-      ancientDragon:{ name: 'Ancient Dragon', cost: 450, from: 'dragonRoost', health: 1400, damage: 70, splash: 3, interval: 2.2, range: 8, speed: 5.0, targets: ['ground', 'air', 'building'], layer: 'air', capacity: 8, summon: 40, unlockMin: 10, requires: ['dragonRoost', 'arcaneSanctum'], earnedGold: 800, text: 'Powerful late-game flying assault unit. Costly, slow to summon, large army footprint.' },
+      ranger:      { name: 'Elven Ranger', cost: 35, from: 'elvenLodge', health: 90, damage: 14, buildingDamage: 10, interval: 1.0, range: 14, speed: 5.0, targets: ['ground', 'air', 'building'], layer: 'ground', capacity: 1, summon: 4, text: 'Ranged attacks against air and ground. Fragile against melee pressure.' },
+      guardian:    { name: 'Dwarven Guardian', cost: 50, from: 'dwarvenForge', health: 320, damage: 20, interval: 1.2, range: 2, speed: 3.5, targets: ['ground'], layer: 'ground', capacity: 1, summon: 5, text: 'Durable frontline fighter. Slow; cannot attack flying units.' },
+      stonebreaker:{ name: 'Dwarven Stonebreaker', cost: 80, from: 'dwarvenForge', health: 220, damage: 12, buildingDamage: 70, interval: 2.0, range: 2.5, speed: 3.0, targets: ['ground', 'building'], layer: 'ground', capacity: 2, summon: 6, text: 'Siege damage against buildings. Slow and vulnerable to mobile troops.' },
+      mage:        { name: 'Apprentice Mage', cost: 70, from: 'wizardTower', health: 80, damage: 26, splash: 2, interval: 2.0, range: 12, speed: 4.2, targets: ['ground', 'air'], layer: 'ground', capacity: 1, summon: 5, text: 'Small-area magic damage. Low health, slower attacks.' },
+      healer:      { name: 'Grove Healer', cost: 80, from: 'elvenLodge', health: 100, damage: 0, heal: 10, interval: 1.5, range: 8, speed: 4.5, targets: [], layer: 'ground', capacity: 1, summon: 5, text: 'Heals friendly troops. No attack; healing does not stack freely.' },
+      emberDrake:  { name: 'Ember Drake', cost: 180, from: 'dragonRoost', health: 420, damage: 30, interval: 1.4, range: 6, speed: 6.5, targets: ['ground', 'air', 'building'], layer: 'air', capacity: 3, summon: 9, unlockMin: 6, text: 'Entry-level flying dragon. Vulnerable to archers and wizard defenses.' },
+      ancientDragon:{ name: 'Ancient Dragon', cost: 450, from: 'dragonRoost', health: 1400, damage: 70, splash: 3, interval: 2.2, range: 8, speed: 5.0, targets: ['ground', 'air', 'building'], layer: 'air', capacity: 8, summon: 24, unlockMin: 10, requires: ['dragonRoost', 'arcaneSanctum'], earnedGold: 800, text: 'Powerful late-game flying assault unit. Costly, slow to summon, large army footprint.' },
     },
     armyCapacityPerTeam: 40,      // equal for every team regardless of size
+    // RTS: every student gets an equal SHARE of the team's army slots (team of 4 = 10 each), so nobody fills it alone
+    armyPerStudent: true, armyMinPerStudent: 8,
     unitAI: { aggroExtra: 4, leash: 12, defendRadius: 12, repathSec: 1.0 },
     airAltitude: 6,               // flying dragons are drawn this high; they fly straight over obstacles
     splashFalloff: 0.6,           // area attacks: others in the splash radius take 60%
@@ -1798,24 +1864,24 @@ window.GK_ONLINE_CONFIG = {
     name: 'Sage Lyra',
     messages: {
       // ---- the learning loop ----
-      welcome:    { mood: 'happy', once: true, text: 'Welcome, apprentice! Go to the glowing shrine ⛩ behind your castle. Answer questions to earn gold.' },
-      shrineHint: { mood: 'calm', cooldown: 90, text: 'Gold comes from the shrine ⛩. Follow the glowing beam!' },
-      noShrine:   { mood: 'calm', cooldown: 150, text: 'Time to learn! Go back to the shrine ⛩ and earn more gold.' },
-      idle:       { mood: 'calm', cooldown: 120, text: 'Still there? Walk to the shrine ⛩ and answer a question!' },
+      welcome:    { mood: 'happy', once: true, text: 'Welcome, commander! Open 📖 Learn on the right and answer questions to earn gold.' },
+      shrineHint: { mood: 'calm', cooldown: 90, text: 'Gold comes from questions! Open 📖 Learn on the right side.' },
+      noShrine:   { mood: 'calm', cooldown: 150, text: 'Time to learn! Open 📖 Learn and earn more gold.' },
+      idle:       { mood: 'calm', cooldown: 120, text: 'Still there? Answer a question in 📖 Learn!' },
       farAway:    { mood: 'calm', cooldown: 120, text: 'You are far from home! Your shrine is at the back of your kingdom.' },
       firstGold:  { mood: 'happy', once: true, text: 'Well done! Every right answer makes your kingdom stronger. 🪙' },
       streak3:    { mood: 'happy', cooldown: 60, text: 'Three right in a row! Great thinking! 🌟' },
       wrong:      { mood: 'calm', cooldown: 180, text: 'Read the "Why". This topic will come back, and then you can win the gold!' },
       mastered:   { mood: 'happy', once: true, text: 'You answered every question! Amazing! Now help your teammates.' },
       // ---- spending gold (from Milestone 2) ----
-      gold200:    { mood: 'happy', cooldown: 240, needs: 'shop', text: 'You have 200 gold! Build a tower 🏹 or train troops ⚔ to protect your kingdom.' },
+      gold200:    { mood: 'happy', cooldown: 240, needs: 'shop', text: 'You have 200 gold! Build 🏗 or train troops ⚔ in the sidebar.' },
       noDefense:  { mood: 'alert', cooldown: 300, needs: 'shop', text: 'Your kingdom has few defenses. Use your gold to build towers before the battle!' },
       needLodge:  { mood: 'happy', cooldown: 240, needs: 'shop', text: 'Build an Elven Lodge 🏠 so your team can recruit Rangers!' },
       needTroops: { mood: 'happy', cooldown: 240, needs: 'shop', text: 'Your team has a Lodge! Recruit a Ranger 🧝 to defend your kingdom.' },
-      commandTip: { mood: 'calm', once: true, needs: 'shop', text: 'Click 👥 My troops, then click the map to send them. ⚔ Attack, 🛡 Defend!' },
+      commandTip: { mood: 'calm', once: true, needs: 'shop', text: 'Drag a box around your troops, then RIGHT-click to send them. ⚔' },
       died:       { mood: 'calm', cooldown: 20, needs: 'combat', text: 'You were defeated! You keep your gold. Back at your Heartkeep soon.' },
       spellIncoming: { mood: 'alert', urgent: true, cooldown: 15, needs: 'combat', text: 'A spell is coming! Move out of the red area! ⚡' },
-      round2:     { mood: 'happy', once: true, text: 'Round 2: Stormcrest Valley! New map, same team. Go to your shrine ⛩ first!' },
+      round2:     { mood: 'happy', once: true, text: 'Round 2: Stormcrest Valley! New map, same team. Open 📖 Learn first!' },
       dragonsOpen:{ mood: 'happy', once: true, needs: 'shop', text: 'Dragon Roosts can be built now! 🐉 Dragons need lots of gold.' },
       magicReady: { mood: 'happy', once: true, needs: 'shop', text: 'Your answers earned enough for ⚡ Thunderbolt! Open ✨ Magic.' },
       eliminated: { mood: 'alert', urgent: true, once: true, needs: 'combat', text: 'Your Heartkeep has fallen. Keep practising questions and cheer for good play!' },
@@ -1835,7 +1901,7 @@ window.GK_ONLINE_CONFIG = {
       kind:       { mood: 'calm', once: true, text: 'Use kind words in chat. Your teacher can read it. 💬' },
       privacy:    { mood: 'calm', once: true, text: 'Never type your real name or a password in chat. 🔒' },
       teamwork:   { mood: 'calm', once: true, text: 'Plan with your team! Use the quick message buttons.' },
-      map:        { mood: 'calm', once: true, text: 'Lost? Click 🗺 Command view to see the whole map.' },
+      map:        { mood: 'calm', once: true, text: 'Press V to play as your mage. Press V again to command.' },
     },
   };
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -2223,6 +2289,13 @@ window.GK_ONLINE_CONFIG = {
       for (const u of Object.values(this.w.u)) if (u.tm === teamId) troops += this.unitValue(u);
       return { infra: U.r2(infra), troops: U.r2(troops), keepPct: keep ? Math.round(keep.hp / keep.max * 1000) / 10 : 0 };
     }
+    capacityOf(pid) { let n = 0; for (const u of Object.values(this.w.u)) if (u.own === pid) n += B().units[u.ty].capacity; return n; }
+    /** RTS: each student's equal share of the team's army slots (0 = no personal limit). */
+    armyShare(P) {
+      if (!B().armyPerStudent) return 0;
+      const T = this.S.team(P.team), n = T ? Math.max(1, T.size0 || T.members.length) : 1;
+      return Math.max(B().armyMinPerStudent || 0, Math.floor(B().armyCapacityPerTeam / n));
+    }
     capacityUsed(teamId) { let n = 0; for (const u of Object.values(this.w.u)) if (u.tm === teamId) n += B().units[u.ty].capacity; return n; }
     count(teamId, ty) { return Object.values(this.w.b).filter(s => s.tm === teamId && s.ty === ty).length; }
     hasBuilt(teamId, ty) { return Object.values(this.w.b).some(s => s.tm === teamId && s.ty === ty && s.bp >= 1); }
@@ -2237,7 +2310,7 @@ window.GK_ONLINE_CONFIG = {
       if (this.S.s.clock.pausedAt) return 'The game is paused.';
       if (P.out) return 'Your kingdom has fallen. You can still practise questions.';
       if (P.dead && !(opts && opts.deadOk)) return 'Wait until you are back at your Heartkeep.';
-      if (P.shrine && !(opts && opts.shrineOk)) return 'Leave the shrine first.';
+      if (P.shrine && !P.shrine.panel && !(opts && opts.shrineOk)) return 'Leave the shrine first.';   // the Learn panel never blocks
       return null;
     }
     build(pid, ty, x, z, rot) {
@@ -2246,6 +2319,7 @@ window.GK_ONLINE_CONFIG = {
       if (!D || D.provided || B().shop.structures.indexOf(ty) < 0) return this.no(pid, 'That building is not available.');
       if (!isFinite(x) || !isFinite(z)) return;
       if (D.unlockMin && S.elapsed() < D.unlockMin * 60) return this.no(pid, D.name + ' unlocks at minute ' + D.unlockMin + '.');
+      for (const r of D.requires || []) if (!this.hasBuilt(P.team, r)) return this.no(pid, D.name + ' needs a finished ' + B().structures[r].name + ' first.');
       if (this.count(P.team, ty) >= (B().structureLimits[ty] || 99)) return this.no(pid, 'Your team has the most ' + D.name + 's allowed.');
       if (P.gold < D.cost) return this.no(pid, 'Not enough gold: ' + D.name + ' costs ' + D.cost + '.');
       x = r1(x); z = r1(z);
@@ -2286,6 +2360,8 @@ window.GK_ONLINE_CONFIG = {
       for (const r of D.requires || []) if (!this.hasBuilt(P.team, r)) return D.name + ' also needs a finished ' + B().structures[r].name + '.';
       if (D.earnedGold && this.earned(P) < D.earnedGold) return D.name + ' needs ' + D.earnedGold + ' gold earned from YOUR answers (you have ' + Math.floor(this.earned(P)) + ').';
       if (this.capacityUsed(P.team) + D.capacity > B().armyCapacityPerTeam) return 'Your team\'s army is full (' + B().armyCapacityPerTeam + ').';
+      const share = this.armyShare(P);
+      if (share && this.capacityOf(P.id) + D.capacity > share) return 'Your own army is full (' + share + ' slots each in your team).';
       if (P.gold < D.cost) return 'Not enough gold: ' + D.name + ' costs ' + D.cost + '.';
       return null;
     }
@@ -2484,7 +2560,7 @@ window.GK_ONLINE_CONFIG = {
     /** Can this target be damaged right now (protection rules)? */
     canHurt(t) {
       if (!this.phase().enemyDamage) return false;
-      if (t.kind === 'p') { const P = t.e; return !P.shrine && !P.dead && !(P.shieldUntil > this.now()); }
+      if (t.kind === 'p') { const P = t.e; return !(P.shrine && !P.shrine.panel) && !P.dead && !(P.shieldUntil > this.now()); }
       return true;
     }
     damage(src, tid, amount) {
@@ -2617,6 +2693,8 @@ window.GK_ONLINE_CONFIG = {
         const spot = this.flies(u) ? [sx, sz] : this.grid().nearestFree(sx, sz, 8) || [hx, hz];
         u.x = spot[0]; u.z = spot[1]; u.st = 'idle'; u.t0 = now; u.p0 = [u.x, u.z]; u.guard = [u.x, u.z];
         this.addFx('c', u.x, u.z, u.x, u.z, u.tm); this.touch(u.id, 'full');
+        const O = S.player(u.own);
+        if (O && O.rally) { u.order = { k: 'defend', x: O.rally[0], z: O.rally[1] }; u.guard = O.rally.slice(); this.pathTo(u, O.rally[0], O.rally[1]); }   // RTS rally point
         S.notify(u.own, 'Your ' + B().units[u.ty].name + ' is ready!', 'good');
       }
       // players: respawn, repairs
@@ -2625,7 +2703,7 @@ window.GK_ONLINE_CONFIG = {
         if (P.dead && now >= P.dead && !P.out) this.respawn(P);
         if (!P.repairing) continue;
         const s = this.w.b[P.repairing];
-        if (!s || P.dead || P.shrine || P.out || !P.pos || s.hp >= s.max || Math.hypot(P.pos[0] - s.x, P.pos[2] - s.z) > cfgR.range + this.def(s).radius) { P.repairing = null; S.touchP(P.id); continue; }
+        if (!s || P.dead || (P.shrine && !P.shrine.panel) || P.out || !P.pos || s.hp >= s.max || Math.hypot(P.pos[0] - s.x, P.pos[2] - s.z) > cfgR.range + this.def(s).radius) { P.repairing = null; S.touchP(P.id); continue; }
         if (now - s.lastHit < cfgR.blockedAfterHitSec * 1000) continue;   // under attack: repairs wait
         const price = Math.max(s.free ? 0 : s.cost / s.max, cfgR.goldPerHp);
         budget[s.id] = budget[s.id] == null ? cfgR.maxPerStructurePerSec * dt : budget[s.id];
@@ -2916,7 +2994,7 @@ window.GK_ONLINE_CONFIG = {
       }
       P.pos = [x, M.height(x, z), z, yaw]; // Jump is visual; height never bypasses ground collision.
       P.posAt = now;
-      if (P.shrine && Math.hypot(x - P.shrine.x, z - P.shrine.z) > B().shrine.leaveRange) this.leaveShrine(pid, 'moved');
+      if (P.shrine && !P.shrine.panel && Math.hypot(x - P.shrine.x, z - P.shrine.z) > B().shrine.leaveRange) this.leaveShrine(pid, 'moved');   // (the Learn panel works anywhere)
       this.dirty.pos = true;
     }
     teleport(pid, x, z) {
@@ -3043,18 +3121,20 @@ window.GK_ONLINE_CONFIG = {
     }
 
     // ===================== knowledge shrine =====================
-    enterShrine(pid) {
+    /** panel = true: the Learn panel (RTS): answer from anywhere, no protection, commanding stays possible. */
+    enterShrine(pid, panel) {
       const P = this.player(pid);
       if (!P || !P.team) return this.notify(pid, 'You are not in a team yet.', 'warn');
       if (this.s.phase !== 'running') return this.notify(pid, 'The shrine wakes up when the round starts.', 'warn');
       if (this.s.clock.pausedAt) return this.notify(pid, 'The game is paused.', 'warn');
       if (P.shrine) return;
-      if (P.dead) return this.notify(pid, 'Wait until you are back at your Heartkeep.', 'warn');
+      panel = !!panel && !!B().shrine.anywhere;
+      if (P.dead && !panel) return this.notify(pid, 'Wait until you are back at your Heartkeep.', 'warn');
       const b = this.map().bases[this.teamIndex(P.team)];
       // eliminated students may keep practising questions from anywhere (no gold)
-      if (!P.out && (!P.pos || Math.hypot(P.pos[0] - b.shrine[0], P.pos[2] - b.shrine[1]) > B().shrine.useRange)) return this.notify(pid, 'Walk up to your team\'s shrine first.', 'warn');
-      P.repairing = null;
-      P.shrine = { x: P.pos ? P.pos[0] : 0, z: P.pos ? P.pos[2] : 0, since: this.now(), practice: !!P.out };
+      if (!P.out && !panel && (!P.pos || Math.hypot(P.pos[0] - b.shrine[0], P.pos[2] - b.shrine[1]) > B().shrine.useRange)) return this.notify(pid, 'Walk up to your team\'s shrine first.', 'warn');
+      if (!panel) P.repairing = null;
+      P.shrine = { x: P.pos ? P.pos[0] : 0, z: P.pos ? P.pos[2] : 0, since: this.now(), practice: !!P.out, panel };
       if (!P.cur || P.cur.state === 'done' || P.cur.state === 'corrected') this.serve(P);
       this.touchP(pid); this.touchPv(pid);
     }
@@ -3108,6 +3188,14 @@ window.GK_ONLINE_CONFIG = {
       if (!Q().mark(q, P.cur.key, a)) return this.notify(pid, 'Not yet: copy the correct answer shown.', 'warn');
       P.cur.state = 'corrected'; P.corrections++;
       this.touchPv(pid);
+    }
+    /** RTS rally point: where this student's NEW troops walk when they are ready (null / non-number = clear). */
+    setRally(pid, x, z) {
+      const P = this.player(pid); if (!P || !P.team) return;
+      x = x == null ? NaN : Number(x); z = z == null ? NaN : Number(z);
+      P.rally = isFinite(x) && isFinite(z) && this.map().inBounds(x, z) ? [U.r2(x), U.r2(z)] : null;
+      this.touchP(pid);
+      return { ok: true };
     }
     nextQuestion(pid) {
       const P = this.player(pid);
@@ -3167,7 +3255,7 @@ window.GK_ONLINE_CONFIG = {
 
     requestMotion(pid, kind) {
       const P = this.player(pid);
-      if (!P || !P.online || !P.team || !P.pos || P.shrine || P.dead || P.out || !this.isRunning()) return false;
+      if (!P || !P.online || !P.team || !P.pos || (P.shrine && !P.shrine.panel) || P.dead || P.out || !this.isRunning()) return false;
       const motion = P.motion || (P.motion = AR.Motion.fresh()), t = this.elapsed();
       const ok = kind === 'sprint' ? AR.Motion.sprint(motion, t) : AR.Motion.jump(motion, t);
       if (ok) this.touchP(pid);
@@ -3181,6 +3269,8 @@ window.GK_ONLINE_CONFIG = {
         case 'sprint': return this.requestMotion(pid, 'sprint');
         case 'jump': return this.requestMotion(pid, 'jump');
         case 'shrine': return this.enterShrine(pid);
+        case 'learn': return this.enterShrine(pid, true);
+        case 'rally': return this.setRally(pid, m.x, m.z);
         case 'leave': return this.leaveShrine(pid, 'left');
         case 'ans': return this.answer(pid, String(m.tok || ''), m.a);
         case 'fixdone': return this.correction(pid, String(m.tok || ''), m.a);
@@ -3231,7 +3321,7 @@ window.GK_ONLINE_CONFIG = {
     pView(pid) {
       const P = this.player(pid); if (!P) return null;
       return { n: P.name, gid: P.gid, tm: P.team || '', on: P.online ? 1 : 0, mo: P.motion || AR.Motion.fresh(), gold: U.r2(P.gold), earned: U.r2(P.earned), shr: P.shrine ? 1 : 0, look: P.look, sp: P.sp || 0, mu: P.muted ? 1 : 0, late: P.late ? 1 : 0,
-        hp: Math.ceil(P.hp == null ? B().player.health : P.hp), dead: P.dead || 0, sh: P.shieldUntil || 0, out: P.out ? 1 : 0, rep: P.repairing || '', bot: P.bot ? 1 : 0 };
+        hp: Math.ceil(P.hp == null ? B().player.health : P.hp), dead: P.dead || 0, sh: P.shieldUntil || 0, out: P.out ? 1 : 0, rep: P.repairing || '', bot: P.bot ? 1 : 0, ra: P.rally || 0 };
     }
     /** Private record: only this student's screen uses it (the current question WITHOUT its answer, feedback, notes). */
     pvView(pid) {
@@ -3239,7 +3329,7 @@ window.GK_ONLINE_CONFIG = {
       const c = P.cur;
       return {
         q: c ? { tok: c.tok, st: c.state, pub: c.pub, fb: c.fb || 0 } : 0,
-        in: P.shrine ? 1 : 0, right: P.right, wrong: P.wrong, mastered: P.mastered ? 1 : 0, note: P.note || 0,
+        in: P.shrine && !P.shrine.panel ? 1 : 0, learn: P.shrine && P.shrine.panel ? 1 : 0, right: P.right, wrong: P.wrong, mastered: P.mastered ? 1 : 0, note: P.note || 0,
       };
     }
     /** Every in-world player's validated position in one short string: "pid,x,z,yaw;…" */
@@ -3302,17 +3392,19 @@ window.GK_ONLINE_CONFIG = {
   // what a team wants, in order (each bot picks among the first few things it can afford, so teams differ a little)
   const PLAN = [
     ['b', 'elvenLodge', 1], ['b', 'archerTower', 3], ['u', 'ranger', 4], ['b', 'dwarvenForge', 1], ['u', 'guardian', 3],
-    ['b', 'stoneWall', 4], ['u', 'ranger', 7], ['b', 'healingGrove', 1], ['u', 'stonebreaker', 2], ['b', 'wizardSpire', 1],
+    ['b', 'stoneWall', 4], ['u', 'ranger', 7], ['b', 'healingGrove', 1], ['u', 'stonebreaker', 2], ['b', 'wizardTower', 1], ['u', 'mage', 2], ['b', 'wizardSpire', 1],
     ['u', 'healer', 2], ['b', 'arcaneSanctum', 1], ['b', 'dragonRoost', 1], ['u', 'emberDrake', 2], ['b', 'boulderBastion', 1],
     ['r', 'armour', 1], ['u', 'mage', 3], ['u', 'guardian', 6], ['b', 'wizardSpire', 2], ['u', 'ancientDragon', 1], ['u', 'emberDrake', 4],
     ['b', 'archerTower', 5], ['u', 'ranger', 10], ['b', 'elvenLodge', 2],
   ];
 
+  // [building, from minute]: what every bot team builds once, in this order, as soon as it is allowed
+  const TECH = [['dwarvenForge', 1], ['wizardTower', 2.5], ['dragonRoost', 6], ['arcaneSanctum', 8]];
   class Bots {
     /** S = AR.Server. opts: {skill: 'easy'|'normal'|'hard'} */
     constructor(S, opts) {
       this.S = S; this.skill = SKILL[(opts && opts.skill) || 'normal'] || SKILL.normal; this.skillId = (opts && opts.skill) || 'normal';
-      this.brains = {}; this.n = 0;
+      this.brains = {}; this.n = 0; this.waves = {};
     }
     get sim() { return this.S.sim; }
     /** Make one bot player (not in a team yet). Returns its player id. */
@@ -3327,7 +3419,7 @@ window.GK_ONLINE_CONFIG = {
     }
     fresh() { return { mode: 'study', until: 0, next: this.S.rnd() * 2, path: [], goal: null, lastPath: 0, armyAt: 0, fightUntil: 0, chatAt: 0, stuck: 0 }; }
     /** New round: forget plans (the world was reset). */
-    reset() { for (const pid in this.brains) this.brains[pid] = this.fresh(); }
+    reset() { for (const pid in this.brains) this.brains[pid] = this.fresh(); this.waves = {}; }
     ids() { return Object.keys(this.brains).filter(pid => this.S.player(pid)); }
 
     // ===================== every server tick =====================
@@ -3393,11 +3485,20 @@ window.GK_ONLINE_CONFIG = {
     /** Try to buy the next thing on the plan. Returns true when something was bought. */
     buy(P) {
       const S = this.S, sim = this.sim, choices = [];
+      // tech goals: a team works towards the Wizard Academy, the Dragon Roost and the Sanctum, saving gold for them when due
+      for (const [ty, min] of TECH) {
+        const D = B().structures[ty];
+        if (S.elapsed() < min * 60 || sim.count(P.team, ty) || !this.techOk(P, ty) || (D.unlockMin && S.elapsed() < D.unlockMin * 60)) continue;
+        if (P.gold >= D.cost) { const spot = this.spot(P, ty); if (spot && (sim.build(P.id, ty, spot[0], spot[1], S.rnd() * Math.PI * 2) || {}).ok) return true; }
+        else if (S.rnd() < 0.6) return false;   // save up for it
+        break;
+      }
       for (const [kind, ty, want] of PLAN) {
         if (kind === 'b') {
           const D = B().structures[ty]; if (!D || P.gold < D.cost) continue;
           if (sim.count(P.team, ty) >= Math.min(want, B().structureLimits[ty] || 99)) continue;
           if (D.unlockMin && S.elapsed() < D.unlockMin * 60) continue;
+          if (!this.techOk(P, ty)) continue;   // tech tree: Lodge → Forge → Wizard Academy → Spire / Sanctum / Roost
           choices.push([kind, ty]);
         } else if (kind === 'u') {
           const n = Object.values(sim.w.u).filter(u => u.tm === P.team && u.ty === ty).length;
@@ -3418,7 +3519,7 @@ window.GK_ONLINE_CONFIG = {
         const units = ['ancientDragon', 'emberDrake', 'mage', 'guardian', 'stonebreaker', 'ranger', 'healer'].filter(ty => !sim.recruitProblem(P, ty));
         if (units.length) choices.push(['u', units[Math.floor(S.rnd() * Math.min(3, units.length))]]);
         for (const ty of ['wizardSpire', 'archerTower', 'boulderBastion', 'healingGrove']) {
-          const D = B().structures[ty]; if (P.gold >= D.cost && sim.count(P.team, ty) < (B().structureLimits[ty] || 99)) { choices.push(['b', ty]); break; }
+          const D = B().structures[ty]; if (P.gold >= D.cost && sim.count(P.team, ty) < (B().structureLimits[ty] || 99) && this.techOk(P, ty)) { choices.push(['b', ty]); break; }
         }
       }
       if (!choices.length) return false;
@@ -3432,6 +3533,7 @@ window.GK_ONLINE_CONFIG = {
       }
       return false;
     }
+    techOk(P, ty) { return (B().structures[ty].requires || []).every(r => this.sim.hasBuilt(P.team, r)); }
     /** A legal place for a building inside my kingdom (towers and walls towards the gate, the rest further in). */
     spot(P, ty) {
       const S = this.S, sim = this.sim, L = S.map(), b = this.base(P), D = B().structures[ty];
@@ -3452,23 +3554,34 @@ window.GK_ONLINE_CONFIG = {
       const ids = mine.map(u => u.id);
       // defend
       const threat = this.threat(P);
-      if (threat && ph.enemyDamage) { sim.command(P.id, ids, 'attack', 0, 0, threat.id); return; }
+      if (threat && ph.enemyDamage) {   // only troops near home turn back: an attack wave keeps going
+        const home = mine.filter(u => Math.hypot(u.x - b.center[0], u.z - b.center[1]) < L.baseR + 25);
+        if (home.length) sim.command(P.id, home.map(u => u.id), 'attack', 0, 0, threat.id);
+        if (home.length === mine.length) return;
+      }
       if (!ph.enemyBaseEntry) return;
-      const team = Object.values(sim.w.u).filter(u => u.tm === P.team && u.st !== 'sum').length;
-      const idle = mine.filter(u => !u.order || u.order.k !== 'attack' || !sim.target(u.order.target || ''));
-      if (team < 6 || !idle.length) return;   // wait for a group, then go together
-      const tgt = this.attackTarget(P, idle[0]);
-      if (tgt) sim.command(P.id, idle.map(u => u.id), 'attack', 0, 0, tgt.id);
+      // ATTACK WAVES: the bots of one team gather and go together, every ~70–100 s, at ONE target (like a real team)
+      const now = S.now(), W = this.waves[P.team] || (this.waves[P.team] = { at: now + 20000, tgt: null, until: 0 });
+      const team = Object.values(sim.w.u).filter(u => u.tm === P.team && u.st !== 'sum' && (S.player(u.own) || {}).bot);
+      if (now >= W.at && team.length >= 8) {
+        W.tgt = this.attackTarget(P, team[0]); W.until = now + 45000; W.at = now + 70000 + S.rnd() * 30000;
+      }
+      if (W.tgt && now < W.until) {
+        const t = sim.target(W.tgt.id) ? W.tgt : (W.tgt = this.attackTarget(P, mine[0]));   // target gone: the next one in that kingdom
+        const go = mine.filter(u => !u.order || u.order.k !== 'attack' || !sim.target(u.order.target || ''));
+        if (t && go.length) sim.command(P.id, go.map(u => u.id), 'attack', 0, 0, t.id);
+      }
     }
-    /** Weakest-looking enemy kingdom: its nearest defence first, then the Heartkeep. */
+    /** The enemy to hit: one kingdom at a time; its defences in the way first, the Heartkeep more and more as the round goes on. */
     attackTarget(P, from) {
       const sim = this.sim, S = this.S, alive = S.s.teams.filter(t => t.id !== P.team && !t.out);
       if (!alive.length) return null;
-      const T = alive[(S.teamIndex(P.team) + Math.floor(S.now() / 120000)) % alive.length];   // focus one enemy at a time, switch every 2 minutes
+      const T = alive[(S.teamIndex(P.team) + Math.floor(S.now() / 150000)) % alive.length];   // focus one enemy, switch every 2.5 minutes
+      const late = S.elapsed() >= 10 * 60, keepBias = late ? -30 : 15;
       let best = null, bd = 1e9;
       for (const s of Object.values(sim.w.b)) {
-        if (s.tm !== T.id) continue;
-        const d = Math.hypot(s.x - from.x, s.z - from.z) + (s.ty === 'heartkeep' ? 25 : 0);
+        if (s.tm !== T.id || s.ty === 'stoneWall') continue;   // walls are walked around, not attacked
+        const d = Math.hypot(s.x - from.x, s.z - from.z) + (s.ty === 'heartkeep' ? keepBias : 0);
         if (d < bd) { bd = d; best = s; }
       }
       return best ? sim.target(best.id) : null;
@@ -4567,6 +4680,21 @@ window.GK_ONLINE_CONFIG = {
     g.sphere(0, 11.1, 0, 0.45, '#b197fc', { seg: 6, rings: 4, flat: true, glow: 1 });
     return g;
   }
+  function wizardTower(color) {   // Wizard Academy: a square school hall with a tall star tower (trains Apprentice Mages)
+    const g = G();
+    g.box(0, 0, 0, 5.2, 0.4, 4.6, DARK);
+    g.box(-0.6, 0.4, 0, 3.6, 2.6, 3.8, '#d6cfbf');                                   // school hall
+    g.add(G().cone(0, 0, 0, 2.9, 1.6, color, { seg: 4, flat: true }).rotY(Math.PI / 4).scale(0.95, 1, 1.05).move(-0.6, 3.0, 0));
+    g.cyl(1.7, 0.4, 0.4, 1.0, 5.6, '#c9c1ae', { seg: 8, flat: true, rTop: 0.85 });     // star tower
+    g.cyl(1.7, 6.0, 0.4, 1.15, 0.3, color, { seg: 8, flat: true });
+    g.cone(1.7, 6.3, 0.4, 1.05, 2.6, '#5f3dc4', { seg: 8, flat: true });
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2; g.box(1.7 + Math.cos(a) * 0.55, 7.4, 0.4 + Math.sin(a) * 0.55, 0.16, 0.16, 0.16, '#ffe066', { glow: 1 }); }
+    g.sphere(1.7, 9.2, 0.4, 0.35, '#ffe066', { seg: 5, rings: 3, flat: true, glow: 1 });
+    g.box(-0.6, 0.4, 1.93, 1.0, 1.6, 0.08, '#3b2a1c');                                 // door
+    for (const x of [-1.8, 0.6]) g.box(x, 1.4, 1.93, 0.6, 0.7, 0.06, '#b197fc', { glow: 0.6 });
+    g.cyl(-2.9, 0.4, 2.1, 0.05, 2.2, '#8b5a2b', { seg: 4, flat: true }); g.box(-2.55, 1.9, 2.1, 0.7, 0.5, 0.04, color);   // banner
+    return g;
+  }
   function dragonRoost(color) {
     const g = G();
     g.cyl(0, 0, 0, 4.6, 0.6, DARK, { seg: 9, flat: true });
@@ -4730,7 +4858,7 @@ window.GK_ONLINE_CONFIG = {
   function boulder() { return G().blob(0, 0, 0, 0.5, '#8d8f96', { seed: 7, rough: 0.35, seg: 6, rings: 4, flat: true }); }
   function fireball() { return G().sphere(0, 0, 0, 0.3, '#ff922b', { seg: 6, rings: 4, flat: true, glow: 1 }); }
 
-  AR.Models3 = { dwarvenForge, boulderBastion, wizardSpire, dragonRoost, arcaneSanctum, healingGrove, stoneWall, guardian, stonebreaker, mage: mageUnit, healer, emberDrake, ancientDragon,
+  AR.Models3 = { dwarvenForge, boulderBastion, wizardSpire, wizardTower, dragonRoost, arcaneSanctum, healingGrove, stoneWall, guardian, stonebreaker, mage: mageUnit, healer, emberDrake, ancientDragon,
     bridge, crystalBig, crystalSpire, warnDisc, lane, lightning, beam, stormCloud, tornado, wave, wardDome, boulder, fireball };
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4749,7 +4877,7 @@ window.GK_ONLINE_CONFIG = {
   const AR = root.AR = root.AR || {};
   const B = () => AR.Balance, M2 = () => AR.Models2, M3 = () => AR.Models3;
   const model = ty => (AR.Models2 && AR.Models2[ty]) || (AR.Models3 && AR.Models3[ty]);
-  const BAR_H = { heartkeep: 13, archerTower: 9, wizardSpire: 12, dragonRoost: 6, arcaneSanctum: 7.5, dwarvenForge: 6, boulderBastion: 5, healingGrove: 6, stoneWall: 3, elvenLodge: 6 };
+  const BAR_H = { heartkeep: 13, archerTower: 9, wizardSpire: 12, wizardTower: 10, dragonRoost: 6, arcaneSanctum: 7.5, dwarvenForge: 6, boulderBastion: 5, healingGrove: 6, stoneWall: 3, elvenLodge: 6 };
   const FX_COL = { m: '#b197fc', f: '#ff922b', k: '#ffe066', h: '#69db7c' };
 
   class WorldView {
@@ -5259,7 +5387,7 @@ window.GK_ONLINE_CONFIG = {
   const AR = root.AR;
   const { h, clear, gold, toast } = AR.ui;
   const B = AR.Balance;
-  const ICON = { archerTower: '🏹', elvenLodge: '🏠', heartkeep: '🏰', stoneWall: '🧱', dwarvenForge: '⚒', boulderBastion: '🪨', wizardSpire: '🔮', healingGrove: '🌳', arcaneSanctum: '✨', dragonRoost: '🥚',
+  const ICON = { archerTower: '🏹', elvenLodge: '🏠', heartkeep: '🏰', stoneWall: '🧱', dwarvenForge: '⚒', boulderBastion: '🪨', wizardSpire: '🔮', wizardTower: '🎓', healingGrove: '🌳', arcaneSanctum: '✨', dragonRoost: '🥚',
     ranger: '🧝', healer: '💚', guardian: '🛡', stonebreaker: '🔨', mage: '🧙', emberDrake: '🐉', ancientDragon: '🐲', thunderbolt: '⚡', thunderstorm: '⛈', hurricane: '🌪', tidalWave: '🌊', ward: '🔰' };
   const TARGETS = { ground: 'ground', air: 'flying', building: 'buildings' };
 
@@ -6281,7 +6409,7 @@ window.GK_ONLINE_CONFIG = {
       this.view = this.view === 'third' ? 'over' : 'third';
       this.usedMap = true;
       if (this.view === 'over' && this.pos) { this.sc.cam.over.x = this.pos[0]; this.sc.cam.over.z = this.pos[2]; }
-      toast(this.view === 'over' ? '🗺 Command view: click your troops or buildings, drag or WASD to move the view. Tab to go back.' : '🧙 Back to your mage. A / D turn · RIGHT-click to aim, LEFT-click fires a lightning beam.');
+      toast(this.view === 'over' ? '🗺 Command view: drag a box around your troops, RIGHT-click to send them. WASD moves the view. V = play as your mage.' : '🧙 Playing as your mage: W / S walk, A / D turn, RIGHT-click to aim ⚡. V = back to command.');
     }
     drag(dx, dy) {
       const c = this.sc.cam;
@@ -6625,7 +6753,7 @@ window.GK_ONLINE_CONFIG = {
     if (this.aimReticle) this.aimReticle.hidden = !this.aiming;
     if (this.viewReticle) this.viewReticle.hidden = !!this.aiming || this.view === 'over' || this.sc.cam.perspective !== 'first';
     const hint = this.app.ui.querySelector('.motion-hint');
-    if (hint) hint.textContent = this.aiming ? '⚡ Left-click = fire · right-click / Esc = stop aiming' : 'A / D = turn · Right-click = 🎯 aim · V = first/third person';
+    if (hint) hint.textContent = this.aiming ? '⚡ Left-click = fire · right-click / Esc = stop aiming' : 'A / D = turn · Right-click = 🎯 aim · V = command view';
   };
   const oldHud = P.buildHud;
   P.buildHud = function () {
@@ -6713,6 +6841,465 @@ window.GK_ONLINE_CONFIG = {
     });
     document.addEventListener('pointerlockchange', () => { const s = S(); if (s && s.aiming && !locked() && s._lockWas) s.setAim(false); if (s) s._lockWas = locked(); if (s && s.refreshCameraButtons) s.refreshCameraButtons(); });
     window.addEventListener('blur', () => { const s = S(); if (s && s.aiming) s.setAim(false); });
+  };
+})();
+
+</script>
+<script>/* src/client/rts.js */
+/* Arcane Realms · src/client/rts.js — the "Command & Conquest" style (teacher's request, 2026-10-16).
+   The game now plays like Command & Conquer / Red Alert in the Arcane Realms theme:
+   - the round STARTS in the top-down command view (V or 🧙 switches to playing as your mage, V again comes back)
+   - a SIDEBAR on the right: minimap, 🏗 Build · ⚔ Train · ✨ Magic · 📖 Learn (answer questions for gold, from anywhere)
+   - LEFT-click selects, LEFT-drag draws a box around your troops, double-click selects that troop type on screen
+   - RIGHT-click gives the order: move there, or attack the enemy you clicked; F then right-click = fight your way there
+   - your MAGE is a hero unit: select it (click it or press H) and right-click to walk or attack with lightning beams
+   - a production building selected + right-click = your rally point 🚩 (new troops walk there)
+   - Ctrl+1…5 saves a group, 1…5 selects it · X = stop · G = guard here · WASD / arrow keys / right-drag = move the view
+   The mouse never moves the camera by itself. Every action is still only a REQUEST that the server checks.
+   Loaded last: it decorates app.js, ui-command.js, ui-shrine.js, world-view.js and camera-controls.js. */
+(function () {
+  'use strict';
+  const AR = window.AR, App = AR.App, P = AR.StudentSession.prototype, C = AR.CommandUI.prototype, B = AR.Balance;
+  const { h, clear, toast, gold } = AR.ui;
+  const ICON = { archerTower: '🏹', elvenLodge: '🏠', stoneWall: '🧱', dwarvenForge: '⚒', boulderBastion: '🪨', wizardTower: '🎓', wizardSpire: '🔮', healingGrove: '🌳', arcaneSanctum: '✨', dragonRoost: '🥚',
+    ranger: '🧝', healer: '💚', guardian: '🛡', stonebreaker: '🔨', mage: '🧙', emberDrake: '🐉', ancientDragon: '🐲' };
+  const PRODUCERS = ['elvenLodge', 'dwarvenForge', 'wizardTower', 'dragonRoost'];
+  let session = null;   // the running StudentSession (for the world-view decoration)
+
+  // ===================== army share (the same rule as the server) =====================
+  C.armyShare = function () {
+    if (!B.armyPerStudent) return 0;
+    const t = ((this.link.g || {}).teams || []).find(x => x.id === this.myTeam()), n = t ? Math.max(1, t.size0 || (t.members || []).length) : 1;
+    return Math.max(B.armyMinPerStudent || 0, Math.floor(B.armyCapacityPerTeam / n));
+  };
+  C.myArmy = function () { let n = 0; for (const id in this.link.un) { const u = this.link.un[id]; if (u.own === this.link.id) n += B.units[u.ty].capacity; } return n; };
+  const oldWhy = C.recruitWhy;
+  C.recruitWhy = function (ty) {
+    const why = oldWhy.call(this, ty); if (why) return why;
+    const share = this.armyShare();
+    return share && this.myArmy() + B.units[ty].capacity > share ? 'Your own army is full (' + share + ' slots)' : '';
+  };
+  C.buildWhy = function (ty) {
+    const D = B.structures[ty], g = this.me().gold || 0, t = this.S.elapsed(), team = this.myTeam();
+    let n = 0; for (const id in this.link.st) { const s = this.link.st[id]; if (s.tm === team && s.ty === ty && !s.f) n++; }
+    if (D.unlockMin && t < D.unlockMin * 60) return 'Unlocks at minute ' + D.unlockMin;
+    for (const r of D.requires || []) if (!this.built(r)) return 'Needs a finished ' + B.structures[r].name;
+    if (n >= (B.structureLimits[ty] || 99)) return 'Team limit reached (' + B.structureLimits[ty] + ')';
+    if (g < D.cost) return 'Need ' + D.cost + ' gold';
+    return '';
+  };
+
+  // ===================== the sidebar =====================
+  P.buildSidebar = function () {
+    const ui = this.app.ui;
+    this.side = { tab: 'learn', sig: '' };
+    const tab = (id, icon, label) => h('button.rts-tab', { 'data-tab': id, onclick: () => this.sideTab(id) }, h('span', icon), h('b', label));
+    this.side.status = h('div.rts-status');
+    this.side.body = h('div.rts-body');
+    this.side.learn = h('div.rts-learn');
+    this.side.tabs = h('div.rts-tabs', tab('build', '🏗', 'Build'), tab('train', '⚔', 'Train'), tab('magic', '✨', 'Magic'), tab('learn', '📖', 'Learn'));
+    this.side.viewBtn = h('button.btn.small', { onclick: () => this.rtsToggleView(), title: 'Play as your mage / back to command (V)' }, '🧙 Mage view (V)');
+    const map = this.mini;   // the minimap moves into the sidebar; a click on it now moves the view there
+    const el = h('aside.rts-side.panel', h('div.rts-map', map), h('div.row.rts-mapbtns', this.side.viewBtn,
+      h('button.btn.small', { onclick: () => this.rtsSelectHero(true), title: 'Select your mage (H)' }, '🧙 My mage'),
+      h('button.btn.small', { onclick: () => this.cmd.selectAll(), title: 'Select all your troops' }, '👥 Troops'),
+      h('button.btn.small', { onclick: () => this.cmd.showGuide(), title: 'Every number' }, '📖 Guide')),
+      this.side.status, this.side.tabs, this.side.body, this.side.learn);
+    ui.querySelector('.hud').appendChild(el);
+    this.side.el = el;
+    this.side.learn.appendChild(this.shrine.el);
+    this.side.learnStart = h('div.rts-learnstart', h('p', 'Answer computer questions to earn gold for your kingdom. You can keep commanding while you answer.'),
+      h('button.btn.primary.big', { onclick: () => this.link.send('learn') }, '📖 Start answering'));
+    this.side.learn.insertBefore(this.side.learnStart, this.shrine.el);
+    this.box = h('div.rts-box', { hidden: true });
+    ui.querySelector('.hud').appendChild(this.box);
+    this.sideTab('learn');
+  };
+  P.sideTab = function (id) {
+    this.side.tab = id; this.side.sig = '';
+    this.side.tabs.querySelectorAll('.rts-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+    this.side.body.hidden = id === 'learn'; this.side.learn.hidden = id !== 'learn';
+    if (id === 'learn') this.side.tabs.querySelector('[data-tab=learn]').classList.remove('ping');
+    this.drawSide(true);
+  };
+  P.drawSide = function (force) {
+    const s = this.side, cmd = this.cmd; if (!s || !cmd) return;
+    const m = this.me() || {}, share = cmd.armyShare(), hp = Math.max(0, m.hp == null ? 100 : m.hp);
+    s.status.textContent = '❤ ' + Math.ceil(hp) + ' · ⚔ Your army ' + cmd.myArmy() + (share ? ' / ' + share : '') + (m.dead ? ' · 💫 mage returns soon' : '');
+    const learning = !!(this.link.pv && (this.link.pv.learn || this.link.pv.in));
+    s.learnStart.hidden = learning;
+    if (s.tab === 'learn') return;
+    const tmp = h('div');
+    if (s.tab === 'build') this.drawBuild(tmp);
+    else if (s.tab === 'train') this.drawTrain(tmp);
+    else { cmd.pop = 'magic'; cmd.drawMenu(tmp); cmd.pop = null; }
+    const sig = tmp.innerHTML;
+    if (!force && sig === s.sig) return;
+    s.sig = sig; const y = s.body.scrollTop; clear(s.body); while (tmp.firstChild) s.body.appendChild(tmp.firstChild); s.body.scrollTop = y;
+  };
+  P.drawBuild = function (into) {
+    const cmd = this.cmd;
+    into.appendChild(h('div.pophead', '🏗 Build', h('span.small', '  click, then click inside your kingdom (R = turn)')));
+    into.appendChild(h('div.cards', B.shop.structures.map(ty => {
+      const D = B.structures[ty];
+      return cmd.card(ICON[ty] || '🏗', D.name, D.cost, D.text, cmd.buildWhy(ty), () => cmd.startPlace(ty), h('span.cstat', '⏱ ' + D.build + ' s'));
+    })));
+  };
+  P.drawTrain = function (into) {
+    const cmd = this.cmd, now = this.link.serverNow(), queue = [];
+    for (const id in this.link.un) { const u = this.link.un[id]; if (u.own === this.link.id && u.s === 'sum') queue.push(u); }
+    into.appendChild(h('div.pophead', '⚔ Train troops', h('span.small', '  your army ' + cmd.myArmy() + (cmd.armyShare() ? ' / ' + cmd.armyShare() : '') + ' slots')));
+    if (queue.length) {
+      queue.sort((a, b) => (a.rd || 0) - (b.rd || 0));
+      into.appendChild(h('div.rts-queue', h('b', '⏳ Training: '), queue.slice(0, 8).map(u => h('span.qitem', (ICON[u.ty] || '') + ' ' + Math.max(0, Math.ceil(((u.rd || now) - now) / 1000)) + 's'))));
+    }
+    for (const home of PRODUCERS) {
+      const units = B.shop.units.filter(ty => B.units[ty].from === home);
+      if (!units.length) continue;
+      const built = cmd.built(home);
+      into.appendChild(h('div.rts-group', h('b', (ICON[home] || '') + ' ' + B.structures[home].name), built ? null : h('span.small', '  (build one first)')));
+      into.appendChild(h('div.cards', units.map(ty => {
+        const D = B.units[ty];
+        return cmd.card(ICON[ty] || '⚔', D.name, D.cost, D.text, cmd.recruitWhy(ty), () => this.link.send('recruit', { ty }),
+          h('span.cstat', '❤' + D.health + (D.damage ? ' ⚔' + D.damage : ' 💚' + D.heal) + ' · ' + D.capacity + ' slot' + (D.capacity > 1 ? 's' : '') + ' · ⏱' + D.summon + 's'));
+      })));
+    }
+  };
+
+  // ===================== HUD: build, start in the command view =====================
+  const oldHud = P.buildHud;
+  P.buildHud = function () {
+    oldHud.call(this);
+    session = this;
+    document.body.classList.add('rts');
+    this.heroSel = false; this.groups = {}; this.marks = [];
+    this.buildSidebar();
+    const ctr = this.app.ui.querySelector('.hud .controls');
+    if (ctr) { clear(ctr); [['drag', 'select'], ['right-click', 'move / attack'], ['F', 'fight-move'], ['H', 'my mage'], ['V', 'mage view'], ['WASD', 'scroll']].forEach(([k, t]) => ctr.appendChild(h('span', h('kbd', k), ' ' + t))); }
+  };
+  const oldStop = P.stop;
+  P.stop = function () { document.body.classList.remove('rts', 'rts-over'); if (session === this) session = null; oldStop.call(this); };
+  P.rtsToggleView = function () {
+    if (this.view === 'over') { this.sc.cam.perspective = 'third'; this.toggleView(); }
+    else this.toggleView();
+  };
+  const oldToggle = P.toggleView;
+  P.toggleView = function () {
+    oldToggle.apply(this, arguments);
+    if (this.side) this.side.viewBtn.textContent = this.view === 'over' ? '🧙 Mage view (V)' : '🗺 Command view (V)';
+    if (this.view === 'over' && this.pos) { this.sc.cam.over.x = this.pos[0]; this.sc.cam.over.z = this.pos[2] + 6; }
+  };
+
+  // ===================== update: start view, hero walking, sidebar refresh =====================
+  const oldUpdate = P.update;
+  P.update = function (dt) {
+    const g = this.link.g;
+    if (g && g.ph === 'running' && this.pos && this.app.layout && this.rtsRound !== g.round) {   // a new round: start above my kingdom
+      this.rtsRound = g.round;
+      const b = this.app.layout.bases[this.teamIndex()];
+      if (b) { const o = this.sc.cam.over; o.x = b.center[0] - b.dir[0] * 6; o.z = b.center[1] - b.dir[1] * 6 + 10; o.h = 62; }
+      if (this.view !== 'over') { oldToggle.call(this); if (this.side) this.side.viewBtn.textContent = '🧙 Mage view (V)'; }
+    }
+    document.body.classList.toggle('rts-over', this.view === 'over');
+    oldUpdate.call(this, dt);
+    const now = performance.now();
+    if (this.side && now - (this.sideAt || 0) > 500) { this.sideAt = now; this.drawSide(false); }
+  };
+  // WASD already pans the command view; the left / right arrows pan too (they turned the mage camera before)
+  const oldMove = P.move;
+  P.move = function (dt) {
+    if (this.view === 'over') {
+      const K = this.app.keys, o = this.sc.cam.over, sp = o.h * 0.9 * dt;
+      if (K.ArrowLeft) o.x -= sp; if (K.ArrowRight) o.x += sp;
+      this.heroStep(dt, oldMove);
+      const L = this.app.layout; if (L) { const E = L.def.edge; o.x = AR.util.clamp(o.x, -E, E); o.z = AR.util.clamp(o.z, -E, E + 30); }
+      const kl = K.ArrowLeft, kr = K.ArrowRight; K.ArrowLeft = K.ArrowRight = false;
+      try { return oldMove.call(this, dt); } finally { K.ArrowLeft = kl; K.ArrowRight = kr; }
+    }
+    if (this.hero) this.hero = null;   // playing as the mage yourself: no hero orders
+    return oldMove.call(this, dt);
+  };
+  /** The mage as a hero unit: walk to a point, or chase an enemy and fire lightning beams at it. */
+  P.heroStep = function (dt, move) {
+    const H = this.hero, m = this.me() || {};
+    if (!H || !this.pos) return;
+    if (m.dead || m.out) { this.hero = null; return; }
+    let gx = H.x, gz = H.z;
+    if (H.target) {
+      const q = this.posOfId(H.target);
+      if (!q) { this.hero = null; return; }
+      gx = q[0]; gz = q[1];
+      const d = Math.hypot(gx - this.pos[0], gz - this.pos[2]);
+      const now0 = performance.now();
+      if (!H.path || now0 - (H.pathAt || 0) > 1500) { H.pathAt = now0; H.path = this.heroPath(gx, gz); }
+      if (d <= B.player.bolt.range - 2) {   // in range: stand and fire
+        this.yaw = Math.atan2(gx - this.pos[0], gz - this.pos[2]); this.walking = false;
+        const now = performance.now();
+        if (now - (H.firedAt || 0) > B.player.bolt.interval * 1000 + 60) { H.firedAt = now; this.link.send('bolt', { x: gx, z: gz }); }
+        return;
+      }
+    }
+    if (!H.path) H.path = this.heroPath(gx, gz);
+    while (H.path.length > 1 && Math.hypot(H.path[0][0] - this.pos[0], H.path[0][1] - this.pos[2]) < 0.8) H.path.shift();   // next waypoint
+    const wp = H.path[0] || [gx, gz], dx = wp[0] - this.pos[0], dz = wp[1] - this.pos[2], d = Math.hypot(gx - this.pos[0], gz - this.pos[2]);
+    if (!H.target && d < 0.7) { this.hero = null; this.walking = false; return; }
+    // walk with the normal (server-checked) movement: forward along the heading
+    const K = this.app.keys, c = this.sc.cam, saved = { keys: K, view: this.view, yaw: c.yaw, persp: c.perspective };
+    this.app.keys = { KeyW: true }; this.view = 'third'; c.yaw = Math.atan2(dx, -dz); c.perspective = 'third';
+    const x0 = this.pos[0], z0 = this.pos[2];
+    try { move.call(this, dt); } finally { this.app.keys = saved.keys; this.view = saved.view; c.yaw = saved.yaw; c.perspective = saved.persp; }
+    const moved = Math.hypot(this.pos[0] - x0, this.pos[2] - z0);
+    H.stuck = moved < 0.2 * dt * B.player.speed ? (H.stuck || 0) + dt : 0;
+    if (H.stuck > 1.2) { this.hero = null; this.walking = false; toast('🧙 Your mage cannot get there (something is in the way).', 'info'); }
+  };
+  /** A walking path for the mage around buildings, trees and rocks (the same A* grid the troops use). */
+  P.heroPath = function (x, z) {
+    const L = this.app.layout; if (!L || !AR.PathGrid) return [[x, z]];
+    const key = Object.keys(this.link.st).length + ':' + this.app.worldKey;
+    if (!this.heroGrid || this.heroGridKey !== key) {
+      this.heroGrid = new AR.PathGrid(L); this.heroGridKey = key;
+      for (const id in this.link.st) { const s = this.link.st[id]; if (s.ty !== 'heartkeep') this.heroGrid.mark(s.x, s.z, B.structures[s.ty].radius + 0.3, 1); }
+    }
+    const p = this.heroGrid.find(this.pos[0], this.pos[2], x, z, 20000);
+    return p && p.length ? p.map(q => [q[0], q[1]]) : [[x, z]];
+  };
+  P.posOfId = function (id) {
+    const link = this.link;
+    if (!id) return null;
+    if (id.indexOf('p:') === 0) { const q = link.pos[id.slice(2)], ps = link.ps[id.slice(2)]; return q && ps && !ps.dead ? [q.x, q.z] : null; }
+    if (link.st[id]) return [link.st[id].x, link.st[id].z];
+    if (link.un[id]) return link.unitPos(link.un[id]);
+    return null;
+  };
+
+  // ===================== mouse: select with the left button, order with the right =====================
+  P.rtsSelectHero = function (center) {
+    const m = this.me() || {};
+    if (m.out) return toast('Your kingdom has fallen: your mage is gone.', 'info');
+    this.heroSel = true; this.cmd.selected.clear(); this.cmd.selStruct = null; this.cmd.drawSel();
+    if (center && this.pos) { if (this.view !== 'over') this.rtsToggleView(); const o = this.sc.cam.over; o.x = this.pos[0]; o.z = this.pos[2] + 6; }
+  };
+  P.rtsMark = function (x, z, color) { this.marks.push({ x, z, color, until: performance.now() + 700 }); };
+  const oldClick = P.click;
+  P.click = function (x, y, b) {
+    if (this.view !== 'over' || !this.cmd || !this.link.g || this.link.g.ph !== 'running') return oldClick.call(this, x, y, b);
+    const cmd = this.cmd;
+    if (cmd.placing || cmd.aim) {
+      if (b === 2) { cmd.placing = null; cmd.aim = null; toast('Cancelled.', 'info'); return; }
+      return oldClick.call(this, x, y, b);
+    }
+    const p = this.sc.pick(x, y); if (!p) return;
+    const e = cmd.entityAt(p), team = cmd.myTeam(), me = this.me() || {};
+    const onHero = this.pos && !me.dead && !me.out && Math.hypot(this.pos[0] - p[0], this.pos[2] - p[2]) < 1.7;
+    if (b !== 2) {   // LEFT: select
+      const add = this.app.keys.ShiftLeft || this.app.keys.ShiftRight;
+      if (onHero) { if (!add) cmd.selected.clear(); cmd.selStruct = null; this.heroSel = true; cmd.drawSel(); return; }
+      if (e && e.kind === 'u' && e.own === this.link.id) { if (!add) { cmd.selected.clear(); this.heroSel = false; } cmd.selected.add(e.id); cmd.selStruct = null; cmd.drawSel(); return; }
+      if (e && e.kind === 'u') toast(e.tm === team ? 'That troop belongs to a teammate. You command only your own troops.' : 'An enemy troop.', 'info');
+      if (!add) { cmd.selected.clear(); this.heroSel = false; }
+      cmd.selStruct = e && e.kind === 'b' ? e.id : null;
+      cmd.drawSel(); return;
+    }
+    // RIGHT: order
+    const ids = Array.from(cmd.selected).filter(id => this.link.un[id]), enemy = e && e.tm !== team && e.tm ? e : null;
+    if (!ids.length && !this.heroSel) {
+      const s = cmd.selStruct && this.link.st[cmd.selStruct];
+      if (s && s.tm === team && PRODUCERS.indexOf(s.ty) >= 0) { this.link.send('rally', { x: p[0], z: p[2] }); this.rtsMark(p[0], p[2], '#ffd166'); toast('🚩 Rally point set: your new troops will walk there.', 'info'); return; }
+      return toast('Select something first: drag a box around your troops, or click your mage (H).', 'info');
+    }
+    if (this.heroSel) {
+      if (me.dead || me.out) toast('Your mage is not on the battlefield right now.', 'info');
+      else this.hero = enemy ? { target: enemy.id } : { x: p[0], z: p[2] };
+    }
+    if (ids.length) {
+      if (enemy) cmd.order('attack', { target: enemy.id }, ids);
+      else cmd.order(this.fightMove ? 'defend' : 'move', { x: p[0], z: p[2] }, ids);
+    } else if (enemy) toast('⚡ Your mage attacks!', 'info');
+    this.rtsMark(p[0], p[2], enemy ? '#ff6b6b' : this.fightMove ? '#ffa94d' : '#51cf66');
+    this.fightMove = false; cmd.drawSel();
+  };
+  // left-drag = selection box; right / middle drag = move the view
+  const oldDrag = P.drag;
+  P.drag = function (dx, dy) {
+    if (this.view === 'over' && this.rtsBtn === 0) return;   // the box is drawn instead
+    return oldDrag.call(this, dx, dy);
+  };
+  P.boxSelect = function (x0, y0, x1, y1) {
+    const cmd = this.cmd, r = this.app.canvas.getBoundingClientRect(), add = this.app.keys.ShiftLeft || this.app.keys.ShiftRight;
+    const L = this.app.layout, inside = (wx, wz, y) => { const q = this.sc.project([wx, y, wz]); const sx = q.x + r.left, sy = q.y + r.top; return q.visible && sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1; };
+    if (!add) { cmd.selected.clear(); this.heroSel = false; }
+    for (const id in this.link.un) {
+      const u = this.link.un[id]; if (u.own !== this.link.id || u.s === 'sum') continue;
+      const q = this.link.unitPos(u); if (inside(q[0], q[1], L.height(q[0], q[1]) + 1)) cmd.selected.add(id);
+    }
+    const me = this.me() || {};
+    if (this.pos && !me.dead && !me.out && inside(this.pos[0], this.pos[2], this.pos[1] + 1)) this.heroSel = true;
+    cmd.selStruct = null; cmd.drawSel();
+    if (!cmd.selected.size && !this.heroSel) toast('No troops of yours in that box.', 'info');
+  };
+  P.selectSameType = function (x, y) {
+    const p = this.sc.pick(x, y), e = p && this.cmd.entityAt(p);
+    if (!e || e.kind !== 'u' || e.own !== this.link.id) return;
+    const ty = this.link.un[e.id].ty, cv = this.app.canvas, cmd = this.cmd;
+    cmd.selected.clear(); this.heroSel = false;
+    for (const id in this.link.un) {
+      const u = this.link.un[id]; if (u.own !== this.link.id || u.ty !== ty || u.s === 'sum') continue;
+      const q = this.link.unitPos(u), s = this.sc.project([q[0], 1, q[1]]);
+      if (s.visible && s.x >= 0 && s.y >= 0 && s.x <= cv.clientWidth && s.y <= cv.clientHeight) cmd.selected.add(id);
+    }
+    cmd.drawSel();
+  };
+  const oldBind = App.bindInput;
+  App.bindInput = function () {
+    oldBind.call(this);
+    const cv = this.canvas, S = () => (this.session && this.session.boxSelect && this.session.view === 'over' && this.session.cmd) ? this.session : null;
+    let box = null;
+    cv.addEventListener('pointerdown', e => {
+      const s = S(); if (!s) return;
+      s.rtsBtn = e.button;
+      box = e.button === 0 && !s.cmd.placing && !s.cmd.aim ? { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY, on: false } : null;
+    });
+    cv.addEventListener('pointermove', e => {
+      const s = S(); if (!s || !box) return;
+      box.x1 = e.clientX; box.y1 = e.clientY;
+      if (!box.on && Math.abs(box.x1 - box.x0) + Math.abs(box.y1 - box.y0) > 8) box.on = true;
+      if (box.on && s.box) { const st = s.box.style; s.box.hidden = false; st.left = Math.min(box.x0, box.x1) + 'px'; st.top = Math.min(box.y0, box.y1) + 'px'; st.width = Math.abs(box.x1 - box.x0) + 'px'; st.height = Math.abs(box.y1 - box.y0) + 'px'; }
+    });
+    const end = () => {
+      const s = S();
+      if (s && box && box.on) s.boxSelect(Math.min(box.x0, box.x1), Math.min(box.y0, box.y1), Math.max(box.x0, box.x1), Math.max(box.y0, box.y1));
+      if (this.session && this.session.box) this.session.box.hidden = true;
+      if (this.session) this.session.rtsBtn = -1;
+      box = null;
+    };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+    cv.addEventListener('dblclick', e => { const s = S(); if (s) s.selectSameType(e.clientX, e.clientY); });
+  };
+
+  // ===================== keys =====================
+  const oldKey = P.key;
+  P.key = function (e) {
+    if (this.mode === 'game' && this.cmd) {
+      const cmd = this.cmd, over = this.view === 'over';
+      if (e.code === 'KeyV') { e.preventDefault(); if (!e.repeat) this.rtsToggleView(); return; }
+      if (e.code === 'KeyH') { this.rtsSelectHero(true); return; }
+      const dg = /^Digit([1-5])$/.exec(e.code);
+      if (dg && over) {
+        if (e.ctrlKey) { e.preventDefault(); this.groups[dg[1]] = { ids: Array.from(cmd.selected), hero: this.heroSel }; toast('Group ' + dg[1] + ' saved (' + (cmd.selected.size + (this.heroSel ? 1 : 0)) + ').', 'info'); return; }
+        const G = this.groups[dg[1]];
+        if (G) { cmd.selected.clear(); G.ids.filter(id => this.link.un[id]).forEach(id => cmd.selected.add(id)); this.heroSel = G.hero; cmd.selStruct = null; cmd.drawSel(); }
+        return;
+      }
+      if (over && (cmd.selected.size || this.heroSel)) {
+        if (e.code === 'KeyF') { this.fightMove = true; toast('⚔ Fight-move: RIGHT-click where to go. Your troops fight everything on the way.', 'info'); return; }
+        if (e.code === 'KeyX') { if (cmd.selected.size) cmd.order('stop'); this.hero = null; return; }
+        if (e.code === 'KeyG') {
+          const ids = Array.from(cmd.selected); if (!ids.length) return;
+          const q = this.link.unitPos(this.link.un[ids[0]]); cmd.order('defend', { x: q[0], z: q[1] }, ids); return;
+        }
+      }
+      if (e.code === 'Escape' && (this.heroSel || this.fightMove)) { this.heroSel = false; this.fightMove = false; }
+    }
+    return oldKey.call(this, e);
+  };
+
+  // ===================== panels: the selection shows the hero too; locks explain the tech tree =====================
+  const oldSel = C.drawSel;
+  C.drawSel = function (onlyIfChanged) {
+    const S = this.S;
+    if (S.heroSel && !this.selected.size) {
+      const m = this.me() || {}, sig = 'hero' + Math.ceil(m.hp || 0) + (S.hero ? 1 : 0) + (m.dead ? 1 : 0);
+      if (onlyIfChanged && sig === this.selSig) { this.selPanel.hidden = false; return; }
+      this.selSig = sig; const Pn = clear(this.selPanel);
+      Pn.appendChild(h('div', h('b', '🧙 Your mage'), ' ', h('span.small', '❤ ' + Math.ceil(m.hp == null ? 100 : m.hp) + ' / ' + B.player.health + (m.dead ? ' · defeated, back soon' : ''))));
+      Pn.appendChild(h('p.small', 'RIGHT-click the ground to walk there, or an enemy to attack it with lightning beams. Press V to play as your mage yourself.'));
+      Pn.appendChild(h('div.row', h('button.btn.small', { onclick: () => S.rtsToggleView() }, '🧙 Play as my mage (V)'), h('button.btn.small', { onclick: () => { S.hero = null; } }, '✋ Stop'), h('button.btn.small', { onclick: () => { S.heroSel = false; this.drawSel(); } }, '✕')));
+      Pn.hidden = false; return;
+    }
+    oldSel.call(this, onlyIfChanged);
+    const ids = Array.from(this.selected).filter(id => this.link.un[id]);
+    if (ids.length && !this.selPanel.hidden && S.view === 'over') {
+      const hint = this.selPanel.querySelector('p.small');
+      if (hint) hint.textContent = (S.heroSel ? '🧙 + ' : '') + 'RIGHT-click the ground to move, an enemy to attack. F = fight-move, G = guard, X = stop, Ctrl+1…5 = save group.';
+    }
+    const s = this.selStruct && this.link.st[this.selStruct];
+    if (s && s.tm === this.myTeam() && PRODUCERS.indexOf(s.ty) >= 0 && !this.selPanel.hidden && !this.selPanel.querySelector('.rally-tip'))
+      this.selPanel.appendChild(h('p.small.rally-tip', '🚩 RIGHT-click the map to set your rally point (where your new troops walk).'));
+  };
+  const oldCmdUpdate = C.update;
+  C.update = function (now) {
+    oldCmdUpdate.call(this, now);
+    if (this.S.heroSel && !this.selected.size && !this.selStruct && now - (this.heroAt || 0) > 250) { this.heroAt = now; this.drawSel(true); }
+  };
+  const oldSelectAll = C.selectAll;
+  C.selectAll = function () { this.S.heroSel = false; return oldSelectAll.call(this); };
+  // building from the sidebar keeps the sidebar open (no popup to close)
+  const oldPlace = C.startPlace;
+  C.startPlace = function (ty) { const why = this.buildWhy(ty); if (why) return toast('🔒 ' + why, 'warn'); this.S.heroSel = false; return oldPlace.call(this, ty); };
+
+  // ===================== the Learn panel (questions from anywhere) =====================
+  const Shr = AR.ShrinePanel.prototype, oldShr = Shr.update;
+  Shr.update = function (pv) {
+    const learn = !!(pv && pv.learn && !pv.in);
+    oldShr.call(this, learn ? Object.assign({}, pv, { in: 1 }) : pv);
+    this.el.classList.toggle('learnmode', learn);
+    const head = this.el.querySelector('.shrine-head');
+    if (learn && head && !head.dataset.learn) {
+      head.dataset.learn = '1';
+      const t = head.querySelector('.shrine-title'), sh = head.querySelector('.shield'), lv = head.querySelector('.ghost');
+      if (t) t.textContent = '📖 Learn & earn'; if (sh) sh.textContent = 'You can still command'; if (lv) lv.textContent = '✕ Stop';
+    }
+  };
+  const oldPv = P.onPv;
+  P.onPv = function (pv) {
+    oldPv.call(this, pv);
+    if (pv && (pv.learn || pv.in)) { this.everShrine = true; this.lastShrineAt = performance.now(); }
+    if (this.side) {
+      if (pv && pv.in && this.side.tab !== 'learn') this.sideTab('learn');   // walked into the real shrine
+      const q = pv && pv.q;
+      if (q && (pv.learn || pv.in) && this.side.tab !== 'learn') this.side.tabs.querySelector('[data-tab=learn]').classList.add('ping');
+      this.drawSide(false);
+    }
+  };
+
+  // ===================== minimap: click = move the view there (pings: Shift+click) =====================
+  P.miniClick = function (e) {
+    const mm = this.sc.minimap; if (!mm) return;
+    const r = this.mini.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 180 / mm.scale - mm.half, z = (e.clientY - r.top) / r.height * 180 / mm.scale - mm.half;
+    if (e.shiftKey) return this.link.send('ping', { x, z });
+    if (this.view !== 'over') this.rtsToggleView();
+    const o = this.sc.cam.over; o.x = x; o.z = z + o.h * 0.25;
+  };
+  const oldMini = P.drawMinimap;
+  P.drawMinimap = function () {
+    oldMini.call(this);
+    const mm = this.sc.minimap, cv = this.mini; if (!mm || !cv || !this.link.g) return;
+    const ctx = cv.getContext('2d'), X = x => (x + mm.half) * mm.scale, myTeam = (this.me() || {}).tm, colorOf = {};
+    (this.link.g.teams || []).forEach(t => { colorOf[t.id] = t.color; });
+    const allies = this.viewCtxAllies(myTeam);
+    for (const id in this.link.un) {   // troops: mine bright, team, enemies only where we can see
+      const u = this.link.un[id]; if (u.s === 'sum') continue;
+      const q = this.link.unitPos(u);
+      if (u.tm !== myTeam && !allies.some(a => Math.hypot(a[0] - q[0], a[1] - q[1]) <= a[2])) continue;
+      ctx.fillStyle = u.own === this.link.id ? '#ffffff' : colorOf[u.tm] || '#ccc';
+      ctx.fillRect(X(q[0]) - 1.5, X(q[1]) - 1.5, 3, 3);
+    }
+    if (this.view === 'over') {   // the part of the map the view shows
+      const o = this.sc.cam.over, w = o.h * 0.9, d = o.h * 0.6;
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1; ctx.strokeRect(X(o.x - w), X(o.z - o.h * 0.25 - d), w * 2 * mm.scale, d * 2 * mm.scale);
+    }
+  };
+
+  // ===================== world: hero ring, rally flag, order marks =====================
+  const WV = AR.WorldView.prototype, oldFrame = WV.frame;
+  WV.frame = function (items, src, ctx) {
+    oldFrame.call(this, items, src, ctx);
+    const S = session; if (!S || S.wv !== this || !S.pos) return;
+    const sc = S.sc, L = ctx.L, m = S.me() || {}, now = performance.now();
+    if (S.heroSel && !m.dead && !m.out && S.view === 'over') items.push({ mesh: sc.ringMesh('#ffd166'), pos: [S.pos[0], S.pos[1] + 0.05, S.pos[2]], scale: 1.5, noShadow: true });
+    if (m.ra && S.view === 'over') { const [x, z] = m.ra; items.push({ mesh: sc.pingMesh('#ffd166'), pos: [x, L.height(x, z), z], scale: [0.35, 0.6, 0.35], alpha: 0.8, noShadow: true }); items.push({ mesh: sc.ringMesh('#ffd166'), pos: [x, L.height(x, z) + 0.05, z], noShadow: true }); }
+    S.marks = (S.marks || []).filter(k => k.until > now);
+    for (const k of S.marks) items.push({ mesh: sc.ringMesh(k.color), pos: [k.x, L.height(k.x, k.z) + 0.05, k.z], scale: 0.6 + (1 - (k.until - now) / 700) * 1.2, alpha: (k.until - now) / 700, noShadow: true });
   };
 })();
 
