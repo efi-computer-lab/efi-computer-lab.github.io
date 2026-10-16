@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-16T01:57:49.078Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-16T02:17:03.823Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -6658,7 +6658,7 @@ window.GK_ONLINE_CONFIG = {
       const box = this.app.labels, used = {}, sc = this.sc;
       const add = (id, pos, name, gid, color, sym, mine) => {
         const p = sc.project([pos[0], pos[1] + 2.5, pos[2]]);
-        if (!p.visible || p.depth > 45) return;
+        if (!p.visible || p.depth > (this.view === 'over' ? 110 : 45)) return;   // names stay steady in the command view
         let el = this.labelPool[id];
         if (!el) { el = this.labelPool[id] = h('div.nlabel'); box.appendChild(el); }
         const txt = sym + ' ' + name + ' ' + gid;
@@ -7265,7 +7265,7 @@ window.GK_ONLINE_CONFIG = {
   const oldCmdUpdate = C.update;
   C.update = function (now) {
     oldCmdUpdate.call(this, now);
-    if (this.S.heroSel && !this.selected.size && !this.selStruct && now - (this.heroAt || 0) > 250) { this.heroAt = now; this.drawSel(true); }
+    if (this.S.heroSel && !this.selected.size && !this.selStruct && this.selPanel.hidden) this.drawSel(true);   // the old update just hid it: show it again in the SAME frame (no blinking)
   };
   const oldSelectAll = C.selectAll;
   C.selectAll = function () { this.S.heroSel = false; return oldSelectAll.call(this); };
@@ -7542,8 +7542,17 @@ window.GK_ONLINE_CONFIG = {
 
   // ===================== edge scrolling + cursors + hover ring =====================
   let mouse = null;
+  const EDGE = 14;
   window.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; });
-  document.addEventListener('mouseout', e => { if (!e.relatedTarget) mouse = null; });
+  // the pointer left the game window (e.g. down onto the taskbar): keep it "at that edge" so the view keeps
+  // scrolling that way, like C&C; it stops when the pointer comes back, or when you click another program
+  document.addEventListener('mouseout', e => {
+    if (e.relatedTarget || !mouse) return;
+    const W = window.innerWidth, Hh = window.innerHeight;
+    const X = 60;   // a fast flick may leave from a little way in
+    mouse = { x: e.clientX <= X ? 0 : e.clientX >= W - X ? W : mouse.x, y: e.clientY <= X ? 0 : e.clientY >= Hh - X ? Hh : mouse.y, out: true };
+    if (!(mouse.x <= 0 || mouse.x >= W || mouse.y <= 0 || mouse.y >= Hh)) mouse = null;   // left somewhere else (not over an edge)
+  });
   window.addEventListener('blur', () => { mouse = null; });
   const svg = s => 'url("data:image/svg+xml,' + encodeURIComponent(s) + '")';
   const CUR = {
@@ -7551,7 +7560,6 @@ window.GK_ONLINE_CONFIG = {
     attack: svg('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><g fill="none" stroke="#ff4d4d" stroke-width="2.5"><circle cx="16" cy="16" r="9"/><path d="M16 2v8M16 22v8M2 16h8M22 16h8"/></g><circle cx="16" cy="16" r="2.5" fill="#ff4d4d"/></svg>') + ' 16 16, crosshair',
     rally: svg('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path d="M8 30V4" stroke="#333" stroke-width="2.5"/><path d="M9 4h16l-4 5 4 5H9z" fill="#ffd166" stroke="#7a5a00"/></svg>') + ' 8 30, pointer',
   };
-  const EDGE = 14;
   const oldUpdate = P.update;
   P.update = function (dt) {
     oldUpdate.call(this, dt);
