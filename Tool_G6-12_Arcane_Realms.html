@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-16T00:18:34.736Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-16T01:57:49.078Z by tools/build.js from the arcane-realms project. Do not edit: edit the source and rebuild. -->
 <title>Arcane Realms: Knowledge Conquest</title>
 <style>/* src/client/styles.css */
 /* Arcane Realms · styles. Readable panels over the 3D world: dark glass, gold accents, large text and buttons. */
@@ -405,7 +405,7 @@ body.rts .hud .prompt { bottom: 30%; }
 
 .rts-box { position: fixed; border: 1.5px solid #80ffdb; background: rgba(128, 255, 219, 0.12); pointer-events: none; z-index: 30; }
 .rts-box[hidden] { display: none; }
-body.rts .selpanel { left: calc(50% - 170px); bottom: 64px; }
+body.rts .selpanel { left: calc((100vw - 344px) / 2 + 60px); transform: translateX(-50%); bottom: 14px; width: auto; max-width: min(460px, calc(100vw - 760px)); min-width: 280px; }
 
 @media (max-width: 1100px) {
   body.rts #ui > .hud { padding-right: 274px; }
@@ -422,6 +422,41 @@ body.rts .selpanel { left: calc(50% - 170px); bottom: 64px; }
 body.rts .hud-map .row > .btn:first-child { display: none; }   /* the sidebar has the view button */
 .rts-side .shrine .shield { display: none; }
 .rts-side .shrine-title { font-size: 1.1em; }
+
+/* ---- C&C look (rts-ui.js): gold header, picture tiles, hover cards, compact selection bar ---- */
+body.rts #ui > .hud > .hud-gold { visibility: hidden; }
+.rts-head { display: flex; align-items: baseline; justify-content: space-between; padding: 2px 6px; }
+.rts-gold { font-size: 22px; font-weight: bold; color: var(--gold); text-shadow: 0 1px 2px #000; }
+.rts-sub { font-size: 12px; color: var(--muted); }
+.rts-mapbtns .ib, .sel-cmds .ib { font-size: 17px; padding: 3px 9px; min-width: 38px; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tile { position: relative; aspect-ratio: 1; padding: 0; border-radius: 8px; border: 2px solid #3d4a66; background: radial-gradient(circle at 50% 40%, #46587a, #1b2236); cursor: pointer; overflow: hidden; }
+.tile:hover { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.35); }
+.tile img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+.tile .emo { font-size: 34px; line-height: 1; display: flex; align-items: center; justify-content: center; height: 100%; pointer-events: none; }
+.tile .price { position: absolute; left: 0; right: 0; bottom: 0; font-size: 12px; font-weight: bold; color: var(--gold); background: rgba(0, 0, 0, 0.62); padding: 1px 0; pointer-events: none; }
+.tile.locked img, .tile.locked .emo { filter: grayscale(1) brightness(0.55); }
+.tile.locked .price { color: #aab; }
+.tile .lock { position: absolute; top: 3px; left: 4px; font-size: 13px; pointer-events: none; }
+.tile .prog { position: absolute; left: 0; right: 0; top: 0; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
+.tile .qn { position: absolute; top: 2px; right: 4px; font-size: 15px; font-weight: bold; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; }
+.rts-army { font-size: 13px; text-align: right; margin: -2px 2px 6px; color: var(--muted); }
+.rts-tip { position: fixed; z-index: 70; width: 230px; background: rgba(12, 16, 28, 0.97); border: 2px solid var(--gold); border-radius: 10px; padding: 8px 10px; font-size: 13px; pointer-events: none; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); }
+.rts-tip[hidden] { display: none; }
+.tt-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.tt-head b { color: var(--gold); font-size: 14px; } .tt-cost { white-space: nowrap; }
+.rts-tip .stats { display: grid; grid-template-columns: repeat(3, auto); gap: 3px 10px; margin-bottom: 4px; }
+.rts-tip .hits { margin: 2px 0; } .rts-tip .hits span { margin-right: 4px; font-size: 15px; }
+.tt-text { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.tt-why { color: #ff8787; margin-top: 5px; font-weight: bold; }
+body.rts .selpanel p.small, body.rts .selpanel .rally-tip { display: none; }
+.sel-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sel-unit { position: relative; display: inline-flex; align-items: center; gap: 2px; background: rgba(255, 255, 255, 0.07); border-radius: 6px; padding: 1px 5px 1px 1px; }
+.sel-unit img { width: 34px; height: 34px; } .sel-unit .emo { font-size: 24px; padding: 3px; }
+.sel-hp { flex: 1; min-width: 60px; height: 8px; background: rgba(255, 255, 255, 0.15); border-radius: 4px; overflow: hidden; }
+.sel-hp i { display: block; height: 100%; background: var(--good); }
+.sel-cmds { margin-top: 6px; gap: 6px; }
+@media (max-width: 1100px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
 
 </style>
 </head>
@@ -5113,6 +5148,7 @@ window.GK_ONLINE_CONFIG = {
 
   let toastBox = null;
   function toast(text, kind) {
+    if (AR.ui && AR.ui.toastFilter && AR.ui.toastFilter(String(text), kind || 'info') === false) return;   // e.g. the RTS mode keeps the screen clean
     if (!toastBox) { toastBox = h('div.toasts', { 'aria-live': 'polite' }); document.body.appendChild(toastBox); }
     const t = h('div.toast.' + (kind || 'info'), text);
     toastBox.appendChild(t);
@@ -6997,8 +7033,8 @@ window.GK_ONLINE_CONFIG = {
     if (g && g.ph === 'running' && this.pos && this.app.layout && this.rtsRound !== g.round) {   // a new round: start above my kingdom
       this.rtsRound = g.round;
       const b = this.app.layout.bases[this.teamIndex()];
-      if (b) { const o = this.sc.cam.over; o.x = b.center[0] - b.dir[0] * 6; o.z = b.center[1] - b.dir[1] * 6 + 10; o.h = 62; }
-      if (this.view !== 'over') { oldToggle.call(this); if (this.side) this.side.viewBtn.textContent = '🧙 Mage view (V)'; }
+      if (b) { const o = this.sc.cam.over; o.x = b.center[0] - b.dir[0] * 8; o.z = b.center[1] - b.dir[1] * 8; o.h = 40; }
+      if (this.view !== 'over') { oldToggle.call(this); if (this.side) { this.side.viewBtn.textContent = '🧙'; this.side.viewBtn.title = 'Play as your mage (V)'; } }
     }
     document.body.classList.toggle('rts-over', this.view === 'over');
     oldUpdate.call(this, dt);
@@ -7077,7 +7113,7 @@ window.GK_ONLINE_CONFIG = {
     const m = this.me() || {};
     if (m.out) return toast('Your kingdom has fallen: your mage is gone.', 'info');
     this.heroSel = true; this.cmd.selected.clear(); this.cmd.selStruct = null; this.cmd.drawSel();
-    if (center && this.pos) { if (this.view !== 'over') this.rtsToggleView(); const o = this.sc.cam.over; o.x = this.pos[0]; o.z = this.pos[2] + 6; }
+    if (center && this.pos) { if (this.view !== 'over') this.rtsToggleView(); const o = this.sc.cam.over; o.x = this.pos[0]; o.z = this.pos[2]; }
   };
   P.rtsMark = function (x, z, color) { this.marks.push({ x, z, color, until: performance.now() + 700 }); };
   const oldClick = P.click;
@@ -7268,7 +7304,7 @@ window.GK_ONLINE_CONFIG = {
     const r = this.mini.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 180 / mm.scale - mm.half, z = (e.clientY - r.top) / r.height * 180 / mm.scale - mm.half;
     if (e.shiftKey) return this.link.send('ping', { x, z });
     if (this.view !== 'over') this.rtsToggleView();
-    const o = this.sc.cam.over; o.x = x; o.z = z + o.h * 0.25;
+    const o = this.sc.cam.over; o.x = x; o.z = z;
   };
   const oldMini = P.drawMinimap;
   P.drawMinimap = function () {
@@ -7285,8 +7321,8 @@ window.GK_ONLINE_CONFIG = {
       ctx.fillRect(X(q[0]) - 1.5, X(q[1]) - 1.5, 3, 3);
     }
     if (this.view === 'over') {   // the part of the map the view shows
-      const o = this.sc.cam.over, w = o.h * 0.9, d = o.h * 0.6;
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1; ctx.strokeRect(X(o.x - w), X(o.z - o.h * 0.25 - d), w * 2 * mm.scale, d * 2 * mm.scale);
+      const o = this.sc.cam.over, w = o.h * 0.75, d = o.h * 0.55;
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1; ctx.strokeRect(X(o.x - w), X(o.z - d), w * 2 * mm.scale, d * 2 * mm.scale);
     }
   };
 
@@ -7300,6 +7336,285 @@ window.GK_ONLINE_CONFIG = {
     if (m.ra && S.view === 'over') { const [x, z] = m.ra; items.push({ mesh: sc.pingMesh('#ffd166'), pos: [x, L.height(x, z), z], scale: [0.35, 0.6, 0.35], alpha: 0.8, noShadow: true }); items.push({ mesh: sc.ringMesh('#ffd166'), pos: [x, L.height(x, z) + 0.05, z], noShadow: true }); }
     S.marks = (S.marks || []).filter(k => k.until > now);
     for (const k of S.marks) items.push({ mesh: sc.ringMesh(k.color), pos: [k.x, L.height(k.x, k.z) + 0.05, k.z], scale: 0.6 + (1 - (k.until - now) / 700) * 1.2, alpha: (k.until - now) / 700, noShadow: true });
+  };
+})();
+
+</script>
+<script>/* src/client/rts-ui.js */
+/* Arcane Realms · src/client/rts-ui.js — the Command & Conquer LOOK (teacher's request, 2026-10-16):
+   - camera: tilted (about 45°) and closer, like C&C; the mouse at the screen EDGES scrolls the view (corners = diagonal)
+   - sidebar: PICTURE tiles (the real 3D models, rendered once into small images) with only the price on them;
+     the details (health, damage, range, speed, time, what it needs) appear in a card only while the mouse points at a tile
+   - training progress fills the tile, a number shows how many are queued; locked tiles are grey with a lock
+   - mouse cursors tell you what a click does: ✋ select · ➤ move · ⊕ attack; a ring shows what you point at
+   - fewer words on screen: instruction pop-ups are gone, panels show icons (with tooltips) instead of sentences
+   Loaded after rts.js. */
+(function () {
+  'use strict';
+  const AR = window.AR, App = AR.App, P = AR.StudentSession.prototype, C = AR.CommandUI.prototype, B = AR.Balance;
+  const { h, clear, toast } = AR.ui, V = GK.vec;
+  const EMO = { archerTower: '🏹', elvenLodge: '🏠', stoneWall: '🧱', dwarvenForge: '⚒', boulderBastion: '🪨', wizardTower: '🎓', wizardSpire: '🔮', healingGrove: '🌳', arcaneSanctum: '✨', dragonRoost: '🥚',
+    ranger: '🧝', healer: '💚', guardian: '🛡', stonebreaker: '🔨', mage: '🧙', emberDrake: '🐉', ancientDragon: '🐲', thunderbolt: '⚡', thunderstorm: '⛈', hurricane: '🌪', tidalWave: '🌊', ward: '🔰' };
+  const PRODUCERS = ['elvenLodge', 'dwarvenForge', 'wizardTower', 'dragonRoost'];
+  const TGT = { ground: '🚶', air: '🪽', building: '🏰' };
+  let session = null;
+
+  // ===================== camera: tilted and closer =====================
+  const Sc = AR.Scene.prototype, oldOver = Sc.overhead;
+  Sc.overhead = function () {
+    const k = this.cam.overK; if (!k) return oldOver.call(this);
+    const o = this.cam.over, tgt = [o.x, 0, o.z], eye = [o.x, o.h, o.z + o.h * k];
+    this.eye = eye; this.fwd = V.norm(V.sub(tgt, eye)); this.fov = 50;
+  };
+  const oldWheel = P.wheel;
+  P.wheel = function (d) {
+    if (this.view !== 'over') return oldWheel.call(this, d);
+    const o = this.sc.cam.over; o.h = AR.util.clamp(o.h * (d > 0 ? 1.1 : 0.9), 18, 85);
+  };
+
+  // ===================== picture tiles: the real models, rendered once =====================
+  const Thumbs = {
+    cache: {},
+    get(ty, color) {
+      const key = ty + color;
+      if (this.cache[key] !== undefined) return this.cache[key];
+      const f = (AR.Models2 && AR.Models2[ty]) || (AR.Models3 && AR.Models3[ty]);
+      if (!f) return (this.cache[key] = null);
+      try {
+        if (!this.r) {
+          this.cv = document.createElement('canvas'); this.cv.width = this.cv.height = 112;
+          this.r = new GK.Renderer(this.cv, { antialias: true, far: 200 });
+          this.r.setQuality({ bloom: false, shadows: false, sky: false, detail: false });
+          this.r.setEnv({ sun: { dir: [0.5, 1, 0.7], intensity: 0.75 }, ambient: { sky: '#c9d6e6', ground: '#6b6252' }, fog: [500, 900], fogColor: '#ffffff', water: false });
+        }
+        const geo = f(color, 0), bb = geo.bounds(), mesh = this.r.mesh(geo);
+        const c = [(bb.min[0] + bb.max[0]) / 2, (bb.min[1] + bb.max[1]) / 2, (bb.min[2] + bb.max[2]) / 2];
+        const size = Math.max(bb.max[0] - bb.min[0], bb.max[1] - bb.min[1], bb.max[2] - bb.min[2]) || 1, d = size * 1.55;
+        const eye = [c[0] + d * 0.62, c[1] + d * 0.5, c[2] + d * 0.78];
+        this.r.gl.viewport(0, 0, 112, 112);
+        this.r.setCamera(eye, V.sub(c, eye), 38);
+        this.r.render([{ mesh, pos: [0, 0, 0], noShadow: true }]);
+        this.cache[key] = this.cv.toDataURL('image/png');
+        this.r.free(mesh);
+      } catch (e) { this.cache[key] = null; }
+      return this.cache[key];
+    },
+  };
+  AR.Thumbs = Thumbs;
+  const pic = (ty, color) => { const src = Thumbs.get(ty, color); return src ? h('img', { src, alt: '', draggable: false }) : h('span.emo', EMO[ty] || '❔'); };
+
+  // ===================== hover card (only while pointing) =====================
+  function cardFor(kind, ty, why) {
+    const rows = [], stat = (icon, v, t) => h('span.st', { title: t }, icon, ' ', h('b', String(v)));
+    let name, cost, text;
+    if (kind === 'u') {
+      const D = B.units[ty]; name = D.name; cost = D.cost; text = D.text;
+      rows.push(h('div.stats', stat('❤', D.health, 'Health'), D.heal ? stat('💚', D.heal, 'Heals') : stat('⚔', D.damage + (D.splash ? ' ✸' : ''), 'Damage' + (D.splash ? ' (area)' : '')),
+        stat('🎯', D.range + 'm', 'Range'), stat('👟', D.speed, 'Speed'), stat('⏱', D.summon + 's', 'Training time'), stat('👥', D.capacity, 'Army slots')));
+      if (D.targets.length) rows.push(h('div.hits', 'Hits ', D.targets.map(t => h('span', { title: t }, TGT[t]))));
+      if (D.buildingDamage) rows.push(h('div.hits', '🏰 ', h('b', String(D.buildingDamage)), ' vs buildings'));
+    } else if (kind === 'b') {
+      const D = B.structures[ty]; name = D.name; cost = D.cost; text = D.text;
+      rows.push(h('div.stats', stat('❤', D.health, 'Health'), D.attack ? stat('⚔', D.attack.damage + (D.attack.splash ? ' ✸' : ''), 'Damage') : null, D.attack ? stat('🎯', D.attack.range + 'm', 'Range') : null,
+        D.heal ? stat('💚', D.heal.perSec + '/s', 'Healing') : null, stat('⏱', D.build + 's', 'Build time')));
+      if (D.attack) rows.push(h('div.hits', 'Hits ', D.attack.targets.map(t => h('span', { title: t }, TGT[t]))));
+      const trains = B.shop.units.filter(u => B.units[u].from === ty);
+      if (trains.length) rows.push(h('div.hits', 'Trains ', trains.map(u => h('span', { title: B.units[u].name }, EMO[u]))));
+    } else {
+      const D = ty === 'ward' ? B.spells.ward : B.spells.list[ty]; name = ty === 'ward' ? 'Ward' : D.name; cost = D.cost;
+      text = ty === 'ward' ? Math.round(D.reduction * 100) + '% less spell damage for ' + D.durationSec + ' s.' : D.text;
+      if (ty !== 'ward') rows.push(h('div.stats', stat('⚔', D.unit, 'Damage to troops'), stat('🏰', D.structure, 'Damage to buildings'), D.radius ? stat('⭕', D.radius + 'm', 'Radius') : null, stat('📖', D.milestone, 'Gold you must earn from YOUR answers first')));
+    }
+    return h('div', h('div.tt-head', h('b', name), h('span.tt-cost', '🪙 ' + cost)), rows, h('div.tt-text', text), why ? h('div.tt-why', '🔒 ' + why) : null);
+  }
+  const tip = h('div.rts-tip', { hidden: true });
+  document.addEventListener('DOMContentLoaded', () => document.body.appendChild(tip));
+  function showTip(el) {
+    const S = session; if (!S || !S.cmd) return;
+    const kind = el.dataset.k, ty = el.dataset.ty, cmd = S.cmd;
+    const why = kind === 'u' ? cmd.recruitWhy(ty) : kind === 'b' ? cmd.buildWhy(ty) : ty === 'ward' ? cmd.wardWhy() : cmd.spellWhy(ty);
+    clear(tip).appendChild(cardFor(kind, ty, why));
+    tip.hidden = false;
+    const r = el.getBoundingClientRect(), side = S.side.el.getBoundingClientRect();
+    tip.style.top = Math.max(8, Math.min(window.innerHeight - tip.offsetHeight - 8, r.top - 6)) + 'px';
+    tip.style.left = Math.max(8, side.left - tip.offsetWidth - 10) + 'px';
+  }
+
+  // ===================== sidebar: header + tiles =====================
+  const oldSide = P.buildSidebar;
+  const hideTip = () => { tip.hidden = true; };
+  P.buildSidebar = function () {
+    oldSide.call(this);
+    const s = this.side;
+    s.gold = h('div.rts-gold'); s.sub = h('div.rts-sub');
+    s.el.insertBefore(h('div.rts-head', s.gold, s.sub), s.el.firstChild);
+    // icon-only map buttons (tooltips say what they do)
+    const btns = s.el.querySelector('.rts-mapbtns'); clear(btns);
+    s.viewBtn = h('button.btn.small.ib', { onclick: () => this.rtsToggleView(), title: 'Play as your mage (V)' }, '🧙');
+    btns.appendChild(s.viewBtn);
+    btns.appendChild(h('button.btn.small.ib', { onclick: () => this.rtsSelectHero(true), title: 'Find and select your mage (H)' }, '📍'));
+    btns.appendChild(h('button.btn.small.ib', { onclick: () => this.cmd.selectAll(), title: 'Select all your troops' }, '👥'));
+    btns.appendChild(h('button.btn.small.ib', { onclick: () => this.cmd.showGuide(), title: 'Guide: every number' }, '❔'));
+    // tabs: icon + one word
+    s.tabs.querySelectorAll('.rts-tab').forEach(b => { const w = { build: 'Build', train: 'Army', magic: 'Magic', learn: 'Learn' }[b.dataset.tab]; b.querySelector('b').textContent = w; b.title = { build: 'Build buildings', train: 'Train troops', magic: 'Spells', learn: 'Answer questions to earn gold' }[b.dataset.tab]; });
+    s.learnStart.firstChild.textContent = 'Right answers = gold 🪙';
+    s.learnStart.lastChild.textContent = '📖 Answer questions';
+    // hover cards (event delegation: the tiles are redrawn while training runs)
+    s.body.addEventListener('mouseover', e => { const t = e.target.closest('.tile'); if (t) showTip(t); });
+    s.body.addEventListener('mouseout', e => { const t = e.target.closest('.tile'); if (t && !t.contains(e.relatedTarget)) tip.hidden = true; });
+    s.body.addEventListener('scroll', hideTip);
+    s.tabs.addEventListener('click', hideTip);
+  };
+  const oldToggle = P.toggleView;
+  P.toggleView = function () {
+    oldToggle.apply(this, arguments);
+    if (this.side) { this.side.viewBtn.textContent = this.view === 'over' ? '🧙' : '🗺'; this.side.viewBtn.title = this.view === 'over' ? 'Play as your mage (V)' : 'Back to command view (V)'; }
+    if (this.view === 'over' && this.pos) { this.sc.cam.over.x = this.pos[0]; this.sc.cam.over.z = this.pos[2]; }
+  };
+  const tile = (kind, ty, why, onclick, extra) => h('button.tile' + (why ? '.locked' : ''), { 'data-k': kind, 'data-ty': ty, onclick: () => { if (why) return toast('🔒 ' + why, 'warn'); tip.hidden = true; onclick(); } }, extra);
+  P.drawBuild = function (into) {
+    const cmd = this.cmd, col = (this.team() || {}).color || '#3b82f6';
+    into.appendChild(h('div.tiles', B.shop.structures.map(ty => {
+      const why = cmd.buildWhy(ty);
+      return tile('b', ty, why, () => cmd.startPlace(ty), [pic(ty, col), h('span.price', '🪙' + B.structures[ty].cost), why ? h('span.lock', '🔒') : null]);
+    })));
+  };
+  P.drawTrain = function (into) {
+    const cmd = this.cmd, col = (this.team() || {}).color || '#3b82f6', now = this.link.serverNow(), q = {};
+    for (const id in this.link.un) { const u = this.link.un[id]; if (u.own === this.link.id && u.s === 'sum') (q[u.ty] = q[u.ty] || []).push(u.rd || now); }
+    const share = cmd.armyShare();
+    into.appendChild(h('div.rts-army', { title: 'Your army slots' }, '👥 ', h('b', String(cmd.myArmy())), share ? ' / ' + share : ''));
+    const units = B.shop.units.slice().sort((a, b) => PRODUCERS.indexOf(B.units[a].from) - PRODUCERS.indexOf(B.units[b].from));
+    into.appendChild(h('div.tiles', units.map(ty => {
+      const why = cmd.recruitWhy(ty), D = B.units[ty], list = (q[ty] || []).sort((a, b) => a - b);
+      const prog = list.length ? Math.max(0, Math.min(1, 1 - (list[0] - now) / (D.summon * 1000))) : 0;
+      return tile('u', ty, why, () => this.link.send('recruit', { ty }), [pic(ty, col), h('span.price', '🪙' + D.cost),
+        list.length ? h('span.prog', { style: { height: Math.round((1 - prog) * 100) + '%' } }) : null,
+        list.length ? h('span.qn', String(list.length)) : null, why ? h('span.lock', '🔒') : null]);
+    })));
+  };
+  P.drawMagic = function (into) {
+    const cmd = this.cmd;
+    into.appendChild(h('div.tiles', Object.keys(B.spells.list).concat(['ward']).map(ty => {
+      const why = ty === 'ward' ? cmd.wardWhy() : cmd.spellWhy(ty), cost = ty === 'ward' ? B.spells.ward.cost : B.spells.list[ty].cost;
+      return tile('s', ty, why, () => cmd.startAim(ty), [h('span.emo', EMO[ty]), h('span.price', '🪙' + cost), why ? h('span.lock', '🔒') : null]);
+    })));
+  };
+  const oldDrawSide = P.drawSide;
+  P.drawSide = function (force) {
+    const s = this.side; if (!s || !this.cmd) return;
+    const m = this.me() || {};
+    if (!s.gold) return oldDrawSide.call(this, force);   // (while the sidebar is still being built)
+    s.gold.textContent = '🪙 ' + Math.floor(m.gold || 0);
+    s.sub.textContent = (this.practice ? 'Practice' : 'Room ' + this.link.room) + ' · ❤ ' + Math.ceil(m.hp == null ? 100 : m.hp);
+    if (s.tab === 'magic') {   // our own tiles instead of the old card list
+      const tmp = h('div'); this.drawMagic(tmp);
+      const sig = tmp.innerHTML; if (!force && sig === s.sig) return;
+      s.sig = sig; const y = s.body.scrollTop; clear(s.body); while (tmp.firstChild) s.body.appendChild(tmp.firstChild); s.body.scrollTop = y; recheckTip();
+      s.learnStart.hidden = !!(this.link.pv && (this.link.pv.learn || this.link.pv.in));
+      return;
+    }
+    const before = s.sig;
+    oldDrawSide.call(this, force);
+    s.status.hidden = true;
+    if (s.sig !== before) recheckTip();
+  };
+  /** After the tiles were redrawn: keep the card only if the mouse still points at a tile. */
+  function recheckTip() {
+    if (tip.hidden) return;
+    const el = mouse && document.elementFromPoint(mouse.x, mouse.y), t = el && el.closest && el.closest('.tile');
+    if (t) showTip(t); else tip.hidden = true;
+  }
+
+  // ===================== HUD =====================
+  const oldHud = P.buildHud;
+  P.buildHud = function () {
+    oldHud.call(this);
+    session = this;
+    this.sc.cam.overK = 1.0;
+    AR.ui.toastFilter = (text, kind) => {   // keep the screen clean: no instruction pop-ups (warnings and news still show)
+      if (kind !== 'info') return true;
+      return !/^(🚶|⚔ Attacking|🛡 Defending|✋ Stopped|🗺 Command view|🧙 Playing|.*Move the mouse inside|.*Click the spot|.*click the direction|.*Sent! Gold|An enemy troop|Cancelled|⚡ Your mage attacks|🎯 Aiming)/.test(text);
+    };
+  };
+  const oldStop = P.stop;
+  P.stop = function () { AR.ui.toastFilter = null; tip.hidden = true; delete this.sc.cam.overK; if (session === this) session = null; oldStop.call(this); };
+
+  // ===================== edge scrolling + cursors + hover ring =====================
+  let mouse = null;
+  window.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; });
+  document.addEventListener('mouseout', e => { if (!e.relatedTarget) mouse = null; });
+  window.addEventListener('blur', () => { mouse = null; });
+  const svg = s => 'url("data:image/svg+xml,' + encodeURIComponent(s) + '")';
+  const CUR = {
+    move: svg('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><g fill="#51cf66" stroke="#0b3d16" stroke-width="1.5"><path d="M16 2l5 7h-3v5h5v-3l7 5-7 5v-3h-5v5h3l-5 7-5-7h3v-5H9v3L2 16l7-5v3h5V9h-3z"/></g></svg>') + ' 16 16, move',
+    attack: svg('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><g fill="none" stroke="#ff4d4d" stroke-width="2.5"><circle cx="16" cy="16" r="9"/><path d="M16 2v8M16 22v8M2 16h8M22 16h8"/></g><circle cx="16" cy="16" r="2.5" fill="#ff4d4d"/></svg>') + ' 16 16, crosshair',
+    rally: svg('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path d="M8 30V4" stroke="#333" stroke-width="2.5"/><path d="M9 4h16l-4 5 4 5H9z" fill="#ffd166" stroke="#7a5a00"/></svg>') + ' 8 30, pointer',
+  };
+  const EDGE = 14;
+  const oldUpdate = P.update;
+  P.update = function (dt) {
+    oldUpdate.call(this, dt);
+    if (this.view !== 'over' || !this.cmd || document.querySelector('.modal-back')) { this.app.canvas.style.cursor = ''; return; }
+    // edge scrolling (C&C): the mouse at an edge or corner of the screen moves the view
+    if (mouse && document.hasFocus()) {
+      const W = window.innerWidth, Hh = window.innerHeight, o = this.sc.cam.over, sp = o.h * 1.15 * dt;
+      const ex = mouse.x <= EDGE ? -1 : mouse.x >= W - EDGE ? 1 : 0, ez = mouse.y <= EDGE ? -1 : mouse.y >= Hh - EDGE ? 1 : 0;
+      if (ex || ez) { o.x += ex * sp; o.z += ez * sp; const L = this.app.layout; if (L) { const E = L.def.edge; o.x = AR.util.clamp(o.x, -E, E); o.z = AR.util.clamp(o.z, -E, E); } }
+    }
+    // cursor + what the mouse points at
+    const now = performance.now();
+    if (now - (this.curAt || 0) < 70) return;
+    this.curAt = now;
+    const cmd = this.cmd, cv = this.app.canvas, mp = this.app.mouse;
+    this.hoverEnt = null;
+    if (!mp || cmd.placing || cmd.aim || this.rtsBtn === 0) { cv.style.cursor = ''; return; }
+    const p = this.sc.pick(mp.x, mp.y); if (!p) { cv.style.cursor = ''; return; }
+    const e = cmd.entityAt(p), team = cmd.myTeam(), sel = cmd.selected.size || this.heroSel;
+    const s = cmd.selStruct && this.link.st[cmd.selStruct];
+    const onHero = this.pos && Math.hypot(this.pos[0] - p[0], this.pos[2] - p[2]) < 1.7;
+    if (e) this.hoverEnt = e;
+    if (onHero) { this.hoverEnt = { kind: 'h' }; cv.style.cursor = 'pointer'; }
+    else if (sel && e && e.tm && e.tm !== team) cv.style.cursor = CUR.attack;
+    else if (e && (e.own === this.link.id || e.kind === 'b')) cv.style.cursor = 'pointer';
+    else if (sel) cv.style.cursor = CUR.move;
+    else if (s && s.tm === team && PRODUCERS.indexOf(s.ty) >= 0) cv.style.cursor = CUR.rally;
+    else cv.style.cursor = '';
+  };
+  const WV = AR.WorldView.prototype, oldFrame = WV.frame;
+  WV.frame = function (items, src, ctx) {
+    oldFrame.call(this, items, src, ctx);
+    const S = session; if (!S || S.wv !== this || S.view !== 'over' || !S.hoverEnt) return;
+    const e = S.hoverEnt, L = ctx.L, team = S.cmd.myTeam();
+    let x, z, r = 1.1;
+    if (e.kind === 'h') { if (!S.pos) return; x = S.pos[0]; z = S.pos[2]; }
+    else { const q = S.posOfId(e.id); if (!q) return; x = q[0]; z = q[1]; if (e.kind === 'b') r = B.structures[(S.link.st[e.id] || {}).ty] ? B.structures[S.link.st[e.id].ty].radius + 0.8 : 3; }
+    const col = e.kind === 'h' || e.own === S.link.id ? '#ffffff' : e.tm === team ? '#80ffdb' : '#ff6b6b';
+    items.push({ mesh: S.sc.ringMesh(col), pos: [x, L.height(x, z) + 0.06, z], scale: r, alpha: 0.75, noShadow: true });
+  };
+
+  // ===================== selection bar: pictures + icon buttons =====================
+  const oldSel = C.drawSel;
+  C.drawSel = function (onlyIfChanged) {
+    const S = this.S, ids = Array.from(this.selected).filter(id => this.link.un[id]);
+    if (S.view !== 'over' || !ids.length) return oldSel.call(this, onlyIfChanged);
+    const kinds = {}; for (const id of ids) { const ty = this.link.un[id].ty; kinds[ty] = (kinds[ty] || 0) + 1; }
+    let hp = 0, mx = 0; for (const id of ids) { hp += this.link.un[id].hp; mx += this.link.un[id].mx; }
+    const sig = JSON.stringify([kinds, Math.round(hp / 20), S.heroSel, S.fightMove]);
+    if (onlyIfChanged && sig === this.selSig) { this.selPanel.hidden = false; return; }
+    this.selSig = sig;
+    const Pn = clear(this.selPanel), col = (S.team() || {}).color || '#3b82f6';
+    Pn.appendChild(h('div.sel-row',
+      S.heroSel ? h('span.sel-unit', { title: 'Your mage' }, h('span.emo', '🧙')) : null,
+      Object.keys(kinds).map(ty => h('span.sel-unit', { title: B.units[ty].name }, pic(ty, col), h('b', '×' + kinds[ty]))),
+      h('span.sel-hp', { title: 'Health of the group' }, h('i', { style: { width: Math.round(hp / Math.max(1, mx) * 100) + '%' } }))));
+    const ib = (icon, t, fn, on) => h('button.btn.small.ib' + (on ? '.primary' : ''), { title: t, onclick: fn }, icon);
+    Pn.appendChild(h('div.row.sel-cmds',
+      ib('⚔', 'Fight-move: then RIGHT-click a place (F)', () => { S.fightMove = true; this.drawSel(); }, S.fightMove),
+      ib('🛡', 'Guard here (G)', () => { const q = this.link.unitPos(this.link.un[ids[0]]); this.order('defend', { x: q[0], z: q[1] }, ids); }),
+      ib('✋', 'Stop (X)', () => this.order('stop')),
+      ib('✕', 'Deselect (Esc)', () => { this.selected.clear(); S.heroSel = false; this.drawSel(); })));
+    Pn.hidden = false;
   };
 })();
 
