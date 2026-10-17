@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T03:28:18.485Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T05:04:50.412Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -439,6 +439,25 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 .slot.armor { cursor: default; border-color: #adb5bd; }
 .slot.armor[hidden] { display: none; }
 .tcage { border: 2px solid var(--gold); border-radius: 10px; padding: 6px 10px; margin-bottom: 8px; background: rgba(255, 212, 59, 0.08); } .tcage .row { margin-top: 6px; gap: 6px; }
+/* ===== the 🎓 tutorial ===== */
+.tutbox { position: absolute; right: 14px; top: 236px; width: min(340px, 40vw); z-index: 60; background: rgba(14, 20, 36, 0.95); border: 3px solid #ffd43b; border-radius: 16px; padding: 10px 16px 12px; box-shadow: 0 0 0 4px rgba(255, 212, 59, 0.18), 0 10px 30px rgba(0, 0, 0, 0.5); pointer-events: auto !important; }
+.tutbox.top, .tutbox.info { right: auto; left: 50%; transform: translateX(-50%); width: min(520px, 92vw); } .tutbox.top { top: 8px; } .tutbox.info { top: 30%; }
+.tutbox.ok { border-color: #51cf66; box-shadow: 0 0 0 6px rgba(81, 207, 102, 0.35), 0 10px 30px rgba(0, 0, 0, 0.5); }
+.tutbox p { margin: 6px 0 4px; font-size: 17px; line-height: 1.35; }
+.tuthead { display: flex; align-items: center; gap: 10px; } .tuthead b { font-size: 20px; color: #ffd43b; flex: 1; }
+.tutstep { font-size: 12px; color: var(--muted); background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 10px; }
+.tutskip { font-size: 13px; }
+.tutkeys { display: flex; align-items: center; gap: 6px; margin-top: 6px; } .tutkeys kbd { font-size: 20px; padding: 3px 12px; border-radius: 8px; box-shadow: 0 3px 0 #9aa3b5; animation: tutkey 1.2s ease-in-out infinite; }
+@keyframes tutkey { 50% { transform: translateY(2px); box-shadow: 0 1px 0 #9aa3b5; } }
+.tutbar { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; margin-top: 6px; } .tutbar i { display: block; height: 100%; width: 30%; background: #80ffdb; animation: tutwait 1.4s linear infinite; }
+@keyframes tutwait { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+.tutprog { height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); margin-top: 8px; overflow: hidden; } .tutprog i { display: block; height: 100%; background: #ffd43b; transition: width 0.3s; }
+.tutarrow { position: fixed; left: 0; top: 0; z-index: 70; font-size: 44px; color: #ffd43b; text-shadow: 0 0 10px #000, 0 2px 0 #7a4b00; pointer-events: none !important; animation: tutbounce 0.8s ease-in-out infinite; }
+.tutarrow[hidden] { display: none; }
+@keyframes tutbounce { 50% { margin-top: -10px; } }
+.tut-glow { outline: 4px solid #ffd43b !important; outline-offset: 3px; border-radius: 10px; animation: tutglow 1s ease-in-out infinite; }
+@keyframes tutglow { 50% { outline-color: rgba(255, 212, 59, 0.25); box-shadow: 0 0 22px 6px rgba(255, 212, 59, 0.6); } }
+.tutbtn.new { border-color: #ffd43b; box-shadow: 0 0 0 3px rgba(255, 212, 59, 0.35); }
 
 </style>
 </head>
@@ -5615,7 +5634,8 @@ window.GK_ONLINE_CONFIG = {
         h('div.actions',
           h('button.btn.big', { onclick: () => this.startHost() }, h('span.ico', '🏰'), 'Host a game', h('small', 'Teacher: make a room')),
           h('button.btn.big.primary', { onclick: () => this.showJoin() }, h('span.ico', '🔑'), 'Join by code', h('small', 'Student: type the room code')),
-          h('button.btn.big', { onclick: () => this.showPracticeSetup() }, h('span.ico', '🤖'), 'Practice', h('small', 'Play with bots (not online)'))),
+          h('button.btn.big', { onclick: () => this.showPracticeSetup() }, h('span.ico', '🤖'), 'Practice', h('small', 'Play with bots (not online)')),
+          h('button.btn.big.tutbtn' + (LS.get('sr.tutorialDone', 0) ? '' : '.new'), { onclick: () => this.startTutorial() }, h('span.ico', '🎓'), 'Tutorial', h('small', 'Learn to play (3 min)'))),
         h('div.howto', [['📦', 'Answer in the cages'], ['⚡', 'Get boosters'], ['🎁', 'Loot chests'], ['⚔', 'Win the battle'], ['🌀', 'Stay out of the storm']].map(([i, t]) => h('div', h('span', i), t))),
         h('div.row.center', h('button.btn', { onclick: () => this.showLook() }, '🎨 My mage'), h('button.link.settings', { onclick: () => this.showSettings() }, '⚙ Settings'))));
       sel();
@@ -6456,6 +6476,227 @@ window.GK_ONLINE_CONFIG = {
     if (cg && cg.ph === 'lift') this.cageGoUntil = now + 900;
     if (big !== this._big) { this._big = big; this.cageBig.textContent = big; this.cageBig.hidden = !big; this.cageBig.classList.toggle('go', big === 'GO!' || /^\d$/.test(big)); }
   };
+})();
+
+</script>
+<script>/* src/client/tutorial.js */
+/* Spellstorm Royale · src/client/tutorial.js — the 🎓 TUTORIAL (about 3 minutes, offline, no other players).
+   A private practice island: the student, a Training Dummy, a chest, a horse. One short step at a time, like the first
+   level of a console game: a box with the keys to press, the right button on the screen GLOWS with an arrow pointing at it,
+   a light beam marks things in the world (dummy, chest, horse), and the step completes by itself when the student does it.
+   Info steps (cage, booster, storm, squad) continue with Enter or the Next button.
+   The tutorial only drives the normal game: the same host rules, the same screen (loaded after cage.js). */
+(function () {
+  'use strict';
+  const AR = window.AR, P = AR.StudentSession.prototype, B = AR.Balance, { h, clear, toast } = AR.ui;
+  const near2 = (a, b) => Math.hypot(a[0] - b[0], a[2] - b[2]);
+
+  // ===================== the steps =====================
+  // target: a CSS selector to glow + point at · world: () => [x, y, z] for a light beam + arrow · done(T): true = next step
+  // info: true = read, then Enter / Next · enter(T): set something up when the step starts
+  const STEPS = [
+    { id: 'look', title: '🖱 Look around', keys: ['Click', 'Mouse'], text: 'Click the game, then move the mouse to turn the camera.',
+      enter: T => { T.yaw0 = T.S.sc.cam.yaw; }, done: T => T.S.locked() && Math.abs(T.S.sc.cam.yaw - T.yaw0) > 0.7 },
+    { id: 'move', title: '🚶 Walk', keys: ['W', 'A', 'S', 'D'], text: 'Walk to the glowing light.', world: T => T.walkTo,
+      enter: T => { T.walkTo = T.ahead(9); }, done: T => T.S.pos && near2(T.S.pos, T.walkTo) < 2.5 },
+    { id: 'sprint', title: '💨 Sprint', keys: ['Shift', '+', 'W'], text: 'Hold Shift while walking to run faster. The yellow bar is your stamina.', target: '.stambar',
+      done: T => AR.Motion.active(T.me().mo, Math.max(0, T.S.t())) },
+    { id: 'jump', title: '⤴ Jump', keys: ['Space'], text: 'Jump over rocks and fences.',
+      enter: T => { T.jump0 = (T.P().motion || {}).jumpAt; }, done: T => (T.P().motion || {}).jumpAt !== T.jump0 },
+    { id: 'crouch', title: '🧎 Crouch', keys: ['C'], text: 'Crouch: you are smaller and harder to hit.', done: T => (T.me().mo || {}).stance === 'crouch' },
+    { id: 'crawl', title: '🐍 Crawl', keys: T => T.S.kbSafe() ? ['Ctrl'] : ['Z'], text: T => 'Lie down and crawl. In tall grass, enemies far away cannot see you!' + (T.S.kbSafe() ? '' : ' (Ctrl works in full screen.)'),
+      done: T => (T.me().mo || {}).stance === 'prone' },
+    { id: 'stand', title: '⬆ Stand up', keys: T => T.S.kbSafe() ? ['Ctrl'] : ['Z'], text: 'Press it again to stand up.', done: T => !(T.me().mo || {}).stance },
+    { id: 'aim', title: '🎯 Aim', keys: ['Right mouse'], text: 'Hold the RIGHT mouse button to aim (the camera zooms in).', target: '.reticle',
+      enter: T => T.placeDummy(), done: T => T.S.aiming },
+    { id: 'attack', title: '⚡ Attack', keys: ['Left click'], text: T => 'Put the crosshair on the Training Dummy and LEFT-click. Your ' + T.cls().name + ' attack: ' + T.cls().attack.icon + ' ' + T.cls().attack.name + ' (' + T.cls().attack.range + ' m).',
+      world: T => T.dummyPos(), target: '.wslot', done: T => T.dummyHit() },
+    { id: 'chest', title: '🎁 Open a chest', keys: ['E'], text: 'Walk to the chest and press E. Chests have better attacks, armour and items.',
+      world: T => T.chestPos(), target: () => '.hud-bottom .prompt:not([hidden])', done: T => T.chestOpen() },
+    { id: 'item', title: '🧪 Use an item', keys: ['1', '2', '3'], text: 'Your items are here. Press 1 to drink the Healing Potion.', target: '.islot',
+      enter: T => T.givePotion(), done: T => T.potionUsed() },
+    { id: 'ability', title: T => T.cls().ability.icon + ' Class power', keys: ['Q'], text: T => 'Q = ' + T.cls().ability.name + ': ' + T.cls().ability.text + ' Then wait for it to recharge.', target: '.slot.ability',
+      done: T => (T.me().ab || 0) > T.S.link.serverNow() },
+    { id: 'ride', title: '🐎 Ride', keys: ['F'], text: 'Walk to the horse and press F. Rides are twice as fast! (No attacking while riding.)',
+      enter: T => T.placeHorse(), world: T => T.horsePos(), done: T => !!T.me().rd },
+    { id: 'getoff', title: '🐎 Get off', keys: ['F'], text: 'Press F again to get off.', done: T => !T.me().rd },
+    { id: 'cage-info', info: true, title: '📦 Question Cages', text: 'Three times a round (in Sky Haven, at 2:30 and at 5:00) a cage falls on EVERYONE. Nobody can move or attack. You get 5 questions and 1 minute. Let\'s try one!' },
+    { id: 'cage', title: '📦 Answer your 5 questions', text: 'Every right answer = ⚡ +4 % health and damage. 3 right = a chest reward. 5 / 5 = PERFECT: golden cage + Legendary attack!', top: true,
+      enter: T => T.startCage(), done: T => T.cageDone() },
+    { id: 'booster', info: true, title: '⚡ Your booster', target: '.boostbox', text: 'Your booster lasts until you are knocked out, or until the next cage. Answer well = stronger!' },
+    { id: 'storm', info: true, title: '🌀 The storm', target: '.mapbox', text: 'The storm shrinks the island. Stay inside the WHITE circle on the map (the dashed circle shows where it goes next). Outside, you lose health. The last squad standing wins!',
+      enter: T => T.showStorm(), leave: T => T.hideStorm() },
+    { id: 'squad', info: true, title: '👥 Your squad', target: '.hud-squad', text: 'Your squad-mates and their health. Stay together! Knocked out early? You come back. In the last 2 minutes: one life.' },
+    { id: 'chat', info: true, title: '💬 Squad chat', target: '.quickbar', text: 'Quick messages for your squad. Press Enter to type. Be kind: your teacher can read the chat.' },
+    { id: 'done', info: true, last: true, title: '🏆 You are ready!', text: 'That\'s everything. Now practise with bots, or join your teacher\'s room with the code.' },
+  ];
+
+  class Tutorial {
+    constructor(app, S, host) {
+      this.app = app; this.S = S; this.host = host; this.H = host.S; this.i = -1; this.glowEl = null;
+      const ui = app.ui.querySelector('.hud') || app.ui;
+      this.box = h('div.tutbox'); this.arrow = h('div.tutarrow', { hidden: true }, '⬇');
+      ui.appendChild(this.box); ui.appendChild(this.arrow);
+      this.keyHandler = e => {
+        const s = STEPS[this.i]; if (!s) return;
+        if (s.info && (e.code === 'Enter' || e.code === 'NumpadEnter')) { e.preventDefault(); e.stopImmediatePropagation(); this.next(); }
+      };
+      window.addEventListener('keydown', this.keyHandler, true);
+      this.setup();
+      this.timer = setInterval(() => this.tick(), 150);
+      this.next();
+    }
+    // ---------------- the island, the dummy, the chest, the horse ----------------
+    P() { return this.H.player(this.S.link.id); }
+    me() { return this.S.me(); }
+    cls() { return B.classes[this.me().cls || 'wizard']; }
+    setup() {
+      const H = this.H, I = H.island(), me = this.P();
+      H.bots.step = () => {};   // the Training Dummy just stands there
+      this.dummy = Object.values(H.s.players).find(p => p.bot); this.dummy.name = 'Training Dummy'; H.touchP(this.dummy.id);
+      // a quiet open spot next to a chest: clear lines, no buildings around
+      const clear = (a, b) => !AR.Collide.ray(I, [a[0], I.ground(a[0], a[1]) + 1.2, a[1]], [b[0], I.ground(b[0], b[1]) + 1.2, b[1]]);
+      const free = (x, z) => I.onLand(x, z) && !I.inMeadow(x, z) && I.colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 2.5);
+      let pick = null;
+      for (const C of I.chests) {
+        if (C.gold) continue;
+        for (let k = 0; k < 8 && !pick; k++) {
+          const a = k / 8 * Math.PI * 2, x = C.x + Math.cos(a) * 16, z = C.z + Math.sin(a) * 16;
+          if (free(x, z) && clear([x, z], [C.x, C.z]) && Math.abs(I.ground(x, z) - I.ground(C.x, C.z)) < 3) pick = { x, z, C };
+        }
+        if (pick) break;
+      }
+      pick = pick || { x: 30, z: 40, C: I.chests[0] };
+      this.spot = [pick.x, pick.z]; this.chest = pick.C;
+      H.s.cageN = B.cage.at.length;   // no automatic cages: the tutorial starts its own
+      this.keepClock(60);
+      for (const p of Object.values(H.s.players)) { p.state = 'ground'; p.shieldUntil = 0; }
+      H.teleport(me.id, pick.x, pick.z); me.pos[3] = Math.atan2(pick.C.x - pick.x, pick.C.z - pick.z);
+      const park = I.randomLand(H.rnd, pick.x, pick.z, 60); H.teleport(this.dummy.id, park[0], park[1]);   // out of the way until the attack step
+      H.s.phase = 'battle'; H.touchG(); this.host.flush();
+      this.clockTimer = setInterval(() => { if (!H.s.cage && this.clockAt != null) this.keepClock(this.clockAt); }, 500);
+    }
+    /** Hold the round clock still (no storm, no round end) while the student learns. */
+    keepClock(t) { const H = this.H, c = H.s.clock; this.clockAt = t; c.startedAt = H.now() - t * 1000 - c.pausedTotal; c.pausedAt = 0; H.touchG(); }
+    ahead(d) { const S = this.S, c = S.sc.cam, p = S.pos || [this.spot[0], 0, this.spot[1]], I = this.app.island; let x = p[0] + Math.sin(c.yaw) * d, z = p[2] - Math.cos(c.yaw) * d; if (!I.onLand(x, z)) { x = p[0] - Math.sin(c.yaw) * d; z = p[2] + Math.cos(c.yaw) * d; } return [x, I.ground(x, z), z]; }
+    placeDummy() {
+      const H = this.H, I = H.island(), S = this.S, p = S.pos;
+      for (let k = 0; k < 12; k++) {   // 10 m in front of the camera (or the next clear direction)
+        const a = S.sc.cam.yaw + k * 0.52, x = p[0] + Math.sin(a) * 10, z = p[2] - Math.cos(a) * 10;
+        if (I.onLand(x, z) && !AR.Collide.ray(I, [p[0], p[1] + 1.2, p[2]], [x, I.ground(x, z) + 1.2, z]) && I.colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 1)) {
+          this.dummy.state = 'ground'; H.teleport(this.dummy.id, x, z); this.dummy.hp = 999; this.dummy.dmgBy = {}; this.host.flush(); return;
+        }
+      }
+      this.dummy.state = 'ground'; H.teleport(this.dummy.id, p[0] + 8, p[2]); this.dummy.hp = 999; this.dummy.dmgBy = {};
+    }
+    dummyPos() { const d = this.dummy; return d.pos ? [d.pos[0], d.pos[1], d.pos[2]] : null; }
+    dummyHit() { const d = this.dummy, hit = !!(d.dmgBy && d.dmgBy[this.S.link.id]); d.hp = 999; return hit; }
+    chestPos() { const C = this.chest; return [C.x, this.app.island.height(C.x, C.z), C.z]; }
+    chestOpen() { return !!(this.H.s.opened || {})[this.chest.id]; }
+    givePotion() { const me = this.P(); if (!me.items.some(s => s && s.ty === 'potion')) { me.items[0] = null; this.H.giveItem(me, 'potion', 1); } const k = me.items.findIndex(s => s && s.ty === 'potion'); if (k > 0) { const t = me.items[0]; me.items[0] = me.items[k]; me.items[k] = t; } me.hp = Math.round(this.H.maxHp(me) * 0.55); this.H.touchP(me.id); }
+    potionUsed() { const me = this.P(); return !!me.hot || !me.items.some(s => s && s.ty === 'potion'); }
+    placeHorse() {
+      const H = this.H, I = H.island(), p = this.S.pos, M = H.s.mounts.find(m => m.k === 'horse') || H.s.mounts[0];
+      for (let k = 0; k < 12; k++) { const a = k * 0.52, x = p[0] + Math.cos(a) * 7, z = p[2] + Math.sin(a) * 7; if (I.onLand(x, z) && I.colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 1.5)) { M.x = Math.round(x * 100) / 100; M.z = Math.round(z * 100) / 100; break; } }
+      M.k = 'horse'; M.by = ''; this.horse = M; H.touchG(); this.host.flush();
+    }
+    horsePos() { const M = this.horse; return M && !M.by ? [M.x, this.app.island.ground(M.x, M.z), M.z] : null; }
+    startCage() { const H = this.H; H.s.cageN = 0; H.startCage(); this.dummy.cage = null; this.cageSeen = true; this.host.flush(); }
+    cageDone() { if (this.H.s.cage) return false; this.H.s.cageN = B.cage.at.length; return true; }
+    showStorm() { this.keepClock(128); }
+    hideStorm() { this.keepClock(60); }
+
+    // ---------------- running the steps ----------------
+    next() {
+      const old = STEPS[this.i]; if (old && old.leave) old.leave(this);
+      this.i++;
+      const s = STEPS[this.i]; if (!s) return this.finish();
+      this.S.tutBlock = !!s.info;   // info steps free the mouse (for the Next button)
+      if (s.enter) s.enter(this);
+      this.draw(); this.app.sfx && this.app.sfx('step');
+    }
+    val(v) { return typeof v === 'function' ? v(this) : v; }
+    draw() {
+      const s = STEPS[this.i], keys = this.val(s.keys) || [];
+      clear(this.box);
+      this.box.classList.toggle('top', !!s.top); this.box.classList.toggle('info', !!s.info);
+      this.box.appendChild(h('div.tuthead', h('span.tutstep', '🎓 ' + (this.i + 1) + ' / ' + STEPS.length), h('b', this.val(s.title)),
+        h('button.ghost.tutskip', { onclick: () => this.finish(true) }, 'Skip ✕')));
+      if (keys.length) this.box.appendChild(h('div.tutkeys', keys.map(k => k === '+' ? h('span', '+') : h('kbd', k))));
+      this.box.appendChild(h('p', this.val(s.text)));
+      if (s.info) this.box.appendChild(h('div.row.end', s.last ? [h('button.btn', { onclick: () => this.finish(true) }, 'Menu'), h('button.btn.primary', { onclick: () => this.finish(true, true) }, '🤖 Practice with bots')] : h('button.btn.primary', { onclick: () => this.next() }, 'Next ▶  (Enter)')));
+      else this.box.appendChild(h('div.tutbar', h('i')));
+      this.box.appendChild(h('div.tutprog', h('i', { style: { width: Math.round(this.i / (STEPS.length - 1) * 100) + '%' } })));
+    }
+    tick() {
+      const s = STEPS[this.i]; if (!s) return;
+      if (this.dummy) { this.dummy.hp = 999; this.dummy.shieldUntil = 0; }   // the dummy never falls
+      try {
+        if (!s.info && s.done && s.done(this)) { this.good(); this.next(); return; }
+      } catch (e) { /* the state is not ready yet */ }
+      // glow + arrow on a screen element, or an arrow over a world target
+      const sel = this.val(s.target), el = sel ? [...document.querySelectorAll(sel)].find(x => x.offsetParent !== null) : null;
+      if (el !== this.glowEl) { if (this.glowEl) this.glowEl.classList.remove('tut-glow'); this.glowEl = el; if (el) el.classList.add('tut-glow'); }
+      let at = null;
+      if (el) { const r = el.getBoundingClientRect(); at = { x: r.left + r.width / 2, y: r.top - 6, up: r.top < 140 }; if (at.up) at.y = r.bottom + 6; }
+      else if (s.world) {
+        const w = s.world(this);
+        if (w) {
+          const p = this.S.sc.project([w[0], w[1] + 2.6, w[2]]), vw = window.innerWidth, vh = window.innerHeight;
+          if (p.visible && p.x > 0 && p.x < vw && p.y > 0 && p.y < vh) at = { x: p.x, y: p.y - 8 };
+          else if (this.S.pos) {   // behind or beside the camera: an arrow at the screen edge says which way to turn
+            let a = Math.atan2(w[0] - this.S.pos[0], -(w[2] - this.S.pos[2])) - this.S.sc.cam.yaw; a = Math.atan2(Math.sin(a), Math.cos(a));
+            at = { x: a > 0 ? vw - 60 : 60, y: vh * 0.45, side: a > 0 ? '➡' : '⬅' };
+          }
+        }
+      }
+      this.arrow.hidden = !at;
+      if (at) { this.arrow.textContent = at.side || (at.up ? '⬆' : '⬇'); this.arrow.style.transform = 'translate(' + Math.round(at.x) + 'px,' + Math.round(at.y) + 'px) translate(-50%, ' + (at.up ? '0' : '-100%') + ')'; }
+    }
+    good() { this.box.classList.add('ok'); clearTimeout(this.okT); this.okT = setTimeout(() => this.box.classList.remove('ok'), 600); }
+    /** World beams for the step's target (called by the screen every frame). */
+    items(items) {
+      const s = STEPS[this.i]; if (!s || !s.world) return;
+      const w = s.world(this); if (!w) return;
+      items.push({ mesh: this.S.sc.mesh('tutbeam', () => AR.Models.pingBeam('#ffd43b')), pos: w, alpha: 0.6 + Math.sin(performance.now() / 200) * 0.2, noShadow: true });
+    }
+    finish(quit, practice) {
+      clearInterval(this.timer); clearInterval(this.clockTimer);
+      window.removeEventListener('keydown', this.keyHandler, true);
+      if (this.glowEl) this.glowEl.classList.remove('tut-glow');
+      this.box.remove(); this.arrow.remove(); this.S.tutBlock = false; this.S.tutorial = null;
+      try { localStorage.setItem('sr.tutorialDone', '1'); } catch (e) { /* storage off */ }
+      if (quit) { this.app.showMenu(); if (practice) this.app.showPracticeSetup(); }
+    }
+  }
+
+  // the screen draws the tutorial's beams; info steps count as "a panel is open" (free mouse)
+  const oldFx = P.fxItems;
+  P.fxItems = function (items, now) { if (this.tutorial) this.tutorial.items(items); return oldFx.call(this, items, now); };
+  const oldBlock = P.blocking;
+  P.blocking = function () { return !!this.tutBlock || oldBlock.call(this); };
+  const oldStop = P.stop;
+  P.stop = function () { if (this.tutorial) this.tutorial.finish(false); return oldStop.call(this); };
+
+  /** Start the tutorial: a private offline island with a Training Dummy. */
+  AR.App.startTutorial = function () {
+    this.endSession(); AR.Net.resetPractice();
+    AR.Host.open({ transport: 'local', bankId: this.bankId, practice: true }).then(host => {
+      const nm = (function () { try { return JSON.parse(localStorage.getItem('sr.name')) || 'Apprentice'; } catch (e) { return 'Apprentice'; } })();
+      return AR.Client.join({ room: host.room, name: nm, look: this.look, transport: 'local' }).then(link => {
+        this.startStudent(link, true); this.session.practiceHost = host;
+        const go = () => {
+          if (!host.S.player(link.id)) return setTimeout(go, 50);
+          AR.Bots.setupPractice(host.S, link.id, { squads: 2, size: 1, skill: 'easy', rounds: 1 });
+          host.S.startRound(); host.flush();
+          const wait = () => { if (!this.session || !this.session.pos) return setTimeout(wait, 80); this.session.tutorial = new Tutorial(this, this.session, host); };
+          setTimeout(wait, 300);
+        };
+        go();
+      });
+    }).catch(e => toast(e.message, 'warn'));
+  };
+  AR.Tutorial = Tutorial;
 })();
 
 </script>
