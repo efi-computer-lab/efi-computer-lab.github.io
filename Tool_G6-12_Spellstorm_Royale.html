@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T14:15:35.028Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T15:17:43.185Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -471,6 +471,19 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 @keyframes tutpop { 0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; } 20% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -60%) scale(1); opacity: 0; } }
 .tutbtn.new { border-color: #ffd43b; box-shadow: 0 0 0 3px rgba(255, 212, 59, 0.35); }
 .stance.low { color: #ff8787; font-weight: 700; }
+
+.bonusbar { background: linear-gradient(90deg, rgba(255, 209, 102, 0.3), rgba(255, 209, 102, 0.08)); border: 1px solid var(--gold); border-radius: 10px; padding: 5px 10px; margin: 4px 0 8px; font-size: 15px; text-align: center; }
+.bonusbar b { color: var(--gold); }
+/* round results: winner · MVP · one K/D/A table */
+.winner { text-align: center; border: 3px solid; border-radius: 14px; padding: 10px; margin: 6px auto 8px; max-width: 520px; background: rgba(255, 255, 255, 0.05); }
+.winner .wt { font-size: 15px; opacity: 0.85; } .winner .wn { font-size: 30px; font-weight: bold; } .winner .wm { font-size: 14px; opacity: 0.9; }
+.kda { width: 100%; border-collapse: collapse; font-size: 15px; margin: 6px 0; }
+.kda th { text-align: left; font-size: 12px; opacity: 0.75; font-weight: normal; padding: 3px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+.kda td { padding: 4px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.07); } .kda td.n, .kda th.n { text-align: center; white-space: nowrap; }
+.kda tr.me td { color: var(--gold); font-weight: bold; } .kda tr.first td { border-top: 2px solid rgba(255, 255, 255, 0.25); }
+.kda .sq { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.kda .kdaval b { font-size: 16px; }
+.panel.results { background: rgba(18, 24, 38, 0.97); }
 
 </style>
 </head>
@@ -1619,7 +1632,7 @@ window.GK_ONLINE_CONFIG = {
     blessings: { every: 3, heal: 40, shield: 40 },
     // ---------- points (the score, kept all match) ----------
     points: {
-      answer: 10, streak3: 5, havenAnswer: 10, outAnswer: 5, bonusAnswer: 5, perfect: 20,
+      answer: 10, streak3: 5, havenAnswer: 10, outAnswer: 5, bonusAnswer: 15, perfect: 20,
       knockout: 50, assist: 20, assistSec: 10, stormStep: 10,
       placement: [150, 100, 70, 50], placementOther: 25,
     },
@@ -2978,7 +2991,7 @@ window.GK_ONLINE_CONFIG = {
       const P = this.player(pid); if (!P) return null;
       const c = P.cur;
       return { q: c ? { tok: c.tok, st: c.state, pub: c.pub, fb: c.fb || 0 } : 0, in: this.answering(P) ? 1 : 0, mode: P.cage && this.s.cage ? 'cage' : P.learn ? 'learn' : '',
-        cn: P.cage ? P.cage.n : 0, cr: P.cage ? P.cage.right : 0,
+        cn: P.cage ? P.cage.n : 0, cr: P.cage ? P.cage.right : 0, cb: P.cage ? P.cage.bonus || 0 : 0,
         right: P.right, wrong: P.wrong, note: P.note || 0 };
     }
     /** Every visible player's validated position in one short string: "pid,x,z,yaw,y;…" */
@@ -3416,6 +3429,7 @@ window.GK_ONLINE_CONFIG = {
     const C = B().cage, K = this.s.cage;
     if (P.cage && K) {
       P.cage.n++;
+      if (ok && P.cage.n > C.questions) P.cage.bonus = (P.cage.bonus || 0) + 1;   // bonus questions: points only
       if (ok && P.cage.n <= C.questions) { P.cage.right++; if (P.roundStats) P.roundStats.cageRight++; if (P.cage.right === C.perfectAt) { K.gold.push(P.id); this.touchG(); } }
       if (P.cage.n === C.questions) { this.touchG(); this.checkCageDone(); }
       this.touchP(P.id);
@@ -5548,7 +5562,21 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
 
-  AR.ui = { h, $, clear, gold, toast, teamBadge, modal, download };
+  /** A simple round results board: 🏆 the winner squad, 👑 the MVP, and one table of every player with K / D / A
+      (knock-outs, times knocked out, assists), right answers and round points. me: highlight this player. */
+  function resultsBoard(res, me) {
+    const medal = n => ['🥇', '🥈', '🥉'][n - 1] || n + '.', win = res.squads[0], mvp = res.mvp;
+    const kda = m => h('span.kdaval', h('b', String(m.ko || 0)), ' / ', h('b', String(m.deaths || 0)), ' / ', h('b', String(m.as || 0)));
+    const winner = win ? h('div.winner', { style: { borderColor: win.color } }, h('div.wt', '🏆 Winner'), h('div.wn', { style: { color: win.color } }, win.sym + ' ' + win.name), h('div.wm', win.members.map(m => m.n).join(' · '))) : null;
+    const mvpBox = mvp ? h('div.mvpbig', h('div.small', '👑 MVP'), h('div.mvpname', mvp.n), h('div', 'K / D / A  ', kda(mvp), '   ·   ⭐ ' + Math.round(mvp.rp))) : null;
+    const rows = [];
+    for (const sq of res.squads) sq.members.forEach((m, i) => rows.push(h('tr' + (m.id === me ? '.me' : '') + (i === 0 ? '.first' : ''),
+      h('td', i === 0 ? medal(sq.place) : ''), h('td', h('span.sq', { style: { background: sq.color } }), (mvp && m.id === mvp.id ? '👑 ' : '') + m.n), h('td.n', kda(m)), h('td.n', '✦ ' + (m.ans || 0)), h('td.n', h('b', '⭐ ' + Math.round(m.rp))))));
+    const table = h('table.kda', h('thead', h('tr', h('th', ''), h('th', 'Player'), h('th.n', 'K / D / A'), h('th.n', 'Answers'), h('th.n', 'Points'))), h('tbody', rows));
+    return h('div.rboard', winner, mvpBox, table, h('div.small', 'K = knock-outs · D = times knocked out · A = assists (helped a knock-out) · ✦ = right answers'));
+  }
+
+  AR.ui = { h, $, clear, gold, toast, teamBadge, modal, download, resultsBoard };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5586,7 +5614,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (cage) {
         const n = pv.cn, r = pv.cr, bonus = n >= C.questions;
         this.timerEl = h('span.cagetime');
-        this.el.appendChild(h('div.shrine-head', h('span.shrine-title', bonus ? '⭐ Bonus questions' : '📦 Question ' + Math.min(C.questions, n + 1) + ' / ' + C.questions), this.timerEl));
+        this.el.appendChild(h('div.shrine-head', h('span.shrine-title', bonus ? '⭐ Booster full! Bonus questions' : '📦 Question ' + Math.min(C.questions, n + 1) + ' / ' + C.questions), this.timerEl));
+        if (bonus) this.el.appendChild(h('div.bonusbar', '⭐ +' + B.points.bonusAnswer + ' points for every right answer', h('b', ' · Bonus so far: ⭐ ' + (pv.cb || 0) * B.points.bonusAnswer)));
         this.el.appendChild(h('div.cagebar',
           h('span.dots', Array.from({ length: C.questions }, (_, i) => h('i.dot' + (i < r ? '.good' : i < n ? '.bad' : '')))),
           h('span.boostm', { title: 'Booster when the cage opens' }, '⚡ +' + Math.round(r * C.boostPer * 100) + ' %'),
@@ -5765,13 +5794,10 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         ready ? null : h('span.small', ' Make squads first (for the option you chose).')));
     }
     resultsView(res) {
-      const place = n => ['🥇', '🥈', '🥉'][n - 1] || n + '.';
       return h('div.tres',
         res.final ? h('div.podium', res.season.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐' + Math.round(r.pts))))) : null,
-        res.mvp ? h('div.mvpbig', h('div.small', 'MVP of MVPs (round ' + res.round + ')'), h('div.mvpname', '👑 ' + res.mvp.n), h('div.small', '⭐' + Math.round(res.mvp.rp) + ' · ⚡' + res.mvp.ko + ' · ✦' + res.mvp.ans)) : null,
-        h('div.rcards', res.squads.map(sq => h('div.rcard', { style: { borderColor: sq.color } }, h('div.rhead', h('span.rplace', place(sq.place)), h('b', sq.sym + ' ' + sq.name)),
-          sq.members.map(m => h('div.rrow', h('span', (m.id === sq.mvp ? '👑 ' : '') + m.n), h('span.small', '⚡' + m.ko + ' ✦' + m.ans), h('b', '⭐' + Math.round(m.rp))))))),
-        h('h3', 'Season points'), h('ol.season', res.season.map(r => h('li', h('span', r.n), h('b', '⭐' + Math.round(r.pts))))));
+        AR.ui.resultsBoard(res, null),
+        h('h3', 'Total points (all rounds)'), h('ol.season', res.season.map(r => h('li', h('span', r.n), h('b', '⭐' + Math.round(r.pts))))));
     }
     drawSide() {
       const S = this.S, s = S.s, D = clear(this.side), running = s.phase === 'haven' || s.phase === 'battle';
@@ -6245,17 +6271,10 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     }
     showResults(res) {
       if (this.resultsEl) this.resultsEl.remove();
-      const me = this.link.id, place = n => ['🥇', '🥈', '🥉'][n - 1] || n + '.';
-      const cards = res.squads.map(s => h('div.rcard', { style: { borderColor: s.color } }, h('div.rhead', h('span.rplace', place(s.place)), h('b', s.sym + ' ' + s.name)),
-        s.members.map(m => h('div.rrow' + (m.id === me ? '.me' : ''), h('span', (m.id === s.mvp ? '👑 ' : '') + m.n), h('span.small', '⚡' + m.ko + ' ✦' + m.ans), h('b', '⭐' + Math.round(m.rp))))));
-      let mine = null, mySq = null; for (const sq of res.squads) for (const m of sq.members) if (m.id === me) { mine = m; mySq = sq; }
-      const myCard = mine ? h('div.mycard', h('b', 'Your round'), h('span', place(mySq.place) + ' ' + mySq.name + (mySq.mvp === me ? ' · 👑 squad MVP' : '')),
-        h('span', '⚡ ' + mine.ko + ' knock-outs'), h('span', '✦ ' + mine.ans + ' answers'), h('span', '🎁 ' + (mine.ch || 0) + ' chests'), h('span', '🏅 +' + mine.bonus + ' squad bonus'), h('b.mypts', '⭐ ' + Math.round(mine.rp))) : null;
-      const mvp = res.mvp ? h('div.mvpbig', h('div.small', 'MVP of MVPs'), h('div.mvpname', '👑 ' + res.mvp.n), h('div.small', '⭐' + Math.round(res.mvp.rp) + ' · ⚡' + res.mvp.ko + ' knock-outs · ✦' + res.mvp.ans + ' answers')) : null;
-      const season = h('ol.season', res.season.slice(0, 10).map(r => h('li' + (r.id === me ? '.me' : ''), h('span', r.n), h('b', '⭐' + Math.round(r.pts)))));
-      const podium = res.final ? h('div.podium', res.season.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐' + Math.round(r.pts))))) : null;
-      this.resultsEl = h('div.panel.results', h('h2', res.final ? '🏆 Grand Champion!' : 'Round ' + res.round + ' results'), podium, myCard, mvp, h('div.rcards', cards),
-        h('h3', 'Season points (all rounds)'), season, h('div.row.end', this.practice ? [!res.final ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost.S; H.makeSquads(H.s.squadCount); H.startRound(); this.practiceHost.flush(); } }, '▶ Next round') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', res.final ? '' : 'Waiting for your teacher…')));
+      const me = this.link.id;
+      // simple: the winner squad, the MVP and one K / D / A table (after the last round: the match podium too)
+      const podium = res.final ? [h('h3', '🏆 Match champions (all rounds)'), h('div.podium', res.season.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐' + Math.round(r.pts)))))] : null;
+      this.resultsEl = h('div.panel.results', h('h2', 'Round ' + res.round + ' results'), AR.ui.resultsBoard(res, me), podium, h('div.row.end', this.practice ? [!res.final ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost.S; H.makeSquads(H.s.squadCount); H.startRound(); this.practiceHost.flush(); } }, '▶ Next round') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', res.final ? '' : 'Waiting for your teacher…')));
       this.app.ui.appendChild(this.resultsEl);
     }
 
