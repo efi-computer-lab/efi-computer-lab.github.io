@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T23:35:43.311Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T23:49:40.637Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -1577,6 +1577,7 @@ window.GK_ONLINE_CONFIG = {
       stance: { crouch: { speed: 0.6, height: 1.15 }, prone: { speed: 0.3, height: 0.55 } },
       height: 1.8,
       maxSpeedSlack: 1.7,
+      knockoutFallSec: 0.9,             // show the fall BEFORE the existing comeback countdown
       respawnBase: 5, respawnStep: 3,   // early respawns wait 5 s, then 8 s, 11 s, …
       respawnShieldSec: 3,
       // water deeper than 1.1 m = swimming: slower, no attacks / chests / rides. C, Z or Ctrl = dive (hidden, 10 s of breath), Space = up
@@ -2620,7 +2621,7 @@ window.GK_ONLINE_CONFIG = {
     // ===================== round control (teacher) =====================
     resetForRound(P) {
       P.rp = 0; P.roundStats = { ko: 0, as: 0, ans: 0, wrong: 0, dmg: 0, cageRight: 0, perfect: 0, q: 0, f: 0, s: 0 }; P.hp = B().player.health; P.deaths = 0; P.dmgBy = {};
-      P.learn = false; P.cage = null; P.boost = 0; P.cur = null; P.streak = 0; P.downUntil = 0; P.shieldUntil = 0; P.motion = AR.Motion.fresh(); P.ride = ''; P.qs = P.qs || Q().Picker.fresh();
+      P.learn = false; P.cage = null; P.boost = 0; P.cur = null; P.streak = 0; P.downUntil = 0; P.fall = null; P.shieldUntil = 0; P.motion = AR.Motion.fresh(); P.ride = ''; P.qs = P.qs || Q().Picker.fresh();
     }
     /** Add round points and remember where they came from: q = answering, f = fighting (knock-outs, assists, chests,
         blessings), s = surviving (placement, storm steps). The results show this split. */
@@ -2657,7 +2658,7 @@ window.GK_ONLINE_CONFIG = {
       const c = this.s.clock; if (!c.pausedAt) return { ok: false };
       const d = this.now() - c.pausedAt; c.pausedAt = 0;
       if (this.s.cage) this.cageShift(d);   // paused inside a cage: the cage waits too (the round clock is already frozen)
-      else c.pausedTotal += d;
+      else { c.pausedTotal += d; for (const P of Object.values(this.s.players)) if (P.fall && P.state === 'down') { P.downUntil += d; this.touchP(P.id); } }
       this.touchG(); return { ok: true };
     }
     cageShift() { /* cages.js */ }
@@ -2693,7 +2694,7 @@ window.GK_ONLINE_CONFIG = {
       if (!spot && mate) spot = I.onLand(mate.pos[0], mate.pos[2]) ? I.randomLand(this.rnd, mate.pos[0], mate.pos[2], 8) : [mate.pos[0], mate.pos[2]];
       if (!spot) spot = I.randomLand(this.rnd, st.x, st.z, Math.max(10, st.r * 0.7));
       this.stopAnswering(P);
-      P.hp = B().player.health; P.dmgBy = {}; P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = I.ground(spot[0], spot[1]) + up;
+      P.fall = null; P.hp = B().player.health; P.dmgBy = {}; P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = I.ground(spot[0], spot[1]) + up;
       P.respawnNear = mate ? mate.id : '';
       P.shieldUntil = this.now() + (B().player.respawnShieldSec + up / B().player.glide.fall) * 1000;
       this.teleport(P.id, spot[0], spot[1], P.glideY0);
@@ -2774,6 +2775,7 @@ window.GK_ONLINE_CONFIG = {
     answering(P) { return !!(P && (P.learn || (P.cage && this.s.cage && this.s.cage.open))); }
     learnPanel(pid) {
       const P = this.player(pid); if (!P || this.s.clock.pausedAt) return;
+      if (P.fall && (P.state === 'down' || P.state === 'out') && this.t() - P.fall.t < B().player.knockoutFallSec) return;
       const ok = (this.s.phase === 'haven' && !this.caged()) || P.state === 'down' || P.state === 'out';
       if (!ok) return this.notify(pid, this.caged() ? 'Answer in your cage!' : 'Questions come in the Question Cages 📦.', 'warn');
       if (P.learn || P.cage) return;
@@ -2849,6 +2851,7 @@ window.GK_ONLINE_CONFIG = {
     knockOut(T, src) {
       const now = this.now(), PB = B().points, t = this.t();
       this.dismount(T); T.hp = 0; T.deaths++; T.boost = 0; this.stopAnswering(T); this.dropBag(T);
+      T.fall = T.pos ? { t, p: T.pos.slice(0, 4) } : null; // retained even when dead players leave the position stream
       if (T.pos) this.addFx('d', T.pos[0], T.pos[2]);
       // the knock-out goes to the attacker (or, after a storm knock-out, to the last enemy who hit them in the last 10 s)
       let killer = src;
@@ -2860,8 +2863,8 @@ window.GK_ONLINE_CONFIG = {
       }
       this.s.feed.push({ k: killer ? killer.name : '', ks: killer ? killer.squad : '', v: T.name, vs: T.squad, storm: src ? 0 : 1, at: now }); if (this.s.feed.length > 8) this.s.feed.shift();
       if (t < B().round.oneLifeFromSec) {
-        T.state = 'down'; T.downUntil = now + (B().player.respawnBase + B().player.respawnStep * (T.deaths - 1)) * 1000;
-        this.notify(T.id, '💫 Knocked out! Back in ' + Math.round((T.downUntil - now) / 1000) + ' s · 📖 answer to come back sooner', 'warn');
+        T.state = 'down'; T.downUntil = now + (B().player.knockoutFallSec + B().player.respawnBase + B().player.respawnStep * (T.deaths - 1)) * 1000;
+        this.notify(T.id, '💫 Knocked out!', 'warn');
       } else {
         T.state = 'out';
         this.notify(T.id, '👻 Out this round · 📖 answer questions for points', 'warn');
@@ -3035,7 +3038,7 @@ window.GK_ONLINE_CONFIG = {
     pView(pid) {
       const P = this.player(pid); if (!P) return null;
       return { n: P.name, gid: P.gid, sq: P.squad || '', on: P.online ? 1 : 0, look: P.look, st: P.state, hp: Math.ceil(Math.max(0, P.hp)), pts: r2(P.pts), rp: r2(P.rp), bo: P.boost || 0,
-        ko: P.roundStats ? P.roundStats.ko : 0, rd: P.ride || '', sh: P.shieldUntil || 0, du: P.downUntil || 0, sp: P.sp || 0, mo: P.motion || AR.Motion.fresh(), mu: P.muted ? 1 : 0, bot: P.bot ? 1 : 0, ans: this.answering(P) ? 1 : 0 };
+        ko: P.roundStats ? P.roundStats.ko : 0, fall: P.fall || null, rd: P.ride || '', sh: P.shieldUntil || 0, du: P.downUntil || 0, sp: P.sp || 0, mo: P.motion || AR.Motion.fresh(), mu: P.muted ? 1 : 0, bot: P.bot ? 1 : 0, ans: this.answering(P) ? 1 : 0 };
     }
     pvView(pid) {
       const P = this.player(pid); if (!P) return null;
@@ -5408,8 +5411,23 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         const o = (py * size + px) * 4; img.data[o] = c[0] * 255; img.data[o + 1] = c[1] * 255; img.data[o + 2] = c[2] * 255; img.data[o + 3] = 255;
       }
       ctx.putImageData(img, 0, 0);
-      ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // Names are baked into the existing map once, shared by students and the teacher.
+      // Pixel offsets keep the eight two-line labels apart on the small 200px map.
+      const offsets = { citadel: [0, 9], wood: [0, -22], forge: [15, 13], frost: [16, 12], market: [12, 15], library: [-11, 15], dragon: [-14, 11], light: [-16, 12] };
+      ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      for (const p of I.places) {
+        const off = offsets[p.id] || [0, 10], words = p.name.split(' ');
+        const lines = words.length > 1 ? [words[0], words.slice(1).join(' ')] : [p.name];
+        ctx.font = 'bold 8.5px sans-serif';
+        const w = Math.ceil(Math.max(...lines.map(t => ctx.measureText(t).width))) + 6, h = lines.length * 10 + 4;
+        const x = Math.max(w / 2 + 1, Math.min(size - w / 2 - 1, (p.x + half) * sc + off[0]));
+        const y = Math.max(1, Math.min(size - h - 1, (p.z + half) * sc + off[1]));
+        ctx.fillStyle = 'rgba(12, 23, 35, 0.86)'; ctx.fillRect(Math.round(x - w / 2), Math.round(y), w, h);
+        ctx.fillStyle = '#fff'; lines.forEach((t, i) => ctx.fillText(t, x, y + 2 + i * 10));
+      }
+      ctx.font = '13px sans-serif'; ctx.textBaseline = 'middle';
       for (const p of I.places) ctx.fillText(p.icon, (p.x + half) * sc, (p.z + half) * sc);
+      ctx.restore();
       return { canvas: cv, scale: sc, half };
     }
 
@@ -5429,9 +5447,16 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         robe), or the hand-built mage on slow PCs. o: {look, cls, squad, walking, fast, back, stance, sit, air, glide, attack,
         attackT, down, time, pos, yaw, alpha} */
     drawChar(items, o) {
+      const base = { pos: o.pos, yaw: o.yaw };
+      if (o.alpha != null) base.alpha = o.alpha;
+      if (o.fallT != null) {
+        const u = Math.max(0, Math.min(1, o.fallT)), ease = u * u * (3 - 2 * u);
+        base.pitch = -Math.PI / 2 * ease;
+        base.pos = [o.pos[0], o.pos[1] + 0.28 * Math.sin(ease * Math.PI / 2), o.pos[2]];
+      }
       if (!AR.Chars || !AR.Chars.ready() || this.lowFx()) {
         if (o.down) return;
-        items.push({ mesh: this.charMesh(o.look, o.walking, o.time, { stance: o.stance, cls: o.cls, fast: o.fast, sit: o.sit }), pos: o.pos, yaw: o.yaw });
+        items.push(Object.assign({ mesh: this.charMesh(o.look, o.walking, o.time, { stance: o.stance, cls: o.cls, fast: o.fast, sit: o.sit }) }, base));
         return;
       }
       const C = AR.Chars, sel = C.pick(o, o.time), cache = this.poseCache || (this.poseCache = {});
@@ -5441,10 +5466,24 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (!parts) { this.posesBuilt = (this.posesBuilt || 0) + 1; parts = cache[key] = C.pose(sel.kind, sel.clip, sel.frame).map(g => (g ? this.r.mesh(g) : null)); }
       }
       const robe = o.cls === 'healer' ? C.HEALER_ROBE : (M().LOOKS.robe[((o.look && o.look.robe) | 0) % M().LOOKS.robe.length]);
-      const base = { pos: o.pos, yaw: o.yaw }; if (o.alpha != null) base.alpha = o.alpha;
       if (parts[0]) items.push(Object.assign({ mesh: parts[0] }, base));
       if (parts[1]) items.push(Object.assign({ mesh: parts[1], tint: o.squad || '#d0d4da' }, base));
       if (parts[2]) items.push(Object.assign({ mesh: parts[2], tint: robe }, base));
+    }
+    /** Host round time freezes the fall during a pause/cage; stored transform survives removal from live positions. */
+    fallProgress(p, t) {
+      if (!p || !p.fall || !['down', 'out'].includes(p.st || p.state)) return null;
+      const elapsed = t - p.fall.t, duration = AR.Balance.player.knockoutFallSec;
+      return elapsed >= 0 && elapsed < duration ? elapsed / duration : null;
+    }
+    drawFall(items, p, t, now, color) {
+      const u = this.fallProgress(p, t), pos = p.fall && p.fall.p;
+      if (u == null || !pos || pos.length < 4) return;
+      const I = this.world && this.world.island, ground = I ? I.ground(pos[0], pos[2]) : pos[1];
+      const y = pos[1] + (ground - pos[1]) * u * u;
+      // Reuse the cached idle mesh, transform it on the GPU. No new pose/mesh per frame, including minimal graphics.
+      this.drawChar(items, { look: p.look, cls: p.cls, squad: color, time: 0, walking: false,
+        pos: [pos[0], y, pos[2]], yaw: pos[3], fallT: u });
     }
     /** A ride: horse / wolf / broom. v = colour variant, moving = gallop. */
     mountMesh(kind, v, moving, time) {
@@ -5943,6 +5982,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const running = s.phase === 'haven' || s.phase === 'battle', t = S.t();
       if (running) {
         for (const P of Object.values(s.players)) {
+          sc.drawFall(items, P, t, now, col[P.squad]);
           if (!P.pos || P.state === 'out' || P.state === 'down' || P.state === 'lobby' || P.state === 'fly') continue;
           const Mt = P.ride && (s.mounts || []).find(m => m.id === P.ride), stn = P.motion && P.motion.stance;
           if (Mt) items.push({ mesh: sc.mountMesh(Mt.k, Number(Mt.id.slice(1)) % 4, false, now), pos: P.pos.slice(0, 3), yaw: P.pos[3] });
@@ -6237,7 +6277,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (to === 'ground' && from === 'glide') this.tip('land', 'E 🎁 chests · F 🐎 ride · 📦 cages at 2:30 and 5:00');
       if (to === 'fly') toast('🦅 SPACE = jump off', 'info');
       if (to === 'glide' && from === 'fly') toast('🪂 Mouse = steer · W = faster', 'info');
-      if (to === 'down' || to === 'out') this.releaseAll();
+      if (to === 'down' || to === 'out') { this.releaseAll(); this.setAim(false); this.spectating = null; }
       if (to === 'ground' && this.pos) this.pos[1] = this.app.island.ground(this.pos[0], this.pos[2]);
     }
     onPv(pv) {
@@ -6582,8 +6622,9 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       else this.move(dt);
       if (this.pos && (st === 'ground' || st === 'glide' || st === 'haven')) this.link.sendPos(this.pos[0], this.pos[1], this.pos[2], this.yaw);
       // camera: follow me, a squad-mate while I am down / out, the griffin when flying
-      let focus = this.pos;
-      if ((st === 'down' || st === 'out') && this.squad()) {
+      const myFall = sc.fallProgress(m, t) != null;
+      let focus = myFall && m.fall ? m.fall.p.slice(0, 3) : this.pos;
+      if (!myFall && (st === 'down' || st === 'out') && this.squad()) {
         const alive = this.squad().members.filter(pid => pid !== this.link.id && this.link.pos[pid]);
         if (alive.length) { const pid = alive[((this.spectate % alive.length) + alive.length) % alive.length], R = this.remote[pid] || this.link.pos[pid]; focus = [R.x, R.y != null ? R.y : I.ground(R.x, R.z), R.z]; this.spectating = pid; }
         else this.spectating = null;
@@ -6594,7 +6635,9 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       cam.aimBlend = (cam.aimBlend || 0) + ((this.aiming ? 1 : 0) - (cam.aimBlend || 0)) * Math.min(1, dt * 10);   // over the right shoulder while aiming
       if (focus && cam.aimBlend > 0.01 && cam.perspective !== 'first') { const k = cam.aimBlend * 1.25; focus = [focus[0] + Math.cos(cam.yaw) * k, focus[1] + 0.25 * cam.aimBlend, focus[2] + Math.sin(cam.yaw) * k]; cam.dist += (5 - cam.dist) * cam.aimBlend * Math.min(1, dt * 8); }
       if (focus && focus === this.pos) { const sk = (m.mo || {}).stance, wet = this.wet(); focus = wet ? [focus[0], -0.9, focus[2]] : [focus[0], focus[1] - (sk === 'prone' ? 1.1 : sk === 'crouch' ? 0.5 : 0) + (m.rd ? 0.9 : 0), focus[2]]; }
+      const savedView = cam.perspective; if (myFall) cam.perspective = 'third';
       if (focus) sc.thirdPerson(focus); else { cam.over.x = 0; cam.over.z = 0; cam.over.h = 220; sc.overhead(); }
+      cam.perspective = savedView; // first-person preference is restored after the fall
       cam.mode = 'third';
       // world items
       const items = [], myQ = this.squad(), colorOf = {}; (g && g.squads || []).forEach(q => { colorOf[q.id] = q.color; });
@@ -6608,7 +6651,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         R.back = mv > 0.05 && (mdx * Math.sin(R.yaw) + mdz * Math.cos(R.yaw)) < -0.3 * mv;
         R.x += (P.x - R.x) * k; R.z += (P.z - R.z) * k; R.y += ((P.y || 0) - (R.y || 0)) * k; R.yaw += (P.yaw - R.yaw) * k; R.walk = mv > 0.05 && ps.st === 'ground';
         R.mate = !!myQ && ps.sq === myQ.id; R.color = colorOf[ps.sq] || '#ccc'; R.name = ps.n; R.st = ps.st; R.hp = ps.hp; R.seen = now;
-        if (ps.st === 'fly') continue;   // riders are on the griffin
+        if (['fly', 'down', 'out', 'lobby'].includes(ps.st)) continue;   // dead actors are drawn from their retained fall transform
         const gy = I.ground(R.x, R.z), mo = ps.mo || {}, tt = Math.max(0, t), ride = ps.rd && this.mounts().find(M => M.id === ps.rd);
         const sw = !ride && this.swimPose(R.x, R.z, ps.st, mo, R.walk);
         if (sw && sw.dive) {   // a diver: only bubbles on the surface (seen up close when I dive too)
@@ -6658,6 +6701,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       for (const M of this.mounts()) if (!M.by && Math.hypot(M.x - myPos[0], M.z - myPos[2]) < 150) items.push({ mesh: sc.mountMesh(M.k, M.v, false, now), pos: [M.x, I.ground(M.x, M.z), M.z], yaw: Math.PI / 2 - M.rot });
       if (st !== 'fly') sc.grassItems(focus || this.pos, items);
       for (const p of this.pings) items.push({ mesh: sc.mesh('ping', () => AR.Models.pingBeam('#ffd166')), pos: [p.x, I.ground(p.x, p.z), p.z], alpha: 0.55, noShadow: true });
+      if (g && (g.ph === 'battle' || g.ph === 'haven')) for (const ps of Object.values(this.link.ps)) sc.drawFall(items, ps, t, now, colorOf[ps.sq]);
       this.fxItems(items, now);
       sc.render(items, dt);
       this.drawLabels();
@@ -6678,13 +6722,14 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (dv) { const left = Math.max(0, B.player.swim.breath - (Math.max(0, t) - ((m.mo || {}).stanceAt || 0))); this.stanceEl.textContent = '🫧 Breath ' + Math.ceil(left) + ' s · Space = up'; this.stanceEl.classList.toggle('low', left < 3); }
         else if (this.wet()) this.stanceEl.textContent = '🏊 Swimming · C / Z = dive';
         this.stanceEl.hidden = !dv && !this.wet();
-        const cp = this.locked() || this.lockFailed || !this.wantsLock() || !!this.tutorial; if (this.clickEl.hidden !== cp) this.clickEl.hidden = cp;
+        const cp = myFall || st === 'down' || st === 'out' || this.locked() || this.lockFailed || !this.wantsLock() || !!this.tutorial; if (this.clickEl.hidden !== cp) this.clickEl.hidden = cp;
         this.keyHelp.hidden = this.caged() || !((st === 'haven' && this.classEl && this.classEl.hidden && !answering) || (this.helpUntil && now < this.helpUntil));
-        this.learnBtn.hidden = answering || this.caged() || !((st === 'haven' && !(g && g.cn)) || st === 'down' || st === 'out');
+        this.learnBtn.hidden = myFall || answering || this.caged() || !((st === 'haven' && !(g && g.cn)) || st === 'down' || st === 'out');
         this.learnBtn.textContent = st === 'down' ? '📖 Answer = back sooner ⏩' : '📖 Questions = ⭐';
         // knocked out / out / waiting boxes
         let box = null;
-        if (st === 'down') box = h('div', h('b', '💫 Back in ' + Math.max(0, Math.ceil((m.du - this.link.serverNow()) / 1000)) + ' s'), h('div.small', '← → watch your squad'));
+        if (myFall) box = null; // let the fall finish before showing the countdown or out/spectator card
+        else if (st === 'down') box = h('div', h('b', '💫 Back in ' + Math.max(0, Math.ceil((m.du - this.link.serverNow()) / 1000)) + ' s'), h('div.small', '← → watch your squad'));
         else if (st === 'out' && g && g.ph === 'battle') box = h('div', h('b', '👻 Out this round'), h('div.small', '📖 Questions = points · ← → watch'));
         else if (st === 'lobby' && g && g.ph === 'lobby') box = h('div', h('b', '⏳ Squads are coming'));
         this.overlay.hidden = !box; if (box) clear(this.overlay).appendChild(box);
