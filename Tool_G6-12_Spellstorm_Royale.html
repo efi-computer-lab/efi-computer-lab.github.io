@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T09:32:43.289Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T14:03:20.127Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -470,6 +470,7 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 .tutgreat[hidden] { display: none; } .tutgreat.pop { animation: tutpop 0.9s ease-out; }
 @keyframes tutpop { 0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; } 20% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -60%) scale(1); opacity: 0; } }
 .tutbtn.new { border-color: #ffd43b; box-shadow: 0 0 0 3px rgba(255, 212, 59, 0.35); }
+.stance.low { color: #ff8787; font-weight: 700; }
 
 </style>
 </head>
@@ -1552,6 +1553,9 @@ window.GK_ONLINE_CONFIG = {
       maxSpeedSlack: 1.7,
       respawnBase: 5, respawnStep: 3,   // early respawns wait 5 s, then 8 s, 11 s, …
       respawnShieldSec: 3,
+      // water deeper than 1.1 m = swimming: slower, no attacks / chests / rides. C, Z or Ctrl = dive (hidden, 10 s of breath), Space = up
+      swim: { speed: 0.6, dive: 0.5, breath: 10, hide: 4 },
+      respawnY: 12,           // respawns glide down from 12 m beside a squad-mate
       glide: { speed: 11, fall: 7, startY: 46 },   // after jumping off the griffin: forward speed, fall speed, height
       griffinY: 46, griffinSpeed: 9.5,
     },
@@ -1637,7 +1641,7 @@ window.GK_ONLINE_CONFIG = {
   const AR = root.AR = root.AR || {};
   const cfg = () => AR.Balance.player;
   const OPEN = 1e9;
-  const fresh = () => ({ sprintFrom: -1, sprintUntil: -1, s0: 0, sEnd: 0, jumpAt: -1, stance: '', ride: '', rideMult: 1, rideFrom: -1, rideUntil: -1 });
+  const fresh = () => ({ sprintFrom: -1, sprintUntil: -1, s0: 0, sEnd: 0, jumpAt: -1, stance: '', stanceAt: -1, ride: '', rideMult: 1, rideFrom: -1, rideUntil: -1 });
   function active(m, t) { return !!m && t >= m.sprintFrom && t < m.sprintUntil; }
   /** Seconds of sprint left. */
   function stamina(m, t) {
@@ -1659,7 +1663,7 @@ window.GK_ONLINE_CONFIG = {
     if (st && riding(m, t)) return false;
     if (st && active(m, t)) sprint(m, t, false);
     if (m.stance === st) return false;
-    m.stance = st; return true;
+    m.stance = st; m.stanceAt = t; return true;
   }
   function mount(m, t, kind) {
     const K = AR.Balance.mounts.kinds[kind]; if (!K) return false;
@@ -1910,8 +1914,15 @@ window.GK_ONLINE_CONFIG = {
     }
     function onLand(x, z) { return Math.hypot(x, z) < coastR(x, z) - 1; }
     function inHaven(x, z) { return Math.hypot(x - HAVEN.x, z - HAVEN.z) < HAVEN.r; }
-    /** where you stand: the floating Sky Haven, or the island */
-    function ground(x, z) { return inHaven(x, z) ? HAVEN.y : Math.max(height(x, z), 0); }
+    // water: wading in the shallows (feet on the sand), swimming where it is deeper than 1.1 m, a reef edge around the island
+    const SWIM_AT = -1.1, SWIM_Y = -1.15, DIVE_Y = -2.6;
+    function swimming(x, z) { return !inHaven(x, z) && height(x, z) < SWIM_AT; }
+    function inBounds(x, z) { return inHaven(x, z) || Math.hypot(x, z) < Math.min(coastR(x, z) + 26, half - 4); }
+    /** A move from (x0, z0) to (x, z) in the water: inside the reef edge, or at least back towards the island. */
+    function canMove(x0, z0, x, z) { return inBounds(x, z) || Math.hypot(x, z) < Math.hypot(x0, z0) - 1e-6; }
+    /** where you stand: the floating Sky Haven, the island, the sea floor in the shallows, or floating (diving) in deep water */
+    function ground(x, z) { return inHaven(x, z) ? HAVEN.y : Math.max(height(x, z), SWIM_Y); }
+    function feet(x, z, dive) { return dive && swimming(x, z) ? Math.max(DIVE_Y, height(x, z) + 0.3) : ground(x, z); }
 
     // ---------- scenery + colliders ----------
     const scenery = [], colliders = [], chests = [];
@@ -2038,7 +2049,7 @@ window.GK_ONLINE_CONFIG = {
       const from = [-dir[0] * 215 + side[0] * off, -dir[1] * 215 + side[1] * off], to = [dir[0] * 215 + side[0] * off, dir[1] * 215 + side[1] * off];
       return { from, to };
     }
-    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, height, ground, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
+    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
   }
 
   AR.Island = { PLACES, HAVEN, build };
@@ -2379,7 +2390,7 @@ window.GK_ONLINE_CONFIG = {
           const ni = i + di, nj = j + dj;
           if (this.blocked(ni, nj)) continue;
           if (di && dj && (this.blocked(i + di, j) || this.blocked(i, j + dj))) continue;   // no corner cutting
-          const nk = nj * n + ni, cost = G[k] + (di && dj ? 1.414 : 1);
+          const nk = nj * n + ni, cost = G[k] + (di && dj ? 1.414 : 1) * (this.cost ? this.cost[nk] || 1 : 1);   // optional slower cells (water)
           if (cost < G[nk]) { G[nk] = cost; from[nk] = k; push(nk, cost + hEst(nk)); }
         }
       }
@@ -2521,7 +2532,7 @@ window.GK_ONLINE_CONFIG = {
       if (st === 'haven') { if (!I.inHaven(x, z)) bad = 'haven'; else if (d > B().player.speed * 1.6 * dt + 2.5) bad = 'fast'; }
       else if (st === 'glide') { if (d > B().player.glide.speed * 1.5 * dt + 3) bad = 'fast'; }
       else if (st === 'ground') {
-        if (!I.onLand(x, z)) bad = 'sea';
+        if (!I.inBounds(x, z) && !(P.pos && Math.hypot(x, z) < Math.hypot(P.pos[0], P.pos[2]) + 0.5)) bad = 'sea';   // swimming is fine up to the reef edge
         else if (d > AR.Motion.distance(P.motion, this.t(now) - dt, this.t(now)) * B().player.maxSpeedSlack + 2.5) bad = 'fast';
       }
       if (bad) { if (P.pos) this.teleport(pid, P.pos[0], P.pos[2], P.pos[1]); return; }
@@ -2530,6 +2541,13 @@ window.GK_ONLINE_CONFIG = {
         const minY = Math.max(g, (P.glideY0 || B().player.glide.startY) - B().player.glide.fall * 1.3 * ((now - P.glideAt) / 1000) - 3);
         y = Math.max(g, Math.min(y, P.pos ? P.pos[1] + 2 : y), minY);
         if (y <= g + 0.6) { P.state = 'ground'; y = g; this.touchP(pid); }
+      } else if (st === 'ground') {
+        const m = P.motion, wet = I.swimming(x, z);
+        if (wet && m) {   // into deep water: rides stay on the shore, crouching / crawling turns into swimming on the surface
+          if (P.ride) this.dismount(P);
+          if (m.stance && P.pos && !I.swimming(P.pos[0], P.pos[2])) { m.stance = ''; this.touchP(pid); }
+        }
+        y = I.feet(x, z, wet && m && !!m.stance);
       } else y = g;
       P.pos = [x, y, z, yaw]; P.posAt = now;
       this.dirty.pos = true;
@@ -2622,14 +2640,23 @@ window.GK_ONLINE_CONFIG = {
       P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = g[1];
       this.teleport(P.id, g[0], g[2], g[1]);
     }
-    /** Back into the round (until 5:00): glide down from 30 m near a squad-mate, or inside the storm circle. */
+    /** Back into the round (until 5:00): glide down from 12 m right beside a squad-mate (on land, a few metres away),
+        or inside the storm circle when no squad-mate is standing. */
     respawn(P) {
-      const I = this.island(), st = AR.Storm.at(this.storm(), Math.max(0, this.t()));
-      const mates = this.s.squads.find(q => q.id === P.squad), mate = mates && mates.members.map(id => this.player(id)).find(M => M && M !== P && M.state === 'ground' && M.pos);
-      const spot = mate ? I.randomLand(this.rnd, mate.pos[0], mate.pos[2], 12) : I.randomLand(this.rnd, st.x, st.z, Math.max(10, st.r * 0.7));
+      const I = this.island(), st = AR.Storm.at(this.storm(), Math.max(0, this.t())), up = B().player.respawnY;
+      const q = this.s.squads.find(q => q.id === P.squad), mates = q ? q.members.map(id => this.player(id)).filter(M => M && M !== P && M.pos && (M.online || M.bot)) : [];
+      const mate = mates.find(M => M.state === 'ground') || mates.find(M => M.state === 'glide');
+      let spot = null;
+      if (mate) for (let k = 0; k < 24 && !spot; k++) {   // 3–7 m from the mate, on land, not inside a tree or a house
+        const a = this.rnd() * 6.28, d = 3 + this.rnd() * 4, x = mate.pos[0] + Math.cos(a) * d, z = mate.pos[2] + Math.sin(a) * d;
+        if (I.onLand(x, z) && I.colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 0.8)) spot = [x, z];
+      }
+      if (!spot && mate) spot = I.onLand(mate.pos[0], mate.pos[2]) ? I.randomLand(this.rnd, mate.pos[0], mate.pos[2], 8) : [mate.pos[0], mate.pos[2]];
+      if (!spot) spot = I.randomLand(this.rnd, st.x, st.z, Math.max(10, st.r * 0.7));
       this.stopAnswering(P);
-      P.hp = B().player.health; P.dmgBy = {}; P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = I.ground(spot[0], spot[1]) + 30;
-      P.shieldUntil = this.now() + (B().player.respawnShieldSec + 30 / B().player.glide.fall) * 1000;
+      P.hp = B().player.health; P.dmgBy = {}; P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = I.ground(spot[0], spot[1]) + up;
+      P.respawnNear = mate ? mate.id : '';
+      P.shieldUntil = this.now() + (B().player.respawnShieldSec + up / B().player.glide.fall) * 1000;
       this.teleport(P.id, spot[0], spot[1], P.glideY0);
       this.touchP(P.id);
     }
@@ -2819,6 +2846,10 @@ window.GK_ONLINE_CONFIG = {
       if (kind === 'jump' && P.state === 'fly') { this.dropOff(P); return true; }
       if (P.state !== 'ground' && P.state !== 'haven') return false;
       const m = P.motion || (P.motion = AR.Motion.fresh()), t = this.t();
+      if (P.state === 'ground' && P.pos && this.island().swimming(P.pos[0], P.pos[2])) {   // in deep water: Space = come up, C / Z / Ctrl = dive
+        if (kind === 'jump') { if (!m.stance) return false; m.stance = ''; this.touchP(pid); return true; }
+        if (kind === 'stance' && arg && m.stance) arg = '';
+      }
       const ok = kind === 'sprint' ? AR.Motion.sprint(m, t, arg) : kind === 'stance' ? AR.Motion.setStance(m, t, arg) : AR.Motion.jump(m, t);
       if (ok) this.touchP(pid);
       return ok;
@@ -2892,6 +2923,9 @@ window.GK_ONLINE_CONFIG = {
         if (P.state === 'fly') { if (t >= R.flightSec || this.griffinLeaving(t)) this.dropOff(P); else { P.pos = [gp[0], gp[1], gp[2], 0]; this.dirty.pos = true; } }
         else if (P.state === 'glide' && now - P.glideAt > ((P.glideY0 || 46) / B().player.glide.fall + 4) * 1000) { P.state = 'ground'; if (P.pos) this.teleport(P.id, P.pos[0], P.pos[2]); }   // landed (safety net)
         else if (P.state === 'down' && now >= P.downUntil) this.respawn(P);
+        else if (P.state === 'ground' && P.motion && P.motion.stance && P.pos && t - (P.motion.stanceAt || 0) > B().player.swim.breath && this.island().swimming(P.pos[0], P.pos[2])) {
+          P.motion.stance = ''; P.pos[1] = this.island().feet(P.pos[0], P.pos[2]); this.touchP(P.id); this.dirty.pos = true;   // out of breath: back up
+        }
       }
       // the tutorial (tutorialMode): the clock runs normally (jumps and sprints need it), but no storm and no round end
       if (this.tutorialMode) { if (this.bots) this.bots.step(dt); return; }
@@ -3012,13 +3046,16 @@ window.GK_ONLINE_CONFIG = {
   /** Everybody a shot can hit or be blocked by (standing, crouching, crawling), as collide.js wants them. */
   SP.bodies = function () {
     const out = [];
-    for (const T of Object.values(this.s.players)) if ((T.state === 'ground' || T.state === 'glide') && T.pos && (T.online || T.bot)) out.push({ id: T.id, x: T.pos[0], y: T.pos[1], z: T.pos[2], h: this.bodyHeight(T), r: B().combat.hitR });
+    for (const T of Object.values(this.s.players)) if ((T.state === 'ground' || T.state === 'glide') && T.pos && (T.online || T.bot) && !this.diving(T)) out.push({ id: T.id, x: T.pos[0], y: T.pos[1], z: T.pos[2], h: this.bodyHeight(T), r: B().combat.hitR });
     return out;
   };
   SP.enemyWalls = function (sq) { const now = this.now(); return (this.s.walls || []).filter(w => w.until > now && w.sq !== sq); };
   /** Hidden in tall grass: crouching or crawling in a meadow, further than meadowHide from the looker. */
+  SP.diving = function (T) { return !!(T && T.state === 'ground' && T.pos && T.motion && T.motion.stance && this.island().swimming(T.pos[0], T.pos[2])); };
+  SP.swimming = function (T) { return !!(T && T.state === 'ground' && T.pos && this.island().swimming(T.pos[0], T.pos[2])); };
   SP.hiddenFrom = function (T, P) {
     const st = T.motion && T.motion.stance; if (!st || !T.pos || !P.pos) return false;
+    if (this.diving(T)) return Math.hypot(T.pos[0] - P.pos[0], T.pos[2] - P.pos[2]) > B().player.swim.hide;   // under water
     return this.island().inMeadow(T.pos[0], T.pos[2]) && Math.hypot(T.pos[0] - P.pos[0], T.pos[2] - P.pos[2]) > B().combat.meadowHide;
   };
   const chest = (S, P) => [P.pos[0], P.pos[1] + Math.min(B().combat.chestY, S.bodyHeight(P) * 0.7), P.pos[2]];
@@ -3048,6 +3085,7 @@ window.GK_ONLINE_CONFIG = {
   SP.shoot = function (pid, ax, ay, az) {
     const P = this.player(pid), now = this.now();
     if (!P || P.state !== 'ground' || !P.pos || this.s.phase !== 'battle' || this.s.clock.pausedAt || this.caged() || !isFinite(ax) || !isFinite(az)) return;
+    if (this.swimming(P)) return;   // no attacks while swimming
     const D = this.attackOf(P);
     if (now - (P.lastShot || 0) < D.interval * 1000 * 0.9) return;
     P.lastShot = now;
@@ -3148,6 +3186,7 @@ window.GK_ONLINE_CONFIG = {
   };
   SP.ability = function (pid, x, z) {
     const P = this.player(pid), now = this.now(); if (!P || P.state !== 'ground' || this.s.phase !== 'battle' || this.s.clock.pausedAt || this.caged()) return;
+    if (this.swimming(P)) return this.notify(pid, 'Swim to land first.', 'info');
     const C = B().classes[P.cls], A = C && C.ability; if (!A) return;
     if (now < (P.abilityAt || 0)) return this.notify(pid, A.name + ' is recharging (' + Math.ceil((P.abilityAt - now) / 1000) + ' s).', 'info');
     P.abilityAt = now + A.cd * 1000;
@@ -3195,7 +3234,7 @@ window.GK_ONLINE_CONFIG = {
   };
   SP.openChest = function (pid, id) {
     const P = this.player(pid), I = this.island(), C = I.chests.find(c => c.id === id), CB = B().chests;
-    if (!P || !C || this.s.phase !== 'battle' || P.state !== 'ground' || !P.pos || this.s.clock.pausedAt || this.caged()) return;
+    if (!P || !C || this.s.phase !== 'battle' || P.state !== 'ground' || !P.pos || this.s.clock.pausedAt || this.caged() || this.swimming(P)) return;
     if ((this.s.opened = this.s.opened || {})[id]) return this.notify(pid, 'This chest is empty.', 'info');
     if (Math.hypot(P.pos[0] - C.x, P.pos[2] - C.z) > CB.useRange) return this.notify(pid, 'Walk up to the chest.', 'warn');
     this.s.opened[id] = 1;
@@ -3499,14 +3538,15 @@ window.GK_ONLINE_CONFIG = {
       r.player.bot = true; this.brains[pid] = this.fresh();
       return pid;
     }
-    fresh() { return { goal: null, path: [], think: this.S.rnd(), shotAt: 0, qAt: 0, target: null, jumpPlace: null, wander: 0, picked: 0, chest: null }; }
+    fresh() { return { goal: null, path: [], think: this.S.rnd(), shotAt: 0, qAt: 0, target: null, jumpPlace: null, wander: 0, picked: 0, chest: null, chk: null, skip: {}, stuck: 0 }; }
     reset() { for (const id in this.brains) this.brains[id] = this.fresh(); }
     grid() {
       const I = this.S.island();
       if (!this._grid || this._gridSeed !== I.seed) {
         this._grid = new AR.PathGrid({ def: { edge: I.half }, height: () => 0, colliders: I.colliders }); this._gridSeed = I.seed;   // walls are rows of small colliders
         const G = this._grid;
-        for (let j = 0; j < G.n; j++) for (let i = 0; i < G.n; i++) { const [x, z] = G.center(i, j); if (!I.onLand(x, z)) G.block[j * G.n + i] = 1; }
+        G.cost = new Uint8Array(G.n * G.n);   // bots can swim, but water is 4× slower to cross, so they go round when they can
+        for (let j = 0; j < G.n; j++) for (let i = 0; i < G.n; i++) { const [x, z] = G.center(i, j); if (!I.inBounds(x, z)) G.block[j * G.n + i] = 1; else if (I.swimming(x, z)) G.cost[j * G.n + i] = 4; }
       }
       return this._grid;
     }
@@ -3518,6 +3558,8 @@ window.GK_ONLINE_CONFIG = {
           this.answerQ(P, m);
           if (S.caged()) continue;   // locked in a Question Cage: only answering
           if (P.state === 'down' && !P.learn) S.learnPanel(P.id);   // answer to come back sooner
+          if (P.state === 'glide' && m.was !== 'glide') m.goal = m.was === 'fly' && m.jumpPlace ? m.jumpPlace : [P.pos[0], P.pos[2]];   // off the griffin: to the chosen place · a respawn: straight down beside the squad
+          m.was = P.state;
           if (P.state === 'haven') this.haven(P, m, dt);
           else if (P.state === 'fly') this.fly(P, m);
           else if (P.state === 'glide') this.glide(P, m, dt);
@@ -3538,7 +3580,7 @@ window.GK_ONLINE_CONFIG = {
       if (Math.hypot(g[0] - m.jumpPlace[0], g[2] - m.jumpPlace[1]) < 45 + S.rnd() * 20) { S.requestMotion(P.id, 'jump'); m.goal = m.jumpPlace; }
     }
     glide(P, m, dt) {
-      const S = this.S, I = S.island(), G = B().player.glide, goal = m.goal || m.jumpPlace || [0, 0];
+      const S = this.S, I = S.island(), G = B().player.glide, goal = m.goal || m.jumpPlace || [0, 0];   // (m.goal is set when the glide starts)
       const dx = goal[0] - P.pos[0], dz = goal[1] - P.pos[2], d = Math.hypot(dx, dz), sp = Math.min(d, G.speed * dt);
       const x = P.pos[0] + (d ? dx / d * sp : 0), z = P.pos[2] + (d ? dz / d * sp : 0), g = I.ground(x, z);
       let y = P.pos[1] - G.fall * dt;
@@ -3565,6 +3607,7 @@ window.GK_ONLINE_CONFIG = {
       if (m.think <= 0) {
         m.think = sk.react * (0.7 + S.rnd() * 0.6);
         const st = AR.Storm.at(S.storm(), t), safe = st.next || st;
+        if (this.unstick(P, m, st)) return this.walk(P, m, dt);
         // 1) the storm first: get inside the (next) circle
         if (Math.hypot(P.pos[0] - safe.x, P.pos[2] - safe.z) > safe.r * 0.85 && safe.r > 2) {
           const a = S.rnd() * 6.28, rr = safe.r * 0.5 * S.rnd();
@@ -3583,7 +3626,10 @@ window.GK_ONLINE_CONFIG = {
           } else if ((m.chest = this.nearChest(P, st))) {
             if (Math.hypot(m.chest.x - P.pos[0], m.chest.z - P.pos[2]) <= B().chests.useRange - 0.5) { S.openChest(P.id, m.chest.id); m.chest = null; m.path = []; }
             else this.goTo(P, m, [m.chest.x + 1, m.chest.z]);
-          } else if (!m.path.length) { const pl = I.places[Math.floor(S.rnd() * I.places.length)]; if (Math.hypot(pl.x - st.x, pl.z - st.z) < st.r) this.goTo(P, m, [pl.x, pl.z]); }
+          } else if (!m.path.length) {   // wander: a place inside the circle, or any spot inside it
+            const pl = I.places[Math.floor(S.rnd() * I.places.length)];
+            this.goTo(P, m, Math.hypot(pl.x - st.x, pl.z - st.z) < st.r * 0.9 ? [pl.x + (S.rnd() - 0.5) * 12, pl.z + (S.rnd() - 0.5) * 12] : I.randomLand(S.rnd, st.x, st.z, Math.max(6, st.r * 0.6)));
+          }
         }
       }
       // attacking: aim at the enemy's chest, with a skill-based error
@@ -3615,32 +3661,50 @@ window.GK_ONLINE_CONFIG = {
     }
     nearBag(P, st) {
       const S = this.S; let best = null, bd = 30;
-      for (const G of S.s.bags || []) { if (Math.hypot(G.x - st.x, G.z - st.z) > st.r * 0.9) continue; const d = Math.hypot(G.x - P.pos[0], G.z - P.pos[2]); if (d < bd) { bd = d; best = G; } }
+      for (const G of S.s.bags || []) { if (P.bot && this.brains[P.id].skip[G.id] > S.now() || Math.hypot(G.x - st.x, G.z - st.z) > st.r * 0.9) continue; const d = Math.hypot(G.x - P.pos[0], G.z - P.pos[2]); if (d < bd) { bd = d; best = G; } }
       return best;
     }
     nearChest(P, st) {
       const S = this.S; let best = null, bd = 45;
-      for (const C of S.island().chests) { if ((S.s.opened || {})[C.id] || Math.hypot(C.x - st.x, C.z - st.z) > st.r * 0.9) continue; const d = Math.hypot(C.x - P.pos[0], C.z - P.pos[2]); if (d < bd) { bd = d; best = C; } }
+      for (const C of S.island().chests) { if ((S.s.opened || {})[C.id] || this.brains[P.id].skip[C.id] > S.now() || Math.hypot(C.x - st.x, C.z - st.z) > st.r * 0.9) continue; const d = Math.hypot(C.x - P.pos[0], C.z - P.pos[2]); if (d < bd) { bd = d; best = C; } }
       return best;
+    }
+    /** Not getting anywhere for 3 s (a corner, a chest it cannot reach, water)? Forget that goal for a while and walk
+        to a free spot nearby. Also frees a bot that ended up inside a tree or a house. Returns true when it acted. */
+    unstick(P, m, st) {
+      const S = this.S, I = S.island(), now = S.now();
+      for (const c of I.colliders) { const dx = P.pos[0] - c.x, dz = P.pos[2] - c.z, d = Math.hypot(dx, dz); if (d < c.r + 0.3) { const k = (c.r + 0.5) / (d || 1); P.pos = [c.x + (d ? dx : 1) * k, P.pos[1], c.z + (d ? dz : 0) * k, P.pos[3]]; P.pos[1] = I.feet(P.pos[0], P.pos[2]); S.dirty.pos = true; } }
+      const busy = m.path.length || m.chest || m.bag || (m.goal && Math.hypot(m.goal[0] - P.pos[0], m.goal[1] - P.pos[2]) > 3);
+      if (!m.chk || !busy || Math.hypot(P.pos[0] - m.chk.x, P.pos[2] - m.chk.z) > 1.2) { m.chk = { x: P.pos[0], z: P.pos[2], at: now }; return false; }
+      if (now - m.chk.at < 3000) return false;
+      if (m.chest) m.skip[m.chest.id] = now + 30000;
+      if (m.bag) m.skip[m.bag.id] = now + 30000;
+      m.chest = m.bag = null; m.goal = null; m.stuck++;
+      const G = this.grid(), a = S.rnd() * 6.28, d = 6 + S.rnd() * 10;
+      const out = !I.inBounds(P.pos[0], P.pos[2]), to = out ? I.randomLand(S.rnd, st.x, st.z, Math.max(6, st.r * 0.6)) : G.nearestFree(P.pos[0] + Math.cos(a) * d, P.pos[2] + Math.sin(a) * d, 8) || I.randomLand(S.rnd, st.x, st.z, Math.max(6, st.r * 0.6));
+      const p = G.find(P.pos[0], P.pos[2], to[0], to[1], 20000);
+      m.path = p ? p.slice() : [to]; m.goal = to; m.chk = { x: P.pos[0], z: P.pos[2], at: now };
+      return true;
     }
     wrong(right) { return typeof right === 'number' ? (right + 1) % 4 : Array.isArray(right) ? right.slice().reverse() : 'no idea'; }
     goTo(P, m, goal) {
       if (m.goal && Math.hypot(m.goal[0] - goal[0], m.goal[1] - goal[1]) < 3 && m.path.length) return;
       m.goal = goal;
-      const p = this.grid().find(P.pos[0], P.pos[2], goal[0], goal[1], 6000);
+      const p = this.grid().find(P.pos[0], P.pos[2], goal[0], goal[1], 20000);
       m.path = p ? p.slice() : [goal];
     }
     walk(P, m, dt) {
       const S = this.S, I = S.island();
-      let left = B().player.speed * 0.9 * dt, x = P.pos[0], z = P.pos[2], yaw = P.pos[3];
+      let left = B().player.speed * 0.9 * dt * (I.swimming(P.pos[0], P.pos[2]) ? B().player.swim.speed : 1), x = P.pos[0], z = P.pos[2], yaw = P.pos[3];
       while (left > 0 && m.path.length) {
         const wp = m.path[0], dx = wp[0] - x, dz = wp[1] - z, d = Math.hypot(dx, dz);
         if (d < 1e-3) { m.path.shift(); continue; }
         const k = Math.min(1, left / d); x += dx * k; z += dz * k; left -= d * k; if (!m.target) yaw = Math.atan2(dx, dz);
         if (k >= 1) m.path.shift(); else break;
       }
-      if (!I.onLand(x, z)) { m.path = []; return; }
-      if (x !== P.pos[0] || z !== P.pos[2]) { P.pos = [x, I.ground(x, z), z, yaw]; P.posAt = S.now(); S.dirty.pos = true; }
+      if (!I.canMove(P.pos[0], P.pos[2], x, z)) { m.path = []; return; }
+      if (P.ride && I.swimming(x, z)) S.dismount(P);
+      if (x !== P.pos[0] || z !== P.pos[2]) { P.pos = [x, I.feet(x, z), z, yaw]; P.posAt = S.now(); S.dirty.pos = true; }
     }
     stepTo(P, goal, dt, y) {
       const S = this.S, dx = goal[0] - P.pos[0], dz = goal[1] - P.pos[2], d = Math.hypot(dx, dz), sp = Math.min(d, B().player.speed * 0.6 * dt);
@@ -4709,25 +4773,85 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     return g;
   }
   function runeGlyph() { return G().box(0, 0, 0, 0.35, 0.35, 0.35, '#80ffdb', { glow: 1 }).add(G().box(0, 0, 0, 0.5, 0.12, 0.12, '#ffffff', { glow: 1 })); }
-  function griffin(flap) {   // eagle front, lion back, big feathered wings (flap: -1..1)
-    const g = G(), body = '#c49a5a', wingC = ['#7a5631', '#9a7044', '#e9dcc0'], w = (flap || 0) * 0.55;
-    g.add(G().sphere(0, 0, 0, 1.6, body, { seg: 9, rings: 6 }).scale(1, 0.78, 1.9));
-    g.add(G().sphere(0, 0.5, 1.9, 1.15, '#f2efe6', { seg: 8, rings: 6 }).scale(1, 0.95, 1));   // white chest feathers
-    g.add(G().sphere(0, 1.1, 3.0, 0.8, '#f7f4ec', { seg: 8, rings: 6 }));                       // eagle head
-    g.add(G().cone(0, 0, 0, 0.26, 0.75, '#f0b429', { seg: 5 }).rotX(Math.PI / 2 + 0.3).move(0, 0.95, 3.75));   // hooked beak
-    for (const sd of [-1, 1]) g.box(sd * 0.36, 1.35, 3.45, 0.14, 0.14, 0.06, '#1b1b1b');          // eyes
-    g.add(G().cone(0, 0, 0, 0.35, 0.9, '#f2efe6', { seg: 4, flat: true }).rotX(-0.9).move(0, 1.6, 2.6));   // crest
-    for (const sd of [-1, 1]) {
-      const wg = G();
-      for (let k = 0; k < 3; k++) wg.add(G().box(0, 0, 0, 2.2 + k * 1.3, 0.14, 1.9 - k * 0.35, wingC[k]).move(1.1 + k * 0.65, -k * 0.03, -0.2 - k * 0.28));   // three feather layers
-      for (let f = 0; f < 5; f++) wg.add(G().box(0, 0, 0, 0.45, 0.1, 1.4, wingC[1]).rotY(-0.15 * f).move(4.2 + f * 0.35, -0.05, -1.0 - f * 0.18));   // long tip feathers
-      g.add(wg.scale(sd, 1, 1).rotZ(sd * w).move(sd * 1.2, 0.7, 0.2));
+  /** The griffin (rendered at scale 1.6): an eagle front with a feathered ruff, a lion back and tail, and big wings that
+      bend at the shoulder, elbow and wrist. flap: -1 (down) … 1 (up). A saddle blanket with seats for the riders (SEATS),
+      glowing magic feather tips and a squad banner on the tail. */
+  const GRIFFIN_SEATS = [[-0.36, 0.95], [0.36, 0.95], [-0.36, 0.1], [0.36, 0.1], [-0.36, -0.75], [0.36, -0.75], [-0.36, -1.6], [0.36, -1.6]];
+  const GRIFFIN_SEAT_Y = 1.36;
+  function griffin(flap) {
+    const g = G(), f = U_clamp(flap || 0, -1, 1);
+    const FUR = '#c99a5b', FUR2 = '#a87a42', WHITE = '#f4efe3', CREAM = '#e6dcc4', GOLD = '#f0b429', DARK = '#3b2a1a';
+    const COV = '#9a6a3a', SEC = '#6b4527', PRI = '#47301b', TIP = '#80ffdb';
+    // one feather: flat, tapered and rounded, lying flat and pointing backwards (-z), its root at the origin
+    const feather = (L, w, col, tip) => { const fe = G().cyl(0, 0, 0, w / 2, L, col, { seg: 8, rTop: w * 0.16 }).scale(1, 1, 0.16).rotX(-Math.PI / 2); if (tip) fe.add(G().sphere(0, 0.01, -L + 0.12, w * 0.3, TIP, { seg: 6, rings: 4, glow: 0.8 }).scale(1, 0.35, 1.6)); return fe; };
+    // ---- body ----
+    g.add(G().sphere(0, 0, 0, 1.5, FUR, { seg: 14, rings: 10 }).scale(1.0, 0.86, 1.85));
+    g.add(G().sphere(0, -0.35, 0.2, 1.2, '#dcb57c', { seg: 12, rings: 8 }).scale(0.95, 0.7, 1.6));             // lighter belly
+    g.add(G().sphere(0, 0.3, 1.75, 1.15, WHITE, { seg: 12, rings: 9 }).scale(1, 1.05, 0.95));                  // chest feathers
+    g.add(G().cyl(0, 0, 0, 0.78, 1.5, WHITE, { seg: 10, rTop: 0.56 }).rotX(0.72).move(0, 0.55, 2.15));          // neck
+    for (let i = 0; i < 9; i++) {   // the feathered ruff where the neck meets the body
+      const a = -1.25 + i * (2.5 / 8);
+      g.add(G().cone(0, 0, 0, 0.32, 1.1, i % 2 ? CREAM : WHITE, { seg: 4, flat: true }).rotX(-2.1).rotZ(a * 0.9).move(Math.sin(a) * 0.85, 1.05 + Math.cos(a) * 0.35, 2.05));
     }
-    g.add(G().cyl(0, 0, 0, 0.12, 2.6, body, { seg: 5, flat: true }).rotX(-1.9).move(0, 0.3, -2.6));   // lion tail
-    g.sphere(0, -0.1, -4.9, 0.32, '#7a5631', { seg: 5, rings: 3, flat: true });
-    for (const sx of [-0.75, 0.75]) { g.cyl(sx, -1.7, 1.3, 0.2, 1.0, '#e0a92e', { seg: 5, flat: true }); g.cyl(sx, -1.7, -1.2, 0.3, 1.0, body, { seg: 5, flat: true }); }
+    // ---- head ----
+    g.add(G().sphere(0, 1.78, 3.02, 0.8, WHITE, { seg: 12, rings: 9 }).scale(1, 0.95, 1.08));
+    g.add(G().cone(0, 0, 0, 0.3, 0.95, GOLD, { seg: 8 }).rotX(Math.PI / 2 + 0.38).move(0, 1.62, 3.68));        // upper beak
+    g.sphere(0, 1.25, 4.42, 0.12, '#c98a10', { seg: 6, rings: 4 });                                             // hooked tip
+    g.add(G().cone(0, 0, 0, 0.2, 0.55, '#d99a1a', { seg: 6 }).rotX(Math.PI / 2 + 0.15).move(0, 1.42, 3.7));    // lower beak
+    for (const sd of [-1, 1]) {
+      g.sphere(sd * 0.43, 1.95, 3.42, 0.15, '#ffb703', { seg: 8, rings: 6, glow: 0.45 });                       // eyes
+      g.sphere(sd * 0.5, 1.96, 3.5, 0.075, '#111111', { seg: 6, rings: 4 });
+      g.add(G().box(0, 0, 0, 0.36, 0.08, 0.2, '#d7cdb6').rotZ(sd * 0.35).move(sd * 0.4, 2.12, 3.38));           // brows
+      g.add(G().cone(0, 0, 0, 0.12, 0.45, CREAM, { seg: 5 }).rotX(-1.35).move(sd * 0.36, 2.22, 2.72));          // ear tufts
+    }
+    // ---- legs (tucked in for flight) ----
+    for (const sd of [-1, 1]) {
+      g.add(G().cyl(0, 0, 0, 0.24, 1.1, GOLD, { seg: 7, rTop: 0.17 }).rotX(2.5).move(sd * 0.6, -0.6, 1.6));      // eagle legs, forward
+      for (let k = -1; k <= 1; k++) g.add(G().cone(0, 0, 0, 0.07, 0.35, DARK, { seg: 4 }).rotX(2.0).move(sd * 0.6 + k * 0.1, -1.35, 2.25));   // talons
+      g.add(G().sphere(sd * 0.72, -0.15, -1.55, 0.95, FUR, { seg: 10, rings: 7 }));                              // lion haunches
+      g.add(G().cyl(0, 0, 0, 0.32, 1.35, FUR, { seg: 7, rTop: 0.22 }).rotX(-2.25).move(sd * 0.75, -0.55, -1.75));   // hind legs, back
+      g.sphere(sd * 0.75, -1.15, -2.75, 0.28, FUR2, { seg: 7, rings: 5 });                                        // paws
+    }
+    // ---- lion tail with a dark tuft ----
+    let tx = 0, ty = 0.05, tz = -2.65;
+    for (const [ang, len] of [[-1.85, 0.9], [-1.55, 0.8], [-1.2, 0.7]]) {   // straight back, then curling up
+      g.add(G().cyl(0, 0, 0, 0.14, len, FUR, { seg: 6, rTop: 0.11 }).rotX(ang).move(tx, ty, tz));
+      ty += Math.cos(ang) * len; tz += Math.sin(ang) * len;   // rotX turns +y towards +z
+    }
+    g.add(G().sphere(tx, ty, tz, 0.3, DARK, { seg: 7, rings: 5 }).scale(1, 1, 1));
+    // ---- saddle: a blue blanket with gold trim, seat pads, a front handle with a crystal ----
+    g.add(G().box(0, 0, 0, 1.75, 0.12, 3.3, '#2f6fbf').move(0, 1.18, -0.3));
+    for (const sd of [-1, 1]) { g.box(sd * 0.88, 1.12, -0.3, 0.1, 0.16, 3.32, GOLD, { glow: 0.2 }); g.box(sd * 0.92, 0.25, 0.4, 0.06, 0.95, 0.18, '#5c3a1e'); }   // trim + straps
+    for (const [x, z] of GRIFFIN_SEATS) g.box(x, 1.28, z, 0.5, 0.09, 0.55, '#7a4a25');
+    g.cyl(0, 1.25, 1.55, 0.06, 0.7, GOLD, { seg: 6 }); g.sphere(0, 2.0, 1.55, 0.13, TIP, { seg: 6, rings: 4, glow: 1 });
+    // ---- banner on a short pole at the back ----
+    g.cyl(0, 1.2, -2.0, 0.04, 2.0, '#5c3a1e', { seg: 5 }); g.box(0, 2.55, -2.4, 0.04, 0.6, 0.8, TIP, { glow: 0.35 }); g.box(0, 2.3, -2.4, 0.045, 0.15, 0.8, '#ffd166', { glow: 0.3 });
+    // ---- wings: shoulder → elbow → wrist; each joint bends a bit later than the one before (a soft, curved beat) ----
+    const a1 = 0.12 + f * 0.72, a2 = f * 0.38, a3 = f * 0.22 - 0.04;
+    for (const sd of [-1, 1]) {
+      const w = G(); let px = 0, py = 0, A = 0;
+      const seg = (len, r0, r1, ang) => { A += ang; const s0 = G().cyl(0, 0, 0, r0, len, FUR, { seg: 7, rTop: r1 }).rotZ(-Math.PI / 2); return { s0, x: px, y: py, A, len }; };
+      const put = (geo, S) => w.add(geo.rotZ(S.A).move(S.x, S.y, 0));
+      const next = S => { px = S.x + Math.cos(S.A) * S.len; py = S.y + Math.sin(S.A) * S.len; };
+      // arm: rounded coverts over the bone, a row of short feathers behind
+      const S1 = seg(2.0, 0.4, 0.28, a1); put(S1.s0, S1);
+      put(G().sphere(1.0, 0.02, -0.35, 1.0, COV, { seg: 10, rings: 6 }).scale(1.05, 0.2, 0.75), S1);
+      for (let k = 0; k < 5; k++) put(feather(1.35 - k * 0.04, 0.55, k % 2 ? SEC : '#7a5030').rotY(0.05 * (2 - k)).move(0.15 + k * 0.42, -0.06, -0.55), S1);
+      next(S1);
+      // forearm: long secondary feathers, slightly fanned
+      const S2 = seg(2.3, 0.28, 0.18, a2); put(S2.s0, S2);
+      put(G().sphere(1.15, 0.02, -0.3, 1.15, COV, { seg: 10, rings: 6 }).scale(1.05, 0.18, 0.6), S2);
+      for (let k = 0; k < 7; k++) put(feather(1.95 - k * 0.04, 0.52, k % 2 ? SEC : '#7a5030').rotY(-0.04 * k).move(0.1 + k * 0.34, -0.07, -0.35), S2);
+      next(S2);
+      // hand: a fan of primaries, longest at the tip, glowing magic tips
+      const S3 = seg(1.3, 0.18, 0.08, a3); put(S3.s0, S3);
+      put(G().sphere(0.6, 0.02, -0.15, 0.7, COV, { seg: 8, rings: 5 }).scale(1.1, 0.2, 0.6), S3);
+      for (let k = 0; k < 7; k++) put(feather(2.0 + k * 0.2, 0.46, k % 2 ? PRI : '#5a3c22', true).rotY(-(0.25 + k * 0.19)).move(0.1 + k * 0.18, -0.06 - k * 0.01, -0.05), S3);
+      g.add(w.scale(sd, 1, 1).move(sd * 0.95, 0.72, 0.45));
+    }
     return g;
   }
+  const U_clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   function chest(gold) {   // a wooden chest with metal bands; golden chests glow
     const g = G(), wood = gold ? '#d4a017' : '#8b5a2b', band = gold ? '#fff3bf' : '#5c6370', P = AR.Props;
     if (P && P.has('chest')) {   // Kenney Survival Kit chest (CC0), the same size as before (1.3 m wide); golden = gold colours + glow
@@ -4993,7 +5117,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   }
   function dragonRib() { return G().add(G().cyl(0, 0, 0, 0.35, 7, '#e9e2d0', { seg: 5, flat: true, rTop: 0.18 }).rotZ(-0.55).move(0, 0, 0)); }
 
-  AR.ModelsRoyale = { saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
+  AR.ModelsRoyale = { saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5301,13 +5425,13 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const cp = Math.cos(c.pitch), fx = Math.sin(c.yaw) * cp, fz = -Math.cos(c.yaw) * cp, fy = -Math.sin(c.pitch);
       const look = [target[0], target[1] + 1.6, target[2]];
       let eye = [look[0] - fx * c.dist, look[1] - fy * c.dist, look[2] - fz * c.dist];
-      if (I) { const gy = I.ground(eye[0], eye[2]) + 0.6; if (eye[1] < gy) eye[1] = gy; }
+      if (I) { const gy = Math.max(I.ground(eye[0], eye[2]), 0) + 0.6; if (eye[1] < gy) eye[1] = gy; }   // never under the sea
       eye = this.cameraClearance(look, eye);
       this.eye = eye; this.fwd = GK.vec.norm(GK.vec.sub(look, eye)); this.fov = 62;
     }
     firstPerson(target) {
       const c = this.cam, cp = Math.cos(c.pitch); c.target = target;
-      this.eye = [target[0], target[1] + 1.6, target[2]]; this.fwd = [Math.sin(c.yaw) * cp, -Math.sin(c.pitch), -Math.cos(c.yaw) * cp]; this.fov = 70;
+      this.eye = [target[0], Math.max(target[1] + 1.6, 0.35), target[2]]; this.fwd = [Math.sin(c.yaw) * cp, -Math.sin(c.pitch), -Math.cos(c.yaw) * cp]; this.fov = 70;
     }
     cameraClearance(look, eye) {
       const d = GK.vec.sub(eye, look), len = Math.hypot(...d), a = d[0] * d[0] + d[2] * d[2];
@@ -5704,7 +5828,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
           items.push({ mesh: sc.ringMesh(col[P.squad] || '#ccc'), pos: P.pos.slice(0, 3), scale: Math.max(1, o.h / 60), noShadow: true });
         }
         if (s.phase === 'battle') {
-          if (t < B.round.flightSec + 6) { const gp = S.griffinAt(Math.max(0, t)), R = I.griffinRoute(s.seed); items.push({ mesh: sc.mesh('griffin0', () => MR.griffin(0)), pos: [gp[0], gp[1] - 2.4, gp[2]], yaw: Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), scale: 1.6 }); }
+          if (t < B.round.flightSec + 6) { const gp = S.griffinAt(Math.max(0, t)), R = I.griffinRoute(s.seed); const fq = Math.round(Math.sin(now / 1000 * 4.2) * 5) / 5; items.push({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)), pos: [gp[0], gp[1] - 2.4, gp[2]], yaw: Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), scale: 1.6 }); }
           const st = AR.Storm.at(S.storm(), Math.max(0, t));
           if (st.r > 0.5) items.push({ mesh: sc.mesh('storm', () => MR.stormWall()), pos: [st.x, -5, st.z], scale: [st.r, 140, st.r], alpha: 0.45, noShadow: true });
           if (st.next && st.next.r > 0.5) items.push({ mesh: sc.mesh('nextline', () => MR.circleLine('#80ffdb')), pos: [st.next.x, 0.6, st.next.z], scale: [st.next.r, 1, st.next.r], noShadow: true });
@@ -6147,8 +6271,65 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const hit = AR.Collide.ray(I, eye, far, { players: bodies, groundStep: 1.2 });
       return hit ? hit.p : far;
     }
+    /** How somebody in deep water is drawn: treading water upright (head out), swimming = the crawl stroke on the surface,
+        diving = the stroke under water. null on land. */
+    swimPose(x, z, st, mo, walking) {
+      const I = this.app.island; if (st !== 'ground' || !I.swimming(x, z)) return null;
+      const dive = !!(mo && mo.stance);
+      return { dive, stance: walking || dive ? 'prone' : '', y: dive ? I.feet(x, z, true) : walking ? -0.12 : -0.62 };
+    }
+    /** The griffin: a smooth wing beat (11 poses), a gentle rise and fall, a slight bank, riders sitting on the saddle
+        (me first, then my squad, then others), a trail of magic sparkles and its shadow on the ground. */
+    griffinItems(items, t, now, g, colorOf, myQ) {
+      const sc = this.sc, I = this.app.island, MR = AR.ModelsRoyale, R = I.griffinRoute(g.seed), S = 1.6;
+      const gp = this.griffinAt(t), yaw = Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]);
+      const ph = now / 1000 * 4.2, flap = Math.sin(ph + Math.sin(ph) * 0.35), fq = Math.round(flap * 5) / 5;   // quicker downstroke
+      const bob = -Math.sin(ph - 0.6) * 0.45, base = [gp[0], gp[1] - 2.4 + bob, gp[2]], roll = Math.sin(now / 2300) * 0.07;
+      items.push({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)), pos: base, yaw, roll, scale: S });
+      // riders on the saddle
+      const fly = Object.keys(this.link.ps).filter(pid => (this.link.ps[pid] || {}).st === 'fly');
+      const rank = pid => pid === this.link.id ? 0 : myQ && this.link.ps[pid].sq === myQ.id ? 1 : 2;
+      fly.sort((a, b) => rank(a) - rank(b));
+      const c = Math.cos(yaw), sn = Math.sin(yaw);
+      fly.slice(0, MR.GRIFFIN_SEATS.length).forEach((pid, i) => {
+        const [lx, lz] = MR.GRIFFIN_SEATS[i], ps = this.link.ps[pid], me = pid === this.link.id;
+        const pos = [base[0] + (lx * c + lz * sn) * S, base[1] + MR.GRIFFIN_SEAT_Y * S, base[2] + (-lx * sn + lz * c) * S];
+        sc.drawChar(items, { look: me ? this.app.look : ps.look, cls: ps.cls, squad: colorOf[ps.sq] || null, sit: true, time: now + i * 211, pos, yaw });
+      });
+      // magic sparkles left behind along the route, drifting down
+      const spark = sc.mesh('gspark', () => new GK.Geo().box(0, 0, 0, 0.22, 0.22, 0.22, '#80ffdb', { glow: 1 }));
+      for (let i = 0; i < 16; i++) {
+        const age = ((now / 1000) * 0.9 + i / 16 * 1.8) % 1.8, p = this.griffinAt(Math.max(0, t - age)), side = (i % 2 ? 1 : -1) * (3 + (i * 37 % 7));
+        items.push({ mesh: spark, pos: [p[0] + c * side, p[1] - 2.2 - age * 3.5, p[2] - sn * side], yaw: i + now / 400, scale: 1 - age / 2.2, alpha: 0.9 * (1 - age / 1.8), noShadow: true });
+      }
+      // its shadow on the island (shows where it is flying over)
+      if (I.onLand(gp[0], gp[2])) items.push({ mesh: sc.mesh('gshadow', () => new GK.Geo().cyl(0, 0, 0, 1, 0.03, '#000000', { seg: 20 })), pos: [gp[0], I.ground(gp[0], gp[2]) + 0.15, gp[2]], scale: [7, 1, 7], alpha: 0.22, noShadow: true });
+    }
+    /** In Sky Haven: build the griffin's wing-beat poses and the glider wings ahead of time, one per frame, so the
+        flight starts without a hitch. */
+    warmUp() {
+      const MR = AR.ModelsRoyale, k = this.warmed = (this.warmed || 0);
+      if (k >= 16) return;
+      if (k < 11) { const fq = Math.round((k / 5 - 1) * 5) / 5; this.sc.mesh('griffin' + fq, () => MR.griffin(fq)); }
+      else { const fl = (k - 11) / 2 - 1; this.sc.mesh('wings' + fl, () => MR.wings(fl)); }
+      this.warmed = k + 1;
+    }
+    /** Rings on the water around a swimmer (bigger and faster while swimming). */
+    ripple(items, x, z, now, moving) {
+      const sc = this.sc;
+      for (let i = 0; i < 2; i++) { const k = ((now / (moving ? 700 : 1300)) + i / 2) % 1; items.push({ mesh: sc.ringMesh('#eaf6ff'), pos: [x, 0.05, z], scale: 0.7 + k * (moving ? 1.6 : 1.1), alpha: 0.55 * (1 - k), noShadow: true }); }
+    }
+    /** Bubbles rising over a diver. */
+    bubbles(items, x, z, now) {
+      const sc = this.sc, m = sc.mesh('bubble', () => new GK.Geo().sphere(0, 0, 0, 0.11, '#e7f8ff', { seg: 6, rings: 4, glow: 0.35 }));
+      for (let i = 0; i < 4; i++) { const k = ((now / 900) + i / 4) % 1, a = i * 2.1 + now / 1500; items.push({ mesh: m, pos: [x + Math.cos(a) * 0.35, -0.5 + k * 0.6, z + Math.sin(a) * 0.35], scale: 0.6 + k * 0.8, alpha: 0.85 * (1 - k * 0.6), noShadow: true }); }
+    }
+    /** In deep water (swimming)? diving: also under the surface. */
+    wet() { return !!this.pos && this.me().st === 'ground' && this.app.island.swimming(this.pos[0], this.pos[2]); }
+    diving() { return this.wet() && !!(this.me().mo || {}).stance; }
     fire() {
       if (this.me().st !== 'ground' || this.caged()) return;
+      if (this.wet()) { this.tip('swimfire', '🏊 No attacks while swimming. Swim to land!'); return; }
       const now = performance.now(); if (now - (this.lastFire || 0) < this.weaponNow().interval * 950) return; this.lastFire = now;
       const p = this.aimPoint3() || this.forward(30);
       this.link.send('shoot', { x: Math.round(p[0] * 100) / 100, y: Math.round(p[1] * 100) / 100, z: Math.round(p[2] * 100) / 100 });
@@ -6175,6 +6356,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const st = this.me().st, rep = e.repeat;
       if (e.code === 'Space' && !rep) { this.link.send('jump'); return; }
       if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !rep) { if (st === 'ground' && !this.me().rd) { this.sprinting = true; this.link.send('sprint', { on: 1 }); } return; }
+      if (['KeyC', 'KeyZ', 'ControlLeft', 'ControlRight'].indexOf(e.code) >= 0 && !rep && st === 'ground' && this.wet()) { this.stance('prone'); return; }   // dive / come up
       if (e.code === 'KeyC' && !rep && st === 'ground') { this.stance('crouch'); return; }
       if (e.code === 'KeyZ' && !rep && st === 'ground') { this.stance('prone'); return; }
       if ((e.code === 'ControlLeft' || e.code === 'ControlRight') && !rep && st === 'ground') {
@@ -6209,16 +6391,22 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         return;
       }
       if (st !== 'ground' && st !== 'haven') { this.walking = false; return; }
-      if (!side && !fwdIn) { this.walking = false; this.backward = false; if (this.aiming || this.firing) this.yaw = this.camYaw(); return; }
+      if (!side && !fwdIn) {
+        this.walking = false; this.backward = false; if (this.aiming || this.firing) this.yaw = this.camYaw();
+        if (st === 'ground') P[1] = I.feet(P[0], P[2], !!(this.me().mo || {}).stance);   // diving / coming up on the spot
+        return;
+      }
       let mx = f[0] * fwdIn + r[0] * side, mz = f[1] * fwdIn + r[1] * side; const ml = Math.hypot(mx, mz); mx /= ml; mz /= ml;
       const slow = this.me().sl > this.link.serverNow() ? 1 - B.weapons.frostStaff.slow : 1;   // frozen by a Frost Staff
       const back = fwdIn < 0 && !this.me().rd ? 0.75 : 1; this.backward = fwdIn < 0 && !side;
-      const sp = AR.Motion.speed(this.me().mo, Math.max(0, this.t())) * dt * slow * back;
+      const wasWet = st === 'ground' && I.swimming(P[0], P[2]), swimK = wasWet ? ((this.me().mo || {}).stance ? B.player.swim.dive : B.player.swim.speed) : 1;
+      const sp = AR.Motion.speed(this.me().mo, Math.max(0, this.t())) * dt * slow * back * (this.me().rd ? 1 : swimK);
       let x = P[0] + mx * sp, z = P[2] + mz * sp;
       if (st === 'ground') for (const col of this.app.colliders.near(x, z)) { const dx = x - col.x, dz = z - col.z, d = Math.hypot(dx, dz), rr = col.r + 0.45; if (d < rr && d > 1e-4) { x = col.x + dx / d * rr; z = col.z + dz / d * rr; } }
-      if (st === 'ground' && !I.onLand(x, z)) return;
+      if (st === 'ground' && (!I.canMove(P[0], P[2], x, z) || (this.me().rd && I.swimming(x, z)))) { if (this.me().rd) this.tip('ridewater', '🐎 Rides stop at deep water. F = get off, then swim.'); return; }
+      if (st === 'ground' && !wasWet && I.swimming(x, z)) this.tip('swim', '🏊 Swimming! C / Z = dive (hide) · Space = up');
       if (st === 'haven' && !I.inHaven(x, z)) { const H = I.haven, dx = x - H.x, dz = z - H.z, d = Math.hypot(dx, dz); x = H.x + dx / d * (H.r - 1.2); z = H.z + dz / d * (H.r - 1.2); }
-      this.pos = [x, I.ground(x, z), z];
+      this.pos = [x, st === 'ground' ? I.feet(x, z, !!(this.me().mo || {}).stance) : I.ground(x, z), z];
       // like PUBG: you face the way you run; while aiming or attacking you face the crosshair
       const want = this.aiming || this.firing || this.me().rd ? (this.me().rd ? Math.atan2(mx, mz) : this.camYaw()) : Math.atan2(mx, mz);
       const d = Math.atan2(Math.sin(want - (this.yaw || 0)), Math.cos(want - (this.yaw || 0)));
@@ -6271,7 +6459,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       cam.dist += (wantDist - cam.dist) * Math.min(1, dt * 3);
       cam.aimBlend = (cam.aimBlend || 0) + ((this.aiming ? 1 : 0) - (cam.aimBlend || 0)) * Math.min(1, dt * 10);   // over the right shoulder while aiming
       if (focus && cam.aimBlend > 0.01 && cam.perspective !== 'first') { const k = cam.aimBlend * 1.25; focus = [focus[0] + Math.cos(cam.yaw) * k, focus[1] + 0.25 * cam.aimBlend, focus[2] + Math.sin(cam.yaw) * k]; cam.dist += (5 - cam.dist) * cam.aimBlend * Math.min(1, dt * 8); }
-      if (focus && focus === this.pos) { const sk = (m.mo || {}).stance; focus = [focus[0], focus[1] - (sk === 'prone' ? 1.1 : sk === 'crouch' ? 0.5 : 0) + (m.rd ? 0.9 : 0), focus[2]]; }
+      if (focus && focus === this.pos) { const sk = (m.mo || {}).stance, wet = this.wet(); focus = wet ? [focus[0], -0.9, focus[2]] : [focus[0], focus[1] - (sk === 'prone' ? 1.1 : sk === 'crouch' ? 0.5 : 0) + (m.rd ? 0.9 : 0), focus[2]]; }
       if (focus) sc.thirdPerson(focus); else { cam.over.x = 0; cam.over.z = 0; cam.over.h = 220; sc.overhead(); }
       cam.mode = 'third';
       // world items
@@ -6288,32 +6476,40 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         R.mate = !!myQ && ps.sq === myQ.id; R.color = colorOf[ps.sq] || '#ccc'; R.name = ps.n; R.st = ps.st; R.hp = ps.hp; R.seen = now;
         if (ps.st === 'fly') continue;   // riders are on the griffin
         const gy = I.ground(R.x, R.z), mo = ps.mo || {}, tt = Math.max(0, t), ride = ps.rd && this.mounts().find(M => M.id === ps.rd);
-        const y = Math.max(gy, R.y || gy) + (ride ? 0 : AR.Motion.height(mo, tt));
+        const sw = !ride && this.swimPose(R.x, R.z, ps.st, mo, R.walk);
+        if (sw && sw.dive) {   // a diver: only bubbles on the surface (seen up close when I dive too)
+          this.bubbles(items, R.x, R.z, now + pid.length * 131);
+          if (!this.diving() || Math.hypot(R.x - myPos[0], R.z - myPos[2]) > 12) continue;   // when I dive too: other divers close by, faint
+        }
+        const y = sw ? (sw.dive ? 0.06 : sw.y) : Math.max(gy, R.y || gy) + (ride ? 0 : AR.Motion.height(mo, tt));
+        if (sw && !sw.dive) this.ripple(items, R.x, R.z, now + pid.length * 77, R.walk);
         if (ride) { items.push({ mesh: sc.mountMesh(ride.k, ride.v, R.walk, now), pos: [R.x, gy, R.z], yaw: R.yaw }); }
         const atk = now - (R.attackAt || 0);
-        sc.drawChar(items, { look: ps.look, cls: ps.cls, squad: R.color, walking: R.walk, back: R.back, fast: AR.Motion.active(mo, tt), stance: ride ? '' : mo.stance, sit: !!ride,
-          air: !ride && y > gy + 0.15, glide: ps.st === 'glide', attack: atk < 450, attackT: atk / 450, time: now + pid.length * 97, pos: [R.x, y + (ride ? MR.SADDLE[ride.k] : 0), R.z], yaw: R.yaw });
+        sc.drawChar(items, { look: ps.look, cls: ps.cls, squad: R.color, walking: R.walk, back: R.back && !sw, fast: AR.Motion.active(mo, tt), stance: sw ? sw.stance : ride ? '' : mo.stance, sit: !!ride,
+          air: !ride && !sw && y > gy + 0.15, glide: ps.st === 'glide', attack: atk < 450, attackT: atk / 450, time: now + pid.length * 97, pos: [R.x, y + (ride ? MR.SADDLE[ride.k] : 0), R.z], yaw: R.yaw, alpha: sw && sw.dive ? 0.38 : undefined });
         if (ps.st === 'glide' && y > gy + 1.2) { const fl = Math.round(Math.sin(now / 260 + pid.length) * 2) / 2; items.push({ mesh: sc.mesh('wings' + fl, () => MR.wings(fl)), pos: [R.x, y, R.z], yaw: R.yaw, noShadow: true }); }
-        items.push({ mesh: sc.ringMesh(R.mate ? R.color : '#ff6b6b'), pos: [R.x, y, R.z], noShadow: true });
+        items.push({ mesh: sc.ringMesh(R.mate ? R.color : '#ff6b6b'), pos: [R.x, sw ? 0.04 : y, R.z], noShadow: true });
         if (ps.sh > this.link.serverNow()) items.push({ mesh: sc.ringMesh('#ffd166'), pos: [R.x, y + 1, R.z], scale: 1.6, alpha: 0.5, noShadow: true });
       }
       for (const pid in this.remote) if (!this.link.pos[pid]) delete this.remote[pid];
       const myRide = m.rd && this.mounts().find(M => M.id === m.rd), tt = Math.max(0, t), mo = m.mo || {};
       if (this.pos && st !== 'fly' && st !== 'down' && st !== 'out' && st !== 'lobby' && !(cam.perspective === 'first' && st === 'ground')) {
-        const jy = myRide ? MR.SADDLE[myRide.k] : AR.Motion.height(mo, tt);
+        const jy = myRide ? MR.SADDLE[myRide.k] : AR.Motion.height(mo, tt), sw = !myRide && this.swimPose(this.pos[0], this.pos[2], st, mo, this.walking);
+        const myY = sw ? (sw.dive ? 0.06 : sw.y) : this.pos[1] + jy;   // my own diver: a faint shape just under the surface
+        if (sw) { if (sw.dive) this.bubbles(items, this.pos[0], this.pos[2], now); else this.ripple(items, this.pos[0], this.pos[2], now, this.walking); }
         if (myRide) items.push({ mesh: sc.mountMesh(myRide.k, myRide.v, this.walking, now), pos: this.pos, yaw: this.yaw });
         const atk = now - (this.lastFire || 0);
-        sc.drawChar(items, { look: this.app.look, cls: m.cls, squad: myQ ? myQ.color : null, walking: this.walking, back: this.backward, fast: AR.Motion.active(mo, tt), stance: myRide ? '' : mo.stance, sit: !!myRide,
-          air: !myRide && jy > 0.15, glide: st === 'glide', attack: atk < 450, attackT: atk / 450, time: now, pos: [this.pos[0], this.pos[1] + jy, this.pos[2]], yaw: this.yaw });
+        sc.drawChar(items, { look: this.app.look, cls: m.cls, squad: myQ ? myQ.color : null, walking: this.walking, back: this.backward && !sw, fast: AR.Motion.active(mo, tt), stance: sw ? sw.stance : myRide ? '' : mo.stance, sit: !!myRide,
+          air: !myRide && !sw && jy > 0.15, glide: st === 'glide', attack: atk < 450, attackT: atk / 450, time: now, pos: [this.pos[0], myY, this.pos[2]], yaw: this.yaw, alpha: sw && sw.dive ? 0.38 : undefined });
         if (st === 'glide') { const fl = Math.round(Math.sin(now / 260) * 2) / 2; this.wingRoll = (this.wingRoll || 0) * 0.9 + (this.turnRate || 0) * 0.1; items.push({ mesh: sc.mesh('wings' + fl, () => MR.wings(fl)), pos: [this.pos[0], this.pos[1] + jy, this.pos[2]], yaw: this.yaw, roll: U.clamp(-this.wingRoll * 0.35, -0.5, 0.5), noShadow: true }); }
-        items.push({ mesh: sc.ringMesh(myQ ? myQ.color : '#fff'), pos: this.pos, noShadow: true });
+        items.push({ mesh: sc.ringMesh(myQ ? myQ.color : '#fff'), pos: sw ? [this.pos[0], 0.04, this.pos[2]] : this.pos, noShadow: true });
         if (m.sh > this.link.serverNow()) items.push({ mesh: sc.ringMesh('#ffd166'), pos: [this.pos[0], this.pos[1] + 1, this.pos[2]], scale: 1.6, alpha: 0.5, noShadow: true });
       }
       // the griffin (with everybody who is still on board)
       if (g && g.ph === 'battle' && t >= 0 && t < B.round.flightSec + 6) {
-        const gp = this.griffinAt(t), R = I.griffinRoute(g.seed), flap = Math.sin(now / 160);
-        items.push({ mesh: sc.mesh('griffin' + Math.round(flap * 2), () => MR.griffin(Math.round(flap * 2) / 2)), pos: [gp[0], gp[1] - 2.4, gp[2]], yaw: Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), scale: 1.6 });
+        this.griffinItems(items, t, now, g, colorOf, myQ);
       }
+      if (g && g.ph === 'haven') this.warmUp();
       if (this.cageItems) this.cageItems(items, now);
       // the storm wall and the next safe circle
       const tS = g ? this.stormTime(t) : null;
@@ -6344,7 +6540,10 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         this.rideBtn.hidden = !mt; if (mt) { const K = B.mounts.kinds[mt.k]; this.rideBtn.lastChild.textContent = ' ' + (m.rd ? K.icon + ' Get off' : K.icon + ' Ride ' + K.name); if (!m.rd) this.tip('ride', 'F = ride ' + K.icon + ' (faster!)'); }
         const stam = AR.Motion.stamina(m.mo, Math.max(0, t)) / B.player.sprint.stamina;
         this.stamEl.firstChild.style.width = Math.round(stam * 100) + '%'; this.stamEl.classList.toggle('low', stam < 0.25); this.stamEl.hidden = st !== 'ground';
-        this.stanceEl.hidden = true;
+        const dv = this.diving();
+        if (dv) { const left = Math.max(0, B.player.swim.breath - (Math.max(0, t) - ((m.mo || {}).stanceAt || 0))); this.stanceEl.textContent = '🫧 Breath ' + Math.ceil(left) + ' s · Space = up'; this.stanceEl.classList.toggle('low', left < 3); }
+        else if (this.wet()) this.stanceEl.textContent = '🏊 Swimming · C / Z = dive';
+        this.stanceEl.hidden = !dv && !this.wet();
         const cp = this.locked() || this.lockFailed || !this.wantsLock() || !!this.tutorial; if (this.clickEl.hidden !== cp) this.clickEl.hidden = cp;
         this.keyHelp.hidden = this.caged() || !((st === 'haven' && this.classEl && this.classEl.hidden && !answering) || (this.helpUntil && now < this.helpUntil));
         this.learnBtn.hidden = answering || this.caged() || !((st === 'haven' && !(g && g.cn)) || st === 'down' || st === 'out');
@@ -6391,10 +6590,11 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (!R.mate) {
           if (d > 48 || (sk && d > 16)) continue;
           if (sk && d > B.combat.meadowHide && I.inMeadow(R.x, R.z)) continue;   // hiding in tall grass
+          if (sk && d > B.player.swim.hide && R.st === 'ground' && I.swimming(R.x, R.z)) continue;   // diving
           if (check) R.inSight = this.clearLine(me[0], me[2], R.x, R.z);
           if (!R.inSight) continue;
         }
-        const y = Math.max(I.ground(R.x, R.z), R.y || 0) + (ps.rd ? 1.6 : sk === 'prone' ? -0.9 : sk === 'crouch' ? -0.5 : 0), p = sc.project([R.x, y + 2.5, R.z]); if (!p.visible || p.depth > 160) continue;
+        const wetT = R.st === 'ground' && I.swimming(R.x, R.z), y = wetT ? -1 : Math.max(I.ground(R.x, R.z), R.y || 0) + (ps.rd ? 1.6 : sk === 'prone' ? -0.9 : sk === 'crouch' ? -0.5 : 0), p = sc.project([R.x, y + 2.5, R.z]); if (!p.visible || p.depth > 160) continue;
         let el = this.labelPool[pid]; if (!el) { el = this.labelPool[pid] = h('div.nlabel', h('span.nm'), h('span.nhp', h('i'))); box.appendChild(el); }
         const txt = (R.mate ? '' : '⚔ ') + R.name, hpw = (R.hp || 0) + '%', tf = 'translate(' + Math.round(p.x) + 'px,' + Math.round(p.y) + 'px) translate(-50%,-100%)';
         if (el._txt !== txt) { el._txt = txt; el.firstChild.textContent = txt; el.classList.toggle('mate', R.mate); el.classList.toggle('foe', !R.mate); }
