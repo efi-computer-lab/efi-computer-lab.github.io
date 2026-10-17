@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T15:17:43.185Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T23:35:43.311Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -484,6 +484,19 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 .kda .sq { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 .kda .kdaval b { font-size: 16px; }
 .panel.results { background: rgba(18, 24, 38, 0.97); }
+
+/* scoring v3: points split, rule line, final ranking + awards */
+.split { display: inline-flex; gap: 8px; white-space: nowrap; } .sq-q { color: #8ce99a; } .sq-f { color: #ff8787; } .sq-s { color: #74c0fc; }
+.wsplit { margin-top: 4px; font-size: 15px; }
+.rule { text-align: center; font-size: 13px; opacity: 0.85; margin: 2px 0 6px; }
+.kda tr.sqrow td { background: rgba(255, 255, 255, 0.06); border-top: 2px solid rgba(255, 255, 255, 0.25); padding-top: 6px; }
+.fboard { border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 10px; }
+.awards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.award { text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 8px 6px; background: rgba(255, 255, 255, 0.05); }
+.award .aicon { font-size: 28px; } .award b { display: block; font-size: 18px; color: var(--gold); }
+.youplaced { text-align: center; background: rgba(128, 255, 219, 0.1); border: 1px solid var(--accent); border-radius: 12px; padding: 8px; margin: 8px auto; max-width: 560px; display: grid; gap: 4px; }
+.youplaced .yp { font-size: 20px; } .youplaced .yp b { color: var(--gold); font-size: 26px; }
+@media (max-width: 640px) { .awards { grid-template-columns: 1fr; } }
 
 </style>
 </head>
@@ -2606,8 +2619,15 @@ window.GK_ONLINE_CONFIG = {
 
     // ===================== round control (teacher) =====================
     resetForRound(P) {
-      P.rp = 0; P.roundStats = { ko: 0, as: 0, ans: 0, dmg: 0, cageRight: 0, perfect: 0 }; P.hp = B().player.health; P.deaths = 0; P.dmgBy = {};
+      P.rp = 0; P.roundStats = { ko: 0, as: 0, ans: 0, wrong: 0, dmg: 0, cageRight: 0, perfect: 0, q: 0, f: 0, s: 0 }; P.hp = B().player.health; P.deaths = 0; P.dmgBy = {};
       P.learn = false; P.cage = null; P.boost = 0; P.cur = null; P.streak = 0; P.downUntil = 0; P.shieldUntil = 0; P.motion = AR.Motion.fresh(); P.ride = ''; P.qs = P.qs || Q().Picker.fresh();
+    }
+    /** Add round points and remember where they came from: q = answering, f = fighting (knock-outs, assists, chests,
+        blessings), s = surviving (placement, storm steps). The results show this split. */
+    addPts(P, n, kind) {
+      if (!P || !n) return;
+      P.rp += n;
+      if (P.roundStats) P.roundStats[kind] = (P.roundStats[kind] || 0) + n;
     }
     toHaven(P) {
       const H = this.island().haven, a = this.rnd() * Math.PI * 2, d = this.rnd() * (H.r - 6);
@@ -2692,18 +2712,37 @@ window.GK_ONLINE_CONFIG = {
       rows.forEach((r, i) => {
         r.q.place = i + 1;
         const bonus = PB.placement[i] != null ? PB.placement[i] : PB.placementOther;
-        for (const pid of r.q.members) { const P = this.player(pid); if (P) { P.rp += bonus; P.placeBonus = bonus; } }
+        r.q.surv = i + 1;   // survival place (the placement bonus); the winner is decided by points below
+        for (const pid of r.q.members) { const P = this.player(pid); if (P) { this.addPts(P, bonus, 's'); P.placeBonus = bonus; P.survPlace = i + 1; } }
       });
-      // squad MVPs and the MVP of MVPs (round points)
+      // THE WINNER = MOST POINTS: squads ranked by their average round points per member (answers + fights + survival),
+      // so a squad of 2 is not behind a squad of 3. Ties: more right answers, then more knock-outs.
+      const sum = (M, k) => M.reduce((t, m) => t + (m[k] || 0), 0);
       const squads = rows.map(r => {
-        const members = r.q.members.map(id => this.player(id)).filter(Boolean).map(P => ({ id: P.id, n: P.name, g: P.gid, rp: r2(P.rp), ko: P.roundStats.ko, as: P.roundStats.as, ans: P.roundStats.ans, ch: P.roundStats.chests || 0, dmg: Math.round(P.roundStats.dmg || 0), deaths: P.deaths || 0, bonus: P.placeBonus || 0 }))
-          .sort((a, b) => b.rp - a.rp || b.ko - a.ko || b.ans - a.ans);
-        return { id: r.q.id, name: r.q.name, color: r.q.color, sym: r.q.sym, place: r.q.place, members, mvp: members[0] ? members[0].id : null };
-      });
+        const members = r.q.members.map(id => this.player(id)).filter(Boolean).map(P => {
+          const R = P.roundStats;
+          return { id: P.id, n: P.name, g: P.gid, rp: r2(P.rp), ko: R.ko, as: R.as, ans: R.ans, wrong: R.wrong || 0, ch: R.chests || 0, dmg: Math.round(R.dmg || 0), deaths: P.deaths || 0, bonus: P.placeBonus || 0,
+            q: r2(R.q || 0), f: r2(R.f || 0), s: r2(R.s || 0) };
+        }).sort((a, b) => b.rp - a.rp || b.ko - a.ko || b.ans - a.ans);
+        const n = members.length || 1;
+        return { id: r.q.id, name: r.q.name, color: r.q.color, sym: r.q.sym, surv: r.q.surv, members, mvp: members[0] ? members[0].id : null,
+          avg: r2(sum(members, 'rp') / n), q: r2(sum(members, 'q') / n), f: r2(sum(members, 'f') / n), s: r2(sum(members, 's') / n), ans: sum(members, 'ans'), ko: sum(members, 'ko') };
+      }).sort((a, b) => b.avg - a.avg || b.ans - a.ans || b.ko - a.ko || a.surv - b.surv);
+      squads.forEach((s, i) => { s.place = i + 1; const q = this.squad(s.id); if (q) q.place = i + 1; });
+      // the whole match, per student (the final ranking is individual)
+      for (const sq of squads) for (const m of sq.members) {
+        const P = this.player(m.id), M = P.match || (P.match = { q: 0, f: 0, s: 0, ko: 0, de: 0, as: 0, right: 0, wrong: 0, rounds: 0, survSum: 0 });
+        M.q += m.q; M.f += m.f; M.s += m.s; M.ko += m.ko; M.de += m.deaths; M.as += m.as; M.right += m.ans; M.wrong += m.wrong; M.rounds++; M.survSum += sq.surv || 0;
+      }
       for (const P of Object.values(this.s.players)) { P.pts = r2(P.pts + P.rp); this.touchP(P.id); }
       const mvps = squads.map(s => s.members[0]).filter(Boolean).sort((a, b) => b.rp - a.rp || b.ko - a.ko);
-      const season = Object.values(this.s.players).filter(P => P.squad || P.pts).map(P => ({ id: P.id, n: P.name, g: P.gid, pts: P.pts })).sort((a, b) => b.pts - a.pts);
-      this.s.results = { round: this.s.round, rounds: this.s.rounds, reason, squads, mvp: mvps[0] || null, season, final: this.s.round >= this.s.rounds, at: now };
+      const season = Object.values(this.s.players).filter(P => P.squad || P.pts).map(P => {
+        const M = P.match || {};
+        return { id: P.id, n: P.name, g: P.gid, pts: P.pts, q: r2(M.q || 0), f: r2(M.f || 0), s: r2(M.s || 0), ko: M.ko || 0, de: M.de || 0, as: M.as || 0, right: M.right || 0, wrong: M.wrong || 0, rounds: M.rounds || 0,
+          surv: M.rounds ? r2(M.survSum / M.rounds) : 0 };
+      }).sort((a, b) => b.pts - a.pts || b.right - a.right || b.ko - a.ko);
+      season.forEach((r, i) => { r.rank = i + 1; });
+      this.s.results = { round: this.s.round, rounds: this.s.rounds, reason, squads, mvp: mvps[0] || null, season, awards: this.awards(season), final: this.s.round >= this.s.rounds, at: now };
       this.s.history.push({ round: this.s.round, squads: squads.map(s => ({ name: s.name, place: s.place, members: s.members.map(m => m.n) })), mvp: mvps[0] ? mvps[0].n : '' });
       this.s.phase = this.s.round >= this.s.rounds ? 'final' : 'results';
       this.s.clock.endedAt = now;
@@ -2711,11 +2750,22 @@ window.GK_ONLINE_CONFIG = {
       this.dirty.pos = true; this.touchG();
       return this.s.results;
     }
+    /** Match awards, so different strengths are recognised: 📖 Best Answerer (most right answers, then accuracy),
+        ⚔ Top Fighter (most knock-outs, then assists), 🛡 Survivor (best average survival place, then more rounds). */
+    awards(season) {
+      const played = season.filter(r => r.rounds > 0), acc = r => r.right / Math.max(1, r.right + r.wrong);
+      const best = (list, cmp) => { const l = list.slice().sort(cmp)[0]; return l ? { id: l.id, n: l.n } : null; };
+      return {
+        answer: best(played.filter(r => r.right > 0), (a, b) => b.right - a.right || acc(b) - acc(a) || b.pts - a.pts),
+        fight: best(played.filter(r => r.ko > 0), (a, b) => b.ko - a.ko || b.as - a.as || b.pts - a.pts),
+        survive: best(played, (a, b) => a.surv - b.surv || b.rounds - a.rounds || b.pts - a.pts),
+      };
+    }
     /** Teacher: start a new match with the same students (season points reset). */
     newMatch() {
       if (this.s.phase === 'haven' || this.s.phase === 'battle') return { ok: false };
       Object.assign(this.s, { phase: 'lobby', round: 0, results: null, history: [], pairs: {}, squads: [] });
-      for (const P of Object.values(this.s.players)) { P.pts = 0; P.squad = null; P.state = 'lobby'; this.touchP(P.id); }
+      for (const P of Object.values(this.s.players)) { P.pts = 0; P.match = null; P.squad = null; P.state = 'lobby'; this.touchP(P.id); }
       this.touchG(); return { ok: true };
     }
 
@@ -2757,12 +2807,12 @@ window.GK_ONLINE_CONFIG = {
         const bonus = P.cage && P.cage.n >= B().cage.questions;   // after the 5 cage questions: bonus questions (points only)
         let pts = P.state === 'out' ? PB.outAnswer : bonus ? PB.bonusAnswer : P.cage ? PB.answer : P.state === 'down' ? PB.outAnswer : PB.havenAnswer;
         P.streak++; if (P.streak % 3 === 0) pts += PB.streak3;
-        P.rp += pts; P.right++; ts.r++; qs.r++; if (P.roundStats) P.roundStats.ans++;
+        this.addPts(P, pts, 'q'); P.right++; ts.r++; qs.r++; if (P.roundStats) P.roundStats.ans++;
         Q().Picker.right(P.qs, q);
         P.cur.state = 'done'; P.cur.fb = { ok: true, pts, kind };
         this.touchP(pid);
       } else {
-        P.wrong++; ts.w++; qs.w++; P.streak = 0;
+        P.wrong++; ts.w++; qs.w++; P.streak = 0; if (P.roundStats) P.roundStats.wrong++;
         Q().Picker.wrong(P.qs, q);
         P.cur.state = 'wrong'; P.cur.fb = { ok: false, ex: q.ex, fix: q.fix, reveal: Q().reveal(q, P.cur.key) };
       }
@@ -2803,10 +2853,10 @@ window.GK_ONLINE_CONFIG = {
       // the knock-out goes to the attacker (or, after a storm knock-out, to the last enemy who hit them in the last 10 s)
       let killer = src;
       if (!killer) { let last = 0; for (const id in T.dmgBy) if (T.dmgBy[id] > last && now - T.dmgBy[id] < PB.assistSec * 1000) { last = T.dmgBy[id]; killer = this.player(id); } }
-      if (killer && killer.squad !== T.squad) { killer.rp += PB.knockout; killer.roundStats.ko++; this.notify(killer.id, '💥 Knock-out! +' + PB.knockout, 'good'); this.touchP(killer.id); }
+      if (killer && killer.squad !== T.squad) { this.addPts(killer, PB.knockout, 'f'); killer.roundStats.ko++; this.notify(killer.id, '💥 Knock-out! +' + PB.knockout, 'good'); this.touchP(killer.id); }
       for (const id in T.dmgBy) {
         const A = this.player(id);
-        if (A && A !== killer && A.squad !== T.squad && now - T.dmgBy[id] < PB.assistSec * 1000) { A.rp += PB.assist; A.roundStats.as++; this.touchP(A.id); }
+        if (A && A !== killer && A.squad !== T.squad && now - T.dmgBy[id] < PB.assistSec * 1000) { this.addPts(A, PB.assist, 'f'); A.roundStats.as++; this.touchP(A.id); }
       }
       this.s.feed.push({ k: killer ? killer.name : '', ks: killer ? killer.squad : '', v: T.name, vs: T.squad, storm: src ? 0 : 1, at: now }); if (this.s.feed.length > 8) this.s.feed.shift();
       if (t < B().round.oneLifeFromSec) {
@@ -2955,7 +3005,7 @@ window.GK_ONLINE_CONFIG = {
       const st = AR.Storm.at(this.storm(), t);
       if (st.stage > this.s.stormStep) {
         this.s.stormStep = st.stage;
-        for (const P of Object.values(this.s.players)) if (this.alive(P) && P.state !== 'fly') { P.rp += B().points.stormStep; this.touchP(P.id); }
+        for (const P of Object.values(this.s.players)) if (this.alive(P) && P.state !== 'fly') { this.addPts(P, B().points.stormStep, 's'); this.touchP(P.id); }
         this.touchG();
       }
       for (const P of Object.values(this.s.players)) {
@@ -3261,7 +3311,7 @@ window.GK_ONLINE_CONFIG = {
     if (Math.hypot(P.pos[0] - C.x, P.pos[2] - C.z) > CB.useRange) return this.notify(pid, 'Walk up to the chest.', 'warn');
     this.s.opened[id] = 1;
     const got = this.lootRoll(P, !!C.gold);
-    P.rp += C.gold ? CB.goldPoints : CB.points;
+    this.addPts(P, C.gold ? CB.goldPoints : CB.points, 'f');
     if (P.roundStats) P.roundStats.chests = (P.roundStats.chests || 0) + 1;
     this.addFx('O', C.x, C.z, C.x, C.z, C.gold ? 'gold' : '');
     this.touchP(pid); this.touchG();
@@ -3295,7 +3345,7 @@ window.GK_ONLINE_CONFIG = {
     P.blessReady--;
     if (kind === 'heal') T.hp = Math.min(this.maxHp(T), T.hp + BL.heal);
     else T.shield = Math.min(B().inventory.maxShield, T.shield + BL.shield);
-    P.rp += 5;
+    this.addPts(P, 5, 'f');
     this.notify(to, '✨ ' + P.name + ' sent you a blessing: ' + (kind === 'heal' ? '+' + BL.heal + ' ❤' : '+' + BL.shield + ' 🔷'), 'good');
     if (T.pos) this.addFx('h', T.pos[0], T.pos[2]);
     this.touchP(pid); this.touchP(to);
@@ -3478,7 +3528,7 @@ window.GK_ONLINE_CONFIG = {
         const msg = ['⚡ Booster +' + Math.round(right * C.boostPer * 100) + ' %'];
         if (right >= C.perfectAt) {   // PERFECT: Legendary class attack (or better armour), points, the squad sees it
           if ((P.wr || 0) < 3) P.wr = 3; else if ((P.armor || 0) < B().armor.length - 1) P.armor++;
-          P.rp += PB.perfect; if (P.roundStats) P.roundStats.perfect++;
+          this.addPts(P, PB.perfect, 'q'); if (P.roundStats) P.roundStats.perfect++;
           msg.push('⭐ PERFECT! Legendary ' + this.attackOf(P).name);
           this.squadNote(P, '⭐ ' + P.name + ' got a PERFECT cage!');
         }
@@ -5562,21 +5612,52 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
 
-  /** A simple round results board: 🏆 the winner squad, 👑 the MVP, and one table of every player with K / D / A
-      (knock-outs, times knocked out, assists), right answers and round points. me: highlight this player. */
+  const R = v => Math.round(v || 0);
+  const kdaOf = (k, d, a) => h('span.kdaval', h('b', String(k || 0)), ' / ', h('b', String(d || 0)), ' / ', h('b', String(a || 0)));
+  const split = o => h('span.split', h('span.sq-q', '📖 ' + R(o.q)), h('span.sq-f', '⚔ ' + R(o.f)), h('span.sq-s', '🛡 ' + R(o.s)));
+  /** The round results: 🏆 the winner squad (most points = the squad average of answers + fights + survival), 👑 the MVP,
+      and one table, squad by squad, with each player's K / D / A, right answers, the 📖 / ⚔ / 🛡 split and points. */
   function resultsBoard(res, me) {
     const medal = n => ['🥇', '🥈', '🥉'][n - 1] || n + '.', win = res.squads[0], mvp = res.mvp;
-    const kda = m => h('span.kdaval', h('b', String(m.ko || 0)), ' / ', h('b', String(m.deaths || 0)), ' / ', h('b', String(m.as || 0)));
-    const winner = win ? h('div.winner', { style: { borderColor: win.color } }, h('div.wt', '🏆 Winner'), h('div.wn', { style: { color: win.color } }, win.sym + ' ' + win.name), h('div.wm', win.members.map(m => m.n).join(' · '))) : null;
-    const mvpBox = mvp ? h('div.mvpbig', h('div.small', '👑 MVP'), h('div.mvpname', mvp.n), h('div', 'K / D / A  ', kda(mvp), '   ·   ⭐ ' + Math.round(mvp.rp))) : null;
+    const winner = win ? h('div.winner', { style: { borderColor: win.color } }, h('div.wt', '🏆 Winner'), h('div.wn', { style: { color: win.color } }, win.sym + ' ' + win.name),
+      h('div.wm', win.members.map(m => m.n).join(' · ')), h('div.wsplit', '⭐ ' + R(win.avg) + ' points each  =  ', split(win))) : null;
+    const mvpBox = mvp ? h('div.mvpbig', h('div.small', '👑 MVP'), h('div.mvpname', mvp.n), h('div', 'K / D / A  ', kdaOf(mvp.ko, mvp.deaths, mvp.as), '   ·   ⭐ ' + R(mvp.rp))) : null;
     const rows = [];
-    for (const sq of res.squads) sq.members.forEach((m, i) => rows.push(h('tr' + (m.id === me ? '.me' : '') + (i === 0 ? '.first' : ''),
-      h('td', i === 0 ? medal(sq.place) : ''), h('td', h('span.sq', { style: { background: sq.color } }), (mvp && m.id === mvp.id ? '👑 ' : '') + m.n), h('td.n', kda(m)), h('td.n', '✦ ' + (m.ans || 0)), h('td.n', h('b', '⭐ ' + Math.round(m.rp))))));
-    const table = h('table.kda', h('thead', h('tr', h('th', ''), h('th', 'Player'), h('th.n', 'K / D / A'), h('th.n', 'Answers'), h('th.n', 'Points'))), h('tbody', rows));
-    return h('div.rboard', winner, mvpBox, table, h('div.small', 'K = knock-outs · D = times knocked out · A = assists (helped a knock-out) · ✦ = right answers'));
+    for (const sq of res.squads) {
+      rows.push(h('tr.sqrow', h('td', medal(sq.place)), h('td', { colSpan: 3 }, h('span.sq', { style: { background: sq.color } }), h('b', sq.sym + ' ' + sq.name), h('span.small', '  ⭐ ' + R(sq.avg) + ' each')), h('td.n.small', split(sq)), h('td')));
+      for (const m of sq.members) rows.push(h('tr' + (m.id === me ? '.me' : ''),
+        h('td', ''), h('td', (mvp && m.id === mvp.id ? '👑 ' : '') + m.n), h('td.n', kdaOf(m.ko, m.deaths, m.as)), h('td.n', '✦ ' + (m.ans || 0)), h('td.n.small', split(m)), h('td.n', h('b', '⭐ ' + R(m.rp)))));
+    }
+    const table = h('table.kda', h('thead', h('tr', h('th', ''), h('th', 'Player'), h('th.n', 'K / D / A'), h('th.n', 'Answers'), h('th.n', '📖 / ⚔ / 🛡'), h('th.n', 'Points'))), h('tbody', rows));
+    return h('div.rboard', winner, h('div.rule', '🏆 The winner has the most points: 📖 answers + ⚔ fights + 🛡 survival (average per squad member)'), mvpBox, table,
+      h('div.small', 'K = knock-outs · D = times knocked out · A = assists · ✦ = right answers · 📖 answer points · ⚔ fight points · 🛡 survival points'));
+  }
+  /** The end of the match: an INDIVIDUAL ranking by total points over all rounds — podium, three awards (📖 Best Answerer,
+      ⚔ Top Fighter, 🛡 Survivor), "you placed N of M" with your own split, and the full list. */
+  function finalBoard(res, me) {
+    const list = res.season || [], A = res.awards || {}, mine = list.find(r => r.id === me), pct = r => r.right + r.wrong ? Math.round(r.right / (r.right + r.wrong) * 100) + ' %' : '–';
+    const podium = h('div.podium', list.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐ ' + R(r.pts)))));
+    const award = (icon, title, a, what) => h('div.award', h('div.aicon', icon), h('div.small', title), h('b', a ? a.n : '—'), h('div.small', what));
+    const byId = id => list.find(r => r.id === id) || {};
+    const awards = h('div.awards',
+      award('📖', 'Best Answerer', A.answer, A.answer ? byId(A.answer.id).right + ' right · ' + pct(byId(A.answer.id)) : ''),
+      award('⚔', 'Top Fighter', A.fight, A.fight ? byId(A.fight.id).ko + ' knock-outs · ' + byId(A.fight.id).as + ' assists' : ''),
+      award('🛡', 'Survivor', A.survive, A.survive ? 'average place ' + byId(A.survive.id).surv : ''));
+    const you = mine ? h('div.youplaced', h('div.yp', 'You placed ', h('b', mine.rank + (mine.rank % 100 >= 11 && mine.rank % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][mine.rank % 10] || 'th')), ' of ' + list.length),
+      h('div', '⭐ ' + R(mine.pts) + '  =  ', split(mine)), h('div', 'K / D / A  ', kdaOf(mine.ko, mine.de, mine.as), '  ·  ✦ ' + mine.right + ' right (' + pct(mine) + ')')) : null;
+    const rows = list.map(r => h('tr' + (r.id === me ? '.me' : ''), h('td', String(r.rank)), h('td', r.n), h('td.n', h('b', '⭐ ' + R(r.pts))), h('td.n.small', split(r)), h('td.n', kdaOf(r.ko, r.de, r.as)), h('td.n', r.right + ' (' + pct(r) + ')'), h('td.n', String(r.rounds))));
+    const table = h('table.kda', h('thead', h('tr', h('th', '#'), h('th', 'Player'), h('th.n', 'Total'), h('th.n', '📖 / ⚔ / 🛡'), h('th.n', 'K / D / A'), h('th.n', 'Right answers'), h('th.n', 'Rounds'))), h('tbody', rows));
+    return h('div.fboard', h('h2', '🏆 Match champions'), podium, awards, you, h('h3', 'Final ranking (all rounds, every student on their own)'), table);
+  }
+  /** The final ranking as a spreadsheet (CSV) for the teacher. */
+  function rankingCsv(res) {
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const head = ['Rank', 'Name', 'Total points', 'Answer points', 'Fight points', 'Survival points', 'Right answers', 'Wrong answers', 'Accuracy %', 'Knock-outs', 'Times knocked out', 'Assists', 'Rounds played', 'Average survival place'];
+    const rows = (res.season || []).map(r => [r.rank, r.n, R(r.pts), R(r.q), R(r.f), R(r.s), r.right, r.wrong, r.right + r.wrong ? Math.round(r.right / (r.right + r.wrong) * 100) : '', r.ko, r.de, r.as, r.rounds, r.surv]);
+    return [head].concat(rows).map(r => r.map(q).join(',')).join('\r\n');
   }
 
-  AR.ui = { h, $, clear, gold, toast, teamBadge, modal, download, resultsBoard };
+  AR.ui = { h, $, clear, gold, toast, teamBadge, modal, download, resultsBoard, finalBoard, rankingCsv };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5795,9 +5876,10 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     }
     resultsView(res) {
       return h('div.tres',
-        res.final ? h('div.podium', res.season.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐' + Math.round(r.pts))))) : null,
+        h('div.row.end', h('button.btn', { onclick: () => AR.ui.download('Spellstorm_ranking_' + new Date().toISOString().slice(0, 10) + (res.final ? '_final' : '_round' + res.round) + '.csv', AR.ui.rankingCsv(res)) }, '⬇ Download ranking (spreadsheet)')),
+        res.final ? AR.ui.finalBoard(res, null) : null,
         AR.ui.resultsBoard(res, null),
-        h('h3', 'Total points (all rounds)'), h('ol.season', res.season.map(r => h('li', h('span', r.n), h('b', '⭐' + Math.round(r.pts))))));
+        res.final ? null : h('div', h('h3', 'Total points so far (all rounds, each student)'), h('ol.season', res.season.map(r => h('li', h('span', r.n), h('b', '⭐' + Math.round(r.pts)))))));
     }
     drawSide() {
       const S = this.S, s = S.s, D = clear(this.side), running = s.phase === 'haven' || s.phase === 'battle';
@@ -6151,7 +6233,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     /** A short tip, at most once per round. */
     tip(id, text) { const g = this.link.g, k = (g ? g.round : 0) + ':' + id; this.tipsSeen = this.tipsSeen || {}; if (this.tipsSeen[k]) return; this.tipsSeen[k] = 1; toast(text, 'tip'); }
     onState(from, to) {
-      if (to === 'haven') this.tip('haven', (this.link.g && this.link.g.round > 1 ? '🔀 New squad! ' : '') + 'Pick a class · 📖 answer = 🪙 · 🛒 buy');
+      if (to === 'haven') this.tip('haven', (this.link.g && this.link.g.round > 1 ? '🔀 New squad! ' : '') + 'Pick a class · 📦 a Question Cage comes soon: answers = ⭐ points + ⚡ booster');
       if (to === 'ground' && from === 'glide') this.tip('land', 'E 🎁 chests · F 🐎 ride · 📦 cages at 2:30 and 5:00');
       if (to === 'fly') toast('🦅 SPACE = jump off', 'info');
       if (to === 'glide' && from === 'fly') toast('🪂 Mouse = steer · W = faster', 'info');
@@ -6273,8 +6355,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (this.resultsEl) this.resultsEl.remove();
       const me = this.link.id;
       // simple: the winner squad, the MVP and one K / D / A table (after the last round: the match podium too)
-      const podium = res.final ? [h('h3', '🏆 Match champions (all rounds)'), h('div.podium', res.season.slice(0, 3).map((r, i) => h('div.pod.p' + (i + 1), h('div.pmedal', ['🥇', '🥈', '🥉'][i]), h('b', r.n), h('div', '⭐' + Math.round(r.pts)))))] : null;
-      this.resultsEl = h('div.panel.results', h('h2', 'Round ' + res.round + ' results'), AR.ui.resultsBoard(res, me), podium, h('div.row.end', this.practice ? [!res.final ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost.S; H.makeSquads(H.s.squadCount); H.startRound(); this.practiceHost.flush(); } }, '▶ Next round') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', res.final ? '' : 'Waiting for your teacher…')));
+      this.resultsEl = h('div.panel.results', res.final ? AR.ui.finalBoard(res, me) : null, h('h2', 'Round ' + res.round + ' results'), AR.ui.resultsBoard(res, me), h('div.row.end', this.practice ? [!res.final ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost.S; H.makeSquads(H.s.squadCount); H.startRound(); this.practiceHost.flush(); } }, '▶ Next round') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', res.final ? '' : 'Waiting for your teacher…')));
       this.app.ui.appendChild(this.resultsEl);
     }
 
