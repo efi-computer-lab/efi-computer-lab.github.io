@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T05:38:35.275Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T05:51:33.840Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -2893,6 +2893,8 @@ window.GK_ONLINE_CONFIG = {
         else if (P.state === 'glide' && now - P.glideAt > ((P.glideY0 || 46) / B().player.glide.fall + 4) * 1000) { P.state = 'ground'; if (P.pos) this.teleport(P.id, P.pos[0], P.pos[2]); }   // landed (safety net)
         else if (P.state === 'down' && now >= P.downUntil) this.respawn(P);
       }
+      // the tutorial (tutorialMode): the clock runs normally (jumps and sprints need it), but no storm and no round end
+      if (this.tutorialMode) { if (this.bots) this.bots.step(dt); return; }
       // the storm: damage outside the circle; points for everyone still standing at each step
       const st = AR.Storm.at(this.storm(), t);
       if (st.stage > this.s.stormStep) {
@@ -2919,7 +2921,7 @@ window.GK_ONLINE_CONFIG = {
         ph: s.phase, round: s.round, rounds: s.rounds, bank: s.bankId, practice: this.practice, bots: this.bots ? 1 : 0, iseed: s.islandSeed, seed: s.seed,
         clock: { s: s.clock.startedAt, p: s.clock.pausedAt, c: s.clock.cageAt || 0, pz: s.clock.pausedTotal, e: s.clock.endedAt || 0 },
         squads: s.squads.map(q => ({ id: q.id, name: q.name, color: q.color, sym: q.sym, members: q.members.slice(), mult: r2(q.mult || 1), out: q.outAt ? 1 : 0 })),
-        sq: s.squadCount, ann: s.ann, res: s.results, feed: s.feed.slice(-6),
+        sq: s.squadCount, ann: s.ann, res: s.results, feed: s.feed.slice(-6), tut: this.tutorialMode ? (this.tutorialStorm ? 2 : 1) : 0,
         mt: (s.mounts || []).map(m => m.id + ',' + m.k + ',' + m.x + ',' + m.z + ',' + m.rot + ',' + (m.by || '')).join(';'),
         n: Object.values(s.players).filter(p => p.online).length,
       };
@@ -5809,6 +5811,8 @@ window.GK_ONLINE_CONFIG = {
     squad() { const m = this.me(), g = this.link.g; return g && (g.squads || []).find(q => q.id === m.sq) || null; }
     squadOf(pid) { const p = this.link.ps[pid]; return p && this.link.g ? (this.link.g.squads || []).find(q => q.id === p.sq) : null; }
     t() { const g = this.link.g; if (!g || !g.clock || !g.clock.s) return -999; const c = g.clock, now = this.link.serverNow(); return ((c.c || c.p || (g.ph === 'battle' || g.ph === 'haven' ? now : c.e || now)) - c.s - (c.pz || 0)) / 1000; }
+    /** The round time the storm is drawn at (the tutorial shows it only in its storm step). */
+    stormTime(t) { const g = this.link.g; return g && g.tut ? (g.tut === 2 ? 128 : null) : Math.max(0, t); }
     /** A Question Cage is down (everyone frozen). */
     caged() { const g = this.link.g; return !!(g && g.cg); }
     storm() { const g = this.link.g; if (!g || !g.seed) return null; if (!this._storm || this._storm.seed !== g.seed) this._storm = AR.Storm.plan(g.seed, this.app.island); return this._storm; }
@@ -5913,6 +5917,7 @@ window.GK_ONLINE_CONFIG = {
       if (g.clock.p) return h('div', h('b.paused', '⏸ PAUSED'));
       if (g.cg) return h('div', h('b', '📦 Question Cage ' + g.cg.n + '/' + B.cage.at.length), h('div.small', g.cg.ph === 'lift' ? '🔓 Free in a moment…' : g.cg.ph === 'fall' ? 'Get ready to answer!' : '✔ ' + g.cg.done + ' / ' + g.cg.total + ' finished'));
       if (t < 0) return h('div', h('b', '☁ Sky Haven · Round ' + g.round + '/' + g.rounds), h('div.small', (g.cn ? '🦅 Griffin in ' : '📦 Cage in ') + fmt(g.cn ? -t : -t - 5)));
+      if (g.tut) return h('div', h('b', '🎓 Tutorial'), h('div.small', g.tut === 2 ? '🌀 This is how the storm looks on the map' : 'Practice island: no storm, no enemies'));
       const st = AR.Storm.at(this.storm(), t), left = B.round.durationSec - t, L = B.round.oneLifeFromSec;
       let sub = t < B.round.flightSec ? '🦅 SPACE = jump off' : st.next ? '🌀 Storm in ' + fmt(st.nextAt - t) : st.moving ? '🌀 Storm moving!' : t < L ? '💫 Comebacks until ' + fmt(L) : '⚠ One life';
       const nextCage = B.cage.at[g.cn || 0];
@@ -5927,8 +5932,9 @@ window.GK_ONLINE_CONFIG = {
       const ctx = cv.getContext('2d'), s = mm.scale, X = x => (x + mm.half) * s;
       ctx.drawImage(mm.canvas, 0, 0);
       const t = this.t();
-      if (g.ph === 'battle' && this.storm()) {
-        const st = AR.Storm.at(this.storm(), Math.max(0, t));
+      const tS = this.stormTime(t);
+      if (g.ph === 'battle' && this.storm() && tS != null) {
+        const st = AR.Storm.at(this.storm(), tS);
         ctx.save(); ctx.fillStyle = 'rgba(120,50,220,0.35)'; ctx.beginPath(); ctx.rect(0, 0, 200, 200); ctx.arc(X(st.x), X(st.z), st.r * s, 0, 7, true); ctx.fill(); ctx.restore();
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(st.x), X(st.z), st.r * s, 0, 7); ctx.stroke();
         if (st.next) { ctx.setLineDash([4, 3]); ctx.strokeStyle = '#80ffdb'; ctx.beginPath(); ctx.arc(X(st.next.x), X(st.next.z), st.next.r * s, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
@@ -6169,8 +6175,9 @@ window.GK_ONLINE_CONFIG = {
       }
       if (this.cageItems) this.cageItems(items, now);
       // the storm wall and the next safe circle
-      if (g && g.ph === 'battle' && this.storm()) {
-        const s = AR.Storm.at(this.storm(), Math.max(0, t));
+      const tS = g ? this.stormTime(t) : null;
+      if (g && g.ph === 'battle' && this.storm() && tS != null) {
+        const s = AR.Storm.at(this.storm(), tS);
         if (s.r > 0.5) items.push({ mesh: sc.mesh('storm', () => MR.stormWall()), pos: [s.x, -5, s.z], scale: [s.r, 140, s.r], alpha: 0.5, noShadow: true });
         if (s.next && s.next.r > 0.5) items.push({ mesh: sc.mesh('nextline', () => MR.circleLine('#80ffdb')), pos: [s.next.x, 0.6, s.next.z], scale: [s.next.r, 1, s.next.r], alpha: 0.9, noShadow: true });
         const outside = this.pos && st !== 'fly' && st !== 'down' && st !== 'out' && AR.Storm.outside(s, this.pos[0], this.pos[2]) && t >= B.round.flightSec;
@@ -6602,15 +6609,15 @@ window.GK_ONLINE_CONFIG = {
       pick = pick || { x: 30, z: 40, C: I.chests[0] };
       this.spot = [pick.x, pick.z]; this.chest = pick.C;
       H.s.cageN = B.cage.at.length;   // no automatic cages: the tutorial starts its own
-      this.keepClock(60);
+      H.tutorialMode = true;          // no storm, no round end; the clock itself keeps running (jumps and sprints are timed by it)
+      this.setClock(60);
       for (const p of Object.values(H.s.players)) { p.state = 'ground'; p.shieldUntil = 0; }
       H.teleport(me.id, pick.x, pick.z);
       const park = I.randomLand(H.rnd, pick.x, pick.z, 60); H.teleport(this.dummy.id, park[0], park[1]);   // out of the way until the attack step
       H.s.phase = 'battle'; H.touchG(); this.host.flush();
-      this.clockTimer = setInterval(() => { if (!H.s.cage && this.clockAt != null) this.keepClock(this.clockAt); }, 500);
     }
-    /** Hold the round clock still (no storm, no round end) while the student learns. */
-    keepClock(t) { const H = this.H, c = H.s.clock; this.clockAt = t; c.startedAt = H.now() - t * 1000 - c.pausedTotal; c.pausedAt = 0; H.touchG(); }
+    /** Start the battle clock at round time t (once: it must never jump back, or jumps and sprints would replay). */
+    setClock(t) { const H = this.H, c = H.s.clock; c.startedAt = H.now() - t * 1000 - c.pausedTotal; c.pausedAt = 0; H.touchG(); }
     /** A walk target 9 m away on open ground the student can reach in a straight line. */
     walkPoint() {
       const S = this.S, I = this.app.island, p = S.pos;
@@ -6644,10 +6651,10 @@ window.GK_ONLINE_CONFIG = {
       M.k = 'horse'; M.by = ''; this.horse = M; H.touchG(); this.host.flush();
     }
     horsePos() { const M = this.horse; return M && !M.by ? [M.x, this.app.island.ground(M.x, M.z), M.z] : null; }
-    startCage() { const H = this.H; H.s.cageN = 0; H.startCage(); this.dummy.cage = null; this.host.flush(); }
+    startCage() { const H = this.H; H.s.cageN = 0; H.startCage(); H.s.cageN = B.cage.at.length; this.dummy.cage = null; this.host.flush(); }   // shown as cage 1; no more cages after it
     cageDone() { if (this.H.s.cage) return false; this.H.s.cageN = B.cage.at.length; return true; }
-    showStorm() { this.keepClock(128); }
-    hideStorm() { this.keepClock(60); }
+    showStorm() { this.H.tutorialStorm = true; this.H.touchG(); this.host.flush(); }
+    hideStorm() { this.H.tutorialStorm = false; this.H.touchG(); this.host.flush(); }
 
     // ---------------- running the steps ----------------
     /** byUser: the student pressed Next / Enter (a click or key = the browser lets us capture the mouse again). */
@@ -6733,7 +6740,7 @@ window.GK_ONLINE_CONFIG = {
       items.push({ mesh: this.S.sc.mesh('tutbeam', () => AR.Models.pingBeam('#ffd43b')), pos: w, scale: [1.6, 1, 1.6], alpha: 0.65 + Math.sin(performance.now() / 200) * 0.2, noShadow: true });
     }
     finish(quit, practice) {
-      clearInterval(this.timer); clearInterval(this.clockTimer); clearTimeout(this.greatT);
+      clearInterval(this.timer); clearTimeout(this.greatT);
       if (this.assist0 != null) B.combat.assist = this.assist0;
       window.removeEventListener('keydown', this.keyHandler, true);
       if (this.glowEl) this.glowEl.classList.remove('tut-glow');
