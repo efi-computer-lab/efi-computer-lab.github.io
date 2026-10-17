@@ -5546,6 +5546,7 @@ GK_LIBRARY.worlds = {
       if (a.slow < 4) return null;
       a.slow = 0;
       for (const k of ['shadows', 'detail', 'bloom']) if (this.quality[k]) { this.quality[k] = false; return k; }
+      if (this.pixelRatio > 0.55) { this.pixelRatio = Math.max(0.5, Math.round((this.pixelRatio - 0.2) * 100) / 100); return 'resolution'; }   // fewer pixels
       return null;
     }
     /** lights: [{pos:[x,y,z], color:'#hex' | [r,g,b], range, intensity}] — the renderer uses the first `quality.lights`. */
@@ -5820,6 +5821,39 @@ GK_LIBRARY.worlds = {
       this.cache = {};
     }
   }
+  /** What this computer can draw, decided BEFORE the renderer is made (antialias is fixed when the canvas starts).
+      Returns {tier: 'minimal' | 'low' | 'medium' | 'high', reason, antialias, pixelRatio, quality} for
+      new GK.Renderer(canvas, {antialias, pixelRatio}) + renderer.setQuality(quality).
+      - minimal: no real graphics chip (software drawing: SwiftShader, llvmpipe, "Microsoft Basic Render Driver")
+      - low:     old built-in Intel graphics (HD 2000-5000, GMA), or 4 GB memory / 2 cores or fewer
+      - medium:  newer built-in graphics (Intel UHD / Iris, AMD Radeon Vega in a laptop chip), or 8 GB memory or less
+      - high:    a real graphics card (NVIDIA GeForce, AMD Radeon RX) with more memory
+      School lab default (nothing detectable): medium. renderer.adapt() still lowers it further while playing. */
+  Renderer.detect = function () {
+    const nav = window.navigator || {}, mem = nav.deviceMemory || 0, cores = nav.hardwareConcurrency || 0;
+    let gpu = '';
+    try {
+      const c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (gl) {
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        gpu = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) || '');
+        const lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
+      }
+    } catch (e) { /* no WebGL info: keep the defaults */ }
+    let tier = 'medium', reason = 'school lab default';
+    if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(gpu)) { tier = 'minimal'; reason = 'software drawing (no graphics chip): ' + gpu; }
+    else if (/intel.*(hd graphics( [2-5]\d{3})?\b|gma|g4[15]|q45)/i.test(gpu) && !/uhd|iris/i.test(gpu)) { tier = 'low'; reason = 'old built-in graphics: ' + gpu; }
+    else if ((mem && mem <= 4) || (cores && cores <= 2)) { tier = 'low'; reason = 'small computer: ' + (mem || '?') + ' GB, ' + (cores || '?') + ' cores'; }
+    else if (/nvidia|geforce|quadro|radeon (rx|pro)|\brx ?\d{3,4}/i.test(gpu) && (!mem || mem >= 8)) { tier = 'high'; reason = 'graphics card: ' + gpu; }
+    else if (gpu) reason = 'built-in graphics: ' + gpu + (mem ? ', ' + mem + ' GB' : '');
+    const T = {
+      minimal: { antialias: false, pixelRatio: 0.5, quality: { shadows: false, detail: false, bloom: false, lights: 2, sky: true } },
+      low: { antialias: false, pixelRatio: 0.75, quality: { shadows: false, detail: false, bloom: false, lights: 4, sky: true } },
+      medium: { antialias: false, pixelRatio: 1, quality: { shadows: true, shadowSize: 1024, shadowRange: 30, detail: true, bloom: false, lights: 6, sky: true } },
+      high: { antialias: true, pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5), quality: { shadows: true, shadowSize: 2048, shadowRange: 42, detail: true, bloom: true, lights: 8, sky: true } },
+    };
+    return Object.assign({ tier, reason, gpu, memory: mem, cores }, T[tier]);
+  };
   GK.Renderer = Renderer;
 })();
 
@@ -5869,7 +5903,10 @@ GK_LIBRARY.worlds = {
       this.game = game;
       const r = game.cfg.render || {};
       this.canvas = game.root.insertBefore(U.el('canvas', 'gk-canvas'), game.root.firstChild);
-      this.renderer = new GK.Renderer(this.canvas, { pixelRatio: 1, antialias: r.antialias, far: r.far });
+      // School-lab hardware detection (blueprint INTEGRATION_GUIDE 2b): minimal | low | medium | high
+      this.detected = GK.Renderer.detect ? GK.Renderer.detect() : null;
+      if (this.detected) console.info('[GK] graphics: ' + this.detected.tier + ' (' + this.detected.reason + ')');
+      this.renderer = new GK.Renderer(this.canvas, { pixelRatio: 1, antialias: r.antialias != null ? r.antialias : !this.detected || this.detected.antialias, far: r.far });
       this.applySettings();
       game.input.el = this.canvas;
       game.input.onLockChange = locked => { if (!locked && game.state.mode === 'playing') game.pause(); };
@@ -5878,11 +5915,13 @@ GK_LIBRARY.worlds = {
         if (locked) { game.clickInteract = true; game.clickFire = true; } else game.input.lock();
       };
     }
-    /** Teacher setting "low graphics" renders fewer pixels: much faster on old lab PCs. */
+    /** Teacher setting "low graphics" renders fewer pixels: much faster on old lab PCs.
+        "normal" = the best this computer can do (GK.Renderer.detect, blueprint INTEGRATION_GUIDE 2b). */
     applySettings() {
-      const r = this.game.cfg.render || {}, low = GK.Settings.get('quality', 'normal') === 'low';
-      this.renderer.pixelRatio = Math.min(r.pixelRatio || 1, window.devicePixelRatio || 1) * (low ? 0.6 : 1);
-      this.renderer.setQuality(low ? { bloom: false, lights: 3, shadows: false, detail: false } : { bloom: r.bloom !== false, lights: 8, shadows: r.shadows !== false, detail: true });
+      const r = this.game.cfg.render || {}, low = GK.Settings.get('quality', 'normal') === 'low', det = this.detected;
+      if (low) { this.renderer.pixelRatio = Math.min(r.pixelRatio || 1, window.devicePixelRatio || 1) * 0.6; this.renderer.setQuality({ bloom: false, lights: 3, shadows: false, detail: false }); }
+      else if (det) { this.renderer.pixelRatio = Math.min(r.pixelRatio || det.pixelRatio, det.pixelRatio); this.renderer.setQuality(Object.assign({}, det.quality, r.bloom === false ? { bloom: false } : {}, r.shadows === false ? { shadows: false } : {})); }
+      else { this.renderer.pixelRatio = Math.min(r.pixelRatio || 1, window.devicePixelRatio || 1); this.renderer.setQuality({ bloom: r.bloom !== false, lights: 8, shadows: r.shadows !== false, detail: true }); }
     }
     setup() {
       const g = this.game, cfg = g.cfg, env = cfg.environment, sky = U.list(env.sky);
