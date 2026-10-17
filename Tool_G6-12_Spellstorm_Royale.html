@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T14:03:20.127Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-17T14:15:35.028Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -2043,11 +2043,15 @@ window.GK_ONLINE_CONFIG = {
       for (let t = 0; t < 60; t++) { const a = r2() * 6.28, d = Math.sqrt(r2()) * R, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d; if (onLand(x, z) && colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 1)) return [x, z]; }
       return [cx, cz];
     }
-    /** The griffin's straight route across the island for a round (from one coast to the other). */
-    function griffinRoute(roundSeed) {
-      const r2 = U.rng(roundSeed * 13 + 1), a = r2() * Math.PI * 2, off = (r2() - 0.5) * 90, dir = [Math.cos(a), Math.sin(a)], side = [-dir[1], dir[0]];
+    /** Squad k's griffin (of n squads): a straight route across the island for a round (from one coast to the other).
+        Every squad flies its own line, turned by 180° / n from the next one (with its own side offset and direction), and
+        at its own height, so the griffins spread the squads over the whole island and never fly through each other. */
+    function griffinRoute(roundSeed, k, n) {
+      k = k > 0 ? k : 0; n = n > 0 ? n : 1;
+      const r0 = U.rng(roundSeed * 13 + 1), a0 = r0() * Math.PI * 2, r2 = U.rng(roundSeed * 13 + 7 + k * 101);
+      const a = a0 + k * Math.PI / n + (r2() < 0.5 ? Math.PI : 0), off = (r2() - 0.5) * (n > 1 ? 110 : 90), dir = [Math.cos(a), Math.sin(a)], side = [-dir[1], dir[0]];
       const from = [-dir[0] * 215 + side[0] * off, -dir[1] * 215 + side[1] * off], to = [dir[0] * 215 + side[0] * off, dir[1] * 215 + side[1] * off];
-      return { from, to };
+      return { from, to, dy: [0, 5, -5, 9, -9, 3, -3, 7][k % 8] };
     }
     return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
   }
@@ -2624,19 +2628,21 @@ window.GK_ONLINE_CONFIG = {
       this.touchG(); return { ok: true };
     }
     cageShift() { /* cages.js */ }
-    griffinAt(t) {
-      const R = this.island().griffinRoute(this.s.seed), k = U.clamp(t / B().round.flightSec, 0, 1);
-      return [R.from[0] + (R.to[0] - R.from[0]) * k, B().player.griffinY, R.from[1] + (R.to[1] - R.from[1]) * k];
+    /** Every squad has its own griffin (sq: squad id; none = the first squad's). */
+    griffinRoute(sq) { const n = this.s.squads.length, k = Math.max(0, this.s.squads.findIndex(q => q.id === sq)); return this.island().griffinRoute(this.s.seed, k, n); }
+    griffinAt(t, sq) {
+      const R = this.griffinRoute(sq), k = U.clamp(t / B().round.flightSec, 0, 1);
+      return [R.from[0] + (R.to[0] - R.from[0]) * k, B().player.griffinY + R.dy, R.from[1] + (R.to[1] - R.from[1]) * k];
     }
     /** True when the griffin is about to leave the island on the far side (riders still on board are dropped over land). */
-    griffinLeaving(t) {
-      const R = this.island().griffinRoute(this.s.seed), g = this.griffinAt(t), mid = [(R.from[0] + R.to[0]) / 2, (R.from[1] + R.to[1]) / 2];
+    griffinLeaving(t, sq) {
+      const R = this.griffinRoute(sq), g = this.griffinAt(t, sq), mid = [(R.from[0] + R.to[0]) / 2, (R.from[1] + R.to[1]) / 2];
       const past = (g[0] - mid[0]) * (R.to[0] - mid[0]) + (g[2] - mid[1]) * (R.to[1] - mid[1]) > 0;
       return past && Math.hypot(g[0], g[2]) > this.island().landR - 30;
     }
     /** Jump off the griffin: glide from where the griffin is now. */
     dropOff(P) {
-      const g = this.griffinAt(Math.max(0, this.t()));
+      const g = this.griffinAt(Math.max(0, this.t()), P.squad);
       P.state = 'glide'; P.glideAt = this.now(); P.glideY0 = g[1];
       this.teleport(P.id, g[0], g[2], g[1]);
     }
@@ -2918,9 +2924,12 @@ window.GK_ONLINE_CONFIG = {
       }
       if (this.s.phase !== 'battle') { if (this.bots) this.bots.step(dt); return; }
       // griffin: riders move with it; the last ones are dropped at the end of the flight
-      const gp = this.griffinAt(t);
+      const gps = {};
       for (const P of Object.values(this.s.players)) {
-        if (P.state === 'fly') { if (t >= R.flightSec || this.griffinLeaving(t)) this.dropOff(P); else { P.pos = [gp[0], gp[1], gp[2], 0]; this.dirty.pos = true; } }
+        if (P.state === 'fly') {   // each squad rides its own griffin
+          if (t >= R.flightSec || this.griffinLeaving(t, P.squad)) this.dropOff(P);
+          else { const gp = gps[P.squad] || (gps[P.squad] = this.griffinAt(t, P.squad)); P.pos = [gp[0], gp[1], gp[2], 0]; this.dirty.pos = true; }
+        }
         else if (P.state === 'glide' && now - P.glideAt > ((P.glideY0 || 46) / B().player.glide.fall + 4) * 1000) { P.state = 'ground'; if (P.pos) this.teleport(P.id, P.pos[0], P.pos[2]); }   // landed (safety net)
         else if (P.state === 'down' && now >= P.downUntil) this.respawn(P);
         else if (P.state === 'ground' && P.motion && P.motion.stance && P.pos && t - (P.motion.stanceAt || 0) > B().player.swim.breath && this.island().swimming(P.pos[0], P.pos[2])) {
@@ -3575,8 +3584,9 @@ window.GK_ONLINE_CONFIG = {
     }
     fly(P, m) {
       const S = this.S, I = S.island();
-      if (!m.jumpPlace) { const pl = I.places[Math.floor(S.rnd() * I.places.length)]; m.jumpPlace = [pl.x + (S.rnd() - 0.5) * 20, pl.z + (S.rnd() - 0.5) * 20]; }
-      const g = S.griffinAt(S.t());
+      if (!m.jumpPlace) {   // a place near this squad's griffin route
+        const R = S.griffinRoute(P.squad), near = I.places.map(p => [p, Math.abs((p.x - R.from[0]) * (R.to[1] - R.from[1]) - (p.z - R.from[1]) * (R.to[0] - R.from[0])) / Math.hypot(R.to[0] - R.from[0], R.to[1] - R.from[1])]).sort((a, b) => a[1] - b[1]).slice(0, 3), pl = near[Math.floor(S.rnd() * near.length)][0]; m.jumpPlace = [pl.x + (S.rnd() - 0.5) * 20, pl.z + (S.rnd() - 0.5) * 20]; }
+      const g = S.griffinAt(S.t(), P.squad);
       if (Math.hypot(g[0] - m.jumpPlace[0], g[2] - m.jumpPlace[1]) < 45 + S.rnd() * 20) { S.requestMotion(P.id, 'jump'); m.goal = m.jumpPlace; }
     }
     glide(P, m, dt) {
@@ -4819,13 +4829,6 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       ty += Math.cos(ang) * len; tz += Math.sin(ang) * len;   // rotX turns +y towards +z
     }
     g.add(G().sphere(tx, ty, tz, 0.3, DARK, { seg: 7, rings: 5 }).scale(1, 1, 1));
-    // ---- saddle: a blue blanket with gold trim, seat pads, a front handle with a crystal ----
-    g.add(G().box(0, 0, 0, 1.75, 0.12, 3.3, '#2f6fbf').move(0, 1.18, -0.3));
-    for (const sd of [-1, 1]) { g.box(sd * 0.88, 1.12, -0.3, 0.1, 0.16, 3.32, GOLD, { glow: 0.2 }); g.box(sd * 0.92, 0.25, 0.4, 0.06, 0.95, 0.18, '#5c3a1e'); }   // trim + straps
-    for (const [x, z] of GRIFFIN_SEATS) g.box(x, 1.28, z, 0.5, 0.09, 0.55, '#7a4a25');
-    g.cyl(0, 1.25, 1.55, 0.06, 0.7, GOLD, { seg: 6 }); g.sphere(0, 2.0, 1.55, 0.13, TIP, { seg: 6, rings: 4, glow: 1 });
-    // ---- banner on a short pole at the back ----
-    g.cyl(0, 1.2, -2.0, 0.04, 2.0, '#5c3a1e', { seg: 5 }); g.box(0, 2.55, -2.4, 0.04, 0.6, 0.8, TIP, { glow: 0.35 }); g.box(0, 2.3, -2.4, 0.045, 0.15, 0.8, '#ffd166', { glow: 0.3 });
     // ---- wings: shoulder → elbow → wrist; each joint bends a bit later than the one before (a soft, curved beat) ----
     const a1 = 0.12 + f * 0.72, a2 = f * 0.38, a3 = f * 0.22 - 0.04;
     for (const sd of [-1, 1]) {
@@ -4852,6 +4855,17 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     return g;
   }
   const U_clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  /** The saddle in the squad's colour (blanket, gold trim, seats, a front handle with a crystal, a banner on the tail);
+      drawn with the same position / turn / scale as the griffin. */
+  function griffinSaddle(color) {
+    const g = G(), GOLD = '#f0b429', TIP = '#80ffdb', col = color || '#2f6fbf';
+    g.add(G().box(0, 0, 0, 1.75, 0.12, 3.3, col).move(0, 1.18, -0.3));
+    for (const sd of [-1, 1]) { g.box(sd * 0.88, 1.12, -0.3, 0.1, 0.16, 3.32, GOLD, { glow: 0.2 }); g.box(sd * 0.92, 0.25, 0.4, 0.06, 0.95, 0.18, '#5c3a1e'); g.box(sd * 0.89, 0.55, -0.3, 0.04, 0.6, 2.4, col); }   // trim, straps, side drape
+    for (const [x, z] of GRIFFIN_SEATS) g.box(x, 1.28, z, 0.5, 0.09, 0.55, '#7a4a25');
+    g.cyl(0, 1.25, 1.55, 0.06, 0.7, GOLD, { seg: 6 }); g.sphere(0, 2.0, 1.55, 0.13, TIP, { seg: 6, rings: 4, glow: 1 });
+    g.cyl(0, 1.2, -2.0, 0.04, 2.6, '#5c3a1e', { seg: 5 }); g.box(0, 2.95, -2.5, 0.05, 0.85, 1.0, col, { glow: 0.25 }); g.box(0, 2.75, -2.5, 0.055, 0.14, 1.0, '#ffd166', { glow: 0.3 });   // squad banner
+    return g;
+  }
   function chest(gold) {   // a wooden chest with metal bands; golden chests glow
     const g = G(), wood = gold ? '#d4a017' : '#8b5a2b', band = gold ? '#fff3bf' : '#5c6370', P = AR.Props;
     if (P && P.has('chest')) {   // Kenney Survival Kit chest (CC0), the same size as before (1.3 m wide); golden = gold colours + glow
@@ -5117,7 +5131,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   }
   function dragonRib() { return G().add(G().cyl(0, 0, 0, 0.35, 7, '#e9e2d0', { seg: 5, flat: true, rTop: 0.18 }).rotZ(-0.55).move(0, 0, 0)); }
 
-  AR.ModelsRoyale = { saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
+  AR.ModelsRoyale = { saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, griffinSaddle, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5828,7 +5842,10 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
           items.push({ mesh: sc.ringMesh(col[P.squad] || '#ccc'), pos: P.pos.slice(0, 3), scale: Math.max(1, o.h / 60), noShadow: true });
         }
         if (s.phase === 'battle') {
-          if (t < B.round.flightSec + 6) { const gp = S.griffinAt(Math.max(0, t)), R = I.griffinRoute(s.seed); const fq = Math.round(Math.sin(now / 1000 * 4.2) * 5) / 5; items.push({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)), pos: [gp[0], gp[1] - 2.4, gp[2]], yaw: Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), scale: 1.6 }); }
+          if (t < B.round.flightSec + 6) s.squads.forEach((q, qi) => {   // one griffin per squad
+            const gp = S.griffinAt(Math.max(0, t), q.id), R = S.griffinRoute(q.id), fq = Math.round(Math.sin(now / 1000 * 4.2 + qi * 1.3) * 5) / 5, it = { pos: [gp[0], gp[1] - 2.4, gp[2]], yaw: Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), scale: 1.6 };
+            items.push(Object.assign({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)) }, it), Object.assign({ mesh: sc.mesh('gsaddle' + q.color, () => MR.griffinSaddle(q.color)) }, it));
+          });
           const st = AR.Storm.at(S.storm(), Math.max(0, t));
           if (st.r > 0.5) items.push({ mesh: sc.mesh('storm', () => MR.stormWall()), pos: [st.x, -5, st.z], scale: [st.r, 140, st.r], alpha: 0.45, noShadow: true });
           if (st.next && st.next.r > 0.5) items.push({ mesh: sc.mesh('nextline', () => MR.circleLine('#80ffdb')), pos: [st.next.x, 0.6, st.next.z], scale: [st.next.r, 1, st.next.r], noShadow: true });
@@ -6081,7 +6098,12 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     /** A Question Cage is down (everyone frozen). */
     caged() { const g = this.link.g; return !!(g && g.cg); }
     storm() { const g = this.link.g; if (!g || !g.seed) return null; if (!this._storm || this._storm.seed !== g.seed) this._storm = AR.Storm.plan(g.seed, this.app.island); return this._storm; }
-    griffinAt(t) { const g = this.link.g, R = this.app.island.griffinRoute(g.seed), k = U.clamp(t / B.round.flightSec, 0, 1); return [R.from[0] + (R.to[0] - R.from[0]) * k, B.player.griffinY, R.from[1] + (R.to[1] - R.from[1]) * k]; }
+    /** Every squad has its own griffin (sq: squad id; none = mine). */
+    griffinRoute(sq) {
+      const g = this.link.g, qs = (g && g.squads) || [], id = sq || (this.squad() || {}).id, k = Math.max(0, qs.findIndex(q => q.id === id));
+      return this.app.island.griffinRoute(g.seed, k, qs.length || 1);
+    }
+    griffinAt(t, sq) { const R = this.griffinRoute(sq), k = U.clamp(t / B.round.flightSec, 0, 1); return [R.from[0] + (R.to[0] - R.from[0]) * k, B.player.griffinY + R.dy, R.from[1] + (R.to[1] - R.from[1]) * k]; }
 
     // ---------------- events ----------------
     onG() {
@@ -6203,7 +6225,17 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         ctx.save(); ctx.fillStyle = 'rgba(120,50,220,0.35)'; ctx.beginPath(); ctx.rect(0, 0, 200, 200); ctx.arc(X(st.x), X(st.z), st.r * s, 0, 7, true); ctx.fill(); ctx.restore();
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(st.x), X(st.z), st.r * s, 0, 7); ctx.stroke();
         if (st.next) { ctx.setLineDash([4, 3]); ctx.strokeStyle = '#80ffdb'; ctx.beginPath(); ctx.arc(X(st.next.x), X(st.next.z), st.next.r * s, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-        if (t < B.round.flightSec + 2) { const R = this.app.island.griffinRoute(g.seed); ctx.setLineDash([2, 4]); ctx.strokeStyle = '#ffd166'; ctx.beginPath(); ctx.moveTo(X(R.from[0]), X(R.from[1])); ctx.lineTo(X(R.to[0]), X(R.to[1])); ctx.stroke(); ctx.setLineDash([]); const gp = this.griffinAt(Math.max(0, t)); ctx.fillText('🦅', X(gp[0]), X(gp[2])); }
+        if (t < B.round.flightSec + 2) {   // every squad's griffin route (mine: bold yellow, the others: faint in their colour)
+          const mine = (this.squad() || {}).id;
+          for (const q of g.squads || []) {
+            if (q.id === mine) continue;
+            const R = this.griffinRoute(q.id), gp = this.griffinAt(Math.max(0, t), q.id);
+            ctx.globalAlpha = 0.5; ctx.setLineDash([2, 5]); ctx.strokeStyle = q.color; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(R.from[0]), X(R.from[1])); ctx.lineTo(X(R.to[0]), X(R.to[1])); ctx.stroke();
+            ctx.globalAlpha = 1; ctx.setLineDash([]); ctx.fillStyle = q.color; ctx.beginPath(); ctx.arc(X(gp[0]), X(gp[2]), 3, 0, 6.29); ctx.fill();
+          }
+          const R = this.griffinRoute(mine); ctx.setLineDash([3, 4]); ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(R.from[0]), X(R.from[1])); ctx.lineTo(X(R.to[0]), X(R.to[1])); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1;
+          const gp = this.griffinAt(Math.max(0, t)); ctx.fillText('🦅', X(gp[0]), X(gp[2]));
+        }
       }
       const q = this.squad();
       if (q) for (const pid of q.members) { const P = this.link.pos[pid]; if (!P || pid === this.link.id) continue; ctx.fillStyle = q.color; ctx.beginPath(); ctx.arc(X(P.x), X(P.z), 3.5, 0, 7); ctx.fill(); }
@@ -6281,29 +6313,31 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     /** The griffin: a smooth wing beat (11 poses), a gentle rise and fall, a slight bank, riders sitting on the saddle
         (me first, then my squad, then others), a trail of magic sparkles and its shadow on the ground. */
     griffinItems(items, t, now, g, colorOf, myQ) {
-      const sc = this.sc, I = this.app.island, MR = AR.ModelsRoyale, R = I.griffinRoute(g.seed), S = 1.6;
-      const gp = this.griffinAt(t), yaw = Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]);
-      const ph = now / 1000 * 4.2, flap = Math.sin(ph + Math.sin(ph) * 0.35), fq = Math.round(flap * 5) / 5;   // quicker downstroke
-      const bob = -Math.sin(ph - 0.6) * 0.45, base = [gp[0], gp[1] - 2.4 + bob, gp[2]], roll = Math.sin(now / 2300) * 0.07;
-      items.push({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)), pos: base, yaw, roll, scale: S });
-      // riders on the saddle
+      const sc = this.sc, I = this.app.island, MR = AR.ModelsRoyale, S = 1.6, me = this.pos || [0, 0, 0];
+      const ph = now / 1000 * 4.2, roll0 = Math.sin(now / 2300) * 0.07;
       const fly = Object.keys(this.link.ps).filter(pid => (this.link.ps[pid] || {}).st === 'fly');
-      const rank = pid => pid === this.link.id ? 0 : myQ && this.link.ps[pid].sq === myQ.id ? 1 : 2;
-      fly.sort((a, b) => rank(a) - rank(b));
-      const c = Math.cos(yaw), sn = Math.sin(yaw);
-      fly.slice(0, MR.GRIFFIN_SEATS.length).forEach((pid, i) => {
-        const [lx, lz] = MR.GRIFFIN_SEATS[i], ps = this.link.ps[pid], me = pid === this.link.id;
-        const pos = [base[0] + (lx * c + lz * sn) * S, base[1] + MR.GRIFFIN_SEAT_Y * S, base[2] + (-lx * sn + lz * c) * S];
-        sc.drawChar(items, { look: me ? this.app.look : ps.look, cls: ps.cls, squad: colorOf[ps.sq] || null, sit: true, time: now + i * 211, pos, yaw });
+      (g.squads || []).forEach((q, qi) => {   // one griffin per squad, each with its own riders and saddle colour
+        const R = this.griffinRoute(q.id), gp = this.griffinAt(t, q.id), yaw = Math.atan2(R.to[0] - R.from[0], R.to[1] - R.from[1]), mine = myQ && q.id === myQ.id;
+        if (!mine && Math.hypot(gp[0] - me[0], gp[2] - me[2]) > 320) return;
+        const p2 = ph + qi * 1.3, flap = Math.sin(p2 + Math.sin(p2) * 0.35), fq = Math.round(flap * 5) / 5;   // quicker downstroke
+        const base = [gp[0], gp[1] - 2.4 - Math.sin(p2 - 0.6) * 0.45, gp[2]], roll = roll0 * (qi % 2 ? -1 : 1);
+        items.push({ mesh: sc.mesh('griffin' + fq, () => MR.griffin(fq)), pos: base, yaw, roll, scale: S });
+        items.push({ mesh: sc.mesh('gsaddle' + q.color, () => MR.griffinSaddle(q.color)), pos: base, yaw, roll, scale: S });
+        const c = Math.cos(yaw), sn = Math.sin(yaw);
+        fly.filter(pid => this.link.ps[pid].sq === q.id).sort((a, b) => (a === this.link.id ? -1 : b === this.link.id ? 1 : 0)).slice(0, MR.GRIFFIN_SEATS.length).forEach((pid, i) => {
+          const [lx, lz] = MR.GRIFFIN_SEATS[i], ps = this.link.ps[pid], isMe = pid === this.link.id;
+          const pos = [base[0] + (lx * c + lz * sn) * S, base[1] + MR.GRIFFIN_SEAT_Y * S, base[2] + (-lx * sn + lz * c) * S];
+          sc.drawChar(items, { look: isMe ? this.app.look : ps.look, cls: ps.cls, squad: q.color, sit: true, time: now + i * 211, pos, yaw });
+        });
+        if (mine) {   // magic sparkles left behind along my squad's route, drifting down
+          const spark = sc.mesh('gspark', () => new GK.Geo().box(0, 0, 0, 0.22, 0.22, 0.22, '#80ffdb', { glow: 1 }));
+          for (let i = 0; i < 16; i++) {
+            const age = ((now / 1000) * 0.9 + i / 16 * 1.8) % 1.8, p = this.griffinAt(Math.max(0, t - age), q.id), side = (i % 2 ? 1 : -1) * (3 + (i * 37 % 7));
+            items.push({ mesh: spark, pos: [p[0] + c * side, p[1] - 2.2 - age * 3.5, p[2] - sn * side], yaw: i + now / 400, scale: 1 - age / 2.2, alpha: 0.9 * (1 - age / 1.8), noShadow: true });
+          }
+        }
+        if (I.onLand(gp[0], gp[2])) items.push({ mesh: sc.mesh('gshadow', () => new GK.Geo().cyl(0, 0, 0, 1, 0.03, '#000000', { seg: 20 })), pos: [gp[0], I.ground(gp[0], gp[2]) + 0.15, gp[2]], scale: [7, 1, 7], alpha: 0.22, noShadow: true });
       });
-      // magic sparkles left behind along the route, drifting down
-      const spark = sc.mesh('gspark', () => new GK.Geo().box(0, 0, 0, 0.22, 0.22, 0.22, '#80ffdb', { glow: 1 }));
-      for (let i = 0; i < 16; i++) {
-        const age = ((now / 1000) * 0.9 + i / 16 * 1.8) % 1.8, p = this.griffinAt(Math.max(0, t - age)), side = (i % 2 ? 1 : -1) * (3 + (i * 37 % 7));
-        items.push({ mesh: spark, pos: [p[0] + c * side, p[1] - 2.2 - age * 3.5, p[2] - sn * side], yaw: i + now / 400, scale: 1 - age / 2.2, alpha: 0.9 * (1 - age / 1.8), noShadow: true });
-      }
-      // its shadow on the island (shows where it is flying over)
-      if (I.onLand(gp[0], gp[2])) items.push({ mesh: sc.mesh('gshadow', () => new GK.Geo().cyl(0, 0, 0, 1, 0.03, '#000000', { seg: 20 })), pos: [gp[0], I.ground(gp[0], gp[2]) + 0.15, gp[2]], scale: [7, 1, 7], alpha: 0.22, noShadow: true });
     }
     /** In Sky Haven: build the griffin's wing-beat poses and the glider wings ahead of time, one per frame, so the
         flight starts without a hitch. */
