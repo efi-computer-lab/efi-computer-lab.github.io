@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-17T23:49:40.637Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-18T00:03:27.758Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -7080,7 +7080,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       enter: T => T.showStorm(), leave: T => T.hideStorm() },
     { id: 'squad', info: true, icon: '👥', title: 'Your squad', target: '.hud-squad', dim: true, text: 'Your team. Stay together and help each other.' },
     { id: 'chat', info: true, icon: '💬', title: 'Squad chat', target: '.quickbar', dim: true, text: 'Click a quick message, or press Enter to type. Be kind!' },
-    { id: 'done', info: true, last: true, icon: '🏆', title: 'You are ready!', text: 'Great job! Practise with bots, or join your teacher\'s game.' },
+    { id: 'done', info: true, last: true, icon: '🏆', title: 'You are ready!', text: 'Great job! Go back to the main menu, click Join by code, and enter your teacher\'s room code.' },
   ];
 
   class Tutorial {
@@ -7181,7 +7181,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     next(byUser) {
       const old = STEPS[this.i]; if (old && old.leave) old.leave(this);
       this.i++;
-      const s = STEPS[this.i]; if (!s) return this.finish();
+      const s = STEPS[this.i]; if (!s) return this.finish(true);
       this.S.tutBlock = !!s.info;   // info steps free the mouse (for the Next button)
       if (s.enter) s.enter(this);
       if (byUser && !s.info && !s.top && this.S.wantsLock()) this.S.lock();
@@ -7196,7 +7196,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         h('div.tutmain', h('div.tuthead', h('b', this.val(s.title)), h('span.tutstep', (this.i + 1) + ' / ' + STEPS.length)),
           keys.length ? h('div.tutkeys', keys.map(k => k === '+' ? h('span.plus', '+') : h('kbd', k))) : null,
           h('p', this.val(s.text)))));
-      if (s.info) this.box.appendChild(h('div.row.end', s.last ? [h('button.btn', { onclick: () => this.finish(true) }, 'Menu'), h('button.btn.primary.big', { onclick: () => this.finish(true, true) }, '🤖 Practice with bots')] : h('button.btn.primary.big.tutnext', { onclick: () => this.next(true) }, 'Next ▶')));
+      if (s.info) this.box.appendChild(h('div.row.end', s.last ? h('button.btn.primary.big.tutnext', { onclick: () => this.finish(true) }, '← Back to main menu') : h('button.btn.primary.big.tutnext', { onclick: () => this.next(true) }, 'Next ▶')));
       this.box.appendChild(h('div.tutfoot', h('div.tutprog', h('i', { style: { width: Math.round(this.i / (STEPS.length - 1) * 100) + '%' } })), h('button.ghost.tutskip', { onclick: () => this.finish(true) }, 'Skip tutorial')));
     }
     /** The dark screen with bright windows (rects: [{x, y, w, h, r}]). */
@@ -7259,7 +7259,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const w = s.world(this); if (!w) return;
       items.push({ mesh: this.S.sc.mesh('tutbeam', () => AR.Models.pingBeam('#ffd43b')), pos: w, scale: [1.6, 1, 1.6], alpha: 0.65 + Math.sin(performance.now() / 200) * 0.2, noShadow: true });
     }
-    finish(quit, practice) {
+    finish(quit) {
       clearInterval(this.timer); clearTimeout(this.greatT);
       if (this.assist0 != null) B.combat.assist = this.assist0;
       window.removeEventListener('keydown', this.keyHandler, true);
@@ -7267,7 +7267,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       for (const e of [this.shade, this.ring, this.box, this.arrow, this.great]) e.remove();
       this.S.tutBlock = false; this.S.tutorial = null;
       try { localStorage.setItem('sr.tutorialDone', '1'); } catch (e) { /* storage off */ }
-      if (quit) { this.app.showMenu(); if (practice) this.app.showPracticeSetup(); }
+      if (quit) this.app.showMenu();
     }
   }
 
