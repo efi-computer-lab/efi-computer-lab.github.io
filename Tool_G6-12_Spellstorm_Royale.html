@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-18T00:46:01.717Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-18T05:04:19.315Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -342,7 +342,7 @@ tr.mine td:first-child { font-weight: 800; }
 .weaponbar .btn { padding: 6px 10px; }
 .weaponbar .btn.primary { background: linear-gradient(#e0a92e, #b97f12); color: #1b1404; }
 .hpbar { position: relative; width: 170px; height: 22px; background: rgba(255, 255, 255, 0.15); border-radius: 6px; overflow: hidden; }
-.hpbar i { position: absolute; left: 0; top: 0; bottom: 0; transition: width 0.2s; } .hpbar span { position: relative; display: block; text-align: center; font-weight: bold; line-height: 22px; text-shadow: 0 1px 2px #000; }
+.hpbar i { position: absolute; left: 0; top: 0; bottom: 0; transition: width 0.2s; } .hpbar > .health-value { position: relative; display: block; text-align: center; font-weight: bold; line-height: 22px; text-shadow: 0 1px 2px #000; }
 .weapon { background: rgba(177, 151, 252, 0.25); border: 1px solid #b197fc; border-radius: 8px; padding: 4px 10px; white-space: nowrap; }
 .reticle { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; pointer-events: none !important; }
 .reticle[hidden] { display: none; }
@@ -535,6 +535,9 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 @keyframes ko-point {50%{transform:translateY(-4px)}}
 @media (prefers-reduced-motion:reduce) {.ko-guide-arrow{animation:none}}
 @media (max-height:600px) {.statebox.knockout-card{padding:14px 18px;top:45%}.ko-title{font-size:23px}.ko-answer{min-height:54px}.ko-help{margin-bottom:8px}.ko-reward{margin-bottom:8px}}
+
+.hpbar > .health-value { display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;font-size:12px; }
+.hpbar .game-icon { display:inline-flex;width:14px;height:14px;vertical-align:middle;line-height:1; }
 
 </style>
 </head>
@@ -1945,6 +1948,8 @@ window.GK_ONLINE_CONFIG = {
     { id: 'market', name: 'Market Village', icon: '🏘', a: 2.82, d: 104, r: 26, kind: 'market', text: 'Houses and market stalls.' },
     { id: 'library', name: 'Floating Library', icon: '📚', a: 3.66, d: 108, r: 22, kind: 'library', text: 'Book towers on floating rocks.' },
     { id: 'dragon', name: "Dragon's Rest", icon: '🐉', a: 4.5, d: 112, r: 24, kind: 'dragon', text: 'Giant dragon bones in a canyon.' },
+    { id: 'dunes', name: 'Sunspire Dunes', icon: '☀', a: 5.85, d: 67, r: 22, inner: true, kind: 'dunes', text: 'Golden dunes, drifting dust and a climbable lookout.' },
+    { id: 'marsh', name: 'Mistfen Marsh', icon: '☁', a: 2.38, d: 65, r: 22, inner: true, kind: 'marsh', text: 'Wet moss, light mist and a raised lookout.' },
     { id: 'light', name: 'Lighthouse Point', icon: '🗼', a: 5.38, d: 132, r: 20, kind: 'light', text: 'A cliff with a long view.' },
   ];
   const HAVEN = { x: 0, z: 330, y: 70, r: 26 };   // the floating lobby island, far off the coast and high in the sky
@@ -1959,7 +1964,7 @@ window.GK_ONLINE_CONFIG = {
     // roads: centre → every place, plus a ring between neighbouring places
     const roads = [];
     for (const p of places) if (p.id !== 'citadel') roads.push([[0, 0], [p.x, p.z]]);
-    const ring = places.filter(p => p.id !== 'citadel');
+    const ring = places.filter(p => p.id !== 'citadel' && !p.inner);
     for (let i = 0; i < ring.length; i++) { const a = ring[i], b = ring[(i + 1) % ring.length]; roads.push([[a.x, a.z], [b.x, b.z]]); }
     const roadDist = (x, z) => { let d = 1e9; for (const r of roads) d = Math.min(d, segDist(x, z, r[0], r[1])); return d; };
 
@@ -1971,7 +1976,9 @@ window.GK_ONLINE_CONFIG = {
       if (fd < 5) y -= (5 - fd) * 1.6;                                          // crater
       const fr = P('frost'), frd = Math.hypot(x - fr.x, z - fr.z); if (frd < 20) y = y * smooth(12, 20, frd) + 0.6 * (1 - smooth(12, 20, frd));   // flat frozen lake
       const lt = P('light'), ld = Math.hypot(x - lt.x, z - lt.z); y += Math.max(0, 9 - ld * 0.35);   // lighthouse cliff
-      for (const p of places) { const pd = Math.hypot(x - p.x, z - p.z); if (pd < p.r && p.id !== 'forge' && p.id !== 'light') y = y * smooth(p.r * 0.55, p.r, pd) + 2.4 * (1 - smooth(p.r * 0.55, p.r, pd)); }   // flat-ish places
+      for (const p of places) { const pd = Math.hypot(x - p.x, z - p.z); if (pd < p.r && p.id !== 'forge' && p.id !== 'light' && !p.inner) y = y * smooth(p.r * 0.55, p.r, pd) + 2.4 * (1 - smooth(p.r * 0.55, p.r, pd)); }   // flat-ish places
+      for (const id of ['dunes', 'marsh']) { const p = P(id), d = Math.hypot(x-p.x,z-p.z), k = 1-smooth(p.r*.65,p.r+5,d);
+        const y1 = id === 'dunes' ? 3.3 + Math.sin(x*.19+z*.09)*1.3 + Math.cos(z*.22)*.7 : .8 + n2(x/9,z/9)*.25; y = y*(1-k)+y1*k; }
       const rd = roadDist(x, z); if (rd < 5) y = y * 0.6 + 2.4 * 0.4 * (1 - rd / 5) + y * 0.4 * (rd / 5);   // roads follow the ground, softened
       if (d > cr - 14) y = y * (1 - smooth(cr - 14, cr, d)) + 0.4 * smooth(cr - 14, cr, d);   // beaches
       if (d > cr) y = 0.4 - Math.min(6, (d - cr) * 0.35);                       // sea floor
@@ -1990,14 +1997,14 @@ window.GK_ONLINE_CONFIG = {
     function feet(x, z, dive) { return dive && swimming(x, z) ? Math.max(DIVE_Y, height(x, z) + 0.3) : ground(x, z); }
 
     // ---------- scenery + colliders ----------
-    const scenery = [], colliders = [], chests = [];
+    const scenery = [], colliders = [], chests = [], buildings = [], surfaces = [], walkSolids = [], climbs = [];
     const free = (x, z, r) => colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + r) && roadDist(x, z) > 4.5 && onLand(x, z) && chests.every(c => Math.hypot(c.x - x, c.z - z) > r + 1.5);
     const solids = [];   // {c: 1, x, z, r, y0, y1} vertical cylinder · {b: 1, x, z, hx, hz, rot, y0, y1} box turned like the model (rotY)
     const cyl = (x, z, r, y0, h) => solids.push({ c: 1, x, z, r, y0, y1: y0 + h });
     const box = (x, z, hx, hz, rot, y0, h) => solids.push({ b: 1, x, z, hx, hz, rot, y0, y1: y0 + h });
     const SHAPE = {
-      house: (o, g) => box(o.x, o.z, 2.6 * o.s, 2.1 * o.s, o.rot, g - 0.2, 5.6 * o.s),
-      barn: (o, g) => box(o.x, o.z, 3 * o.s, 2.5 * o.s, o.rot, g - 0.2, 6 * o.s),
+      house: () => {}, // hollow walls are built below, with an actual doorway
+      barn: () => {},
       stall: (o, g) => box(o.x, o.z, 1.45, 1.05, o.rot, g, 2.4),
       forgeHut: (o, g) => box(o.x, o.z, 2.5, 2, o.rot, g - 0.2, 4.4),
       lighthouse: (o, g) => cyl(o.x, o.z, 2.6, g - 0.2, 16.5),
@@ -2102,7 +2109,66 @@ window.GK_ONLINE_CONFIG = {
       meadows.push({ x: Math.round(x), z: Math.round(z), r: Math.round(r) });
     }
     function inMeadow(x, z) { if (roadDist(x, z) < 3.6) return false; for (const m of meadows) if (Math.hypot(x - m.x, z - m.z) < m.r) return true; return false; }
+    // Keep real entrances clear; the previous decorative doors had no approach reservation.
+    const homes=scenery.filter(o=>o.kind==='house'||o.kind==='barn');
+    for(let i=scenery.length-1;i>=0;i--){const o=scenery[i];if(!['oak','pine','bush','flowers','rock','boulder','fence','well'].includes(o.kind))continue;
+      if(homes.some(b=>{const dx=o.x-b.x,dz=o.z-b.z,c=Math.cos(b.rot),s=Math.sin(b.rot),x=dx*c-dz*s,z=dx*s+dz*c;return Math.abs(x)<2.6&&z>1&&z<(b.kind==='barn'?2.5:2.1)*(b.s||1)+7;})){
+        scenery.splice(i,1);const j=colliders.findIndex(c=>c.x===o.x&&c.z===o.z);if(j>=0)colliders.splice(j,1);
+      }
+    }
     for (const o of scenery) { const f = SHAPE[o.kind]; if (f) f(o, height(o.x, o.z)); }
+    // Shared structure geometry. Models and host movement use these same dimensions.
+    const local = (o,x,z) => { const c=Math.cos(o.rot||0),s=Math.sin(o.rot||0),dx=x-o.x,dz=z-o.z; return [dx*c-dz*s,dx*s+dz*c]; };
+    const at = (o,x,z) => { const c=Math.cos(o.rot||0),s=Math.sin(o.rot||0); return [o.x+x*c+z*s,o.z-x*s+z*c]; };
+    function slab(o,x,z,hx,hz,y,h,walk=true) { const p=at(o,x,z), b={b:1,x:p[0],z:p[1],hx,hz,rot:o.rot||0,y0:o.base+y,y1:o.base+y+h}; solids.push(b);if(walk)walkSolids.push(b);return b; }
+    function surface(o,x,z,hx,hz,y) { const p=at(o,x,z);surfaces.push({x:p[0],z:p[1],hx,hz,rot:o.rot||0,y:o.base+y}); }
+    for(const o of scenery) if(o.kind==='house'||o.kind==='barn') {
+      // The footprint used during placement is now replaced by thin, open walls.
+      const ci=colliders.findIndex(c=>c.x===o.x&&c.z===o.z);if(ci>=0)colliders.splice(ci,1);
+      const barn=o.kind==='barn',s=o.s||1,hx=(barn?3:2.6)*s,hz=(barn?2.5:2.1)*s,h=(barn?3.6:3.2)*s,door=1.45*s;
+      const corners=[[-hx,-hz],[hx,-hz],[-hx,hz],[hx,hz]].map(p=>at(o,...p));
+      o.base=Math.max(height(o.x,o.z),...corners.map(p=>height(...p)))+.08;
+      const b={...o,hx,hz,h,door};buildings.push(b);
+      slab(o,-hx,0,.12*s,hz,0,h);slab(o,hx,0,.12*s,hz,0,h);slab(o,0,-hz,hx,.12*s,0,h);
+      const wing=(hx-door)/2;for(const sign of [-1,1])slab(o,sign*(door+wing),hz,wing,.12*s,0,h);
+      slab(o,0,hz,door,.12*s,2.45*s,h-2.45*s);
+      slab(o,0,0,hx,hz,-8,8);surface(o,0,0,hx,hz,0);
+      slab(o,0,0,hx+.15*s,hz+.15*s,h,.15*s);surface(o,0,0,hx+.15*s,hz+.15*s,h+.15*s);
+      // A broad, gentle doorstep remains usable on sloping hamlet ground.
+      o.entry=[];const end=at(o,0,hz+6),ey=height(...end);for(let i=0;i<24;i++){const z=hz+.125+i*.25,p=at(o,0,z),t=(i+.5)/24,y=Math.max(height(...p),o.base*(1-t)+ey*t);surfaces.push({x:p[0],z:p[1],hx:door,hz:.15,rot:o.rot||0,y});o.entry.push({z,y:y-o.base,w:door*2});}
+    }
+    // Four marked stairs: lookout decks, open underneath; no teleporting to the top.
+    for(const id of ['dunes','marsh','light','market']) {
+      const p=P(id);let found=null;
+      for(let k=0;k<32&&!found;k++){const a=k*Math.PI/16,o={x:p.x+Math.cos(a)*(p.r+8),z:p.z+Math.sin(a)*(p.r+8),rot:-a+Math.PI/2};
+        const footprint=[];for(let z=-3;z<21;z+=2)for(const x of [-3,0,3])footprint.push(at(o,x,z));
+        if(footprint.every(q=>onLand(...q)&&colliders.every(c=>Math.hypot(c.x-q[0],c.z-q[1])>c.r+1.8)&&buildings.every(b=>{const v=local(b,...q);return Math.abs(v[0])>b.hx+2||v[1]<-b.hz-2||v[1]>b.hz+8;}))){found=o;}
+      }
+      if(!found)continue;
+      const o=found;o.kind='lookout';o.s=1;o.base=Math.max(...[-3,3].flatMap(x=>[-3,13.2].map(z=>height(...at(o,x,z)))))+.1;
+      scenery.push(o);climbs.push(o);
+      const h=3.6;slab(o,0,0,2.8,2.5,h-.18,.18);surface(o,0,0,2.8,2.5,h);
+      for(let i=0;i<12;i++){const y=h-i*.3,z=2.5+.45+i*.9;slab(o,0,z,1.3,.45,0,y);surface(o,0,z,1.3,.45,y);}
+      // Feather the foot of the stairs into the terrain.
+      o.entry=[];const end=at(o,0,19.3),ey=height(...end);for(let i=0;i<24;i++){const z=13.3+i*.25,q=at(o,0,z),t=(i+.5)/24,y=Math.max(height(...q),(o.base+.3)*(1-t)+ey*t);surfaces.push({x:q[0],z:q[1],hx:1.3,hz:.15,rot:o.rot,y});o.entry.push({z,y:y-o.base,w:2.6});}
+      for(const x of [-2.65,2.65])for(const z of [-2.35,2.35])slab(o,x,z,.1,.1,0,h);
+      slab(o,0,-2.45,2.8,.08,h,.8);for(const x of [-2.75,2.75])slab(o,x,0,.08,2.5,h,.8);
+    }
+    function inBox(b,x,z,pad=0){const p=local(b,x,z);return Math.abs(p[0])<b.hx+pad&&Math.abs(p[1])<b.hz+pad;}
+    function indoors(x,y,z){return buildings.find(b=>inBox(b,x,z,-.15)&&y>=b.base-.3&&y<b.base+b.h-.3)||null;}
+    function landing(x,z,fromY){let y=feet(x,z);for(const s of surfaces)if(s.y<=fromY+.38&&s.y>y&&inBox(s,x,z,.43))y=s.y;return y;}
+    function blocked(x,y,z,r=.42){return walkSolids.some(b=>y+.38<b.y1&&y+1.65>b.y0&&inBox(b,x,z,r));}
+    function walk(x0,y0,z0,x,z,dt,dive){
+      const n=Math.max(1,Math.ceil(Math.hypot(x-x0,z-z0)/.22)),dx=(x-x0)/n,dz=(z-z0)/n;let px=x0,pz=z0,py=y0;
+      for(let i=0;i<n;i++){
+        const tryAt=(nx,nz)=>{if(!canMove(px,pz,nx,nz))return false;const floor=landing(nx,nz,py),ny=Math.max(floor,py-9*Math.min(.25,dt)/n);
+          if(blocked(nx,ny,nz)||colliders.some(c=>Math.hypot(nx-c.x,nz-c.z)<c.r+.4))return false;px=nx;pz=nz;py=ny;return true;};
+        if(!tryAt(px+dx,pz+dz)){if(dx)tryAt(px+dx,pz);if(dz)tryAt(px,pz+dz);}
+      }
+      if(dive&&swimming(px,pz))py=feet(px,pz,true);
+      return [px,py,pz];
+    }
+
     // ---------- spawn spots (respawns, bots) ----------
     function randomLand(r2, cx, cz, R) {
       for (let t = 0; t < 60; t++) { const a = r2() * 6.28, d = Math.sqrt(r2()) * R, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d; if (onLand(x, z) && colliders.every(c => Math.hypot(c.x - x, c.z - z) > c.r + 1)) return [x, z]; }
@@ -2118,7 +2184,7 @@ window.GK_ONLINE_CONFIG = {
       const from = [-dir[0] * 215 + side[0] * off, -dir[1] * 215 + side[1] * off], to = [dir[0] * 215 + side[0] * off, dir[1] * 215 + side[1] * off];
       return { from, to, dy: [0, 5, -5, 9, -9, 3, -3, 7][k % 8] };
     }
-    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
+    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, buildings, surfaces, walkSolids, climbs, indoors, landing, blocked, walk, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
   }
 
   AR.Island = { PLACES, HAVEN, build };
@@ -2605,7 +2671,7 @@ window.GK_ONLINE_CONFIG = {
         else if (d > AR.Motion.distance(P.motion, this.t(now) - dt, this.t(now)) * B().player.maxSpeedSlack + 2.5) bad = 'fast';
       }
       if (bad) { if (P.pos) this.teleport(pid, P.pos[0], P.pos[2], P.pos[1]); return; }
-      const g = I.ground(x, z);
+      const g = st === 'glide' ? I.landing(x,z,P.pos ? P.pos[1] : y) : I.ground(x, z);
       if (st === 'glide') {
         const minY = Math.max(g, (P.glideY0 || B().player.glide.startY) - B().player.glide.fall * 1.3 * ((now - P.glideAt) / 1000) - 3);
         y = Math.max(g, Math.min(y, P.pos ? P.pos[1] + 2 : y), minY);
@@ -2616,7 +2682,10 @@ window.GK_ONLINE_CONFIG = {
           if (P.ride) this.dismount(P);
           if (m.stance && P.pos && !I.swimming(P.pos[0], P.pos[2])) { m.stance = ''; this.touchP(pid); }
         }
-        y = I.feet(x, z, wet && m && !!m.stance);
+        const q = P.pos ? I.walk(P.pos[0],P.pos[1],P.pos[2],x,z,dt,wet&&m&&!!m.stance) : [x,I.feet(x,z),z];
+        // Never trust a client-supplied height or a path through a building wall.
+        if(Math.hypot(q[0]-x,q[2]-z)>.65){this.teleport(pid,...[q[0],q[2],q[1]]);return;}
+        x=q[0];y=q[1];z=q[2];
       } else y = g;
       P.pos = [x, y, z, yaw]; P.posAt = now;
       this.dirty.pos = true;
@@ -3254,9 +3323,8 @@ window.GK_ONLINE_CONFIG = {
     }
   };
   SP.knockBack = function (T, a, dist) {
-    const I = this.island(); let x = T.pos[0], z = T.pos[2];
-    for (let s = 0; s < 8; s++) { const nx = x + Math.cos(a) * dist / 8, nz = z + Math.sin(a) * dist / 8; if (!I.onLand(nx, nz) || I.colliders.some(c => Math.hypot(c.x - nx, c.z - nz) < c.r + 0.4)) break; x = nx; z = nz; }
-    this.teleport(T.id, x, z);
+    const I=this.island(),nx=T.pos[0]+Math.cos(a)*dist,nz=T.pos[2]+Math.sin(a)*dist;
+    const q=I.walk(T.pos[0],T.pos[1],T.pos[2],nx,nz,.1);this.teleport(T.id,q[0],q[2],q[1]);
   };
   /** Damage after toughness (Guardian), armour and the shield. Nobody is hurt inside a Question Cage. */
   SP.damage = function (T, amount, src) {
@@ -3276,9 +3344,9 @@ window.GK_ONLINE_CONFIG = {
   // ===================== items, classes, abilities =====================
   SP.forwardPoint = function (P, x, z, dist) {   // the furthest free land point towards (x, z), up to dist
     const I = this.island(), a = isFinite(x) && isFinite(z) && (x !== P.pos[0] || z !== P.pos[2]) ? Math.atan2(z - P.pos[2], x - P.pos[0]) : Math.atan2(Math.cos(P.pos[3]), Math.sin(P.pos[3]));
-    let bx = P.pos[0], bz = P.pos[2];
-    for (let s = 1; s <= 12; s++) { const nx = P.pos[0] + Math.cos(a) * dist * s / 12, nz = P.pos[2] + Math.sin(a) * dist * s / 12; if (!I.onLand(nx, nz) || I.colliders.some(c => Math.hypot(c.x - nx, c.z - nz) < c.r + 0.5)) break; bx = nx; bz = nz; }
-    return [bx, bz, a];
+    let q=[P.pos[0],P.pos[1],P.pos[2]];
+    for(let i=1;i<=12;i++){const nx=P.pos[0]+Math.cos(a)*dist*i/12,nz=P.pos[2]+Math.sin(a)*dist*i/12;if(!I.onLand(nx,nz))break;const p=I.walk(...q,nx,nz,.01);if(Math.hypot(p[0]-nx,p[2]-nz)>.1)break;q=p;}
+    return [q[0],q[2],a,q[1]];
   };
   SP.useItem = function (pid, i, x, z) {
     const P = this.player(pid), now = this.now(), slot = P && P.items && P.items[i];
@@ -3286,7 +3354,7 @@ window.GK_ONLINE_CONFIG = {
     const D = B().items[slot.ty], C = B().classes[P.cls] || {};
     if (slot.ty === 'potion') { if (P.hp >= this.maxHp(P)) return this.notify(pid, 'Your health is already full.', 'info'); P.hot = { per: D.heal * (1 + (C.potion || 0)) / D.overSec, until: now + D.overSec * 1000 }; this.addFx('h', P.pos[0], P.pos[2]); }
     else if (slot.ty === 'shield') { if (P.shield >= B().inventory.maxShield) return this.notify(pid, 'Your shield is full.', 'info'); P.shield = Math.min(B().inventory.maxShield, P.shield + D.shield); this.addFx('s', P.pos[0], P.pos[2]); }
-    else if (slot.ty === 'blink') { const p = this.forwardPoint(P, x, z, D.dist); this.addFx('k', P.pos[0], P.pos[2], p[0], p[1]); this.teleport(pid, p[0], p[1]); }
+    else if (slot.ty === 'blink') { const p = this.forwardPoint(P, x, z, D.dist); this.addFx('k', P.pos[0], P.pos[2], p[0], p[1]); this.teleport(pid, p[0], p[1],p[3]); }
     else if (slot.ty === 'fog') { (this.s.fogs = this.s.fogs || []).push({ x: r2(P.pos[0]), z: r2(P.pos[2]), r: D.r, until: now + D.sec * 1000, sq: P.squad }); this.touchG(); }
     else if (slot.ty === 'feather') { P.state = 'glide'; P.glideAt = now; P.glideY0 = this.island().ground(P.pos[0], P.pos[2]) + D.up; this.teleport(pid, P.pos[0], P.pos[2], P.glideY0); }
     slot.n--; if (slot.n <= 0) P.items[i] = null;
@@ -3303,11 +3371,11 @@ window.GK_ONLINE_CONFIG = {
     const C = B().classes[P.cls], A = C && C.ability; if (!A) return;
     if (now < (P.abilityAt || 0)) return this.notify(pid, A.name + ' is recharging (' + Math.ceil((P.abilityAt - now) / 1000) + ' s).', 'info');
     P.abilityAt = now + A.cd * 1000;
-    if (P.cls === 'wizard') { const p = this.forwardPoint(P, x, z, A.dist); this.addFx('k', P.pos[0], P.pos[2], p[0], p[1]); this.teleport(pid, p[0], p[1]); }
+    if (P.cls === 'wizard') { const p = this.forwardPoint(P, x, z, A.dist); this.addFx('k', P.pos[0], P.pos[2], p[0], p[1]); this.teleport(pid, p[0], p[1],p[3]); }
     else if (P.cls === 'archer') { P.hawkUntil = now + A.sec * 1000; }
     else if (P.cls === 'guardian') {   // Shield Charge: dash forward; enemies next to the path are hit and pushed away
       const x0 = P.pos[0], z0 = P.pos[2], p = this.forwardPoint(P, x, z, A.dist);
-      this.addFx('c', x0, z0, p[0], p[1]); this.teleport(pid, p[0], p[1]);
+      this.addFx('c', x0, z0, p[0], p[1]); this.teleport(pid, p[0], p[1],p[3]);
       const dx = p[0] - x0, dz = p[1] - z0, L2 = dx * dx + dz * dz || 1;
       for (const T of this.enemiesOf(P)) {
         const k = U.clamp(((T.pos[0] - x0) * dx + (T.pos[2] - z0) * dz) / L2, 0, 1), d = Math.hypot(T.pos[0] - (x0 + dx * k), T.pos[2] - (z0 + dz * k));
@@ -3504,7 +3572,7 @@ window.GK_ONLINE_CONFIG = {
       if (!inRound(P)) continue;
       this.stopAnswering(P); this.dismount(P);
       if (P.motion && AR.Motion.active(P.motion, this.t())) AR.Motion.sprint(P.motion, this.t(), false);
-      if (P.state === 'glide' && P.pos) { P.state = 'ground'; this.teleport(P.id, P.pos[0], P.pos[2]); }
+      if (P.state === 'glide' && P.pos) { P.state = 'ground'; this.teleport(P.id, P.pos[0], P.pos[2],this.island().landing(P.pos[0],P.pos[2],P.pos[1])); }
       P.cage = { n: 0, right: 0 }; P.cur = null;
       this.touchP(P.id); this.touchPv(P.id);
     }
@@ -3657,10 +3725,10 @@ window.GK_ONLINE_CONFIG = {
     grid() {
       const I = this.S.island();
       if (!this._grid || this._gridSeed !== I.seed) {
-        this._grid = new AR.PathGrid({ def: { edge: I.half }, height: () => 0, colliders: I.colliders }); this._gridSeed = I.seed;   // walls are rows of small colliders
+        this._grid = new AR.PathGrid({ def: { edge: I.half }, height: () => 0, colliders: I.colliders }, 1.5); this._gridSeed = I.seed;   // walls are rows of small colliders
         const G = this._grid;
         G.cost = new Uint8Array(G.n * G.n);   // bots can swim, but water is 4× slower to cross, so they go round when they can
-        for (let j = 0; j < G.n; j++) for (let i = 0; i < G.n; i++) { const [x, z] = G.center(i, j); if (!I.inBounds(x, z)) G.block[j * G.n + i] = 1; else if (I.swimming(x, z)) G.cost[j * G.n + i] = 4; }
+        for (let j = 0; j < G.n; j++) for (let i = 0; i < G.n; i++) { const [x, z] = G.center(i, j); if (!I.inBounds(x, z) || I.blocked(x,I.feet(x,z),z,.5)) G.block[j * G.n + i] = 1; else if (I.swimming(x, z)) G.cost[j * G.n + i] = 4; }
       }
       return this._grid;
     }
@@ -3697,7 +3765,7 @@ window.GK_ONLINE_CONFIG = {
     glide(P, m, dt) {
       const S = this.S, I = S.island(), G = B().player.glide, goal = m.goal || m.jumpPlace || [0, 0];   // (m.goal is set when the glide starts)
       const dx = goal[0] - P.pos[0], dz = goal[1] - P.pos[2], d = Math.hypot(dx, dz), sp = Math.min(d, G.speed * dt);
-      const x = P.pos[0] + (d ? dx / d * sp : 0), z = P.pos[2] + (d ? dz / d * sp : 0), g = I.ground(x, z);
+      const x = P.pos[0] + (d ? dx / d * sp : 0), z = P.pos[2] + (d ? dz / d * sp : 0), g = I.landing(x,z,P.pos[1]);
       let y = P.pos[1] - G.fall * dt;
       if (y <= g + 0.6) { P.state = 'ground'; y = g; S.touchP(P.id); m.goal = null; }
       P.pos = [x, y, z, Math.atan2(dx, dz)]; P.posAt = S.now(); S.dirty.pos = true;
@@ -3789,6 +3857,7 @@ window.GK_ONLINE_CONFIG = {
     unstick(P, m, st) {
       const S = this.S, I = S.island(), now = S.now();
       for (const c of I.colliders) { const dx = P.pos[0] - c.x, dz = P.pos[2] - c.z, d = Math.hypot(dx, dz); if (d < c.r + 0.3) { const k = (c.r + 0.5) / (d || 1); P.pos = [c.x + (d ? dx : 1) * k, P.pos[1], c.z + (d ? dz : 0) * k, P.pos[3]]; P.pos[1] = I.feet(P.pos[0], P.pos[2]); S.dirty.pos = true; } }
+      if(I.blocked(P.pos[0],P.pos[1],P.pos[2])){const q=this.grid().nearestFree(P.pos[0],P.pos[2],8);if(q){P.pos=[q[0],I.feet(...q),q[1],P.pos[3]];S.dirty.pos=true;m.path=[];m.goal=null;}}
       const busy = m.path.length || m.chest || m.bag || (m.goal && Math.hypot(m.goal[0] - P.pos[0], m.goal[1] - P.pos[2]) > 3);
       if (!m.chk || !busy || Math.hypot(P.pos[0] - m.chk.x, P.pos[2] - m.chk.z) > 1.2) { m.chk = { x: P.pos[0], z: P.pos[2], at: now }; return false; }
       if (now - m.chk.at < 3000) return false;
@@ -3811,15 +3880,20 @@ window.GK_ONLINE_CONFIG = {
     walk(P, m, dt) {
       const S = this.S, I = S.island();
       let left = B().player.speed * 0.9 * dt * (I.swimming(P.pos[0], P.pos[2]) ? B().player.swim.speed : 1), x = P.pos[0], z = P.pos[2], yaw = P.pos[3];
-      while (left > 0 && m.path.length) {
-        const wp = m.path[0], dx = wp[0] - x, dz = wp[1] - z, d = Math.hypot(dx, dz);
-        if (d < 1e-3) { m.path.shift(); continue; }
+      // Ground A* cannot route a bot that landed above it through a deck rail.
+      // Walk to the marked open stair edge first, then descend before resuming A*.
+      let route=m.path;
+      for(const c of I.climbs){const dx=x-c.x,dz=z-c.z,co=Math.cos(c.rot),sn=Math.sin(c.rot),lx=dx*co-dz*sn,lz=dx*sn+dz*co;
+        if(P.pos[1]>c.base+.4&&Math.abs(lx)<3.1&&lz>-2.6&&lz<13.3){const zz=Math.abs(lx)>.18?Math.max(-1.8,Math.min(1.8,lz)):20;route=[[c.x+zz*sn,c.z+zz*co]];break;}}
+      while (left > 0 && route.length) {
+        const wp = route[0], dx = wp[0] - x, dz = wp[1] - z, d = Math.hypot(dx, dz);
+        if (d < 1e-3) { route.shift(); continue; }
         const k = Math.min(1, left / d); x += dx * k; z += dz * k; left -= d * k; if (!m.target) yaw = Math.atan2(dx, dz);
-        if (k >= 1) m.path.shift(); else break;
+        if (k >= 1) route.shift(); else break;
       }
       if (!I.canMove(P.pos[0], P.pos[2], x, z)) { m.path = []; return; }
       if (P.ride && I.swimming(x, z)) S.dismount(P);
-      if (x !== P.pos[0] || z !== P.pos[2]) { P.pos = [x, I.feet(x, z), z, yaw]; P.posAt = S.now(); S.dirty.pos = true; }
+      if (x !== P.pos[0] || z !== P.pos[2]) { const q=I.walk(P.pos[0],P.pos[1],P.pos[2],x,z,dt); P.pos = [q[0],q[1],q[2],yaw]; P.posAt = S.now(); S.dirty.pos = true; }
     }
     stepTo(P, goal, dt, y) {
       const S = this.S, dx = goal[0] - P.pos[0], dz = goal[1] - P.pos[2], d = Math.hypot(dx, dz), sp = Math.min(d, B().player.speed * 0.6 * dt);
@@ -5065,27 +5139,40 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     g.add(G().cone(0, 0, 0, 1.4, 6, '#80ffdb', { seg: 6, flat: true, glow: 0.8 }).move(0, 1, 0));
     return g;
   }
-  function house(s, v) {   // a cottage: stone base, timber walls, steep roof with a chimney, windows on every side
-    const g = G(), roof = ROOF[(v || 0) % 4], wall = ['#efe3c8', '#e6d5b0', '#f2e9d8', '#dccaa4'][(v || 0) % 4];
-    g.box(0, 0, 0, 5.2, 0.7, 4.2, STONE, { top: DARK });
-    g.box(0, 0.7, 0, 5, 2.5, 4, wall);
-    for (const x of [-2.45, 2.45]) for (const z of [-1.95, 1.95]) g.box(x, 0.7, z, 0.28, 2.5, 0.28, WOOD);
-    g.box(0, 2.0, 2.02, 5, 0.18, 0.06, WOOD); g.box(0, 2.0, -2.02, 5, 0.18, 0.06, WOOD);
-    g.add(G().cone(0, 0, 0, 3.95, 2.6, roof, { seg: 4, flat: true }).rotY(Math.PI / 4).scale(1.08, 1, 0.88).move(0, 3.2, 0));
-    g.box(1.4, 4.0, -0.6, 0.7, 1.9, 0.7, '#8a7f73'); g.box(1.4, 5.85, -0.6, 0.85, 0.15, 0.85, DARK);
-    g.box(0, 0.7, 2.04, 1.1, 1.9, 0.08, '#5c3a1e'); g.box(0, 2.6, 2.05, 1.3, 0.12, 0.08, WOOD);
-    for (const x of [-1.6, 1.6]) { g.box(x, 1.5, 2.04, 0.85, 0.75, 0.06, '#ffe8a3', { glow: 0.35 }); g.box(x, 1.45, 2.08, 1.0, 0.1, 0.1, WOOD); }
-    for (const z of [-1, 1]) for (const x of [-2.53, 2.53]) g.box(x, 1.5, z, 0.06, 0.7, 0.8, '#ffe8a3', { glow: 0.3 });
-    return g;
+  function house(s,v,o){return home(s,v,false,o);}
+  function barn(s,v,o){return home(s,v,true,o);}
+  function home(s,v,barn,o){
+    const g=G(),hx=barn?3:2.6,hz=barn?2.5:2.1,h=barn?3.6:3.2,door=1.45,wing=(hx-door)/2;
+    const wall=barn?'#9e493b':['#efe3c8','#e6d5b0','#f2e9d8','#dccaa4'][(v||0)%4];
+    g.box(0,-8,0,hx*2,8,hz*2,'#98734e');
+    for(const x of [-hx,hx])g.box(x,0,0,.24,h,hz*2,wall);
+    g.box(0,0,-hz,hx*2,h,.24,wall);
+    for(const sign of [-1,1])g.box(sign*(door+wing),0,hz,wing*2,h,.24,wall);
+    g.box(0,2.45,hz,door*2,h-2.45,.24,wall);
+    for(const x of [-door,door])g.box(x,0,hz+.14,.14,2.55,.14,WOOD);
+    g.box(0,2.48,hz+.15,door*2+.2,.16,.16,WOOD);
+    // Flat weatherproof terrace: a real solid roof, rather than a painted opaque block.
+    g.box(0,h,0,hx*2+.3,.15,hz*2+.3,ROOF[(v||0)%4]);
+    for(const x of [-hx,hx])g.box(x,h+.15,0,.16,.22,hz*2,STONE);
+    g.box(0,h+.15,-hz,hx*2,.22,.16,STONE);
+    // Cover inside, kept clear of the central doorway.
+    g.box(-hx+.6,0,-hz+.7,.85,.65,1.05,WOOD);g.box(hx-.65,.45,-hz+.6,1.05,.15,.65,WOOD);
+    for(const x of [hx-1.05,hx-.25])g.box(x,0,-hz+.6,.1,.45,.5,WOOD);
+    for(const x of [-hx+.3,hx-.3])g.box(x,1.6,hz+.15,.22,.35,.18,'#ffd078',{glow:.3});
+    // The open door is marked by a small gold lintel and a welcome mat.
+    g.box(0,.01,hz-.4,1.8,.025,.6,'#326875');
+    g.scale(s||1,s||1,s||1);for(const e of (o&&o.entry)||[]){const x=e.w/2,z=e.z,y=e.y;g.quad([-x,y,z-.125],[-x,y,z+.125],[x,y,z+.125],[x,y,z-.125],STONE,[0,y-1,z]);}return g;
   }
-  function barn(s, v) {   // a big red barn with white trim and a hay door
-    const g = G(), red = ['#a93226', '#8e3b2e', '#b0442f', '#7d3c2a'][(v || 0) % 4];
-    g.box(0, 0, 0, 6, 3.6, 5, red);
-    g.add(G().cone(0, 0, 0, 4.3, 2.4, '#5a4636', { seg: 4, flat: true }).rotY(Math.PI / 4).scale(1.02, 1, 0.84).move(0, 3.6, 0));
-    g.box(0, 0, 2.53, 2.2, 2.8, 0.08, '#f1ece2'); g.box(0, 0.1, 2.58, 1.9, 2.5, 0.06, '#6d2b20');
-    g.box(0, 3.0, 2.53, 1.0, 0.8, 0.08, '#d9b35b');
-    for (const x of [-2.95, 2.95]) g.box(x, 0, 2.5, 0.15, 3.6, 0.15, '#f1ece2');
-    for (let i = 0; i < 2; i++) g.cyl(-3.8 + i * 0.4, 0, 1.5 - i * 1.2, 0.7, 1.1, '#d9b35b', { seg: 8, flat: true });
+  function lookout(s,v,o){
+    const g=G(),h=3.6;for(const e of (o&&o.entry)||[]){const x=e.w/2,z=e.z,y=e.y;g.quad([-x,y,z-.125],[-x,y,z+.125],[x,y,z+.125],[x,y,z-.125],STONE,[0,y-1,z]);}g.box(0,h-.18,0,5.6,.18,5,'#986c42');
+    for(const x of [-2.65,2.65])for(const z of [-2.35,2.35])g.box(x,-8,z,.2,h+8,.2,WOOD);
+    for(let i=0;i<12;i++){const y=h-i*.3,z=2.95+i*.9;g.box(0,0,z,2.6,y,.9,'#9f8057');g.box(0,y-.025,z-.35,2.6,.035,.15,'#f2cf69');}
+    g.box(0,h,-2.45,5.6,.12,.16,WOOD);g.box(0,h+.68,-2.45,5.6,.12,.16,WOOD);
+    for(const x of [-2.75,2.75]){g.box(x,h,0,.16,.12,5,WOOD);g.box(x,h+.68,0,.16,.12,5,WOOD);}
+    // Gold upward chevrons show the stair entrance from a distance.
+    for(const x of [-1.55,1.55]){g.box(x,0,12.8,.12,2,.12,WOOD);g.box(x,.9,12.8,.5,.8,.08,'#276d78');
+      g.add(G().box(-.12,0,0,.12,.4,.1,'#ffe29a').rotZ(-.65).move(x,1.12,12.87));
+      g.add(G().box(.12,0,0,.12,.4,.1,'#ffe29a').rotZ(.65).move(x,1.12,12.87));}
     return g;
   }
   function well() {
@@ -5236,7 +5323,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   }
   function dragonRib() { return G().add(G().cyl(0, 0, 0, 0.35, 7, '#e9e2d0', { seg: 5, flat: true, rTop: 0.18 }).rotZ(-0.55).move(0, 0, 0)); }
 
-  AR.ModelsRoyale = { saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, griffinSaddle, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
+  AR.ModelsRoyale = { lookout, saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, griffinSaddle, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -5379,7 +5466,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     /** Build the island (once per island seed). */
     buildWorld(I) {
       if (this.world) this.disposeWorld();
-      const terrain = new GK.Geo(), step = 4, half = I.half + 30, n = Math.ceil(half * 2 / step) + 1;
+      const terrain = new GK.Geo(), step = 4.2, half = I.half + 30, n = Math.ceil(half * 2 / step) + 1;
       const grass = ['#6aa84f', '#78b65a', '#5f9e46', '#82bf63'].map(C), dark = C('#4f8a3c'), sand = C('#e2cf98'), road = C('#c8a46a'), stone = C('#b3ada0'),
         snow = C('#eef4f7'), meadow = C('#7f9c3a'), ice = C('#bfe3f2'), ash = C('#6d625c'), lava = C('#ff7b2e'), rock = C('#8a8f80'), seaBed = C('#c9b98a');
       const P = id => I.places.find(p => p.id === id), W = P('wood'), FR = P('frost'), F = P('forge'), CI = P('citadel'), LT = P('light');
@@ -5389,6 +5476,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (Math.hypot(x - W.x, z - W.z) < W.r + 14) c = mix(c, dark, 0.6);
         const fr = Math.hypot(x - FR.x, z - FR.z); if (fr < 55) c = mix(c, snow, Math.min(1, (55 - fr) / 20)); if (fr < 20) c = ice;
         const fd = Math.hypot(x - F.x, z - F.z); if (fd < 34) c = mix(c, ash, Math.min(1, (34 - fd) / 12)); if (fd < 5.5) c = lava;
+        const region=I.placeOf(x,z);if(region && region.id==='dunes') c=mix(sand,C('#d5a559'),.25+.15*v);
+        if(region && region.id==='marsh') c=mix(C('#536b50'),C('#73918a'),v*.6);
         if (y > 8 && fd > 34) c = mix(c, rock, Math.min(1, (y - 8) / 4));
         const ld = Math.hypot(x - LT.x, z - LT.z); if (ld < 16) c = mix(c, rock, 0.5);
         if (I.inMeadow && I.inMeadow(x, z)) c = mix(c, meadow, 0.55);   // tall-grass meadows: a deeper, golden green
@@ -5419,7 +5508,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const sc = new GK.Geo(), place = (geo, x, z, yaw, dy) => sc.add(geo.rotY(yaw || 0).move(x, I.height(x, z) + (dy || 0), z));
       for (const s of I.scenery) {
         const f = (MR() && MR()[s.kind]) || M()[s.kind] || (AR.Models3 && AR.Models3[s.kind]); if (!f) continue;
-        place(f(s.s, s.v, s), s.x, s.z, s.rot, s.kind === 'rock' || s.kind === 'lavaRock' ? -0.15 : -0.05);
+        place(f(s.s, s.v, s), s.x, s.z, s.rot, s.base != null ? s.base-I.height(s.x,s.z) : s.kind === 'rock' || s.kind === 'lavaRock' ? -0.15 : -0.05);
       }
       // the floating Sky Haven
       const Hv = I.haven; sc.add(MR().haven(Hv.r).move(Hv.x, Hv.y, Hv.z));
@@ -5430,7 +5519,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       this.minimap = this.makeMinimap(I);
       return this.world;
     }
-    disposeWorld() { if (!this.world) return; for (const k of ['terrain', 'sea', 'scenery']) this.r.free(this.world[k]); this.world = null; this.statics = []; }
+    disposeWorld() { for(const key in this.grassCache||{})if(this.grassCache[key])this.r.free(this.grassCache[key]);this.grassCache={}; if(this.weatherCanvas)this.weatherCanvas.style.display='none'; if (!this.world) return; for (const k of ['terrain', 'sea', 'scenery']) this.r.free(this.world[k]); this.world = null; this.statics = []; }
 
     /** A top-down picture of the island for the minimap (drawn once). */
     makeMinimap(I) {
@@ -5443,6 +5532,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (Math.hypot(x - W.x, z - W.z) < W.r + 14) c = [0.31, 0.54, 0.24];
         if (Math.hypot(x - FR.x, z - FR.z) < 45) c = [0.88, 0.93, 0.95];
         if (Math.hypot(x - F.x, z - F.z) < 30) c = [0.45, 0.4, 0.38];
+        const region=I.placeOf(x,z);if(region&&region.id==='dunes')c=[.83,.69,.40];if(region&&region.id==='marsh')c=[.32,.43,.38];
         if (I.inMeadow && I.inMeadow(x, z)) c = [0.42, 0.55, 0.2];
         if (I.roadDist(x, z) < 3) c = [0.8, 0.66, 0.44];
         if (!I.onLand(x, z)) c = y > -0.2 ? [0.88, 0.8, 0.6] : [0.24, 0.55, 0.77];
@@ -5451,7 +5541,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       ctx.putImageData(img, 0, 0);
       // Names are baked into the existing map once, shared by students and the teacher.
       // Pixel offsets keep the eight two-line labels apart on the small 200px map.
-      const offsets = { citadel: [0, 9], wood: [0, -22], forge: [15, 13], frost: [16, 12], market: [12, 15], library: [-11, 15], dragon: [-14, 11], light: [-16, 12] };
+      const offsets = { citadel: [0, 9], wood: [0, -22], forge: [15, 13], frost: [23, 4], market: [12, 15], library: [-11, 15], dragon: [-14, 11], light: [-16, 12], dunes: [-3, -18], marsh: [4, 11] };
       ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       for (const p of I.places) {
         const off = offsets[p.id] || [0, 10], words = p.name.split(' ');
@@ -5460,11 +5550,11 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         const w = Math.ceil(Math.max(...lines.map(t => ctx.measureText(t).width))) + 6, h = lines.length * 10 + 4;
         const x = Math.max(w / 2 + 1, Math.min(size - w / 2 - 1, (p.x + half) * sc + off[0]));
         const y = Math.max(1, Math.min(size - h - 1, (p.z + half) * sc + off[1]));
-        ctx.fillStyle = 'rgba(12, 23, 35, 0.86)'; ctx.fillRect(Math.round(x - w / 2), Math.round(y), w, h);
-        ctx.fillStyle = '#fff'; lines.forEach((t, i) => ctx.fillText(t, x, y + 2 + i * 10));
+        ctx.strokeStyle = '#24394a'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+        ctx.fillStyle = '#ffe29a'; lines.forEach((t, i) => { ctx.strokeText(t, x, y + 2 + i * 10); ctx.fillText(t, x, y + 2 + i * 10); });
       }
       ctx.font = '13px sans-serif'; ctx.textBaseline = 'middle';
-      const mapArt = { citadel: 'castle', wood: 'heart', forge: 'bolt', frost: 'shield', market: 'bag', library: 'book', dragon: 'sword', light: 'star' };
+      const mapArt = { citadel: 'castle', wood: 'heart', forge: 'bolt', frost: 'shield', market: 'bag', library: 'book', dragon: 'sword', light: 'star', dunes: 'star', marsh: 'shield' };
       for (const p of I.places) {
         const x = (p.x + half) * sc, y = (p.z + half) * sc;
         if (AR.paintIcon) AR.paintIcon(ctx, mapArt[p.id], x, y, 13); else ctx.fillText(p.icon, x, y);
@@ -5521,7 +5611,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     drawFall(items, p, t, now, color) {
       const u = this.fallProgress(p, t), pos = p.fall && p.fall.p;
       if (u == null || !pos || pos.length < 4) return;
-      const I = this.world && this.world.island, ground = I ? I.ground(pos[0], pos[2]) : pos[1];
+      const I = this.world && this.world.island, ground = I ? I.landing(pos[0], pos[2],pos[1]) : pos[1];
       const y = pos[1] + (ground - pos[1]) * u * u;
       // Reuse the cached idle mesh, transform it on the GPU. No new pose/mesh per frame, including minimal graphics.
       this.drawChar(items, { look: p.look, cls: p.cls, squad: color, time: 0, walking: false,
@@ -5557,17 +5647,19 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     }
     buildGrass(I, ci, cj, CELL) {
       const g = new GK.Geo(), rnd = GK.util && GK.util.rng ? GK.util.rng(ci * 7349 + cj * 3163 + 11) : Math.random;
+      const near=I.surfaces.filter(s=>Math.hypot(s.x-(ci+.5)*CELL,s.z-(cj+.5)*CELL)<Math.hypot(s.hx,s.hz)+CELL);
+      const pathAt=(x,z)=>near.some(s=>{const dx=x-s.x,dz=z-s.z,c=Math.cos(s.rot),sn=Math.sin(s.rot);return Math.abs(dx*c-dz*sn)<s.hx+.3&&Math.abs(dx*sn+dz*c)<s.hz+.3;});
       const P = id => I.places.find(p => p.id === id), FR = P('frost'), F = P('forge'), CI = P('citadel');
       const cols = ['#5f9e46', '#6aa84f', '#4f8a3c', '#78b65a'], tips = ['#9ccc65', '#a5d46a', '#8bc34a', '#b5d97a'];
       const tallC = ['#6f8f2f', '#7d9b35', '#5f8228', '#8aa63f'], tallT = ['#c9d77a', '#d4dc84', '#b9cc6a', '#dfe39a'];
       for (let n = 0; n < 900; n++) {   // tall grass in the meadows (hide here!): dense blades up to 1.4 m
-        const x = (ci + rnd()) * CELL, z = (cj + rnd()) * CELL; if (!I.inMeadow(x, z)) continue;
+        const x = (ci + rnd()) * CELL, z = (cj + rnd()) * CELL; if (!I.inMeadow(x, z) || pathAt(x,z)) continue;
         const v = Math.floor(rnd() * 4), y = I.height(x, z);
         MR().grassBlades(g, x, y - 0.05, z, 1.05 + rnd() * 0.4, rnd() * 6.28, tallC[v], tallT[v]);
       }
       for (let n = 0; n < 170; n++) {
-        const x = (ci + rnd()) * CELL, z = (cj + rnd()) * CELL; if (I.inMeadow(x, z)) continue;
-        if (!I.onLand(x, z) || I.roadDist(x, z) < 3.6 || Math.hypot(x - FR.x, z - FR.z) < 50 || Math.hypot(x - F.x, z - F.z) < 34 || Math.hypot(x - CI.x, z - CI.z) < 20) continue;
+        const x = (ci + rnd()) * CELL, z = (cj + rnd()) * CELL; if (I.inMeadow(x, z) || pathAt(x,z)) continue;
+        if ((I.placeOf(x,z)||{}).inner || I.buildings.some(b=>Math.hypot(x-b.x,z-b.z)<5) || !I.onLand(x, z) || I.roadDist(x, z) < 3.6 || Math.hypot(x - FR.x, z - FR.z) < 50 || Math.hypot(x - F.x, z - F.z) < 34 || Math.hypot(x - CI.x, z - CI.z) < 20) continue;
         const d = Math.hypot(x, z); if (d > I.coastR(x, z) - 12) continue;
         const y = I.height(x, z); if (y > 8.5) continue;
         const v = Math.floor(rnd() * 4);
@@ -5579,7 +5671,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
 
     // ---------------- cameras ----------------
     thirdPerson(target) {
-      if (this.cam.perspective === 'first') { this.firstPerson(target); return; }
+      const island=this.world&&this.world.island;this.cam.indoorFirst=!!(island&&island.indoors(target[0],target[1],target[2]));
+      if (this.cam.perspective === 'first' || this.cam.indoorFirst) { this.firstPerson(target); return; }
       const c = this.cam, I = this.world && this.world.island; c.target = target;
       const cp = Math.cos(c.pitch), fx = Math.sin(c.yaw) * cp, fz = -Math.cos(c.yaw) * cp, fy = -Math.sin(c.pitch);
       const look = [target[0], target[1] + 1.6, target[2]];
@@ -5602,6 +5695,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         if (Math.abs(d[1]) < 1e-8) { if (look[1] < c.y || look[1] > c.y + c.h) continue; } else { const v0 = (c.y - look[1]) / d[1], v1 = (c.y + c.h - look[1]) / d[1]; lo = Math.max(lo, Math.min(v0, v1)); hi = Math.min(hi, Math.max(v0, v1)); }
         if (lo <= hi && hi > 0 && lo > 0.001) fraction = Math.min(fraction, Math.max(0, lo - 0.35 / len));
       }
+      const I=this.world&&this.world.island; if(I && AR.Collide){const hit=AR.Collide.ray(I,look,eye);if(hit)fraction=Math.min(fraction,Math.max(.06,hit.t-.2/len));}
       return GK.vec.add(look, GK.vec.scale(d, Math.max(0.06, fraction)));
     }
     /** Overhead (teacher spectator / menu): a tilted top-down camera. */
@@ -5613,7 +5707,22 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       r.setShadowFocus(this.cam.mode === 'third' ? this.cam.target : [this.cam.over.x, 0, this.cam.over.z]);
       r.setLights(this.lights);
       r.render(this.statics.concat(items));
+      this.weather(dt);
       if (dt) { const off = r.adapt(dt) || this.adaptMore(dt); if (off && this.onAdapt) this.onAdapt(off); }
+    }
+    weather(dt) {
+      const I=this.world&&this.world.island,tgt=this.cam.target,p=tgt&&I&&I.placeOf(tgt[0],tgt[2]);
+      const active=this.cam.mode==='third'&&p&&['dunes','marsh','frost','forge'].includes(p.id)&&!I.indoors(tgt[0],tgt[1],tgt[2]);
+      if(!active){if(this.weatherCanvas)this.weatherCanvas.style.display='none';this.weatherCount=0;return;}
+      if(!this.weatherCanvas){const cv=this.weatherCanvas=document.createElement('canvas');cv.className='region-weather';cv.setAttribute('aria-hidden','true');Object.assign(cv.style,{position:'fixed',inset:'0',width:'100%',height:'100%',pointerEvents:'none',zIndex:'auto'});document.body.insertBefore(cv,document.getElementById('labels'));}
+      const cv=this.weatherCanvas;cv.style.display='block';this.weatherTime=(this.weatherTime||0)+(dt||0);
+      // 10Hz on minimal/low, 20Hz otherwise; fixed 640x360 backing store.
+      const hz=this.lowFx()?10:20;if(this.weatherTime-(this.weatherAt||0)<1/hz)return;this.weatherAt=this.weatherTime;
+      cv.width=640;cv.height=360;const ctx=cv.getContext('2d'),t=this.weatherTime,low=this.lowFx();
+      this.weatherCount=low?8:20;this.weatherRegion=p.id;
+      if(p.id==='marsh'){const g=ctx.createLinearGradient(0,200,0,360);g.addColorStop(0,'rgba(175,205,193,0)');g.addColorStop(1,'rgba(175,205,193,.13)');ctx.fillStyle=g;ctx.fillRect(0,200,640,160);}
+      ctx.strokeStyle=p.id==='dunes'?'rgba(246,210,138,.28)':p.id==='frost'?'rgba(245,251,255,.6)':p.id==='forge'?'rgba(255,173,101,.45)':'rgba(195,220,210,.14)';ctx.lineWidth=p.id==='marsh'?5:1;
+      ctx.beginPath();for(let i=0;i<this.weatherCount;i++){const x=((i*197+t*(p.id==='frost'?13:35))%700)-30,y=(i*61+t*(p.id==='frost'?22:4))%360;ctx.moveTo(x,y);ctx.lineTo(x+(p.id==='frost'?2:p.id==='marsh'?90:25),y+(p.id==='frost'?4:0));}ctx.stroke();
     }
     /** Slowest lab PCs (no graphics chip): the renderer's own fallback stops at half resolution, which is where the
         "minimal" tier already starts. If it stays under ~18 fps, draw even fewer pixels, in small steps, down to 0.36. */
@@ -6367,7 +6476,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     buildHud() {
       const ui = clear(this.app.ui);
       this.boostEl = h('b.boost'); this.ptsEl = h('b.pts'); this.bannerEl = h('div.banner'); this.stormEl = h('div.stormmsg', { hidden: true });
-      this.rosterEl = h('div.roster'); this.feedEl = h('div.feed'); this.hpEl = h('div.hpbar', h('i'), h('span'));
+      this.rosterEl = h('div.roster'); this.feedEl = h('div.feed'); this.healthFill = h('i.health-fill'); this.healthText = h('span.health-value'); this.hpEl = h('div.hpbar', { role: 'meter', 'aria-label': 'Health', 'aria-valuemin': 0 }, this.healthFill, this.healthText);
       this.mini = h('canvas.minimap', { width: 200, height: 200, title: 'Map (click: ping a spot for your squad)' });
       this.mini.addEventListener('click', e => { const mm = this.sc.minimap; if (!mm) return; const r = this.mini.getBoundingClientRect(); this.link.send('ping', { x: (e.clientX - r.left) / r.width * 200 / mm.scale - mm.half, z: (e.clientY - r.top) / r.height * 200 / mm.scale - mm.half }); });
       this.chatList = h('div.chatlist', { role: 'log' });
@@ -6479,6 +6588,18 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       // simple: the winner squad, the MVP and one K / D / A table (after the last round: the match podium too)
       this.resultsEl = h('div.panel.results', res.final ? AR.ui.finalBoard(res, me) : null, h('h2', 'Round ' + res.round + ' results'), AR.ui.resultsBoard(res, me), h('div.row.end', this.practice ? [!res.final ? h('button.btn.primary', { onclick: () => { const H = this.practiceHost.S; H.makeSquads(H.s.squadCount); H.startRound(); this.practiceHost.flush(); } }, '▶ Next round') : null, h('button.btn', { onclick: () => this.app.showMenu() }, 'Back to menu')] : h('span.small', res.final ? '' : 'Waiting for your teacher…')));
       this.app.ui.appendChild(this.resultsEl);
+    }
+
+    // A single writer for health, its max and the shield layer; never alternate raw HP and percentages.
+    renderHealth(m) {
+      const alive = ['ground', 'glide', 'haven', 'fly'].includes(m.st);
+      const max = Math.max(1, Number(m.mx) || B.player.health), hp = alive ? Math.max(0, Number(m.hp) || 0) : 0;
+      const ratio = Math.max(0, Math.min(1, hp / max)), shield = alive ? Math.max(0, Number(m.shd) || 0) : 0;
+      this.healthFill.style.width = ratio * 100 + '%';
+      this.healthFill.style.background = ratio > 0.5 ? '#51cf66' : ratio > 0.25 ? '#ffd43b' : '#ff6b6b';
+      if (this.shdEl) this.shdEl.style.width = Math.min(100, shield / max * 100) + '%';
+      AR.iconText(this.healthText, '❤ ' + hp + ' / ' + max + (shield ? '  🔷 ' + shield : ''));
+      this.hpEl.setAttribute('aria-valuemax', max); this.hpEl.setAttribute('aria-valuenow', Math.min(hp, max));
     }
 
     openLearn() {
@@ -6662,7 +6783,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (st === 'glide') {   // the mouse steers; W = faster, S = slower, A / D = drift
         const sp = B.player.glide.speed * (fwdIn > 0 ? 1 : fwdIn < 0 ? 0.3 : 0.55) * dt, sd = side * B.player.glide.speed * 0.35 * dt;
         let x = P[0] + f[0] * sp + r[0] * sd, z = P[2] + f[1] * sp + r[1] * sd, y = P[1] - B.player.glide.fall * dt;
-        const gy = I.ground(x, z); if (y < gy) y = gy;
+        const gy = I.landing(x, z, P[1]); if (y < gy) y = gy;
         const ny = this.camYaw(), dYaw = Math.atan2(Math.sin(ny - (this.yaw || 0)), Math.cos(ny - (this.yaw || 0))); this.turnRate = dt ? dYaw / dt : 0;
         this.pos = [x, y, z]; this.yaw = ny; this.walking = false;
         return;
@@ -6670,7 +6791,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (st !== 'ground' && st !== 'haven') { this.walking = false; return; }
       if (!side && !fwdIn) {
         this.walking = false; this.backward = false; if (this.aiming || this.firing) this.yaw = this.camYaw();
-        if (st === 'ground') P[1] = I.feet(P[0], P[2], !!(this.me().mo || {}).stance);   // diving / coming up on the spot
+        if (st === 'ground') this.pos = I.walk(P[0], P[1], P[2], P[0], P[2], dt, !!(this.me().mo || {}).stance);   // diving / coming up on the spot
         return;
       }
       let mx = f[0] * fwdIn + r[0] * side, mz = f[1] * fwdIn + r[1] * side; const ml = Math.hypot(mx, mz); mx /= ml; mz /= ml;
@@ -6683,7 +6804,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (st === 'ground' && (!I.canMove(P[0], P[2], x, z) || (this.me().rd && I.swimming(x, z)))) { if (this.me().rd) this.tip('ridewater', '🐎 Rides stop at deep water. F = get off, then swim.'); return; }
       if (st === 'ground' && !wasWet && I.swimming(x, z)) this.tip('swim', '🏊 Swimming! C / Z = dive (hide) · Space = up');
       if (st === 'haven' && !I.inHaven(x, z)) { const H = I.haven, dx = x - H.x, dz = z - H.z, d = Math.hypot(dx, dz); x = H.x + dx / d * (H.r - 1.2); z = H.z + dz / d * (H.r - 1.2); }
-      this.pos = [x, st === 'ground' ? I.feet(x, z, !!(this.me().mo || {}).stance) : I.ground(x, z), z];
+      this.pos = st === 'ground' ? I.walk(P[0], P[1], P[2], x, z, dt, !!(this.me().mo || {}).stance) : [x, I.ground(x,z), z];
       // like PUBG: you face the way you run; while aiming or attacking you face the crosshair
       const want = this.aiming || this.firing || this.me().rd ? (this.me().rd ? Math.atan2(mx, mz) : this.camYaw()) : Math.atan2(mx, mz);
       const d = Math.atan2(Math.sin(want - (this.yaw || 0)), Math.cos(want - (this.yaw || 0)));
@@ -6773,7 +6894,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       }
       for (const pid in this.remote) if (!this.link.pos[pid]) delete this.remote[pid];
       const myRide = m.rd && this.mounts().find(M => M.id === m.rd), tt = Math.max(0, t), mo = m.mo || {};
-      if (this.pos && st !== 'fly' && st !== 'down' && st !== 'out' && st !== 'lobby' && !(cam.perspective === 'first' && st === 'ground')) {
+      if (this.pos && st !== 'fly' && st !== 'down' && st !== 'out' && st !== 'lobby' && !((cam.perspective === 'first' || cam.indoorFirst) && st === 'ground')) {
         const jy = myRide ? MR.SADDLE[myRide.k] : AR.Motion.height(mo, tt), sw = !myRide && this.swimPose(this.pos[0], this.pos[2], st, mo, this.walking);
         const myY = sw ? (sw.dive ? 0.06 : sw.y) : this.pos[1] + jy;   // my own diver: a faint shape just under the surface
         if (sw) { if (sw.dive) this.bubbles(items, this.pos[0], this.pos[2], now); else this.ripple(items, this.pos[0], this.pos[2], now, this.walking); }
@@ -6813,8 +6934,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         this.hudAt = now;
         this.boostEl.textContent = m.bo ? '+' + Math.round(m.bo * B.cage.boostPer * 100) + ' %' : '—'; this.boostEl.parentNode.classList.toggle('on', !!m.bo); this.ptsEl.textContent = Math.round((m.pts || 0) + (g && (g.ph === 'battle' || g.ph === 'haven') ? m.rp || 0 : 0));
         clear(this.bannerEl).appendChild(this.banner() || h('span'));
-        const hp = st === 'ground' || st === 'glide' || st === 'haven' || st === 'fly' ? m.hp || 0 : 0;
-        this.hpEl.firstChild.style.width = hp + '%'; this.hpEl.firstChild.style.background = hp > 50 ? '#51cf66' : hp > 25 ? '#ffd43b' : '#ff6b6b'; AR.iconText(this.hpEl.lastChild, '❤ ' + hp);
+        this.renderHealth(m);
         const answering = !!(this.link.pv && this.link.pv.in);
         this.jumpBtn.hidden = st !== 'fly';
         const mt = st === 'ground' && !answering && (m.rd ? this.mounts().find(M => M.id === m.rd) : this.nearMount());
@@ -7040,11 +7160,6 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     oldUpdate.call(this, dt);
     const now = performance.now(); if (now - (this.gearAt || 0) < 200) return; this.gearAt = now;
     const m = this.me(), g = this.link.g, st = m.st, sNow = this.link.serverNow();
-    const mx = m.mx || 100, hp = st === 'ground' || st === 'glide' || st === 'haven' || st === 'fly' ? m.hp || 0 : 0;
-    this.hpEl.firstChild.style.width = Math.min(100, hp / mx * 100) + '%';
-    const sk = st === 'ground' && (m.mo || {}).stance;
-    AR.iconText(this.hpEl.lastChild, '❤ ' + hp + (m.shd ? '  🔷 ' + m.shd : '') + (sk ? (sk === 'prone' ? '  ·  🐍 crawling' : '  ·  🧎 crouching') : '') + (m.rd ? '  ·  ' + B.mounts.kinds[(this.mounts().find(M => M.id === m.rd) || {}).k || 'horse'].icon + ' riding' : ''));
-    this.shdEl.style.width = Math.min(100, (m.shd || 0) / mx * 100) + '%';
     const IT = parseI(m.it), sig = m.cls + '/' + m.wr + '/' + m.it + '/' + m.ar;
     if (sig !== this.gearSig) {
       this.gearSig = sig;
