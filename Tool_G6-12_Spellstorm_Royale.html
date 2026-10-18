@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-18T05:04:19.315Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-18T05:10:34.965Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -2162,7 +2162,7 @@ window.GK_ONLINE_CONFIG = {
       const n=Math.max(1,Math.ceil(Math.hypot(x-x0,z-z0)/.22)),dx=(x-x0)/n,dz=(z-z0)/n;let px=x0,pz=z0,py=y0;
       for(let i=0;i<n;i++){
         const tryAt=(nx,nz)=>{if(!canMove(px,pz,nx,nz))return false;const floor=landing(nx,nz,py),ny=Math.max(floor,py-9*Math.min(.25,dt)/n);
-          if(blocked(nx,ny,nz)||colliders.some(c=>Math.hypot(nx-c.x,nz-c.z)<c.r+.4))return false;px=nx;pz=nz;py=ny;return true;};
+          if(blocked(nx,ny,nz)||colliders.some(c=>Math.hypot(nx-c.x,nz-c.z)<c.r+.4&&Math.hypot(nx-c.x,nz-c.z)<=Math.hypot(px-c.x,pz-c.z)+1e-6))return false;px=nx;pz=nz;py=ny;return true;};
         if(!tryAt(px+dx,pz+dz)){if(dx)tryAt(px+dx,pz);if(dz)tryAt(px,pz+dz);}
       }
       if(dive&&swimming(px,pz))py=feet(px,pz,true);
