@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-18T05:56:46.621Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-18T23:17:56.937Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -545,6 +545,22 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 .resume-room .btn { min-height:46px; }
 
 .menu.has-resume { justify-content:flex-start;overflow-y:auto; }
+
+/* end-of-match assessment */
+.panel.reflect { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(640px, 94vw); max-height: 94vh; overflow: auto; z-index: 40; border: 2px solid var(--accent); background: rgba(18, 24, 38, 0.98); }
+.reflect h2 { margin: 0; } .rftime { font-size: 18px; font-weight: bold; color: var(--gold); }
+.rfq { display: block; margin: 10px 0; } .rfq b { display: block; margin-bottom: 4px; font-size: 16px; }
+textarea.rfa { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; font-size: 15px; padding: 6px 8px; min-height: 52px; }
+.rfself { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.rfface { display: flex; flex-direction: column; align-items: center; padding: 6px 4px; } .rfface.on { outline: 3px solid var(--gold); background: rgba(255, 209, 102, 0.2); } .rfemo { font-size: 26px; }
+.assess { margin-bottom: 8px; } .rfstatus { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 6px 0; font-size: 16px; }
+table.gradebook { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+table.gradebook th { text-align: left; font-weight: normal; opacity: 0.75; border-bottom: 1px solid rgba(255, 255, 255, 0.25); padding: 4px; }
+table.gradebook td { padding: 5px 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); vertical-align: top; } table.gradebook .n { text-align: center; }
+.rate { display: inline-flex; gap: 3px; } .rate .btn.small, .teamrow .btn.small { min-width: 30px; padding: 3px 6px; }
+.btn.sugg { outline: 2px dashed var(--gold); }
+.rfans { max-width: 340px; margin-top: 4px; line-height: 1.35; } .warn { color: #ffa94d; } .gpct { color: var(--gold); font-size: 16px; }
+.teamlist { max-height: 60vh; overflow: auto; display: grid; gap: 4px; } .teamrow { display: flex; gap: 4px; align-items: center; }
 
 </style>
 </head>
@@ -1555,13 +1571,21 @@ window.GK_ONLINE_CONFIG = {
     const t = cleanText(s, 16).replace(/[^\p{L}\p{N} _.-]/gu, '').trim();
     return t && !isUnkind(t) ? t : '';
   }
+  /** A full name for the teacher's records: letters (any language), spaces, . - ' · at least first + last name. */
+  function cleanFullName(s) {
+    const t = cleanText(s, 40).replace(/[^\p{L} .'-]/gu, '').replace(/\s+/g, ' ').trim();
+    const w = t.split(' ').filter(x => /\p{L}/u.test(x));
+    return w.length >= 2 && !isUnkind(t) ? w.map(x => x[0].toUpperCase() + x.slice(1)).join(' ') : '';
+  }
+  /** What classmates see in the game: first name + the initial of the next name ("Juan D."). */
+  function shortName(full) { const w = String(full || '').trim().split(/\s+/); return w.length < 2 ? w[0] || '' : w[0].slice(0, 12) + ' ' + w[1][0].toUpperCase() + '.'; }   // the 2nd word: "Juan Dela Cruz" → "Juan D."
   const GID = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function gameId(rnd) { const r = rnd || Math.random; let s = ''; for (let i = 0; i < 4; i++) s += GID[Math.floor(r() * GID.length)]; return '#' + s; }
   const ROOM_WORDS = ['ELF', 'DRAKE', 'RUNE', 'OAK', 'MAGE', 'GROVE', 'KEEP', 'WYRM', 'GEM', 'FAE', 'TOME', 'STAR'];
   function roomCode(rnd) { const r = rnd || Math.random; return ROOM_WORDS[Math.floor(r() * ROOM_WORDS.length)] + '-' + (10 + Math.floor(r() * 90)); }
   const fmtTime = sec => { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
 
-  AR.util = { rng, hash, newId, r2, clamp, isUnkind, cleanText, cleanName, gameId, roomCode, fmtTime };
+  AR.util = { rng, hash, newId, r2, clamp, isUnkind, cleanText, cleanName, cleanFullName, shortName, gameId, roomCode, fmtTime };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1692,6 +1716,8 @@ window.GK_ONLINE_CONFIG = {
     },
     bags: { useRange: 3, keepSec: 120 },
     blessings: { every: 3, heal: 40, shield: 40 },
+    // ---------- end-of-match assessment (classroom only; see server/assess.js) ----------
+    assess: { minutes: 3, maxChars: 200, minWords: 4, knowledge: [85, 70, 50], effort: [15, 12, 8], teamDefault: 3 },
     // ---------- points (the score, kept all match) ----------
     points: {
       answer: 10, streak3: 5, havenAnswer: 10, outAnswer: 5, bonusAnswer: 15, perfect: 20,
@@ -3703,6 +3729,121 @@ window.GK_ONLINE_CONFIG = {
         done: list.filter(P => P.cage.n >= B().cage.questions).length, total: list.length };
     } else v.cg = 0;
     v.cn = this.s.cageN || 0; v.lc = this.s.lastCage || 0;
+    return v;
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>/* src/server/assess.js */
+/* Spellstorm Royale · src/server/assess.js — END-OF-MATCH ASSESSMENT on the authoritative server (loaded after cages.js).
+   The teacher grades LEARNING, not game skill (points, wins and K/D/A are never part of the grade). 4 criteria, 1–4 each,
+   16 points → %:
+     1. Knowledge   accuracy of all answers this match (automatic)        85 %+ = 4 · 70 % = 3 · 50 % = 2 · less = 1
+     2. Effort      answers per round played (automatic)                   15+ = 4 · 12 = 3 · 8 = 2 · less = 1
+     3. Teamwork    the teacher taps 4 / 3 / 2 / 1 on the teacher screen  (everyone starts at 3 = Good)
+     4. Reflection  3 short questions after the last round (about 3 min)  auto-suggested from the answers; the teacher can change it
+   Full names: students type their full name to join; classmates see a short form ("Juan D."), only the teacher screen and
+   the spreadsheet show the full name. Practice with bots has no assessment. */
+(function (root) {
+  'use strict';
+  const AR = root.AR, SP = AR.Server.prototype, B = () => AR.Balance, U = AR.util;
+  const words = t => String(t || '').trim().split(/\s+/).filter(Boolean).length;
+  const level = (v, cuts) => v >= cuts[0] ? 4 : v >= cuts[1] ? 3 : v >= cuts[2] ? 2 : 1;
+
+  // full name on join: keep it on the host only, show the short form in the game
+  const oldJoin = SP.join;
+  SP.join = function (pid, name, look) {
+    const full = U.cleanFullName(name), r = oldJoin.call(this, pid, full ? U.shortName(full) : name, look);
+    if (r && r.ok && full) r.player.fullName = full;
+    return r;
+  };
+
+  /** After the last round (classroom only): every student answers the reflection; the teacher closes it. */
+  SP.openReflect = function () {
+    if (this.practice) return;
+    const A = B().assess;
+    this.s.reflect = { open: true, at: this.now(), endsAt: this.now() + A.minutes * 60000 };
+    for (const P of Object.values(this.s.players)) this.touchPv(P.id);
+    this.touchG();
+  };
+  SP.closeReflect = function () {
+    const R = this.s.reflect; if (!R || !R.open) return { ok: false };
+    R.open = false;
+    for (const P of Object.values(this.s.players)) this.touchPv(P.id);
+    this.touchG(); return { ok: true };
+  };
+  /** A student's reflection: two short texts + a self-rating 1–4. Unkind words are flagged for the teacher. */
+  SP.reflect = function (pid, m) {
+    const P = this.player(pid), R = this.s.reflect, A = B().assess;
+    if (!P || !R || !R.open || !P.match) return;
+    const a1 = U.cleanText(m.a1, A.maxChars), a2 = U.cleanText(m.a2, A.maxChars), self = U.clamp(Math.round(Number(m.self) || 0), 0, 4);
+    P.reflect = { a1, a2, self, at: this.now() };
+    for (const t of [a1, a2]) if (t && U.isUnkind(t)) this.flag(pid, 'reflection', t);
+    this.touchPv(pid); this.touchG();
+    const due = Object.values(this.s.players).filter(p => p.online && p.match);
+    if (due.length && due.every(p => p.reflect)) this.closeReflect();   // everybody done: close it by itself
+    return { ok: true };
+  };
+  /** Teacher ratings: kind 'team' or 'reflect', n 1–4 (0 = back to the default / suggestion). */
+  SP.setRating = function (pid, kind, n) {
+    const P = this.player(pid); if (!P || ['team', 'reflect'].indexOf(kind) < 0) return { ok: false };
+    P.rating = P.rating || {}; n = Math.round(Number(n) || 0);
+    if (n >= 1 && n <= 4) P.rating[kind] = n; else delete P.rating[kind];
+    return { ok: true };
+  };
+  /** Suggested reflection score: nothing = 1 · very short or one answer missing = 2 · both answered = 3. The teacher gives 4
+      for a clear answer with an example from the game. */
+  SP.reflectSuggest = function (P) {
+    const R = P.reflect, A = B().assess; if (!R) return 1;
+    const w1 = words(R.a1), w2 = words(R.a2);
+    if (!w1 && !w2) return 1;
+    if (w1 < A.minWords || w2 < A.minWords) return 2;
+    return 3;
+  };
+  /** One row per student who played this match: the four criteria, total /16 and the grade %. */
+  SP.assessment = function () {
+    const A = B().assess, out = [];
+    for (const P of Object.values(this.s.players)) {
+      const M = P.match; if (!M || !M.rounds) continue;
+      const answered = M.right + M.wrong, acc = answered ? M.right / answered * 100 : 0, perRound = answered / M.rounds, rt = P.rating || {};
+      const knowledge = answered ? level(acc, A.knowledge) : 1, effort = level(perRound, A.effort);
+      const team = rt.team || A.teamDefault, reflect = rt.reflect || this.reflectSuggest(P), total = knowledge + effort + team + reflect;
+      const R = P.reflect || {};
+      out.push({ id: P.id, full: P.fullName || '', n: P.name, right: M.right, wrong: M.wrong, acc: Math.round(acc), perRound: Math.round(perRound * 10) / 10, rounds: M.rounds,
+        knowledge, effort, team, teamSet: !!rt.team, reflect, reflectSet: !!rt.reflect, total, pct: Math.round(total / 16 * 100),
+        self: R.self || 0, a1: R.a1 || '', a2: R.a2 || '', done: !!P.reflect, pts: Math.round(P.pts || 0), ko: M.ko, de: M.de, as: M.as });
+    }
+    return out.sort((a, b) => (a.full || a.n).localeCompare(b.full || b.n));
+  };
+
+  // the reflection opens when the last round ends; a new match clears everything
+  const oldEnd = SP.endRound;
+  SP.endRound = function (reason) {
+    const r = oldEnd.call(this, reason);
+    if (r && r.final) this.openReflect();
+    return r;
+  };
+  const oldNew = SP.newMatch;
+  SP.newMatch = function () {
+    const r = oldNew.call(this);
+    if (r && r.ok) { this.s.reflect = null; for (const P of Object.values(this.s.players)) { P.reflect = null; P.rating = null; } }
+    return r;
+  };
+  const oldHandle = SP.handle;
+  SP.handle = function (pid, m) {
+    if (m && m.t === 'reflect') return this.reflect(pid, m);
+    return oldHandle.call(this, pid, m);
+  };
+  const oldG = SP.gView;
+  SP.gView = function () {
+    const v = oldG.call(this), R = this.s.reflect;
+    if (R && R.open) { const due = Object.values(this.s.players).filter(p => p.online && p.match); v.rf = { end: R.endsAt, done: due.filter(p => p.reflect).length, of: due.length }; }
+    return v;
+  };
+  const oldPv = SP.pvView;
+  SP.pvView = function (pid) {
+    const v = oldPv.call(this, pid), P = this.player(pid), R = this.s.reflect;
+    if (v && P) v.rf = R && R.open && P.match ? (P.reflect ? 2 : 1) : 0;   // 1 = please answer · 2 = sent
     return v;
   };
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -6093,7 +6234,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     // ---------------- drawing the panels (only when something changed) ----------------
     draw(force) {
       const S = this.S, s = S.s, ph = s.phase, running = ph === 'haven' || ph === 'battle';
-      const sig = JSON.stringify([ph, s.round, s.rounds, s.squads.map(q => q.members.join()), Object.values(s.players).map(p => p.id + p.online + p.state + Math.round(p.rp) + p.hp + p.muted), s.clock.pausedAt, this.choice, s.results && s.results.round, s.flagged.length, s.reports.length]);
+      const rfLeft = s.reflect && s.reflect.open ? Math.ceil((s.reflect.endsAt - S.now()) / 1000) : -1;
+      const sig = JSON.stringify([rfLeft, Object.values(s.players).map(p => (p.reflect ? 1 : 0) + JSON.stringify(p.rating || 0)), ph, s.round, s.rounds, s.squads.map(q => q.members.join()), Object.values(s.players).map(p => p.id + p.online + p.state + Math.round(p.rp) + p.hp + p.muted), s.clock.pausedAt, this.choice, s.results && s.results.round, s.flagged.length, s.reports.length]);
       if (!force && sig === this.sig) return; this.sig = sig;
       // top bar
       clear(this.top).appendChild(h('div.row',
@@ -6106,6 +6248,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         h('button.btn', { onclick: () => this.announce() }, '📣'),
         h('button.btn', { onclick: () => this.safety() }, '💬 Chat & safety' + (s.flagged.length + s.reports.length ? ' (' + (s.flagged.length + s.reports.length) + ')' : '')),
         h('button.btn', { onclick: () => this.learning() }, '📈 Learning'),
+        h('button.btn', { onclick: () => this.teamwork() }, '📋 Teamwork'),
         h('button.btn', { onclick: () => this.confirm('Close the room? Students will be disconnected.', () => { this.host.stop(true); this.app.showMenu(); }) }, '✕ Close room')));
       this.main.hidden = running; this.side.hidden = false; this.mini.hidden = !running;
       if (!running) this.drawLobby(); else clear(this.main);
@@ -6114,6 +6257,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     drawLobby() {
       const S = this.S, s = S.s, M = clear(this.main), n = S.lobbyIds().length, opts = S.squadOptions();
       if (s.phase === 'final') {
+        M.appendChild(this.assessView());
         M.appendChild(h('h2', '🏆 Match over: Grand Champion'));
         if (s.results) M.appendChild(this.resultsView(s.results));
         M.appendChild(h('div.row', h('button.btn.primary', { onclick: () => { S.newMatch(); this.draw(true); } }, '↻ New match (same class)')));
@@ -6129,7 +6273,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       M.appendChild(h('div.row', h('button.btn', { onclick: () => { const r = S.makeSquads(this.choice); if (!r.ok) toast(r.why, 'warn'); this.host.flush(); this.draw(true); } }, s.round ? '🎲 Mix new squads' : '🎲 Make squads'),
         h('span.small', s.round ? ' New teammates for everyone as much as possible, and the top scorers are spread out.' : ' Round 1 squads are random.')));
       const ready = s.squads.length && s.squads.reduce((t, q) => t + q.members.length, 0) > 0 && s.squads.length === this.choice;
-      if (s.squads.length) M.appendChild(h('div.sqcards', s.squads.map(q => h('div.sqcard', { style: { borderColor: q.color } }, h('b', q.sym + ' ' + q.name), q.members.map(pid => { const P = S.player(pid); return h('div.small', P ? P.name + (P.pts ? ' ⭐' + Math.round(P.pts) : '') : '?'); })))));
+      if (s.squads.length) M.appendChild(h('div.sqcards', s.squads.map(q => h('div.sqcard', { style: { borderColor: q.color } }, h('b', q.sym + ' ' + q.name), q.members.map(pid => { const P = S.player(pid); return h('div.small', P ? (P.fullName || P.name) + (P.pts ? ' ⭐' + Math.round(P.pts) : '') : '?'); })))));
       M.appendChild(h('div.row', h('button.btn.primary.big', { disabled: !ready, onclick: () => { const r = S.startRound(); if (!r.ok) toast(r.why, 'warn'); this.host.flush(); this.draw(true); } }, '▶ Start round ' + (s.round + 1)),
         ready ? null : h('span.small', ' Make squads first (for the option you chose).')));
     }
@@ -6139,6 +6283,47 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         res.final ? AR.ui.finalBoard(res, null) : null,
         AR.ui.resultsBoard(res, null),
         res.final ? null : h('div', h('h3', 'Total points so far (all rounds, each student)'), h('ol.season', res.season.map(r => h('li', h('span', r.n), h('b', '⭐' + Math.round(r.pts)))))));
+    }
+    /** End of the match: the reflection status and every student's grade (4 criteria × 1–4 = 16 points → %). */
+    assessView() {
+      const S = this.S, s = S.s, R = s.reflect, rows = S.assessment(), redraw = () => { this.host.flush(); this.draw(true); };
+      const rate = (r, kind, cur, set) => h('span.rate', [4, 3, 2, 1].map(n => h('button.btn.small' + (n === cur ? (set ? '.primary' : '.sugg') : ''), { title: ['', 'Beginning', 'Developing', 'Good', 'Excellent'][n], onclick: () => { S.setRating(r.id, kind, n === cur && set ? 0 : n); redraw(); } }, n)));
+      const status = R && R.open
+        ? h('div.rfstatus', h('b', '📝 Reflection: ' + rows.filter(r => r.done).length + ' / ' + rows.length + ' done'), h('span', ' ⏱ ' + fmt((R.endsAt - S.now()) / 1000) + ' suggested'), h('button.btn.primary', { onclick: () => { S.closeReflect(); redraw(); } }, '✔ Finish reflection, show results'))
+        : h('div.rfstatus', h('b', '📝 Reflection: ' + rows.filter(r => r.done).length + ' / ' + rows.length + ' sent'));
+      const table = h('table.gradebook', h('thead', h('tr', h('th', 'Student'), h('th.n', '1 Knowledge'), h('th.n', '2 Effort'), h('th.n', '3 Teamwork'), h('th.n', '4 Reflection'), h('th.n', 'Total'), h('th.n', 'Grade'))),
+        h('tbody', rows.map(r => h('tr',
+          h('td', h('b', r.full || r.n), r.full ? h('div.small', r.n) : h('div.small.warn', 'no full name')),
+          h('td.n', h('b', String(r.knowledge)), h('div.small', r.acc + ' % right')),
+          h('td.n', h('b', String(r.effort)), h('div.small', r.perRound + ' answers / round')),
+          h('td.n', rate(r, 'team', r.team, r.teamSet)),
+          h('td', rate(r, 'reflect', r.reflect, r.reflectSet), r.done ? h('div.small.rfans', '📖 ' + r.a1, h('br'), '🤝 ' + r.a2, h('br'), '⭐ self: ' + ['', '😕 not yet', '🙂 a little', '😃 mostly', '🤩 very well'][r.self]) : h('div.small.warn', 'not sent')),
+          h('td.n', h('b', r.total + ' / 16')), h('td.n', h('b.gpct', r.pct + ' %'))))));
+      return h('div.assess', h('h2', '📋 Assessment'), status,
+        h('p.small', 'Knowledge and Effort are counted by the game. Teamwork starts at 3 for everyone: tap a number to change it (tap again to undo). Reflection shows a suggested score from the answers (dotted); tap 4 for a clear answer with an example. Points, wins and K/D/A are NOT part of the grade.'),
+        h('div.row', h('button.btn.primary', { onclick: () => AR.ui.download('Spellstorm_grades_' + (s.room || '') + '_' + new Date().toISOString().slice(0, 10) + '.csv', this.gradesCsv(rows)) }, '⬇ Download grades (spreadsheet)')),
+        table, h('hr'));
+    }
+    gradesCsv(rows) {
+      const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const head = ['Full name', 'Game name', 'Knowledge (1-4)', 'Effort (1-4)', 'Teamwork (1-4)', 'Reflection (1-4)', 'Total (/16)', 'Grade %', 'Right answers', 'Wrong answers', 'Accuracy %', 'Answers per round', 'Rounds played', 'Self-rating (1-4)', 'What I learned', 'How I helped my squad', 'Game points', 'K/D/A'];
+      const body = rows.map(r => [r.full, r.n, r.knowledge, r.effort, r.team, r.reflect, r.total, r.pct, r.right, r.wrong, r.acc, r.perRound, r.rounds, r.self || '', r.a1, r.a2, r.pts, r.ko + '/' + r.de + '/' + r.as]);
+      return '\ufeff' + [head].concat(body).map(r => r.map(q).join(',')).join('\r\n');
+    }
+    /** Teamwork & conduct, any time (also during play): tap 4 / 3 / 2 / 1 next to a student; everyone starts at 3. */
+    teamwork() {
+      const S = this.S, list = h('div.teamlist');
+      const fill = () => {
+        clear(list);
+        const ps = Object.values(S.s.players).filter(P => P.squad || P.match).sort((a, b) => (a.fullName || a.name).localeCompare(b.fullName || b.name));
+        if (!ps.length) list.appendChild(h('p', 'No students in squads yet.'));
+        for (const P of ps) {
+          const cur = (P.rating || {}).team, set = !!cur, v = cur || B.assess.teamDefault;
+          list.appendChild(h('div.teamrow', h('span.grow', (P.fullName || P.name)), [4, 3, 2, 1].map(n => h('button.btn.small' + (n === v ? (set ? '.primary' : '.sugg') : ''), { title: ['', 'Beginning: disruptive or unkind', 'Developing: needs reminders', 'Good: mostly cooperative', 'Excellent: helps the squad, kind chat'][n], onclick: () => { S.setRating(P.id, 'team', n === v && set ? 0 : n); fill(); this.draw(true); } }, n))));
+        }
+      };
+      fill();
+      const m = modal('📋 Teamwork & conduct', h('div.col', h('p.small', '4 = helps the squad, kind chat, follows the rules · 3 = mostly cooperative (everyone starts here) · 2 = needs reminders · 1 = disruptive or unkind. Only tap the students who stand out.'), list), [h('button.btn', { onclick: () => m.close() }, 'Close')]);
     }
     drawSide() {
       const S = this.S, s = S.s, D = clear(this.side), running = s.phase === 'haven' || s.phase === 'battle';
@@ -6335,19 +6520,19 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     },
     showJoin(code) {
       const ui = clear(this.ui);
-      const name = h('input.text', { maxlength: 16, placeholder: 'Nickname (no full names)', value: LS.get('sr.name', ''), 'aria-label': 'Nickname' });
+      const name = h('input.text', { maxlength: 40, placeholder: 'e.g. Juan Dela Cruz', value: LS.get('sr.name', ''), 'aria-label': 'Your full name' });
       const room = h('input.text.code', { maxlength: 16, placeholder: 'ROOM-00', value: code || AR.Client.lastRoom(), 'aria-label': 'Room code' });
       const msg = h('p.error');
       let joining=false;
       const go = () => {
-        if(joining)return;const nm = U.cleanName(name.value);
-        if (!nm) { msg.textContent = 'Choose a kind nickname (letters and numbers, up to 16).'; return; }
+        if(joining)return;const nm = U.cleanFullName(name.value);
+        if (!nm) { msg.textContent = 'Type your FIRST and LAST name (letters only), e.g. Juan Dela Cruz.'; return; }
         LS.set('sr.name', nm); msg.textContent = 'Connecting…';joining=true;const attempt=this.resumeAttempt=(this.resumeAttempt||0)+1;
         AR.Client.join({ room: room.value, name: nm, look: this.look }).then(link => {if(attempt!==this.resumeAttempt){link.stop();return;}this.startStudent(link,false);}).catch(e => {joining=false;if(attempt===this.resumeAttempt)msg.textContent=e.message;});
       };
       [name, room].forEach(i => i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }));
-      ui.appendChild(h('div.panel.center.join', h('h2', '🔑 Join a game'), h('label', 'Your nickname', name), h('label', 'Room code', room), msg,
-        h('p.small', 'Use a nickname, never your full name.'),
+      ui.appendChild(h('div.panel.center.join', h('h2', '🔑 Join a game'), h('label', 'Your full name (first and last)', name), h('label', 'Room code', room), msg,
+        h('p.small', 'Your teacher uses your full name for your grade. Classmates only see your first name and one letter (like "Juan D.").'),
         h('div.row.end', h('button.btn', { onclick: () => this.showMenu() }, 'Back'), h('button.btn.primary', { onclick: go }, 'Join'))));
       setTimeout(() => (name.value ? room : name).focus(), 50);
     },
@@ -6511,6 +6696,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (to === 'ground' && this.pos) this.pos[1] = this.app.island.landing(this.pos[0], this.pos[2],this.pos[1]);
     }
     onPv(pv) {
+      this.reflection(pv);
       const q = pv && pv.q, key = q ? q.tok + q.st : '';
       if (pv && pv.note && pv.note.n !== this.noteN) { if (this.noteN != null || pv.note.n === 1) toast(pv.note.x, pv.note.k); this.noteN = pv.note.n; }
       if (pv && pv.in) { this.learnPendingUntil = 0; this.setAim(false); }
@@ -6671,7 +6857,36 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
 
     // ---------------- actions ----------------
     /** A panel that needs the mouse pointer is open (questions, shop, class cards, a dialog, chat, results). */
+    /** After the last round: 3 short questions for the teacher's assessment (about 3 minutes), on top of the results. */
+    reflection(pv) {
+      const st = pv ? pv.rf || 0 : 0;
+      if (st === this.rfState) return; this.rfState = st;
+      if (this.reflectEl) { this.reflectEl.remove(); this.reflectEl = null; }
+      if (st === 2) { toast('✔ Thank you! Your reflection was sent to your teacher.', 'good'); return; }
+      if (st !== 1) return;
+      this.unlock(); this.releaseAll();
+      const box = (ph) => { const t = h('textarea.text.rfa', { maxlength: B.assess.maxChars, rows: 2, placeholder: ph }); t.addEventListener('keydown', e => e.stopPropagation()); t.addEventListener('keyup', e => e.stopPropagation()); return t; };
+      const a1 = box('e.g. I learned that I should check the website address before I click a link.'), a2 = box('e.g. I shared my potion and told my squad where the enemy was.');
+      let self = 0; const msg = h('p.error'), timer = h('span.rftime');
+      const faces = [[1, '😕', 'Not yet'], [2, '🙂', 'A little'], [3, '😃', 'Mostly'], [4, '🤩', 'Very well']];
+      const pick = h('div.rfself', faces.map(([n, f, t]) => h('button.btn.rfface', { onclick: e => { self = n; pick.querySelectorAll('.rfface').forEach(b => b.classList.remove('on')); e.currentTarget.classList.add('on'); } }, h('span.rfemo', f), h('span', t))));
+      const send = h('button.btn.primary.big', { onclick: () => {
+        if (!a1.value.trim() || !a2.value.trim() || !self) { msg.textContent = 'Please answer all 3 questions.'; return; }
+        send.disabled = true; msg.textContent = 'Sending…'; this.link.send('reflect', { a1: a1.value, a2: a2.value, self });
+      } }, '✔ Send to my teacher');
+      this.reflectEl = h('div.panel.reflect',
+        h('div.row', h('h2', '📝 Quick reflection'), h('div.grow'), timer),
+        h('p.small', 'About 3 minutes. Your teacher uses this for your grade: answer in your own words.'),
+        h('label.rfq', h('b', '1. 📖 What is one thing you learned from the questions today?'), a1),
+        h('label.rfq', h('b', '2. 🤝 How did you help your squad today?'), a2),
+        h('div.rfq', h('b', '3. ⭐ How well do you understand today\'s topic?'), pick),
+        msg, h('div.row.end', send));
+      this.app.ui.appendChild(this.reflectEl);
+      const tick = () => { if (!this.reflectEl) return; const g = this.link.g, left = g && g.rf ? Math.max(0, Math.ceil((g.rf.end - this.link.serverNow()) / 1000)) : 0; timer.textContent = '⏱ ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0'); setTimeout(tick, 500); };
+      tick(); setTimeout(() => a1.focus(), 60);
+    }
     blocking() {
+      if (this.reflectEl) return true;
       if (this.link.pv && this.link.pv.in) return true;
       if (this.resultsEl || document.querySelector('.modal-back') || this.caged()) return true;
       if ((this.shopEl && !this.shopEl.hidden) || (this.classEl && !this.classEl.hidden) || (this.blessEl && !this.blessEl.hidden)) return true;
