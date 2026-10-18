@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-18T05:10:34.965Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-18T05:56:46.621Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -538,6 +538,13 @@ body.lowfx .nlabel { text-shadow: none; } body.lowfx .stambar i { transition: no
 
 .hpbar > .health-value { display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;font-size:12px; }
 .hpbar .game-icon { display:inline-flex;width:14px;height:14px;vertical-align:middle;line-height:1; }
+
+/* One clear route back to the teacher room after an accidental exit. */
+.resume-room { display:flex;align-items:center;justify-content:center;gap:10px 18px;flex-wrap:wrap;max-width:760px;margin:0 auto 14px;padding:12px 18px;border:2px solid var(--gold); }
+.resume-room b { color:var(--gold); }
+.resume-room .btn { min-height:46px; }
+
+.menu.has-resume { justify-content:flex-start;overflow-y:auto; }
 
 </style>
 </head>
@@ -3064,6 +3071,14 @@ window.GK_ONLINE_CONFIG = {
     handle(pid, m) {
       if (!m || typeof m !== 'object') return;
       switch (m.t) {
+        case 'rejoin': {
+          const P=this.player(pid);if(!P||(this.s.kicked||{})[pid]||!(/^[a-z0-9]{6,20}$/.test(String(m.key||''))))return;
+          const squad=this.squad(P.squad);if((this.s.phase==='haven'||this.s.phase==='battle')&&(!squad||!squad.members.includes(pid)))this.lateJoin(P);
+          P.rejoinKey=m.key;P.online=true;
+          if(P.motion&&AR.Motion.active(P.motion,this.t()))AR.Motion.sprint(P.motion,this.t(),false);
+          if(P.pos)this.teleport(pid,P.pos[0],P.pos[2],P.pos[1]);
+          this.touchP(pid);this.touchPv(pid);this.touchG();return true;
+        }
         case 'jump': if (this.caged()) return; return this.requestMotion(pid, 'jump');
         case 'sprint': return this.requestMotion(pid, 'sprint', m.on === 0 || m.on === false ? false : true);
         case 'stance': return this.requestMotion(pid, 'stance', String(m.s || ''));
@@ -3144,7 +3159,7 @@ window.GK_ONLINE_CONFIG = {
     }
     pView(pid) {
       const P = this.player(pid); if (!P) return null;
-      return { n: P.name, gid: P.gid, sq: P.squad || '', on: P.online ? 1 : 0, look: P.look, st: P.state, hp: Math.ceil(Math.max(0, P.hp)), pts: r2(P.pts), rp: r2(P.rp), bo: P.boost || 0,
+      return { rc: P.rejoinKey || '', n: P.name, gid: P.gid, sq: P.squad || '', on: P.online ? 1 : 0, look: P.look, st: P.state, hp: Math.ceil(Math.max(0, P.hp)), pts: r2(P.pts), rp: r2(P.rp), bo: P.boost || 0,
         ko: P.roundStats ? P.roundStats.ko : 0, fall: P.fall || null, rd: P.ride || '', sh: P.shieldUntil || 0, du: P.downUntil || 0, sp: P.sp || 0, mo: P.motion || AR.Motion.fresh(), mu: P.muted ? 1 : 0, bot: P.bot ? 1 : 0, ans: this.answering(P) ? 1 : 0 };
     }
     pvView(pid) {
@@ -4184,6 +4199,7 @@ window.GK_ONLINE_CONFIG = {
     constructor(T, room, pid) {
       this.T = T; this.room = room; this.base = 'rooms/' + room; this.id = pid;
       this.g = null; this.ps = {}; this.pv = null; this.pos = {}; this.chat = []; this.chatTeam = null;
+      this.resumeKey = AR.util.newId(); this.resumeRequested = false;
       this.handlers = {}; this.sentAt = 0; this.lastSent = null; this.connected = true; this.kicked = false;
     }
     ref(p) { return this.T.ref(this.base + '/' + p); }
@@ -4194,7 +4210,7 @@ window.GK_ONLINE_CONFIG = {
     start(name, look) {
       const me = this.ref('players/' + this.id);
       this.name = String(name || '').slice(0, 16);
-      me.update({ name: this.name, look: JSON.stringify(look || {}), on: 1, h: this.serverNow() });
+      me.update({ name: this.name, look: JSON.stringify(look || {}), on: 1, h: this.serverNow(), p: null }); // discard the previous tab's queued position
       me.onDisconnect().update({ on: 0 });
       this.T.onConnected(ok => {
         this.connected = ok; this.emit('connection', ok);
@@ -4203,9 +4219,11 @@ window.GK_ONLINE_CONFIG = {
       this.beat = setInterval(() => { if (this.connected && !this.stopped) me.update({ on: 1, h: this.serverNow() }); }, 10000);
       this.ref('g').on('value', s => { this.g = s.val(); this.emit('g', this.g); this.watchChat(); });
       const ps = this.ref('ps');
-      const up = s => { this.ps[s.key] = s.val(); this.emit('ps', s.key); if (s.key === this.id) this.watchChat(); };
+      const up = s => { this.ps[s.key] = s.val();
+        if(s.key===this.id&&!this.resumeRequested){this.resumeRequested=true;this.send('rejoin',{key:this.resumeKey});}
+        this.emit('ps', s.key); if (s.key === this.id) this.watchChat(); };
       ps.on('child_added', up); ps.on('child_changed', up);
-      ps.on('child_removed', s => { delete this.ps[s.key]; this.emit('ps', s.key); if (s.key === this.id && this.g) { this.kicked = true; this.emit('kicked'); this.stop(); } });
+      ps.on('child_removed', s => { delete this.ps[s.key]; this.emit('ps', s.key); if (s.key === this.id && this.g) { forgetSession(this.room,this.id); this.kicked = true; this.emit('kicked'); this.stop(); } });
       this.ref('pv/' + this.id).on('value', s => { this.pv = s.val(); this.emit('pv', this.pv); });
       this.ref('pos').on('value', s => { this.parsePos(s.val()); this.emit('pos'); });
       this.ref('fx').on('value', s => {
@@ -4254,16 +4272,34 @@ window.GK_ONLINE_CONFIG = {
   }
 
   /** Same room + same nickname on this computer = the same player (crash / refresh recovery); another nickname = a new player. */
-  function storedId(room, name) {
-    const key = 'sr.pid.' + room + '.' + String(name || '').toLowerCase();
-    let id = null;
-    try { id = sessionStorage.getItem(key) || localStorage.getItem(key); } catch (e) { /* storage off */ }
-    if (!id || !/^[a-z0-9]{6,20}$/.test(id)) {
-      id = AR.util.newId();
-      try { sessionStorage.setItem(key, id); localStorage.setItem(key, id); } catch (e) { /* storage off */ }
-    }
-    return id;
+  const idKey = (room,name) => 'sr.pid.'+room+'.'+String(name||'').trim().toLowerCase();
+  const validId = id => /^[a-z0-9]{6,20}$/.test(String(id||''));
+  function readStore(kind,key){try{return root[kind].getItem(key);}catch(e){return null;}}
+  function writeStore(kind,key,value){try{root[kind].setItem(key,value);}catch(e){/* storage off */}}
+  function storedId(room,name){
+    const key=idKey(room,name),local=readStore('localStorage',key),tab=readStore('sessionStorage',key);
+    const id=validId(local)?local:validId(tab)?tab:AR.util.newId();
+    writeStore('localStorage',key,id);writeStore('sessionStorage',key,id);return id;
   }
+  function remember(link){
+    if(link.T.name==='local')return; // private Practice/Tutorial must not replace the class-room return button
+    const data=JSON.stringify({room:link.room,name:link.name,pid:link.id});
+    writeStore('localStorage','sr.student.resume',data);writeStore('sessionStorage','sr.student.resume',data);
+    writeStore('localStorage','sr.last.room',link.room);writeStore('localStorage',idKey(link.room,link.name),link.id);
+  }
+  function lastSession(){
+    for(const kind of ['localStorage','sessionStorage']){try{const d=JSON.parse(readStore(kind,'sr.student.resume'));
+      if(d&&/^[A-Z0-9-]{3,16}$/.test(d.room)&&validId(d.pid)&&typeof d.name==='string'&&AR.util.cleanName(d.name)===d.name)return d;
+    }catch(e){/* old/corrupt save */}}return null;
+  }
+  function forgetSession(room,pid){const d=lastSession();if(!d||d.room!==room||d.pid!==pid)return;
+    for(const kind of ['localStorage','sessionStorage'])try{root[kind].removeItem('sr.student.resume');}catch(e){/* storage off */}}
+  function ready(link){return new Promise((resolve,reject)=>{
+    let done=false;const finish=error=>{if(done)return;done=true;clearTimeout(timer);if(error){link.stop();reject(error);}else{remember(link);resolve(link);}};
+    const timer=setTimeout(()=>finish(new Error('Your teacher room is not responding. Ask your teacher to open or continue that room, then try again.')),12000);
+    const check=()=>{const me=link.me();if(me&&me.rc===link.resumeKey&&link.g)finish();};
+    link.on('ps',check).on('g',check).on('kicked',()=>{forgetSession(link.room,link.id);finish(new Error('Your teacher removed you from this room. Ask your teacher before joining again.'));});check();
+  });}
 
   AR.Client = {
     /** Join a room by code. opts: {room, name, look, transport, id (tests)} → Promise<ClientLink> */
@@ -4274,11 +4310,11 @@ window.GK_ONLINE_CONFIG = {
         const meta = m.val();
         if (!meta) throw new Error('There is no room "' + room + '". Check the code with your teacher.');
         if (meta.game !== AR.Host.GAME) throw new Error('Room "' + room + '" belongs to a different game.');
-        const pid = opts.id || (T.name === 'fake' ? AR.util.newId() : storedId(room, opts.name));
-        try { localStorage.setItem('sr.last.room', room); } catch (e) { /* ignore */ }
-        return new ClientLink(T, room, pid).start(opts.name, opts.look);
+        const pid = opts.id || (T.name === 'fake' && !opts.remember ? AR.util.newId() : storedId(room, opts.name));
+        return ready(new ClientLink(T, room, pid).start(opts.name, opts.look));
       }));
     },
+    lastSession, forgetSession,
     lastRoom() { try { return localStorage.getItem('sr.last.room') || ''; } catch (e) { return ''; } },
   };
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -6251,13 +6287,15 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
 
     // ===================== menu =====================
     showMenu() {
-      this.endSession();
+      this.resumeAttempt=(this.resumeAttempt||0)+1;this.endSession();
       const ui = clear(this.ui), sel = () => document.querySelectorAll('.grade').forEach(b => b.classList.toggle('on', b.dataset.bank === this.bankId));
+      const saved=AR.Client.lastSession();
+      const resume=saved?h('div.panel.resume-room',h('b','Continue as '+saved.name),h('span.small','Room '+saved.room+' · same squad and progress'),h('button.btn.primary',{onclick:()=>this.continueStudent(saved)},'▶ Continue class game')):null;
       const grade = (id, label, sub) => h('button.grade', { 'data-bank': id, onclick: () => { this.bankId = id; LS.set('sr.bank', id); sel(); } }, h('b', label), h('span', sub));
-      ui.appendChild(h('div.menu',
+      ui.appendChild(h('div.menu'+(saved?'.has-resume':''),
         h('a.labhome', { href: 'START_HERE_Computer_Lab.html' }, '← Lab home'),
         h('h1.title', 'Spellstorm Royale'), h('div.subtitle', 'A magical team battle royale'),
-        h('p.tagline', 'Pick a class, answer in the Question Cages for boosters, loot chests and win with your squad. The storm is coming!'),
+        h('p.tagline', 'Pick a class, answer in the Question Cages for boosters, loot chests and win with your squad. The storm is coming!'), resume,
         h('div.grades', grade('g68', 'Grades 6–8', 'parts · files · scams · passwords'), grade('g912', 'Grades 9–12', 'phishing · MFA · backups · logic')),
         h('div.actions',
           h('button.btn.big', { onclick: () => this.startHost() }, h('span.ico', '🏰'), 'Host a game', h('small', 'Teacher: make a room')),
@@ -6267,6 +6305,12 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         h('div.howto', [['📦', 'Answer in the cages'], ['⚡', 'Get boosters'], ['🎁', 'Loot chests'], ['⚔', 'Win the battle'], ['🌀', 'Stay out of the storm']].map(([i, t]) => h('div', h('span', i), t))),
         h('div.row.center', h('button.btn', { onclick: () => this.showLook() }, '🎨 My mage'), h('button.link.settings', { onclick: () => this.showSettings() }, '⚙ Settings'))));
       sel();
+    },
+    continueStudent(saved) {
+      this.endSession();const msg=h('p','Returning to room '+saved.room+'…'),retry=h('button.btn.primary',{hidden:true,onclick:()=>this.continueStudent(saved)},'Try again');
+      clear(this.ui).appendChild(h('div.panel.center',h('h2','Continue as '+saved.name),msg,h('p.small','The class match keeps running while you are away.'),h('div.row.end',h('button.btn',{onclick:()=>this.showMenu()},'Back to menu'),retry)));
+      const attempt=this.resumeAttempt=(this.resumeAttempt||0)+1;
+      AR.Client.join({room:saved.room,name:saved.name,id:saved.pid,look:this.look}).then(link=>{if(attempt!==this.resumeAttempt){link.stop();return;}LS.set('sr.name',saved.name);this.startStudent(link,false);}).catch(e=>{if(attempt!==this.resumeAttempt)return;msg.textContent=e.message;retry.hidden=false;});
     },
     /** Choose how your mage looks (looks only: no gameplay effect). */
     showLook() {
@@ -6294,11 +6338,12 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const name = h('input.text', { maxlength: 16, placeholder: 'Nickname (no full names)', value: LS.get('sr.name', ''), 'aria-label': 'Nickname' });
       const room = h('input.text.code', { maxlength: 16, placeholder: 'ROOM-00', value: code || AR.Client.lastRoom(), 'aria-label': 'Room code' });
       const msg = h('p.error');
+      let joining=false;
       const go = () => {
-        const nm = U.cleanName(name.value);
+        if(joining)return;const nm = U.cleanName(name.value);
         if (!nm) { msg.textContent = 'Choose a kind nickname (letters and numbers, up to 16).'; return; }
-        LS.set('sr.name', nm); msg.textContent = 'Connecting…';
-        AR.Client.join({ room: room.value, name: nm, look: this.look }).then(link => this.startStudent(link, false)).catch(e => { msg.textContent = e.message; });
+        LS.set('sr.name', nm); msg.textContent = 'Connecting…';joining=true;const attempt=this.resumeAttempt=(this.resumeAttempt||0)+1;
+        AR.Client.join({ room: room.value, name: nm, look: this.look }).then(link => {if(attempt!==this.resumeAttempt){link.stop();return;}this.startStudent(link,false);}).catch(e => {joining=false;if(attempt===this.resumeAttempt)msg.textContent=e.message;});
       };
       [name, room].forEach(i => i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }));
       ui.appendChild(h('div.panel.center.join', h('h2', '🔑 Join a game'), h('label', 'Your nickname', name), h('label', 'Room code', room), msg,
@@ -6419,6 +6464,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         .on('connection', ok => { const b = $('.netwarn'); if (b) b.hidden = ok; })
         .on('fx', list => this.addFx(list));
       this.buildHud();
+      this.onG(); this.onPs(this.link.id); if(this.link.pv){this.panel.update(this.link.pv);this.onPv(this.link.pv);}
     }
     stop() { if (this.overlay) this.overlay.remove(); this.setAim(false); this.link.stop(); if (this.practiceHost) this.practiceHost.stop(true); clear(this.app.labels); }
     me() { return this.link.me() || {}; }
@@ -6462,7 +6508,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (to === 'fly') toast('🦅 SPACE = jump off', 'info');
       if (to === 'glide' && from === 'fly') toast('🪂 Mouse = steer · W = faster', 'info');
       if (to === 'down' || to === 'out') { this.releaseAll(); this.setAim(false); this.unlock(); this.spectating = null; }
-      if (to === 'ground' && this.pos) this.pos[1] = this.app.island.ground(this.pos[0], this.pos[2]);
+      if (to === 'ground' && this.pos) this.pos[1] = this.app.island.landing(this.pos[0], this.pos[2],this.pos[1]);
     }
     onPv(pv) {
       const q = pv && pv.q, key = q ? q.tok + q.st : '';
