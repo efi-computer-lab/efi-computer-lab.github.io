@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-19T02:12:54.676Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-19T02:39:52.843Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -564,6 +564,48 @@ table.gradebook td { padding: 5px 4px; border-bottom: 1px solid rgba(255, 255, 2
 
 /* Name entry stays usable on small lab screens, including validation messages. */
 .panel.center.join { max-height:calc(100vh - 24px);overflow-y:auto;box-sizing:border-box; }
+
+/* ===== kill announcements ===== */
+.hype { position: absolute; left: 50%; top: 33%; transform: translate(-50%, -50%); z-index: 70; pointer-events: none; text-align: center; white-space: nowrap; animation: hypeIn 0.42s cubic-bezier(.2, 1.6, .4, 1) both; }
+.hype.out { animation: hypeOut 0.45s ease-in forwards; }
+.hype .htitle { position: relative; font-family: 'Impact', 'Arial Black', system-ui, sans-serif; font-weight: 900; letter-spacing: 2px; font-style: italic; line-height: 1;
+  background: linear-gradient(180deg, #fff 0%, #ffe066 45%, #ff922b 75%, #e8590c 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 2px rgba(40, 10, 0, 0.85); filter: drop-shadow(0 0 14px rgba(255, 170, 40, 0.9)) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55)); }
+.hype .hicon { font-size: 54px; line-height: 1; filter: drop-shadow(0 0 12px rgba(255, 220, 120, 0.9)); animation: hypeIcon 0.7s ease-out both; }
+.hype .hsub { margin-top: 8px; font: 800 20px system-ui, sans-serif; color: #fff; letter-spacing: 1px; text-shadow: 0 2px 6px #000, 0 0 12px rgba(0, 0, 0, 0.8); }
+.hype.mine .htitle { font-size: 92px; } .hype.mine.t1 .htitle { font-size: 64px; } .hype.mine.t4 .htitle, .hype.mine.t5 .htitle { font-size: 112px; }
+.hype.mate { top: 30%; } .hype.mate .htitle { font-size: 54px; } .hype.mate .hicon { font-size: 36px; }
+.hype.other { top: 26%; } .hype.other .htitle { font-size: 38px; -webkit-text-stroke-width: 1px; } .hype.other .hicon { display: none; } .hype.other .hsub { font-size: 16px; }
+/* tier colours: 2 blue-white · 3 gold-red · 4 purple · 5 rainbow */
+.hype.t2 .htitle { background-image: linear-gradient(180deg, #fff 0%, #a5d8ff 45%, #339af0 80%, #1864ab 100%); filter: drop-shadow(0 0 14px rgba(80, 170, 255, 0.95)) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55)); }
+.hype.t3 .htitle { background-image: linear-gradient(180deg, #fff 0%, #ffe066 40%, #ff6b6b 80%, #c92a2a 100%); filter: drop-shadow(0 0 18px rgba(255, 90, 60, 0.95)) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55)); }
+.hype.t4 .htitle { background-image: linear-gradient(180deg, #fff 0%, #e599f7 40%, #9c36b5 80%, #5f3dc4 100%); filter: drop-shadow(0 0 22px rgba(200, 90, 255, 1)) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55)); }
+.hype.t5 .htitle { background-image: linear-gradient(90deg, #ff6b6b, #ffd43b, #69db7c, #4dabf7, #b197fc, #ff6b6b); background-size: 200% 100%; animation: hypeRainbow 1s linear infinite; filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.95)) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55)); }
+.hype .hrays { position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; margin: -280px 0 0 -280px; z-index: -1; border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 220, 120, 0.42) 0 6deg, transparent 6deg 18deg); -webkit-mask: radial-gradient(circle, #000 10%, transparent 68%); mask: radial-gradient(circle, #000 10%, transparent 68%);
+  animation: hypeSpin 3s linear infinite, hypeRays 0.5s ease-out both; }
+.hype.t2 .hrays { background: repeating-conic-gradient(rgba(120, 190, 255, 0.45) 0 6deg, transparent 6deg 18deg); }
+.hype.t4 .hrays { background: repeating-conic-gradient(rgba(210, 130, 255, 0.5) 0 6deg, transparent 6deg 18deg); }
+.hype.t5 .hrays { background: repeating-conic-gradient(rgba(255, 120, 120, 0.5) 0 5deg, rgba(255, 230, 120, 0.5) 5deg 10deg, rgba(120, 220, 255, 0.5) 10deg 15deg, transparent 15deg 24deg); }
+.hype .hspark { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 2px; background: #fff3bf; box-shadow: 0 0 10px #ffd43b, 0 0 20px #ff922b; transform: rotate(45deg); animation: hypeSpark 0.9s ease-out var(--dl) both; }
+.hype.t2 .hspark { background: #d0ebff; box-shadow: 0 0 10px #74c0fc, 0 0 20px #339af0; } .hype.t4 .hspark { background: #f3d9fa; box-shadow: 0 0 10px #da77f2, 0 0 20px #9c36b5; }
+.hypeflash { position: absolute; inset: 0; z-index: 44; pointer-events: none; background: radial-gradient(circle at 50% 35%, rgba(255, 230, 150, 0.55), rgba(255, 140, 40, 0.15) 45%, transparent 70%); animation: hypeFlash 0.7s ease-out forwards; }
+.hypeflash.t2 { background: radial-gradient(circle at 50% 35%, rgba(170, 220, 255, 0.55), rgba(60, 140, 255, 0.15) 45%, transparent 70%); }
+.hypeflash.t4, .hypeflash.t5 { background: radial-gradient(circle at 50% 35%, rgba(240, 190, 255, 0.65), rgba(150, 60, 255, 0.2) 45%, transparent 70%); }
+canvas.shake { animation: hypeShake 0.42s linear; }
+@keyframes hypeIn { 0% { opacity: 0; transform: translate(-50%, -50%) scale(2.8) rotate(-6deg); filter: blur(8px); } 60% { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(1deg); filter: blur(0); } 100% { transform: translate(-50%, -50%) scale(1) rotate(-2deg); } }
+@keyframes hypeOut { to { opacity: 0; transform: translate(-50%, -62%) scale(1.15) rotate(-2deg); filter: blur(4px); } }
+@keyframes hypeIcon { 0% { transform: scale(0) rotate(-90deg); } 70% { transform: scale(1.35) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes hypeSpin { to { transform: rotate(360deg); } }
+@keyframes hypeRays { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; } }
+@keyframes hypeSpark { 0% { opacity: 1; transform: translate(0, 0) rotate(45deg) scale(1.4); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(225deg) scale(0.3); } }
+@keyframes hypeFlash { from { opacity: 1; } to { opacity: 0; } }
+@keyframes hypeRainbow { to { background-position: 200% 0; } }
+@keyframes hypeShake { 0%, 100% { transform: translate(0, 0); } 15% { transform: translate(-7px, 4px); } 30% { transform: translate(6px, -5px); } 45% { transform: translate(-5px, -3px); } 60% { transform: translate(4px, 5px); } 75% { transform: translate(-3px, 2px); } 90% { transform: translate(2px, -2px); } }
+@media (max-width: 800px) { .hype.mine .htitle { font-size: 60px; } .hype.mine.t4 .htitle, .hype.mine.t5 .htitle { font-size: 70px; } .hype .hrays { width: 380px; height: 380px; margin: -190px 0 0 -190px; } }
+body.lowfx .hype .hrays, body.lowfx .hype .hspark { display: none; }
+.hype .hsub b { font-size: 1.15em; filter: brightness(1.5) saturate(1.3); -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.6); }
+.hypeflash { z-index: 69; }
 
 </style>
 </head>
@@ -1734,6 +1776,10 @@ window.GK_ONLINE_CONFIG = {
     // ---------- end-of-match assessment (classroom only; see server/assess.js) ----------
     assess: { minutes: 3, maxChars: 200, minWords: 4, knowledge: [85, 70, 50], effort: [15, 12, 8], teamDefault: 3,
       sections: ['Grade 6 Kepler', 'Grade 7 Galileo', 'Grade 8 Darwin', 'Grade 9 Curie', 'Grade 9 Newton', 'Grade 10 Tesla', 'Grade 11 Einstein', 'Grade 12 Hawkings'] },
+    // ---------- kill announcements (show only: no extra points) ----------
+    //   FIRST KILL of the round · DOUBLE / TRIPLE / QUADRA / PENTA KILL (each knock-out within multiSec of the last)
+    //   streaks without being knocked out: KILLING SPREE 3 · RAMPAGE 5 · UNSTOPPABLE 7 · GODLIKE 10 · SHUTDOWN = ending a streak of 3+
+    hype: { multiSec: 12, spree: [3, 5, 7, 10], shutdownAt: 3 },
     // ---------- points (the score, kept all match) ----------
     points: {
       answer: 10, streak3: 5, havenAnswer: 10, outAnswer: 5, bonusAnswer: 15, perfect: 20,
@@ -2787,7 +2833,7 @@ window.GK_ONLINE_CONFIG = {
     // ===================== round control (teacher) =====================
     resetForRound(P) {
       P.rp = 0; P.roundStats = { ko: 0, as: 0, ans: 0, wrong: 0, dmg: 0, cageRight: 0, perfect: 0, q: 0, f: 0, s: 0 }; P.hp = B().player.health; P.deaths = 0; P.dmgBy = {};
-      P.learn = false; P.cage = null; P.boost = 0; P.cur = null; P.streak = 0; P.downUntil = 0; P.fall = null; P.shieldUntil = 0; P.motion = AR.Motion.fresh(); P.ride = ''; P.qs = P.qs || Q().Picker.fresh();
+      P.learn = false; P.cage = null; P.boost = 0; P.cur = null; P.streak = 0; P.downUntil = 0; P.fall = null; P.spree = 0; P.multi = 0; P.lastKoAt = 0; P.shieldUntil = 0; P.motion = AR.Motion.fresh(); P.ride = ''; P.qs = P.qs || Q().Picker.fresh();
     }
     /** Add round points and remember where they came from: q = answering, f = fighting (knock-outs, assists, chests,
         blessings), s = surviving (placement, storm steps). The results show this split. */
@@ -2805,7 +2851,7 @@ window.GK_ONLINE_CONFIG = {
       if (this.s.round >= this.s.rounds) return { ok: false, why: 'The match is over.' };
       if (!this.s.squads.length || this.s.squads.every(q => !q.members.length)) { const r = this.makeSquads(this.s.squadCount); if (!r.ok) return r; }
       this.s.squads = this.s.squads.filter(q => q.members.length);
-      this.s.round++; this.s.phase = 'haven'; this.s.results = null; this.s.feed = []; this.s.stormStep = 0; this.s.cage = null; this.s.cageN = 0;
+      this.s.round++; this.s.phase = 'haven'; this.s.results = null; this.s.feed = []; this.s.stormStep = 0; this.s.firstKo = 0; this.s.cage = null; this.s.cageN = 0;
       this.s.seed = Math.floor(this.rnd() * 1e9) + 1; this._storm = null; this.placeMounts();
       this.s.clock = { startedAt: this.now() + B().round.havenSec * 1000, pausedAt: 0, pausedTotal: 0 };
       for (const q of this.s.squads) { q.place = 0; q.outAt = 0; }
@@ -3022,7 +3068,8 @@ window.GK_ONLINE_CONFIG = {
       // the knock-out goes to the attacker (or, after a storm knock-out, to the last enemy who hit them in the last 10 s)
       let killer = src;
       if (!killer) { let last = 0; for (const id in T.dmgBy) if (T.dmgBy[id] > last && now - T.dmgBy[id] < PB.assistSec * 1000) { last = T.dmgBy[id]; killer = this.player(id); } }
-      if (killer && killer.squad !== T.squad) { this.addPts(killer, PB.knockout, 'f'); killer.roundStats.ko++; this.notify(killer.id, '💥 Knock-out! +' + PB.knockout, 'good'); this.touchP(killer.id); }
+      if (killer && killer.squad !== T.squad) { this.addPts(killer, PB.knockout, 'f'); killer.roundStats.ko++; this.notify(killer.id, '💥 Knock-out! +' + PB.knockout, 'good'); this.touchP(killer.id); this.hype(killer, T, now); }
+      T.spree = 0; T.multi = 0;   // a knock-out ends your streak
       for (const id in T.dmgBy) {
         const A = this.player(id);
         if (A && A !== killer && A.squad !== T.squad && now - T.dmgBy[id] < PB.assistSec * 1000) { this.addPts(A, PB.assist, 'f'); A.roundStats.as++; this.touchP(A.id); }
@@ -3040,6 +3087,23 @@ window.GK_ONLINE_CONFIG = {
       this.touchP(T.id); this.touchG(); this.dirty.pos = true;
     }
     dropBag() { /* arsenal.js */ }
+    /** Kill announcements for everybody's screen (an effect 'H': tag = codes joined by '.', id = the killer):
+        the main one first (multi-kill > streak > first kill > shutdown > plain kill), then extras. Show only, no points. */
+    hype(K, T, now) {
+      const H = B().hype, codes = [];
+      K.multi = now - (K.lastKoAt || 0) <= H.multiSec * 1000 ? (K.multi || 1) + 1 : 1; K.lastKoAt = now;
+      K.spree = (K.spree || 0) + 1;
+      const multi = ['', '', 'double', 'triple', 'quadra'][K.multi] || (K.multi >= 5 ? 'penta' : '');
+      const spree = H.spree.indexOf(K.spree) >= 0 ? 'spree' + K.spree : '';
+      if (multi) codes.push(multi);
+      if (spree) codes.push(spree);
+      if (!this.s.firstKo) { this.s.firstKo = 1; codes.push('first'); }
+      if ((T.spree || 0) >= H.shutdownAt) codes.push('shutdown');
+      if (!codes.length) codes.push('ko');
+      const a = K.pos || T.pos || [0, 0, 0, 0], b = T.pos || a;
+      if (this.addFx3) this.addFx3('H', a, b, codes.join('.'), K.id);
+      return codes;
+    }
 
     // ===================== chat & moderation (from Arcane Realms) =====================
     chat(pid, kind, payload) {
@@ -6491,7 +6555,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   const App = AR.App = {
     bankId: LS.get('sr.bank', 'g68'),
     look: LS.get('sr.look', { robe: Math.floor(Math.random() * 10), hat: 0, skin: 1, hair: 1, gem: 0, trim: 0 }),
-    settings: Object.assign({ low: false, big: false, sens: 1, full: true }, LS.get('sr.settings', {})),
+    settings: Object.assign({ low: false, big: false, sens: 1, full: true, sfx: true }, LS.get('sr.settings', {})),
     keys: {}, mouse: { x: 0, y: 0 }, session: null,
 
     init() {
@@ -6564,6 +6628,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         h('label.check', h('input', { type: 'checkbox', checked: s.low, onchange: e => { s.low = e.target.checked; this.scene.setLow(s.low); this.scene.charCache = {}; document.body.classList.toggle('lowfx', this.scene.lowFx()); LS.set('sr.settings', s); } }), ' Low graphics (faster on old computers)'),
         h('label.check', h('input', { type: 'checkbox', checked: s.big, onchange: e => { s.big = e.target.checked; document.body.classList.toggle('bigtext', s.big); LS.set('sr.settings', s); } }), ' Bigger text'),
         h('label.check', h('input', { type: 'checkbox', checked: s.full, onchange: e => { s.full = e.target.checked; LS.set('sr.settings', s); } }), ' Full screen when playing (needed for Ctrl = crawl)'),
+        h('label.check', h('input', { type: 'checkbox', checked: s.sfx !== false, onchange: e => { s.sfx = e.target.checked; LS.set('sr.settings', s); } }), ' Sound effects (kill announcements)'),
         h('label', 'Mouse speed', h('select.text', { onchange: e => { s.sens = Number(e.target.value); LS.set('sr.settings', s); } },
           [[0.5, 'Slow'], [0.75, 'A bit slow'], [1, 'Normal'], [1.4, 'Fast'], [1.9, 'Very fast']].map(([v, t]) => h('option', { value: v, selected: Number(s.sens) === v }, t)))),
         h('p.small', 'Graphics level picked for this computer: ' + this.scene.det.tier + '.')), [h('button.btn', { onclick: () => m.close() }, 'Close')]);
@@ -7500,10 +7565,70 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     this.fxList = keep.filter(f => f.k === 'd'); oldFx.call(this, items, now);   // app.js draws the knock-out bursts
     this.fxList = mine.concat(this.fxList);
   };
+  // ===================== KILL ANNOUNCEMENTS (FIRST KILL, DOUBLE KILL, KILLING SPREE …) =====================
+  // The killer gets a huge centre banner (rays, sparks, a flash, a little screen shake and a sound); squad-mates a big one;
+  // everybody else a banner at the top with the name. Show only: points are unchanged.
+  const HYPE = {
+    ko:       { t: 'KILL!',          tier: 1, icon: '💥' },
+    first:    { t: 'FIRST KILL!',    tier: 3, icon: '⚡' },
+    double:   { t: 'DOUBLE KILL!',   tier: 2, icon: '⚔' },
+    triple:   { t: 'TRIPLE KILL!',   tier: 3, icon: '🔥' },
+    quadra:   { t: 'QUADRA KILL!',   tier: 4, icon: '💎' },
+    penta:    { t: 'PENTA KILL!',    tier: 5, icon: '👑' },
+    spree3:   { t: 'KILLING SPREE!', tier: 2, icon: '🔥' },
+    spree5:   { t: 'RAMPAGE!',       tier: 3, icon: '💥' },
+    spree7:   { t: 'UNSTOPPABLE!',   tier: 4, icon: '⚡' },
+    spree10:  { t: 'GODLIKE!',       tier: 5, icon: '👑' },
+    shutdown: { t: 'SHUTDOWN!',      tier: 3, icon: '🛑' },
+  };
+  P.hype = function (e) {
+    const codes = String(e.tm || '').split('.').filter(c => HYPE[c]); if (!codes.length) return;
+    const me = this.link.id, mine = e.id === me, ps = this.link.ps[e.id] || {}, q = this.squad(), mate = !mine && !!q && ps.sq === q.id;
+    if (!mine && codes[0] === 'ko') return;   // a plain knock-out: only the one who made it
+    const main = HYPE[codes[0]], tier = Math.max.apply(null, codes.map(c => HYPE[c].tier)), extra = codes.slice(1).map(c => HYPE[c].t);
+    const col = ((this.link.g && this.link.g.squads || []).find(x => x.id === ps.sq) || {}).color || '#ffd166';
+    const who = mine ? '' : (ps.n || '?');
+    if (this.hypeEl) this.hypeEl.remove();
+    const sparks = mine ? Array.from({ length: 10 + tier * 4 }, (_, i) => { const a = i / (10 + tier * 4) * Math.PI * 2, d = 160 + Math.random() * 140; const sp = h('i.hspark'); sp.style.setProperty('--dx', Math.round(Math.cos(a) * d) + 'px'); sp.style.setProperty('--dy', Math.round(Math.sin(a) * d * 0.6) + 'px'); sp.style.setProperty('--dl', (Math.random() * 0.15).toFixed(2) + 's'); return sp; }) : null;
+    const el = h('div.hype.t' + tier + (mine ? '.mine' : mate ? '.mate' : '.other'),
+      mine ? h('div.hrays') : null, sparks,
+      h('div.hicon', main.icon),
+      h('div.htitle', { 'data-text': main.t }, main.t),
+      extra.length || who ? h('div.hsub', who ? h('b', { style: { color: col } }, who) : null, (who && extra.length ? ' · ' : '') + extra.join(' · ')) : null);
+    this.app.ui.appendChild(el); this.hypeEl = el;
+    const life = mine ? 2400 + tier * 250 : 2200;
+    setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); if (this.hypeEl === el) this.hypeEl = null; }, 450); }, life);
+    if (mine) {
+      const fl = h('div.hypeflash.t' + tier); this.app.ui.appendChild(fl); setTimeout(() => fl.remove(), 700);
+      const cv = this.app.canvas; if (cv && tier >= 2) { cv.classList.remove('shake'); void cv.offsetWidth; cv.classList.add('shake'); setTimeout(() => cv.classList.remove('shake'), 450); }
+    }
+    this.hypeSound(mine ? tier : mate ? Math.min(2, tier) : 0);
+  };
+  /** A short made-up fanfare (Web Audio; no files): higher tiers = more notes. Off with the Sound effects setting. */
+  P.hypeSound = function (tier) {
+    if (!tier || this.app.settings.sfx === false) return;
+    try {
+      const A = this.audio || (this.audio = new (window.AudioContext || window.webkitAudioContext)()); if (A.state === 'suspended') A.resume();
+      const t0 = A.currentTime + 0.02, out = A.createGain(); out.gain.value = 0.13; out.connect(A.destination);
+      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].slice(0, Math.min(6, 2 + tier));
+      notes.forEach((f, i) => {
+        const o = A.createOscillator(), g = A.createGain(); o.type = i === notes.length - 1 ? 'sawtooth' : 'square'; o.frequency.value = f;
+        const st = t0 + i * 0.075, len = i === notes.length - 1 ? 0.45 : 0.12;
+        g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(0.9, st + 0.01); g.gain.exponentialRampToValueAtTime(0.001, st + len);
+        o.connect(g); g.connect(out); o.start(st); o.stop(st + len + 0.02);
+      });
+      // a whoosh: filtered noise
+      const n = A.createBufferSource(), buf = A.createBuffer(1, A.sampleRate * 0.35, A.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const bp = A.createBiquadFilter(), ng = A.createGain(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(400, t0); bp.frequency.exponentialRampToValueAtTime(3000, t0 + 0.3); ng.gain.value = 0.5;
+      n.buffer = buf; n.connect(bp); bp.connect(ng); ng.connect(out); n.start(t0);
+    } catch (err) { /* no sound on this PC */ }
+  };
   const oldAdd = P.addFx;
   P.addFx = function (list) {
     const now = performance.now();
     for (const e of list) {
+      if (e.k === 'H') { this.hype(e); continue; }   // kill announcement
       if (e.k === 'd' || e.k === 'b') continue;
       if (e.k === 'x' && e.id) { const pr = this.fxList.find(f => f.id === e.id && (f.k === 'a' || f.k === 'o')); if (pr) pr.dead = true; }
       // the host's copy of a shot I already drew myself (same kind, starts where I stand, within 1.5 s): link it, do not draw twice
