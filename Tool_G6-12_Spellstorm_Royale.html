@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-19T01:45:04.898Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-19T02:12:54.676Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -561,6 +561,9 @@ table.gradebook td { padding: 5px 4px; border-bottom: 1px solid rgba(255, 255, 2
 .btn.sugg { outline: 2px dashed var(--gold); }
 .rfans { max-width: 340px; margin-top: 4px; line-height: 1.35; } .warn { color: #ffa94d; } .gpct { color: var(--gold); font-size: 16px; }
 .teamlist { max-height: 60vh; overflow: auto; display: grid; gap: 4px; } .teamrow { display: flex; gap: 4px; align-items: center; }
+
+/* Name entry stays usable on small lab screens, including validation messages. */
+.panel.center.join { max-height:calc(100vh - 24px);overflow-y:auto;box-sizing:border-box; }
 
 </style>
 </head>
@@ -1571,21 +1574,33 @@ window.GK_ONLINE_CONFIG = {
     const t = cleanText(s, 16).replace(/[^\p{L}\p{N} _.-]/gu, '').trim();
     return t && !isUnkind(t) ? t : '';
   }
-  /** A full name for the teacher's records: letters (any language), spaces, . - ' · at least first + last name. */
-  function cleanFullName(s) {
-    const t = cleanText(s, 40).replace(/[^\p{L} .'-]/gu, '').replace(/\s+/g, ' ').trim();
-    const w = t.split(' ').filter(x => /\p{L}/u.test(x));
-    return w.length >= 2 && !isUnkind(t) ? w.map(x => x[0].toUpperCase() + x.slice(1)).join(' ') : '';
+  /** Separate fields make order explicit; retain accents and compound family names. */
+  function namePart(s) {
+    const t=String(s||'').normalize('NFC').replace(/[’‘]/g,"'").replace(/[–—]/g,'-').replace(/\s+/gu,' ').trim();
+    return t&&t.length<=80&&/^[\p{L}\p{M} .'-]+$/u.test(t)&&/\p{L}/u.test(t)&&!isUnkind(t)?t:'';
   }
-  /** What classmates see in the game: first name + the initial of the next name ("Juan D."). */
-  function shortName(full) { const w = String(full || '').trim().split(/\s+/); return w.length < 2 ? w[0] || '' : w[0].slice(0, 12) + ' ' + w[1][0].toUpperCase() + '.'; }   // the 2nd word: "Juan Dela Cruz" → "Juan D."
+  function fullNameParts(surname,given) {
+    const family=namePart(surname),first=namePart(given),full=family+', '+first;
+    return family&&first&&full.length<=100?full:'';
+  }
+  function cleanFullName(s) {
+    const raw=String(s||'').normalize('NFC').trim();if(raw.length>100)return '';
+    if(raw.includes(',')){const p=raw.split(',');return p.length===2?fullNameParts(p[0],p[1]):'';}
+    // Continue accepts the older first-name-first format; do not guess its surname.
+    const t=namePart(raw),w=t?t.split(' '):[];
+    return w.length>=2?w.map(x=>x[0].toUpperCase()+x.slice(1)).join(' '):'';
+  }
+  function shortName(full) {
+    const text=String(full||'').trim();if(text.includes(',')){const p=text.split(','),family=p[0].trim(),given=(p[1]||'').trim().split(/\s+/)[0];return (given.slice(0,12)+' '+(family[0]||'').toUpperCase()+'.').trim();}
+    const w=text.split(/\s+/);return w.length<2?w[0]||'':w[0].slice(0,12)+' '+w[1][0].toUpperCase()+'.';
+  }
   const GID = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function gameId(rnd) { const r = rnd || Math.random; let s = ''; for (let i = 0; i < 4; i++) s += GID[Math.floor(r() * GID.length)]; return '#' + s; }
   const ROOM_WORDS = ['ELF', 'DRAKE', 'RUNE', 'OAK', 'MAGE', 'GROVE', 'KEEP', 'WYRM', 'GEM', 'FAE', 'TOME', 'STAR'];
   function roomCode(rnd) { const r = rnd || Math.random; return ROOM_WORDS[Math.floor(r() * ROOM_WORDS.length)] + '-' + (10 + Math.floor(r() * 90)); }
   const fmtTime = sec => { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
 
-  AR.util = { rng, hash, newId, r2, clamp, isUnkind, cleanText, cleanName, cleanFullName, shortName, gameId, roomCode, fmtTime };
+  AR.util = { rng, hash, newId, r2, clamp, isUnkind, cleanText, cleanName, cleanFullName, namePart, fullNameParts, shortName, gameId, roomCode, fmtTime };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -4250,7 +4265,7 @@ window.GK_ONLINE_CONFIG = {
         if (!P || !P.online) {
           if (v.kicked) return;
           let look = v.look; if (typeof look === 'string') { try { look = JSON.parse(look); } catch (e) { look = {}; } }
-          S.join(pid, v.name, look, v.sec);
+          S.join(pid, AR.util.cleanFullName(v.fullName) || v.name, look, v.sec);
         }
         if (v.p) { const n = String(v.p).split(',').map(Number); if (n.length >= 4) S.pos(pid, n[0], n[1], n[2], n[3]); }
       };
@@ -4370,15 +4385,17 @@ window.GK_ONLINE_CONFIG = {
 
     start(name, look, sec) {
       const me = this.ref('players/' + this.id);
-      this.name = String(name || '').slice(0, 40);   // full names (the host shows classmates the short form)
-      const rec = { name: this.name, look: JSON.stringify(look || {}), on: 1, h: this.serverNow(), p: null }; if (sec) rec.sec = String(sec).slice(0, 30);
-      me.update(rec); // discard the previous tab's queued position
-      me.onDisconnect().update({ on: 0 });
+      this.name = String(name || '').slice(0, 100);
+      // Existing Firebase rules cap name at 16. Send full records separately for the host.
+      const full=AR.util.cleanFullName(this.name),wireName=(full?AR.util.shortName(full):AR.util.cleanName(this.name)).slice(0,16);
+      const rec = { name: wireName, fullName: full || '', look: JSON.stringify(look || {}), on: 1, h: this.serverNow(), p: null }; if (sec) rec.sec = String(sec).slice(0, 30);
+      this.presenceReady=me.update(rec); // ready() handles a refused initial write immediately
+      me.onDisconnect().update({ on: 0 }).catch(()=>{});
       this.T.onConnected(ok => {
         this.connected = ok; this.emit('connection', ok);
-        if (ok && !this.stopped) { me.onDisconnect().update({ on: 0 }); me.update({ on: 1, h: this.serverNow() }); }
+        if (ok && !this.stopped) { me.onDisconnect().update({ on: 0 }).catch(()=>{}); me.update({ on: 1, h: this.serverNow() }).catch(e=>this.emit('joinError',e)); }
       });
-      this.beat = setInterval(() => { if (this.connected && !this.stopped) me.update({ on: 1, h: this.serverNow() }); }, 10000);
+      this.beat = setInterval(() => { if (this.connected && !this.stopped) me.update({ on: 1, h: this.serverNow() }).catch(e=>this.emit('joinError',e)); }, 10000);
       this.ref('g').on('value', s => { this.g = s.val(); this.emit('g', this.g); this.watchChat(); });
       const ps = this.ref('ps');
       const up = s => { this.ps[s.key] = s.val();
@@ -4438,7 +4455,7 @@ window.GK_ONLINE_CONFIG = {
       this.stopped = true; clearInterval(this.beat);
       for (const p of ['g', 'ps', 'pos', 'pv/' + this.id, 'fx']) this.ref(p).off();
       if (this.chatTeam) this.ref('chat/' + this.chatTeam).off();
-      if (!this.kicked) this.ref('players/' + this.id).update({ on: 0 });
+      if (!this.kicked) this.ref('players/' + this.id).update({ on: 0 }).catch(()=>{});
     }
   }
 
@@ -4460,7 +4477,7 @@ window.GK_ONLINE_CONFIG = {
   }
   function lastSession(){
     for(const kind of ['localStorage','sessionStorage']){try{const d=JSON.parse(readStore(kind,'sr.student.resume'));
-      if(d&&/^[A-Z0-9-]{3,16}$/.test(d.room)&&validId(d.pid)&&typeof d.name==='string'&&AR.util.cleanName(d.name)===d.name)return d;
+      if(d&&/^[A-Z0-9-]{3,16}$/.test(d.room)&&validId(d.pid)&&typeof d.name==='string'&&(AR.util.cleanFullName(d.name)===d.name||AR.util.cleanName(d.name)===d.name))return d;
     }catch(e){/* old/corrupt save */}}return null;
   }
   function forgetSession(room,pid){const d=lastSession();if(!d||d.room!==room||d.pid!==pid)return;
@@ -4468,6 +4485,7 @@ window.GK_ONLINE_CONFIG = {
   function ready(link){return new Promise((resolve,reject)=>{
     let done=false;const finish=error=>{if(done)return;done=true;clearTimeout(timer);if(error){link.stop();reject(error);}else{remember(link);resolve(link);}};
     const timer=setTimeout(()=>finish(new Error('Your teacher room is not responding. Ask your teacher to open or continue that room, then try again.')),12000);
+    const fail=e=>finish(new Error(/permission.?denied/i.test(String(e.code||e.message||e))?'The server refused this join request. Ask your teacher to open the updated game. Keep your full name; you do not need to shorten it.':(e.message||'Could not send your join request. Check the internet and try again.')));Promise.resolve(link.presenceReady).catch(fail);link.on('joinError',fail);
     const check=()=>{const me=link.me();if(me&&me.rc===link.resumeKey&&link.g)finish();};
     link.on('ps',check).on('g',check).on('kicked',()=>{forgetSession(link.room,link.id);finish(new Error('Your teacher removed you from this room. Ask your teacher before joining again.'));});check();
   });}
@@ -6552,23 +6570,29 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     },
     showJoin(code) {
       const ui = clear(this.ui);
-      const name = h('input.text', { maxlength: 40, placeholder: 'e.g. Nguyen Van An · Kim Min-jun · Ivan Petrov', value: LS.get('sr.name', ''), 'aria-label': 'Your full name' });
+      const savedName=LS.get('sr.name',''),parts=savedName.includes(',')?savedName.split(','):[];
+      const surname=h('input.text',{maxlength:80,placeholder:'Family name · e.g. Nguyen','aria-label':'Surname (family name)',autocomplete:'family-name',value:parts[0]?.trim()||''});
+      const given=h('input.text',{maxlength:80,placeholder:'Given name · e.g. Van An','aria-label':'Given name',autocomplete:'given-name',value:parts[1]?.trim()||''});
+      const preview=h('p.small');const updateName=()=>{const full=U.fullNameParts(surname.value,given.value);preview.textContent=full?'Name for your teacher: '+full:'Enter your surname first, then your given name. Keep accents and spaces in your name.';};surname.addEventListener('input',updateName);given.addEventListener('input',updateName);updateName();
       const sec = h('select.text', { 'aria-label': 'Grade and section' }, h('option', { value: '' }, '— Choose your grade and section —'), B.assess.sections.map(x => h('option', { value: x, selected: LS.get('sr.sec', '') === x }, x)));
       const room = h('input.text.code', { maxlength: 16, placeholder: 'ROOM-00', value: code || AR.Client.lastRoom(), 'aria-label': 'Room code' });
       const msg = h('p.error');
       let joining=false;
+      for(const input of [surname,given,room,sec])input.addEventListener(input===sec?'change':'input',()=>{if(!joining)msg.textContent='';});
       const go = () => {
-        if(joining)return;const nm = U.cleanFullName(name.value);
-        if (!nm) { msg.textContent = 'Type your FULL name (letters only), e.g. Nguyen Van An, Kim Min-jun or Ivan Petrov.'; return; }
+        if(joining)return;const nm=U.fullNameParts(surname.value,given.value);
+        if(!U.namePart(surname.value)){msg.textContent='Enter your surname (family name) in the first box. Letters, accents, spaces, apostrophes and hyphens are allowed.';surname.focus();return;}
+        if(!U.namePart(given.value)){msg.textContent='Enter your given name in the second box. Letters, accents, spaces, apostrophes and hyphens are allowed.';given.focus();return;}
+        if(!nm){msg.textContent='Your combined name is too long (maximum 100 characters). Ask your teacher for help; do not remove part of your name just to connect.';return;}
         if (!sec.value) { msg.textContent = 'Choose your grade and section.'; return; }
         LS.set('sr.name', nm); LS.set('sr.sec', sec.value); msg.textContent = 'Connecting…';joining=true;const attempt=this.resumeAttempt=(this.resumeAttempt||0)+1;
         AR.Client.join({ room: room.value, name: nm, section: sec.value, look: this.look }).then(link => {if(attempt!==this.resumeAttempt){link.stop();return;}this.startStudent(link,false);}).catch(e => {joining=false;if(attempt===this.resumeAttempt)msg.textContent=e.message;});
       };
-      [name, room].forEach(i => i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }));
-      ui.appendChild(h('div.panel.center.join', h('h2', '🔑 Join a game'), h('label', 'Your full name', name), h('label', 'Grade and section', sec), h('label', 'Room code', room), msg,
-        h('p.small', 'Your teacher uses your full name for your grade. Classmates only see your first name and one letter (like "Ivan P.").'),
+      [surname,given,room].forEach(i => i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }));
+      ui.appendChild(h('div.panel.center.join', h('h2', '🔑 Join a game'), h('label','1 · Surname (family name)',surname),h('label','2 · Given name',given),preview, h('label', 'Grade and section', sec), h('label', 'Room code', room), msg,
+        h('p.small', 'Your teacher uses your full name for your grade. Classmates only see your given name and your surname initial (like "An N."). Check the name preview above before joining.'),
         h('div.row.end', h('button.btn', { onclick: () => this.showMenu() }, 'Back'), h('button.btn.primary', { onclick: go }, 'Join'))));
-      setTimeout(() => (name.value ? room : name).focus(), 50);
+      setTimeout(() => (surname.value&&given.value?room:surname).focus(), 50);
     },
     showPracticeSetup() {
       const o = Object.assign({ squads: 4, size: 3, skill: 'normal', rounds: 2 }, LS.get('sr.practice', {}));
