@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-18T23:26:34.973Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-19T01:45:04.898Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -2414,7 +2414,17 @@ window.GK_ONLINE_CONFIG = {
       // cfg.filter(q): only some questions (e.g. short ones in the Question Cages); if none are left, every question counts
       let open = bank.questions.filter(q => !st.correct[q.id] && (!cfg.filter || cfg.filter(q)));
       if (!open.length && cfg.filter) open = bank.questions.filter(q => !st.correct[q.id]);
-      if (!open.length) return null;   // every question answered correctly: bank mastered
+      // nothing new left (every question already answered right): REVIEW old questions, so there is always something to
+      // answer: the least-asked first, never the very last one, short ones first in the cages
+      const review = () => {
+        let all = bank.questions.filter(q => q.id !== st.lastId && (!cfg.filter || cfg.filter(q)));
+        if (!all.length) all = bank.questions.filter(q => q.id !== st.lastId);
+        if (!all.length) all = bank.questions.slice();
+        if (!all.length) return null;
+        const min = Math.min.apply(null, all.map(q => st.seen[q.id] || 0)), pool = all.filter(q => (st.seen[q.id] || 0) === min);
+        return pool[Math.floor(rnd() * pool.length)];
+      };
+      if (!open.length) return review();
       // 1) a missed concept that is due: same topic, preferably a different question; the very same question only
       //    after sameQuestionAfter others (so the revealed answer is never rewarded straight away)
       for (const due of st.missed.slice()) {
@@ -2433,7 +2443,7 @@ window.GK_ONLINE_CONFIG = {
       // 3) everything seen: questions not yet answered correctly, oldest/least-seen first, never the very last one
       if (!pool.length) {
         const wa = st.wrongAt || {}, ok = open.filter(q => q.id !== st.lastId && !(wa[q.id] != null && st.served < wa[q.id] + cfg.sameQuestionAfter));
-        if (!ok.length) return null;   // only just-missed questions are left: wait (the shrine says "come back soon")
+        if (!ok.length) return review();   // only just-missed questions are left: review an old one meanwhile
         const min = Math.min.apply(null, ok.map(q => st.seen[q.id] || 0));
         pool = ok.filter(q => (st.seen[q.id] || 0) === min);
       }
@@ -4284,7 +4294,14 @@ window.GK_ONLINE_CONFIG = {
       }
       // effects (beams, knock-outs): one short string, 4 times a second, only when something happened
       this.fxBuf = (this.fxBuf || []).concat(S.takeFx());
-      if (this.fxBuf.length && now - (this.fxAt || 0) >= 250) { this.fxSeq = (this.fxSeq || 0) + 1; up.fx = this.fxSeq + '|' + this.fxBuf.slice(-80).join(';'); this.fxBuf = []; this.fxAt = now; }
+      // Firebase may skip a value that is replaced quickly, so each publish repeats the last 6 batches (each entry marked
+      // with its batch number) and a student's PC draws only the batches it has not drawn yet: no arrow is ever lost.
+      if (this.fxBuf.length && now - (this.fxAt || 0) >= 250) {
+        this.fxSeq = (this.fxSeq || 0) + 1;
+        this.fxHist = (this.fxHist || []).concat([{ s: this.fxSeq, l: this.fxBuf.slice(-80) }]).slice(-6);
+        up.fx = this.fxSeq + '|' + this.fxHist.map(b => b.l.map(e => b.s + '~' + e).join(';')).join(';');
+        this.fxBuf = []; this.fxAt = now;
+      }
       const keys = Object.keys(up);
       if (!keys.length) return;
       this.stats.out += keys.length;
@@ -4372,9 +4389,18 @@ window.GK_ONLINE_CONFIG = {
       this.ref('pv/' + this.id).on('value', s => { this.pv = s.val(); this.emit('pv', this.pv); });
       this.ref('pos').on('value', s => { this.parsePos(s.val()); this.emit('pos'); });
       this.ref('fx').on('value', s => {
-        const v = String(s.val() || ''), bar = v.indexOf('|'); if (bar < 0) return;
-        const seq = v.slice(0, bar); if (seq === this.fxSeq) return; this.fxSeq = seq;
-        this.emit('fx', v.slice(bar + 1).split(';').map(e => { const a = e.split(','); return { k: a[0], x1: +a[1], z1: +a[2], x2: +a[3], z2: +a[4], tm: a[5], y1: a[6] === undefined ? null : +a[6], y2: a[7] === undefined ? null : +a[7], id: a[8] || '' }; }));
+        const v = String(s.val() || ''), bar = v.indexOf('|'), seq = bar < 0 ? 0 : Number(v.slice(0, bar)) || 0;
+        if (this.fxSeq == null) { this.fxSeq = seq; return; }   // the first value when I join is old history: draw nothing
+        if (bar < 0 || seq === this.fxSeq) return;
+        const last = seq < this.fxSeq ? 0 : this.fxSeq; this.fxSeq = seq;   // a restarted host counts from 1 again: all of it is new
+        const out = [];
+        for (const raw of v.slice(bar + 1).split(';')) {
+          if (!raw) continue;
+          const t = raw.indexOf('~'), bs = t > 0 ? Number(raw.slice(0, t)) : seq, e = t > 0 ? raw.slice(t + 1) : raw;
+          if (bs <= last) continue;   // already drawn
+          const a = e.split(','); out.push({ k: a[0], x1: +a[1], z1: +a[2], x2: +a[3], z2: +a[4], tm: a[5], y1: a[6] === undefined ? null : +a[6], y2: a[7] === undefined ? null : +a[7], id: a[8] || '' });
+        }
+        if (out.length) this.emit('fx', out);
       });
       return this;
     }
@@ -5243,6 +5269,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   function wallBox() { return G().box(0, 0, 0, 1, 1, 0.5, '#6fd3ff', { glow: 0.7 }); }   // Rune Wall (scale [width, 3, 1])
   function fogCloud() { const g = G(); for (let i = 0; i < 7; i++) { const a = i / 7 * 6.28; g.sphere(Math.cos(a) * 0.55, 0.3 + (i % 2) * 0.3, Math.sin(a) * 0.55, 0.55, '#d8dee9', { seg: 6, rings: 4, flat: true }); } g.sphere(0, 0.5, 0, 0.7, '#e5e9f0', { seg: 6, rings: 4, flat: true }); return g; }
   function arrowFx() { return G().box(0, -0.03, -0.45, 0.06, 0.06, 0.9, '#5c3a1e').add(G().cone(0, 0, 0, 0.08, 0.2, '#e8eef2', { seg: 4, flat: true }).rotX(Math.PI / 2).move(0, 0, 0.45)); }
+  /** A glowing streak behind a flying arrow / life bolt (length 1 along -z; scaled to the distance flown). */
+  function fxTrail(color) { return G().box(0, -0.035, -0.5, 0.07, 0.07, 1, color || '#ffffff', { glow: 1 }).add(G().box(0, -0.02, -0.5, 0.03, 0.04, 1, '#ffffff', { glow: 1 })); }
   function shockRing(color) { return G().add(G().cyl(0, 0, 0, 1, 0.5, color, { seg: 24, glow: 0.8, noTop: true, noBottom: true })); }
   function stormWall() {   // scale [r, height, r]: a glowing purple wall with lighter bands, so it is easy to see from far away
     const g = G().cyl(0, 0, 0, 1, 1, '#a64dff', { seg: 64, glow: 0.95, noTop: true, noBottom: true });
@@ -5504,7 +5532,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
   }
   function dragonRib() { return G().add(G().cyl(0, 0, 0, 0.35, 7, '#e9e2d0', { seg: 5, flat: true, rTop: 0.18 }).rotZ(-0.55).move(0, 0, 0)); }
 
-  AR.ModelsRoyale = { lookout, saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, shockRing, haven, runeStone, runeGlyph, griffin, griffinSaddle, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
+  AR.ModelsRoyale = { lookout, saddle, cage, lootBag, lifeOrb, chest, wallBox, fogCloud, arrowFx, fxTrail, shockRing, haven, runeStone, runeGlyph, griffin, griffinSaddle, GRIFFIN_SEATS, GRIFFIN_SEAT_Y, stormWall, circleLine, wings, citadel, house, stall, lighthouse, forgeHut, lavaRock, iceSpike, bookTower, floatRock, dragonSkull, dragonRib, barn, well, fence, boulder, grassBlades, horse, wolf, broom, SADDLE, classGear };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -6988,6 +7016,27 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const sc = this.sc, m = sc.mesh('bubble', () => new GK.Geo().sphere(0, 0, 0, 0.11, '#e7f8ff', { seg: 6, rings: 4, glow: 0.35 }));
       for (let i = 0; i < 4; i++) { const k = ((now / 900) + i / 4) % 1, a = i * 2.1 + now / 1500; items.push({ mesh: m, pos: [x + Math.cos(a) * 0.35, -0.5 + k * 0.6, z + Math.sin(a) * 0.35], scale: 0.6 + k * 0.8, alpha: 0.85 * (1 - k * 0.6), noShadow: true }); }
     }
+    /** Jumping feels instant: the host's answer needs a network round trip (often longer than the 0.75 s jump), so my PC
+        starts the same jump at once with the same rules (not riding, not swimming, not caged, the rest time after a jump). */
+    predictJump() {
+      const m = this.me(), t = Math.max(0, this.t()), M = AR.Motion;
+      if (m.st !== 'ground' || m.rd || this.wet() || this.caged() || (this.link.pv && this.link.pv.in)) return;
+      if (this.jumpLocalAt != null && t < this.jumpLocalAt + M.flight() + B.player.jump.rest) return;
+      this.jumpLocalAt = t;
+    }
+    /** My jump height: my own prediction, or the host's jump when it is a different one (e.g. sent by the tutorial). */
+    myJumpHeight(mo, tt) {
+      const M = AR.Motion, local = this.jumpLocalAt;
+      const mine = local != null ? M.height({ jumpAt: local }, tt) : 0;
+      if (local != null && mo && mo.jumpAt >= 0 && Math.abs(mo.jumpAt - local) < 0.8) return mine;   // the same jump: use mine
+      return Math.max(mine, M.height(mo, tt));
+    }
+    /** Another player's jump: start the whole arc when the news arrives (it is late by the network delay). */
+    remoteJump(R, mo, tt, now) {
+      const M = AR.Motion, ja = mo && mo.jumpAt >= 0 ? mo.jumpAt : -1;
+      if (ja !== R.jSeen) { R.jSeen = ja; R.jStart = ja >= 0 && tt - ja >= -0.5 && tt - ja < M.flight() + 0.8 ? now : -1; }
+      return R.jStart >= 0 ? M.height({ jumpAt: 0 }, (now - R.jStart) / 1000) : 0;
+    }
     /** In deep water (swimming)? diving: also under the surface. */
     wet() { return !!this.pos && this.me().st === 'ground' && this.app.island.swimming(this.pos[0], this.pos[2]); }
     diving() { return this.wet() && !!(this.me().mo || {}).stance; }
@@ -6997,8 +7046,23 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const now = performance.now(); if (now - (this.lastFire || 0) < this.weaponNow().interval * 950) return; this.lastFire = now;
       const p = this.aimPoint3() || this.forward(30);
       this.link.send('shoot', { x: Math.round(p[0] * 100) / 100, y: Math.round(p[1] * 100) / 100, z: Math.round(p[2] * 100) / 100 });
+      this.predictShot(p);
       if (this.yaw != null) this.yaw = this.camYaw();
       if (this.reticle) { this.reticle.classList.remove('fire'); void this.reticle.offsetWidth; this.reticle.classList.add('fire'); }
+    }
+    /** Draw my own arrow / life bolt / lightning at once, from my chest towards the crosshair (stopped by walls, trees, rocks). */
+    predictShot(p) {
+      if (!this.pos || this.wet() || !this.addFx) return;
+      const W = this.weaponNow(), k = W.kind === 'arrow' ? 'a' : W.kind === 'orb' ? 'o' : W.kind === 'bolt' ? 'L' : W.kind === 'melee' ? 'm' : '';
+      if (!k) return;
+      const I = this.app.island, sk = (this.me().mo || {}).stance, hb = sk === 'prone' ? 0.55 : sk === 'crouch' ? 1.15 : 1.8;
+      const a = [this.pos[0], this.pos[1] + Math.min(B.combat.chestY, hb * 0.7), this.pos[2]];
+      const d = [p[0] - a[0], p[1] - a[1], p[2] - a[2]], L = Math.hypot(d[0], d[1], d[2]) || 1, r = W.range || 3;
+      let b = [a[0] + d[0] / L * r, a[1] + d[1] / L * r, a[2] + d[2] / L * r];
+      const bodies = []; for (const pid in this.remote) { const R = this.remote[pid]; if (R.st === 'ground' || R.st === 'glide') bodies.push({ id: pid, x: R.x, y: Math.max(I.ground(R.x, R.z), R.y || 0), z: R.z, h: 1.8, r: 0.5 }); }
+      const hit = k !== 'm' && AR.Collide.ray(I, a, b, { players: k === 'L' ? bodies : [], groundStep: 1 }); if (hit) b = hit.p;
+      const q = this.squad(), tm = q && q.color ? q.color.slice(1) : 'ffffff';
+      this.addFx([{ k, x1: a[0], z1: a[2], y1: a[1], x2: b[0], z2: b[2], y2: b[1], tm, id: '', own: true }]);
     }
     camYaw() { const c = this.sc.cam; return Math.atan2(Math.sin(c.yaw), -Math.cos(c.yaw)); }
     forward(d) { const c = this.sc.cam; return [this.pos[0] + Math.sin(c.yaw) * d, 0, this.pos[2] - Math.cos(c.yaw) * d]; }
@@ -7018,7 +7082,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     stance(s) { const cur = (this.me().mo || {}).stance || ''; this.link.send('stance', { s: cur === s ? '' : s }); }
     key(e) {
       const st = this.me().st, rep = e.repeat;
-      if (e.code === 'Space' && !rep) { this.link.send('jump'); return; }
+      if (e.code === 'Space' && !rep) { this.predictJump(); this.link.send('jump'); return; }
       if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !rep) { if (st === 'ground' && !this.me().rd) { this.sprinting = true; this.link.send('sprint', { on: 1 }); } return; }
       if (['KeyC', 'KeyZ', 'ControlLeft', 'ControlRight'].indexOf(e.code) >= 0 && !rep && st === 'ground' && this.wet()) { this.stance('prone'); return; }   // dive / come up
       if (e.code === 'KeyC' && !rep && st === 'ground') { this.stance('crouch'); return; }
@@ -7148,7 +7212,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
           this.bubbles(items, R.x, R.z, now + pid.length * 131);
           if (!this.diving() || Math.hypot(R.x - myPos[0], R.z - myPos[2]) > 12) continue;   // when I dive too: other divers close by, faint
         }
-        const y = sw ? (sw.dive ? 0.06 : sw.y) : Math.max(gy, R.y || gy) + (ride ? 0 : AR.Motion.height(mo, tt));
+        const y = sw ? (sw.dive ? 0.06 : sw.y) : Math.max(gy, R.y || gy) + (ride ? 0 : this.remoteJump(R, mo, tt, now));
         if (sw && !sw.dive) this.ripple(items, R.x, R.z, now + pid.length * 77, R.walk);
         if (ride) { items.push({ mesh: sc.mountMesh(ride.k, ride.v, R.walk, now), pos: [R.x, gy, R.z], yaw: R.yaw }); }
         const atk = now - (R.attackAt || 0);
@@ -7161,7 +7225,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       for (const pid in this.remote) if (!this.link.pos[pid]) delete this.remote[pid];
       const myRide = m.rd && this.mounts().find(M => M.id === m.rd), tt = Math.max(0, t), mo = m.mo || {};
       if (this.pos && st !== 'fly' && st !== 'down' && st !== 'out' && st !== 'lobby' && !((cam.perspective === 'first' || cam.indoorFirst) && st === 'ground')) {
-        const jy = myRide ? MR.SADDLE[myRide.k] : AR.Motion.height(mo, tt), sw = !myRide && this.swimPose(this.pos[0], this.pos[2], st, mo, this.walking);
+        const jy = myRide ? MR.SADDLE[myRide.k] : this.myJumpHeight(mo, tt), sw = !myRide && this.swimPose(this.pos[0], this.pos[2], st, mo, this.walking);
         const myY = sw ? (sw.dive ? 0.06 : sw.y) : this.pos[1] + jy;   // my own diver: a faint shape just under the surface
         if (sw) { if (sw.dive) this.bubbles(items, this.pos[0], this.pos[2], now); else this.ripple(items, this.pos[0], this.pos[2], now, this.walking); }
         if (myRide) items.push({ mesh: sc.mountMesh(myRide.k, myRide.v, this.walking, now), pos: this.pos, yaw: this.yaw });
@@ -7391,8 +7455,14 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       } else if (f.k === 'a' || f.k === 'o') {   // a flying arrow / life bolt (stopped early by its impact)
         const k = Math.min(1, t * f.dur / f.fly), p = [f.a[0] + dx * k, y0 + dy * k, f.a[1] + dz * k];
         if (k >= 1) { f.dead = true; continue; }
-        if (f.k === 'a') items.push({ mesh: sc.mesh('arrow', () => MR.arrowFx()), pos: p, yaw, pitch, scale: 1.4, noShadow: true });
-        else items.push({ mesh: sc.mesh('orb', () => MR.lifeOrb()), pos: p, yaw: now / 120, noShadow: true });
+        const trail = Math.min(2.2, len * k);   // a glowing streak behind it, so it can be seen from far away
+        if (f.k === 'a') {
+          items.push({ mesh: sc.mesh('arrow', () => MR.arrowFx()), pos: p, yaw, pitch, scale: 1.8, noShadow: true });
+          if (trail > 0.1) items.push({ mesh: sc.mesh('ftrail' + f.col, () => MR.fxTrail(f.col)), pos: p, yaw, pitch, scale: [1, 1, trail], alpha: 0.75, noShadow: true });
+        } else {
+          items.push({ mesh: sc.mesh('orb', () => MR.lifeOrb()), pos: p, yaw: now / 120, scale: 1.3, noShadow: true });
+          if (trail > 0.1) items.push({ mesh: sc.mesh('ftrail#69db7c', () => MR.fxTrail('#69db7c')), pos: p, yaw, pitch, scale: [2.2, 2.2, trail], alpha: 0.6, noShadow: true });
+        }
       } else if (f.k === 'x') {   // impact: red spark on a player, green on a life bolt, dust on anything else
         items.push({ mesh: sc.mesh('hit' + f.tm, () => M2.burst(f.tm === 'p' ? '#ff6b6b' : f.tm === 'orb' ? '#69db7c' : '#d9c7a3')), pos: [f.a[0], y0, f.a[1]], scale: 0.25 + t * (f.tm === 'p' ? 1.0 : 0.7), alpha: fade, noShadow: true });
       } else if (f.k === 'm' || f.k === 'c') {   // sword arc · Shield Charge
@@ -7412,7 +7482,12 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     for (const e of list) {
       if (e.k === 'd' || e.k === 'b') continue;
       if (e.k === 'x' && e.id) { const pr = this.fxList.find(f => f.id === e.id && (f.k === 'a' || f.k === 'o')); if (pr) pr.dead = true; }
-      const f = { k: e.k, a: [e.x1, e.z1], b: [e.x2, e.z2], y1: e.y1, y2: e.y2, id: e.id, t0: now, col: /^[0-9a-f]{6}$/i.test(e.tm || '') ? '#' + e.tm : '#ffffff', tm: e.tm };
+      // the host's copy of a shot I already drew myself (same kind, starts where I stand, within 1.5 s): link it, do not draw twice
+      if (!e.own && 'aoLm'.indexOf(e.k) >= 0 && this.pos && Math.hypot(e.x1 - this.pos[0], e.z1 - this.pos[2]) < 2.5) {
+        const mine = this.fxList.find(f => f.own && !f.matched && f.k === e.k && now - f.t0 < 1500);
+        if (mine) { mine.matched = true; if (e.id) mine.id = e.id; continue; }
+      }
+      const f = { k: e.k, a: [e.x1, e.z1], b: [e.x2, e.z2], y1: e.y1, y2: e.y2, id: e.id, own: !!e.own, t0: now, col: /^[0-9a-f]{6}$/i.test(e.tm || '') ? '#' + e.tm : '#ffffff', tm: e.tm };
       if (e.k === 'a' || e.k === 'o') { const L = Math.hypot(e.x2 - e.x1, (e.y2 || 0) - (e.y1 || 0), e.z2 - e.z1); f.fly = Math.max(30, L / SPEED[e.k] * 1000); f.dur = f.fly + 30; }
       else f.dur = { L: 260, x: 420, m: 300, c: 450, h: 900, g: 1000, s: 700, k: 500, O: 800 }[e.k] || 500;
       this.fxList.push(f);
