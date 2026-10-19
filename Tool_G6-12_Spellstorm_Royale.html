@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-19T02:39:52.843Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-19T02:53:08.630Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -2253,11 +2253,28 @@ window.GK_ONLINE_CONFIG = {
     function indoors(x,y,z){return buildings.find(b=>inBox(b,x,z,-.15)&&y>=b.base-.3&&y<b.base+b.h-.3)||null;}
     function landing(x,z,fromY){let y=feet(x,z);for(const s of surfaces)if(s.y<=fromY+.38&&s.y>y&&inBox(s,x,z,.43))y=s.y;return y;}
     function blocked(x,y,z,r=.42){return walkSolids.some(b=>y+.38<b.y1&&y+1.65>b.y0&&inBox(b,x,z,r));}
+    /** How deep a body at (x, y, z) is inside walls / floors (0 = free). Steps that make it smaller are always allowed,
+        so a player who ended up overlapping a wall can always walk out (they used to freeze: "stuck in the wall"). */
+    function depth(x,y,z,r=.42){let d=0;for(const b of walkSolids){if(!(y+.38<b.y1&&y+1.65>b.y0))continue;const p=local(b,x,z),ex=b.hx+r-Math.abs(p[0]),ez=b.hz+r-Math.abs(p[1]);if(ex>0&&ez>0)d+=Math.min(ex,ez);}return d;}   // total overlap with all walls
+    /** The way out of walls: the vector (x, z) to the NEAREST free spot (rings of 16 directions, 0.15 m apart, up to 4 m),
+        where a body fits on the ground or a floor and is clear of trees and rocks; null when already free. */
+    function escape(x,y,z){
+      if(!blocked(x,y,z))return null;
+      for(let r=.15;r<=4.01;r+=.15)for(let k=0;k<16;k++){const a=k/16*Math.PI*2,nx=x+Math.cos(a)*r,nz=z+Math.sin(a)*r;
+        if(!canMove(x,z,nx,nz))continue;const ny=Math.max(landing(nx,nz,y),feet(nx,nz));
+        if(!blocked(nx,ny,nz)&&colliders.every(c=>Math.hypot(nx-c.x,nz-c.z)>c.r+.45))return[nx-x,nz-z];}
+      return null;
+    }
     function walk(x0,y0,z0,x,z,dt,dive){
+      // under a floor (placed at ground height inside a house)? stand on the floor instead
+      if(blocked(x0,y0,z0)){const up=landing(x0,z0,y0+2);if(up>y0&&!blocked(x0,up,z0))y0=up;}
+      // still inside a wall: glide out to the nearest free spot first (5 m/s), then walk as usual
+      if(blocked(x0,y0,z0)){const e=escape(x0,y0,z0);if(e){const L=Math.hypot(e[0],e[1]),st=Math.min(L,Math.max(.05,5*Math.min(.25,dt||.05)));const mx=e[0]/L*st,mz=e[1]/L*st,still=Math.hypot(x-x0,z-z0)<1e-6;x0+=mx;z0+=mz;if(still){x+=mx;z+=mz;}y0=Math.max(landing(x0,z0,y0),feet(x0,z0));}}
       const n=Math.max(1,Math.ceil(Math.hypot(x-x0,z-z0)/.22)),dx=(x-x0)/n,dz=(z-z0)/n;let px=x0,pz=z0,py=y0;
       for(let i=0;i<n;i++){
         const tryAt=(nx,nz)=>{if(!canMove(px,pz,nx,nz))return false;const floor=landing(nx,nz,py),ny=Math.max(floor,py-9*Math.min(.25,dt)/n);
-          if(blocked(nx,ny,nz)||colliders.some(c=>Math.hypot(nx-c.x,nz-c.z)<c.r+.4&&Math.hypot(nx-c.x,nz-c.z)<=Math.hypot(px-c.x,pz-c.z)+1e-6))return false;px=nx;pz=nz;py=ny;return true;};
+          if(blocked(nx,ny,nz)&&!(depth(nx,ny,nz)<depth(px,py,pz)-1e-4))return false;   // into a wall: no · out of a wall: yes
+          if(colliders.some(c=>Math.hypot(nx-c.x,nz-c.z)<c.r+.4&&Math.hypot(nx-c.x,nz-c.z)<=Math.hypot(px-c.x,pz-c.z)+1e-6)&&!(depth(px,py,pz)>0&&depth(nx,ny,nz)<depth(px,py,pz)-1e-4))return false;px=nx;pz=nz;py=ny;return true;};
         if(!tryAt(px+dx,pz+dz)){if(dx)tryAt(px+dx,pz);if(dz)tryAt(px,pz+dz);}
       }
       if(dive&&swimming(px,pz))py=feet(px,pz,true);
@@ -2279,7 +2296,7 @@ window.GK_ONLINE_CONFIG = {
       const from = [-dir[0] * 215 + side[0] * off, -dir[1] * 215 + side[1] * off], to = [dir[0] * 215 + side[0] * off, dir[1] * 215 + side[1] * off];
       return { from, to, dy: [0, 5, -5, 9, -9, 3, -3, 7][k % 8] };
     }
-    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, buildings, surfaces, walkSolids, climbs, indoors, landing, blocked, walk, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
+    return { seed, half, landR, places, chests, roads, mountSpots, meadows, inMeadow, scenery, colliders, solids, buildings, surfaces, walkSolids, climbs, indoors, landing, blocked, depth, escape, walk, height, ground, feet, swimming, inBounds, canMove, SWIM_Y, DIVE_Y, onLand, inHaven, coastR, roadDist, randomLand, griffinRoute, haven: HAVEN, placeOf };
   }
 
   AR.Island = { PLACES, HAVEN, build };
@@ -2798,7 +2815,10 @@ window.GK_ONLINE_CONFIG = {
     /** Put a player somewhere (spawn, correction). y: height (gliding). */
     teleport(pid, x, z, y) {
       const P = this.player(pid); if (!P) return;
-      const g = this.island().ground(x, z);
+      const I = this.island();
+      // never inside a wall: step out through the nearest side; inside a house: on its floor, not on the ground under it
+      if (I.escape && y == null) { const e = I.escape(x, I.landing(x, z, I.ground(x, z) + 2), z); if (e) { x += e[0]; z += e[1]; } }
+      const g = I.landing ? I.landing(x, z, I.ground(x, z) + 2) : I.ground(x, z);
       P.pos = [x, y == null ? g : Math.max(g, y), z, P.pos ? P.pos[3] : 0]; P.posAt = this.now();
       P.sp = [r2(x), r2(z), (P.sp ? P.sp[2] : 0) + 1, r2(P.pos[1])];
       this.touchP(pid); this.dirty.pos = true;
@@ -4141,6 +4161,7 @@ window.GK_ONLINE_CONFIG = {
       }
       if (!I.canMove(P.pos[0], P.pos[2], x, z)) { m.path = []; return; }
       if (P.ride && I.swimming(x, z)) S.dismount(P);
+      if (I.blocked && I.blocked(P.pos[0], P.pos[1], P.pos[2]) && x === P.pos[0] && z === P.pos[2]) x += 1e-3;   // standing still inside a wall: walk() glides it out
       if (x !== P.pos[0] || z !== P.pos[2]) { const q=I.walk(P.pos[0],P.pos[1],P.pos[2],x,z,dt); P.pos = [q[0],q[1],q[2],yaw]; P.posAt = S.now(); S.dirty.pos = true; }
     }
     stepTo(P, goal, dt, y) {
@@ -7210,7 +7231,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       if (st !== 'ground' && st !== 'haven') { this.walking = false; return; }
       if (!side && !fwdIn) {
         this.walking = false; this.backward = false; if (this.aiming || this.firing) this.yaw = this.camYaw();
-        if (st === 'ground') this.pos = I.walk(P[0], P[1], P[2], P[0], P[2], dt, !!(this.me().mo || {}).stance);   // diving / coming up on the spot
+        if (st === 'ground') this.pos = I.walk(P[0], P[1], P[2], P[0], P[2], dt, !!(this.me().mo || {}).stance);   // diving / coming up on the spot · gliding out of a wall
         return;
       }
       let mx = f[0] * fwdIn + r[0] * side, mz = f[1] * fwdIn + r[1] * side; const ml = Math.hypot(mx, mz); mx /= ml; mz /= ml;
