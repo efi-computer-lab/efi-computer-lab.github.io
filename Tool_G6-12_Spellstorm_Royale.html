@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-19T02:53:08.630Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<!-- Built 2026-10-19T03:36:09.823Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -7557,7 +7557,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const t = (now - f.t0) / f.dur; if (t >= 1 || f.dead) continue; keep.push(f);
       if (f.k === 'd') continue;   // knock-out bursts: app.js
       const fade = Math.max(0, 1 - t), y0 = f.y1 != null ? f.y1 : I.ground(f.a[0], f.a[1]) + 1.3, y1 = f.y2 != null ? f.y2 : I.ground(f.b[0], f.b[1]) + 1.3;
-      const dx = f.b[0] - f.a[0], dz = f.b[1] - f.a[1], dy = y1 - y0, flat = Math.hypot(dx, dz) || 1e-3, len = Math.hypot(flat, dy) || 1, yaw = Math.atan2(dx, dz), pitch = -Math.atan2(dy, flat);
+      const dx = f.b[0] - f.a[0], dz = f.b[1] - f.a[1], dy = y1 - y0, flat = Math.hypot(dx, dz) || 1e-3, len = Math.hypot(flat, dy) || 1, yaw = Math.atan2(dx, dz), pitch = Math.atan2(dy, flat);   // the renderer tilts +z UP for a positive pitch: a downward shot needs a negative one
       if (f.k === 'L') {   // Lightning Strike: a crackling bolt + a flash where it hit
         const shape = Math.floor(now / 50) % 3;
         items.push({ mesh: sc.mesh('beam' + f.col + shape, () => M3.beam(f.col, shape)), pos: [f.a[0], y0, f.a[1]], yaw, pitch, scale: [1.3, 1.3, len], alpha: fade, noShadow: true });
