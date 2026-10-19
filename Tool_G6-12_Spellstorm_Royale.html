@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<!-- Built 2026-10-19T03:36:09.823Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<meta name="sr-build" content="20261019091951">
+<!-- Built 2026-10-19T09:19:51.177Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -606,6 +607,18 @@ canvas.shake { animation: hypeShake 0.42s linear; }
 body.lowfx .hype .hrays, body.lowfx .hype .hspark { display: none; }
 .hype .hsub b { font-size: 1.15em; filter: brightness(1.5) saturate(1.3); -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.6); }
 .hypeflash { z-index: 69; }
+
+
+.build-label{font-size:11px;letter-spacing:.04em;color:#b8cfdb}.menu .build-label{margin:0}.menu .latest-version{font-size:12px;text-decoration:none;padding:5px 12px;margin:2px 0 4px}.menu{max-height:100vh;overflow-y:auto}
+
+.menu{justify-content:safe center}
+
+/* Keep celebratory text, while removing heavy motion on minimal/reduced-motion setups. */
+body.lowfx .hypeflash{display:none}body.lowfx canvas.shake{animation:none}
+@media(prefers-reduced-motion:reduce){.hype,.hype.out,.hype .htitle,.hype .hicon,canvas.shake{animation:none!important}.hype .hrays,.hype .hspark,.hypeflash{display:none!important}}
+
+/* UI-root hit testing must never turn visual announcements into click blockers. */
+#ui .hype,#ui .hype *,#ui .hypeflash{pointer-events:none!important}
 
 </style>
 </head>
@@ -6375,7 +6388,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       // top bar
       clear(this.top).appendChild(h('div.row',
         h('div.roomcode', h('span.small', 'Room code'), h('b', s.room)),
-        h('div', h('b', 'Spellstorm Royale'), h('div.small', (AR.Questions.Banks.get(s.bankId) || {}).label + ' · ' + Object.values(s.players).filter(p => p.online).length + ' students here')),
+        h('div', h('b', 'Spellstorm Royale'),h('div.small.build-label','Version '+(document.querySelector('meta[name=sr-build]')?.content||'source preview')), h('div.small', (AR.Questions.Banks.get(s.bankId) || {}).label + ' · ' + Object.values(s.players).filter(p => p.online).length + ' students here')),
         h('div.grow'),
         h('div.t-round', s.round ? 'Round ' + s.round + ' / ' + s.rounds : 'Before round 1'),
         running ? [s.clock.pausedAt ? h('button.btn.primary', { onclick: () => { S.resume(); this.host.flush(); } }, '▶ Resume') : h('button.btn', { onclick: () => { S.pause(); this.host.flush(); } }, '⏸ Pause'),
@@ -6558,6 +6571,89 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
 })(window);
 
 </script>
+<script>/* src/client/update.js */
+/* Spellstorm Royale · src/client/update.js — EVERY copy opens the newest version by itself.
+   Lab PCs open the game in many ways: old bookmarks, typed addresses from the history (with an old ?v=), cached pages, and
+   downloaded copies on the Desktop (file://, LabDrop) that never replace themselves. When the menu opens, the game reads
+   the build number of the LIVE website copy (only its first 2 KB: <meta name="sr-build">) and, if that is newer than its
+   own, switches to the website's newest version straight away (a fresh address, so no browser cache can hold it back).
+   Saved data (player id per room, the Continue record, name, class, settings) travels along in the #part of the address,
+   which never leaves the PC, because a Desktop copy and the website keep separate storage. Never during a game; no
+   internet = stays on this copy; at most one switch per new build per tab (no loops). */
+(function (root) {
+  'use strict';
+  const AR = root.AR = root.AR || {};
+  const SITE = 'https://efi-computer-lab.github.io/', FILE = 'Tool_G6-12_Spellstorm_Royale.html', MOVE = 'srmove=';
+
+  function myBuild() { const m = document.querySelector('meta[name="sr-build"]'); return m ? m.content : ''; }
+  /** The live build number, or null (offline, blocked, slow). Reads only the start of the file. */
+  async function liveBuild(timeoutMs) {
+    const read = async (headers) => {
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), timeoutMs || 5000);
+      try {
+        const r = await fetch(SITE + FILE + '?check=' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), { cache: 'no-store', headers, signal: ctl.signal });
+        if (!r.ok && r.status !== 206) return null;
+        const reader = r.body.getReader(), dec = new TextDecoder(); let txt = '';
+        while (txt.length < 8192) {
+          const { done, value } = await reader.read(); if (done) break;
+          txt += dec.decode(value, { stream: true });
+          const m = txt.match(/name="sr-build" content="(\d{14})"/); if (m) { ctl.abort(); return m[1]; }
+        }
+        ctl.abort(); return null;
+      } finally { clearTimeout(tm); }
+    };
+    try { return await read({ Range: 'bytes=0-2047' }); } catch (e) { /* the Range header was refused: read the start without it */ }
+    try { return await read({}); } catch (e) { return null; }
+  }
+  /** Saved Spellstorm data of this copy (keys starting with "sr."), small enough for an address. */
+  function savedData() {
+    const out = {}; let size = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i); if (!/^sr\./.test(k)) continue;
+        const v = localStorage.getItem(k); if (v == null || size + v.length > 400000) continue;
+        out[k] = v; size += v.length + k.length;
+      }
+    } catch (e) { /* storage off */ }
+    return out;
+  }
+  /** On the new copy: take over saved data that came along (never overwriting what this copy already has). */
+  function importMoved() {
+    const hs = location.hash || '', i = hs.indexOf(MOVE); if (i < 0) return 0;
+    let n = 0;
+    try {
+      const data = JSON.parse(decodeURIComponent(hs.slice(i + MOVE.length)));
+      for (const k in data) if (/^sr\./.test(k) && typeof data[k] === 'string') { try { if (localStorage.getItem(k) == null) { localStorage.setItem(k, data[k]); n++; } } catch (e) { /* full */ } }
+    } catch (e) { /* damaged: ignore */ }
+    try { history.replaceState(null, '', location.href.split('#')[0]); } catch (e) { /* ignore */ }
+    return n;
+  }
+  /** Switch to the newest website version if this copy is older. Returns 'current' | 'offline' | 'tried' | 'updating'. */
+  async function check(opts) {
+    opts = opts || {};
+    const q = new URLSearchParams(location.search);
+    if (q.get('noupdate') === '1') return 'off';
+    const mine = myBuild(); if (!mine) return 'off';
+    const live = await liveBuild(opts.timeoutMs);
+    if (!live) return 'offline';
+    if (live <= mine) return 'current';
+    if (opts.busy && opts.busy()) return 'busy';   // a game started meanwhile: never interrupt it
+    const key = 'sr.updated.' + live;
+    try { if (sessionStorage.getItem(key)) return 'tried'; sessionStorage.setItem(key, '1'); } catch (e) { /* no storage: still fine once */ }
+    const u = new URL(SITE + FILE);
+    for (const [k, v] of q) if (['v', 'check', 'launch', 'latest'].indexOf(k) < 0) u.searchParams.set(k, v);
+    u.searchParams.set('v', live);
+    const moved = location.origin !== u.origin ? savedData() : {};
+    u.hash = Object.keys(moved).length ? MOVE + encodeURIComponent(JSON.stringify(moved)) : '';
+    if (opts.onUpdate) opts.onUpdate(live);
+    location.replace(u.href);
+    return 'updating';
+  }
+  AR.Update = { check, myBuild, liveBuild, importMoved, SITE, FILE };
+  if (typeof location !== 'undefined' && typeof document !== 'undefined') importMoved();   // before the game reads its settings
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script>/* src/client/app.js */
 /* Spellstorm Royale · src/client/app.js — start-up, menu, joining, Practice with bots, input, and the STUDENT game:
    Sky Haven (class + Question Cage) → griffin → glide → battle (PUBG-style: the mouse turns the camera, click = attack,
@@ -6590,6 +6686,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       this.bindInput();
       const q = new URLSearchParams(location.search);
       if (q.get('room')) this.showJoin(q.get('room')); else this.showMenu();
+      // an old copy (Desktop file, bookmark, history, cached page)? switch to the newest version before anybody plays
+      if (AR.Update) AR.Update.check({ busy: () => !!this.session, onUpdate: () => { try { this.ui.appendChild(h('div.panel.center.updating', h('h2', '✨ Getting the newest version…'), h('p', 'One moment.'))); } catch (e) { /* ignore */ } } });
       let last = performance.now();
       const frame = t => { requestAnimationFrame(frame); const dt = Math.min(0.1, (t - last) / 1000); last = t; try { this.frame(dt); } catch (e) { console.error(e); } };
       requestAnimationFrame(frame);
@@ -6615,6 +6713,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       ui.appendChild(h('div.menu'+(saved?'.has-resume':''),
         h('a.labhome', { href: 'START_HERE_Computer_Lab.html' }, '← Lab home'),
         h('h1.title', 'Spellstorm Royale'), h('div.subtitle', 'A magical team battle royale'),
+        h('p.small.build-label','Version '+(document.querySelector('meta[name=sr-build]')?.content||'source preview')),
+        h('a.btn.latest-version',{href:'https://efi-computer-lab.github.io/Spellstorm_Play.html'},'↗ Play latest version · bookmark this link'),
         h('p.tagline', 'Pick a class, answer in the Question Cages for boosters, loot chests and win with your squad. The storm is coming!'), resume,
         h('div.grades', grade('g68', 'Grades 6–8', 'parts · files · scams · passwords'), grade('g912', 'Grades 9–12', 'phishing · MFA · backups · logic')),
         h('div.actions',
@@ -6789,7 +6889,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       this.mode = ''; this.aiming = false; this.spectate = 0;
       Object.assign(this.sc.cam, { yaw: 0, pitch: 0.32, dist: 8, perspective: 'third' });
       link.on('g', () => this.onG()).on('ps', id => this.onPs(id)).on('pv', pv => { if (this.panel) this.panel.update(pv); this.onPv(pv); }).on('chat', () => this.drawChat()).on('chatReset', () => this.drawChat())
-        .on('kicked', () => { clear(this.app.ui).appendChild(h('div.panel.center', h('h2', 'You left the room'), h('p', 'Your teacher removed you from this room.'), h('button.btn', { onclick: () => this.app.showMenu() }, 'OK'))); this.app.session = null; })
+        .on('kicked', () => {clear(this.app.ui).appendChild(h('div.panel.center', h('h2', 'You left the room'), h('p', 'Your teacher removed you from this room.'), h('button.btn', { onclick: () => this.app.showMenu() }, 'OK'))); this.app.session = null; })
         .on('connection', ok => { const b = $('.netwarn'); if (b) b.hidden = ok; })
         .on('fx', list => this.addFx(list));
       this.buildHud();
@@ -6842,7 +6942,7 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     onPv(pv) {
       this.reflection(pv);
       const q = pv && pv.q, key = q ? q.tok + q.st : '';
-      if (pv && pv.note && pv.note.n !== this.noteN) { if (this.noteN != null || pv.note.n === 1) toast(pv.note.x, pv.note.k); this.noteN = pv.note.n; }
+      if (pv && pv.note && pv.note.n !== this.noteN) { if ((this.noteN != null || pv.note.n === 1) && !(AR.StudentSession.prototype.hype && /Knock-out!/.test(pv.note.x))) toast(pv.note.x, pv.note.k); this.noteN = pv.note.n; }
       if (pv && pv.in) { this.learnPendingUntil = 0; this.setAim(false); }
       this.lastQKey = key;
     }
