@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<meta name="sr-build" content="20261020011815">
-<!-- Built 2026-10-20T01:18:15.932Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<meta name="sr-build" content="20261020015338">
+<!-- Built 2026-10-20T01:53:38.822Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -622,7 +622,7 @@ body.lowfx .hypeflash{display:none}body.lowfx canvas.shake{animation:none}
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202610200936',page=location.pathname.split('/').pop()||'index.html';
+var mine='202610201000',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -6668,13 +6668,16 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
     const mine = myBuild(); if (!mine) return 'off';
     const live = await liveBuild(opts.timeoutMs);
     if (!live) return 'offline';
-    if (live <= mine) return 'current';
+    // Even an up-to-date downloaded copy opens the live game when connected.
+    // Keep unpublished developer builds local.
+    if (live < mine || (live === mine && !location.href.startsWith('file:'))) return 'current';
     if (opts.busy && opts.busy()) return 'busy';   // a game started meanwhile: never interrupt it
     const key = 'sr.updated.' + live;
     try { if (sessionStorage.getItem(key)) return 'tried'; sessionStorage.setItem(key, '1'); } catch (e) { /* no storage: still fine once */ }
     const u = new URL(SITE + FILE);
     for (const [k, v] of q) if (['v', 'check', 'launch', 'latest'].indexOf(k) < 0) u.searchParams.set(k, v);
     u.searchParams.set('v', live);
+    u.searchParams.set('launch', Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
     const moved = location.origin !== u.origin ? savedData() : {};
     u.hash = Object.keys(moved).length ? MOVE + encodeURIComponent(JSON.stringify(moved)) : '';
     if (opts.onUpdate) opts.onUpdate(live);
@@ -6719,11 +6722,30 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
       const q = new URLSearchParams(location.search);
       if (q.get('room')) this.showJoin(q.get('room')); else this.showMenu();
       // an old copy (Desktop file, bookmark, history, cached page)? switch to the newest version before anybody plays
-      if (AR.Update) AR.Update.check({ busy: () => !!this.session, onUpdate: () => { try { this.ui.appendChild(h('div.panel.center.updating', h('h2', '✨ Getting the newest version…'), h('p', 'One moment.'))); } catch (e) { /* ignore */ } } });
+      this.checkUpdates();
+      window.addEventListener('pageshow', e => { if (e.persisted) this.checkUpdates(); });
+      window.addEventListener('online', () => this.checkUpdates());
       let last = performance.now();
       const frame = t => { requestAnimationFrame(frame); const dt = Math.min(0.1, (t - last) / 1000); last = t; try { this.frame(dt); } catch (e) { console.error(e); } };
       requestAnimationFrame(frame);
       window.addEventListener('beforeunload', () => { if (this.session && this.session.stop) this.session.stop(); });
+    },
+    checkUpdates() {
+      if (!AR.Update || this.session) return Promise.resolve('busy');
+      if (this.updateCheck) return this.updateCheck;
+      this.updateStatus = 'Checking for updates automatically…'; this.showUpdateStatus();
+      this.updateCheck = AR.Update.check({ busy: () => !!this.session, onUpdate: () => {
+        this.updateStatus = 'Opening the latest version…'; this.showUpdateStatus();
+      } }).then(result => {
+        const messages = { current: 'Latest version ready · updates are automatic', offline: 'Offline · using this saved copy. Updates resume when connected.', tried: 'Update already attempted. Close and reopen this tab to retry.', off: 'Automatic updates unavailable in this preview.' };
+        if (messages[result]) this.updateStatus = messages[result];
+        this.showUpdateStatus(); return result;
+      }).finally(() => { this.updateCheck = null; });
+      return this.updateCheck;
+    },
+    showUpdateStatus() {
+      const el = this.ui && this.ui.querySelector('.update-status');
+      if (el) el.textContent = this.updateStatus || 'Updates are checked automatically';
     },
     fatal(msg) { clear($('#ui')).appendChild(h('div.panel.center', h('h1', 'Spellstorm Royale'), h('p', msg), h('p', 'Ask your teacher for help.'))); },
     ensureWorld(seed) {
@@ -6746,7 +6768,8 @@ GK.ModelData["chest"] = {"q":1000,"p":[-84,66,136,-130,0,136,-84,0,136,-130,0,13
         h('a.labhome', { href: 'START_HERE_Computer_Lab.html' }, '← Lab home'),
         h('h1.title', 'Spellstorm Royale'), h('div.subtitle', 'A magical team battle royale'),
         h('p.small.build-label','Version '+(document.querySelector('meta[name=sr-build]')?.content||'source preview')),
-        h('a.btn.latest-version',{href:'https://efi-computer-lab.github.io/Spellstorm_Play.html'},'↗ Play latest version · bookmark this link'),
+        h('p.small.update-status', { role: 'status' }, this.updateStatus || 'Checking for updates automatically…'),
+        h('a.latest-version',{href:'https://efi-computer-lab.github.io/Spellstorm_Play.html'},'Bookmark game link'),
         h('p.tagline', 'Pick a class, answer in the Question Cages for boosters, loot chests and win with your squad. The storm is coming!'), resume,
         h('div.grades', grade('g68', 'Grades 6–8', 'parts · files · scams · passwords'), grade('g912', 'Grades 9–12', 'phishing · MFA · backups · logic')),
         h('div.actions',
