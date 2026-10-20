@@ -459,7 +459,16 @@ body.rts .selpanel p.small, body.rts .selpanel .rally-tip { display: none; }
 @media (max-width: 1100px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
 
 </style>
-</head>
+<!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
+var mine='202610161017',page=location.pathname.split('/').pop()||'index.html';
+function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
+var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
+if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
+if(document.getElementById('efi-fresh'))return;var b=document.createElement('button');b.id='efi-fresh';b.textContent='✨ New version – click to update';
+b.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483647;padding:10px 18px;border:0;border-radius:22px;background:#ffd166;color:#1b1a2e;font:bold 16px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer';
+b.onclick=function(){var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);};document.body.appendChild(b);}catch(e){}};x.send();}
+check(true);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')check(false);});
+}catch(e){}})();</script><!--/EFI-FRESH--></head>
 <body>
 <canvas id="view" aria-label="The 3D game world"></canvas>
 <div id="labels" aria-hidden="true"></div>
