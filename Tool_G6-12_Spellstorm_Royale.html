@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- the game draws its own colours: opt out of the browser's automatic dark mode -->
 <meta name="color-scheme" content="only light">
-<meta name="sr-build" content="20261019091951">
-<!-- Built 2026-10-19T09:19:51.177Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
+<meta name="sr-build" content="20261020011815">
+<!-- Built 2026-10-20T01:18:15.932Z by tools/build.js from the spellstorm-royale project. Do not edit: edit the source and rebuild. -->
 <title>Spellstorm Royale</title>
 <style>/* src/client/styles.css */
 /* Spellstorm Royale · src/client/styles.css — base look shared with Arcane Realms (menus, panels, buttons, modals, question panel, toasts). Game layout: royale.css */
@@ -3875,8 +3875,31 @@ window.GK_ONLINE_CONFIG = {
 
   // full name on join: keep it on the host only, show the short form in the game
   const oldJoin = SP.join;
+  /** Same person? Full names compared without capitals, commas or word order ("Nguyen, Van An" = "Van An Nguyen"). */
+  const nameKey = n => String(n || '').toLowerCase().replace(/[,.]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+  /** A student who comes back from ANOTHER copy of the game (Desktop file → website, another browser, cleared storage)
+      has a new player id. If an OFFLINE player in this room has the same full name and the same class, they get that
+      player back (points, squad, class, answers, grades), instead of starting again at 0 points. Never an online player. */
+  SP.reclaim = function (pid, full, sec) {
+    if (!full || this.player(pid)) return null;
+    const key = nameKey(full), S = this.s;
+    const old = Object.values(S.players).find(P => !P.online && !P.bot && P.fullName && nameKey(P.fullName) === key && (!sec || !P.section || P.section === sec) && !(S.kicked || {})[P.id]);
+    if (!old) return null;
+    const from = old.id;
+    delete S.players[from]; old.id = pid; S.players[pid] = old;
+    for (const q of S.squads || []) q.members = q.members.map(id => (id === from ? pid : id));
+    for (const M of S.mounts || []) if (M.by === from) M.by = pid;
+    for (const P of Object.values(S.players)) if (P.dmgBy && P.dmgBy[from]) { P.dmgBy[pid] = P.dmgBy[from]; delete P.dmgBy[from]; }
+    if (S.cage && S.cage.gold) S.cage.gold = S.cage.gold.map(id => (id === from ? pid : id));
+    for (const pr of this.projs || []) if (pr.src === from) pr.src = pid;
+    this.touchP(from); this.touchPv(from);   // the old entry disappears from everybody's list
+    (S.reclaims = S.reclaims || []).push({ from, to: pid, name: full, at: this.now() });
+    return old;
+  };
   SP.join = function (pid, name, look, sec) {
-    const full = U.cleanFullName(name), r = oldJoin.call(this, pid, full ? U.shortName(full) : name, look);
+    const full0 = U.cleanFullName(name);
+    if (full0 && /^[a-z0-9]{6,20}$/.test(String(pid))) this.reclaim(pid, full0, B().assess.sections.indexOf(sec) >= 0 ? sec : '');
+    const full = full0, r = oldJoin.call(this, pid, full ? U.shortName(full) : name, look);
     if (r && r.ok && full) r.player.fullName = full;
     if (r && r.ok && B().assess.sections.indexOf(sec) >= 0) r.player.section = sec;   // grade + section from the join list
     return r;
