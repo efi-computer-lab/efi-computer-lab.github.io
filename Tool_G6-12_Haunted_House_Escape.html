@@ -155,7 +155,7 @@ body[data-quality="Low"] .menu-bat:nth-of-type(n+4){display:none}body[data-quali
 .reviewer-end{display:block;height:1px}
 
 </style><!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202610252202',page=location.pathname.split('/').pop()||'index.html';
+var mine='202610252255',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -61122,7 +61122,9 @@ export function objectCaption(name){
  if(name.includes('Supply drawer'))return 'Supply drawer';
  if(name.includes('Wardrobe'))return 'Wardrobe';
  if(name.includes('Under bed'))return 'Under the bed';
- const caption=name.split(' · ')[0].replace(/^Take labeled /,'').replace(/^Take /,'');
+ // "Place · thing" names the thing ("Rusty crowbar"); "Device · do something" names the device ("Attic fuse box").
+ const parts=name.split(' · ');if(parts.length>1&&!/^(fit|restore|repair|connect|return|install|play|open|collect|print|start|inspect)(\s|$)/i.test(parts[1]))return parts[1].replace(/^./,c=>c.toUpperCase());
+ const caption=parts[0].replace(/^Take labeled /,'').replace(/^Take /,'');
  return caption.charAt(0).toUpperCase()+caption.slice(1);
 }
 
@@ -62382,7 +62384,19 @@ function hardScares(dt){const sc=cfg().scares;if(!sc||!started||paused||capture|
  if(kind==='slam'||kind==='crash')triggerScare(performance.now());}
 
 const aimRay=new T.Raycaster();const centreAim=new T.Vector2(0,0);
-function closest(){camera.updateWorldMatrix(true,false);aimRay.setFromCamera(centreAim,camera);let found=null,best=Infinity;for(const o of interactables){if(Math.hypot(o.x-camera.position.x,o.z-camera.position.z)>o.range+1)continue;let hit;if(o.aimObject){if(!o.aimObject.visible)continue;o.aimObject.updateWorldMatrix(true,true);hit=aimRay.intersectObject(o.aimObject,true)[0];}else{const size=new T.Vector3(.8,.8,.6),box=new T.Box3().setFromCenterAndSize(o.aimPoint,size),point=aimRay.ray.intersectBox(box,new T.Vector3());if(point)hit={distance:camera.position.distanceTo(point)};}if(hit&&hit.distance<o.range&&hit.distance<best){found=o;best=hit.distance;}}if(!found)return null;for(const object of occluders)object.updateWorldMatrix(true,true);const obstruction=aimRay.intersectObjects(occluders,true)[0];return obstruction&&obstruction.distance<best-.06?null:found;}
+function closest(){camera.updateWorldMatrix(true,false);aimRay.setFromCamera(centreAim,camera);let found=null,best=Infinity;for(const o of interactables){if(Math.hypot(o.x-camera.position.x,o.z-camera.position.z)>o.range+1)continue;let hit;if(o.aimObject){if(!o.aimObject.visible)continue;o.aimObject.updateWorldMatrix(true,true);hit=aimRay.intersectObject(o.aimObject,true)[0];}else{const size=new T.Vector3(.8,.8,.6),box=new T.Box3().setFromCenterAndSize(o.aimPoint,size),point=aimRay.ray.intersectBox(box,new T.Vector3());if(point)hit={distance:camera.position.distanceTo(point)};}if(hit&&hit.distance<o.range&&hit.distance<best){found=o;best=hit.distance;}}if(!found)return aimAssist();for(const object of occluders)object.updateWorldMatrix(true,true);const obstruction=aimRay.intersectObjects(occluders,true)[0];return obstruction&&obstruction.distance<best-.06?aimAssist():found;}
+// Aim assist (2026-10-25): students struggled to put the exact centre of the screen on small objects. If nothing is hit
+// exactly, take the nearest usable object close to the centre of view (about 20 degrees, wider up close), in reach
+// and not behind a wall or door.
+const assistDir=new T.Vector3(),assistTo=new T.Vector3(),assistRay=new T.Raycaster();
+function aimCentre(o){if(o.aimObject&&!o.name.endsWith(' door')){if(!o.aimCentre){const b=new T.Box3().setFromObject(o.aimObject);o.aimCentre=b.isEmpty()?o.aimPoint.clone():b.getCenter(new T.Vector3());}return o.aimCentre;}return o.aimPoint;}
+function aimAssist(){camera.getWorldDirection(assistDir);let pick=null,bestScore=Infinity;const eye=camera.position;
+ for(const o of interactables){if(Math.hypot(o.x-eye.x,o.z-eye.z)>o.range+1.5)continue;if(o.aimObject&&!o.aimObject.visible)continue;if(Math.abs(elevation(o.z)-elevation(eye.z))>1.6)continue;
+  const c=aimCentre(o);assistTo.copy(c).sub(eye);const dist=assistTo.length();if(dist>o.range+.5||dist<.05)continue;const angle=assistDir.angleTo(assistTo.normalize()),cone=Math.max(.35,Math.atan(.7/dist));if(angle>cone)continue;
+  const score=angle/cone+dist*.08;if(score>=bestScore)continue;
+  assistRay.set(eye,assistTo);assistRay.far=dist-.25;const block=assistRay.intersectObjects(occluders,true).find(h=>!o.aimObject||!isInside(h.object,o.aimObject));if(block)continue;pick=o;bestScore=score;}
+ return pick;}
+function isInside(obj,root){for(let p=obj;p;p=p.parent)if(p===root)return true;return false;}
 
 addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName))return;if(['KeyW','KeyA','KeyS','KeyD','Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.repeat)return;if(e.code==='Escape'&&started&&!paused)pause();if(paused)return;if(e.code==='KeyE'){if(state.hidden){leaveHide();}else target?.action();}if(e.code==='KeyF'){state.lit=!state.lit;tone(250,.05,.03);}if(e.code==='KeyJ')openJournal();if(e.code==='KeyM')$('#map').hidden=!$('#map').hidden;});addEventListener('keyup',e=>keys[e.code]=false);addEventListener('blur',()=>{keys={};if(started&&!paused)pause();});document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&started&&!paused)pause();});addEventListener('mousemove',e=>{if(!paused&&document.pointerLockElement){yaw-=e.movementX*.002;pitch=T.MathUtils.clamp(pitch-e.movementY*.002,-1.35,1.35);}});renderer.domElement.onclick=()=>{if(started&&!paused)capturePointer();};
 // Maps: the mini-map (always on, current floor) and the full map (M, every floor). Red = locked, star = the goal.
