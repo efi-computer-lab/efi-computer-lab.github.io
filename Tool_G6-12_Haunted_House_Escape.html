@@ -155,7 +155,7 @@ body[data-quality="Low"] .menu-bat:nth-of-type(n+4){display:none}body[data-quali
 .reviewer-end{display:block;height:1px}
 
 </style><!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202610261409',page=location.pathname.split('/').pop()||'index.html';
+var mine='202610261437',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -62213,7 +62213,7 @@ const dustGeo=new T.BufferGeometry();dustGeo.setAttribute('position',new T.Float
 const wearDecals=addSurfaceWear(T,scene,rooms,halls,elevation,document);const goreMeshes=wearDecals.filter(m=>/blood/.test(m.name));
 // Difficulty: Easy (internal 'practice') = no monster, no scares, brighter, no blood; Normal ('classroom'); Hard ('standard') = very scary.
 const MODES={practice:{label:'Easy',light:1.65,fog:.020,wax:.6,gore:false},
- classroom:{label:'Normal',light:1.3,fog:.028,wax:1,gore:true,patrol:1,chase:1.9,sight:10,dark:6,hear:.9,giveUp:3.5,grace:15,scares:{every:[45,75],pool:['creak','whisper','gutter','footsteps','cry','flash']}},
+ classroom:{label:'Normal',light:1.3,fog:.028,wax:1,gore:true,patrol:1,chase:1.9,sight:10,dark:6,hear:.9,giveUp:3.5,grace:15,scares:{every:[45,75],pool:['creak','whisper','gutter','footsteps','cry','flash','flash','flash']}},
  standard:{label:'Hard',light:1.05,fog:.036,wax:1.5,gore:true,patrol:1.3,chase:2.85,sight:13,dark:8,hear:1.2,giveUp:3,grace:12,scares:{every:[14,26],pool:['apparition','apparition','whisper','slam','creak','crash','gutter','growl','laugh','cry','footsteps','flash','flash','flash']}}};
 const cfg=()=>MODES[state.mode]||MODES.classroom;
 // Low drifting mist around the player: large soft sprites near the floor that slowly drift and are recycled
@@ -62296,7 +62296,7 @@ function approachCandidates(p){const room=rooms.find(q=>Math.abs(p.x-q.x)<6&&Mat
  return out.sort((a,b)=>a.s-b.s);}
 const approachCache=new Map();
 function safeSpot(p){if(!blocked(p.x,p.z))return p;for(let r=.4;r<6;r+=.4)for(let a=0;a<6.28;a+=.4){const x=p.x+Math.cos(a)*r,z=p.z+Math.sin(a)*r;if(!blocked(x,z)&&Math.abs(elevation(z)-elevation(p.z))<.5)return {x,z};}return {x:0,z:18};}
-function start(resume=false){if(resume&&checkpoint&&!checkpoint.session)checkpoint.session=Date.now().toString(36);clearScare();storm.reset();lastScare=-Infinity;nextAmbientSound=8;lastAmbientSound='';nextHardScare=45;capture=null;ai.grace=0;state=resume&&checkpoint?{...defaults(),...checkpoint}:defaults();state.band=applyBand(state.band||bandFor(state.section));if(resume&&checkpoint&&!checkpoint.immersionVersion){if(checkpoint.items?.crowbar||checkpoint.got?.crowbar||checkpoint.gates?.attic||Object.values(checkpoint.done||{}).some(Boolean))state.repairs.bridge=true;if(checkpoint.done?.footprint)state.repairs.timeline=true;}activeEncounter=0;started=true;paused=false;$('#menu').hidden=true;$('#modal').hidden=true;$('#hud').hidden=false;const s0=ACTS[0].start,pos=safeSpot(resume&&checkpoint?.position?checkpoint.position:{x:s0.x,z:s0.z});camera.position.set(pos.x,elevation(pos.z)+1.7,pos.z);yaw=resume?0:s0.yaw;pitch=0;state.hidden=false;$('#hideShade').hidden=true;{const far=farFrom(camera.position);keeper.position.set(far.x,elevation(far.z),far.z);ai.target.copy(keeper.position);}ai.mode='patrol';ai.checkSpot=null;ai.checked=false;doors.forEach(d=>d.open=false);syncGates();syncMemories();setQuality($('#quality').value,true);initAudio();loadAudio();applyMode();updateAI(0);updateHUD();save();capturePointer();syncGrade(true);if(!resume){state.actShown=0;}showActCard();}
+function start(resume=false){if(resume&&checkpoint&&!checkpoint.session)checkpoint.session=Date.now().toString(36);clearScare();storm.reset();lastScare=-Infinity;nextAmbientSound=8;lastAmbientSound='';nextHardScare=25;capture=null;ai.grace=0;state=resume&&checkpoint?{...defaults(),...checkpoint}:defaults();state.band=applyBand(state.band||bandFor(state.section));if(resume&&checkpoint&&!checkpoint.immersionVersion){if(checkpoint.items?.crowbar||checkpoint.got?.crowbar||checkpoint.gates?.attic||Object.values(checkpoint.done||{}).some(Boolean))state.repairs.bridge=true;if(checkpoint.done?.footprint)state.repairs.timeline=true;}activeEncounter=0;started=true;paused=false;$('#menu').hidden=true;$('#modal').hidden=true;$('#hud').hidden=false;const s0=ACTS[0].start,pos=safeSpot(resume&&checkpoint?.position?checkpoint.position:{x:s0.x,z:s0.z});camera.position.set(pos.x,elevation(pos.z)+1.7,pos.z);yaw=resume?0:s0.yaw;pitch=0;state.hidden=false;$('#hideShade').hidden=true;{const far=farFrom(camera.position);keeper.position.set(far.x,elevation(far.z),far.z);ai.target.copy(keeper.position);}ai.mode='patrol';ai.checkSpot=null;ai.checked=false;doors.forEach(d=>d.open=false);syncGates();syncMemories();setQuality($('#quality').value,true);initAudio();loadAudio();applyMode();updateAI(0);updateHUD();save();capturePointer();syncGrade(true);if(!resume){state.actShown=0;}showActCard();}
 // Act title cards: the prologue + Act I at the start, then each new act when the previous one is finished.
 function showActCard(){const n=actNumber(state);if((state.actShown||0)>=n||state.escaped)return;state.actShown=n;const act=ACTS[n-1];save();
  show(`${n===1?`<small>PROLOGUE · ${PROLOGUE.title.toUpperCase()}</small><p class="story">${PROLOGUE.text}</p>`:''}<small>${act.place.toUpperCase()} · ACT ${n} OF 5</small><h2>${act.title}</h2><p class="story">${act.intro}</p><div class="tools"><button id="actGo">${n===1?'Pick up the candle':'Keep going'} →</button></div>`);$('#actGo').onclick=close;}
@@ -62395,14 +62395,14 @@ function storyBeats(dt){if(state.mode==='practice')return;state.events=state.eve
  if(state.unlocked?.crypt&&in_('crypt',5)&&once('crypt')){sfx?.laugh(9,elevation(60)+1,64,v);flashImage(gentle?.12:.2);}}
 const gotAll=list=>list.every(k=>got(state,k));
 // A scary face fills the screen for a split second (not in Easy; never longer than ~0.2 s).
-let flashEl=null;let lastScarePic=-1;function flashImage(ms=.15){if(state.mode==='practice'||reducedMotion())return;if(!flashEl){flashEl=document.createElement('div');flashEl.id='flash';Object.assign(flashEl.style,{position:'fixed',inset:'0',zIndex:40,pointerEvents:'none',display:'none',background:'#000',alignItems:'center',justifyContent:'center'});document.body.append(flashEl);}
+let flashEl=null;let lastScarePic=-1;function flashImage(ms=.15){if(state.mode==='practice')return;if(!flashEl){flashEl=document.createElement('div');flashEl.id='flash';Object.assign(flashEl.style,{position:'fixed',inset:'0',zIndex:40,pointerEvents:'none',display:'none',background:'#000',alignItems:'center',justifyContent:'center'});document.body.append(flashEl);}
  let pick=Math.floor(Math.random()*SCARES.length);if(pick===lastScarePic)pick=(pick+1)%SCARES.length;lastScarePic=pick;const art=loadedArt(T,SCARES[pick]);let c;if(art&&art.width){c=document.createElement('canvas');c.width=art.naturalWidth||art.width;c.height=art.naturalHeight||art.height;c.getContext('2d').drawImage(art,0,0,c.width,c.height);Object.assign(c.style,{width:'100%',height:'100%',objectFit:'cover',filter:'contrast(1.25) saturate(1.1)'});}else{c=scaryFace(document);Object.assign(c.style,{height:'100%',width:'auto',filter:'contrast(1.3)'});}flashEl.innerHTML='';flashEl.append(c);flashEl.style.display='flex';setTimeout(()=>{if(flashEl)flashEl.style.display='none';},ms*1000);}
 let gutterUntil=0;
 // Finale: the gate breaker wakes the cellar gate — and the Keeper. Easy mode has no monster, only the run.
 function startFinale(){state.finale=true;ai.grace=2;ai.chaseTime=0;toast('The gate is open. Keep moving. The Collector cannot enter the rooms.');sfx?.sting(state.mode==='practice'?0:.6);}
 // Apparition (Hard): the Keeper flashes into view a few metres ahead, screams, and is gone. It cannot catch you.
 function apparition(){if(state.mode==='practice')return false;sfx?.whisper(camera.position.x,camera.position.y,camera.position.z,.5);flashImage(.15);lastHardScare='apparition';return true;}
-let nextHardScare=45,lastHardScare='',nextAmbientSound=8,lastAmbientSound='';
+let nextHardScare=25,lastHardScare='',nextAmbientSound=8,lastAmbientSound='';
 function ambientScares(dt){
  if(!started||paused||capture||state.hidden||state.mode==='practice')return;
  nextAmbientSound-=dt;if(nextAmbientSound>0)return;
