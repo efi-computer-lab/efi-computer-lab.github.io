@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First Term Pointers · EFI Computer Lab</title>
+<meta name="description" content="EFI Computer Lab first term exam reviewers: choose your grade and download.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root{--night:#1b1a2e;--panel:#2e2a4a;--panel-2:#3a3459;--bone:#f2e9d0;--dim:#a79fcb;--gold:#ffd166;--green:#22c55e;--blue:#3b82f6}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#3a2f12,var(--night) 65%);color:var(--bone);
+    font:17px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;justify-content:center;padding:28px 16px 40px}
+  main{width:100%;max-width:520px;text-align:center}
+  .eyebrow{font:12px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--dim);margin:0 0 10px}
+  h1{margin:0 0 6px;font-size:30px;color:var(--gold)}
+  .sub{margin:0 0 24px;color:var(--bone)}
+  a.grade{display:flex;align-items:center;gap:16px;text-align:left;margin:0 0 16px;padding:18px 20px;border-radius:20px;
+    background:var(--panel-2);color:var(--bone);text-decoration:none;box-shadow:0 0 0 3px var(--c),0 10px 26px rgba(0,0,0,.4)}
+  a.grade:active{transform:scale(.98)}
+  a.grade svg{width:60px;height:60px;flex:none}
+  a.grade b{display:block;font-size:26px}
+  a.grade span{color:var(--dim);font-size:14px}
+  .dl{display:inline-block;margin-top:8px;background:var(--c);color:#fff;font-weight:700;font-size:15px;padding:6px 14px;border-radius:999px}
+  #msg{min-height:1.5em;color:var(--gold);font-weight:600}
+  .home{display:inline-block;margin-top:18px;color:var(--dim)}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">EFI COMPUTER LAB</p>
+  <h1>📝 First Term Pointers</h1>
+  <p class="sub">Tap your grade. Your reviewer downloads to your phone or computer.</p>
+
+  <a class="grade" style="--c:var(--green)" href="First_Term_Pointers_Grades_6-9.pdf" download="EFI_Computer_Reviewer_Grades_6-9.pdf">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 6h26l12 12v40H14z" fill="#fff8e6" stroke="#5a4a1a" stroke-width="1.6"/><path d="M40 6v12h12" fill="#f2e2b0" stroke="#5a4a1a" stroke-width="1.6"/><path d="M21 26h22M21 33h22M21 40h15" stroke="#b9a678" stroke-width="2.6" stroke-linecap="round"/><circle cx="46" cy="48" r="10" fill="#22c55e" stroke="#1b1a2e" stroke-width="1.6"/><path d="M46 42v9M42 47.5l4 4 4-4" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>Grades 6–9</b><span>Scams · computer parts · problem solving · etiquette</span><br><span class="dl">⬇ Download</span></div>
+  </a>
+
+  <a class="grade" style="--c:var(--blue)" href="First_Term_Pointers_Grades_10-12.pdf" download="EFI_Computer_Reviewer_Grades_10-12.pdf">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 6h26l12 12v40H14z" fill="#fff8e6" stroke="#5a4a1a" stroke-width="1.6"/><path d="M40 6v12h12" fill="#f2e2b0" stroke="#5a4a1a" stroke-width="1.6"/><path d="M21 26h22M21 33h22M21 40h15" stroke="#b9a678" stroke-width="2.6" stroke-linecap="round"/><circle cx="46" cy="48" r="10" fill="#3b82f6" stroke="#1b1a2e" stroke-width="1.6"/><path d="M46 42v9M42 47.5l4 4 4-4" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>Grades 10–12</b><span>Emails · professional profile · career · spreadsheets</span><br><span class="dl">⬇ Download</span></div>
+  </a>
+
+  <p id="msg" role="status"></p>
+  <a class="home" href="/">← EFI Computer Lab home</a>
+</main>
+<script>
+  // Short "downloading" note after a tap (some phones open the PDF instead; that is fine too).
+  document.querySelectorAll('a.grade').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('msg').textContent = '⬇ Downloading your reviewer… check your Downloads.';
+    });
+  });
+</script>
+</body>
+</html>
