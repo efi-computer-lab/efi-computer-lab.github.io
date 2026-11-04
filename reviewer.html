@@ -42,11 +42,27 @@
 </main>
 <script>
   // Tap a grade -> the reviewer for that grade downloads (file name says the grade).
+  // iPhone Safari opens a PDF link instead of saving it, so the file is fetched and handed over as a plain
+  // "file to save" (octet-stream) — Safari then shows its Download prompt. If that fails, the PDF just opens.
+  var msg = document.getElementById('msg');
   document.querySelectorAll('a.g').forEach(function (a) {
-    var g = a.getAttribute('data-g');
-    a.setAttribute('download', 'EFI_Computer_Reviewer_Grade_' + g + '.pdf');
-    a.addEventListener('click', function () {
-      document.getElementById('msg').textContent = '⬇ Downloading the Grade ' + g + ' reviewer… check your Downloads.';
+    var g = a.getAttribute('data-g'), name = 'EFI_Computer_Reviewer_Grade_' + g + '.pdf';
+    a.setAttribute('download', name);
+    a.addEventListener('click', function (e) {
+      if (!window.fetch || !window.Blob || !window.URL) return;          // old browser: normal link
+      e.preventDefault();
+      msg.textContent = '⬇ Getting the Grade ' + g + ' reviewer…';
+      fetch(a.href, { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.arrayBuffer();
+      }).then(function (buf) {
+        var url = URL.createObjectURL(new Blob([buf], { type: 'application/octet-stream' }));
+        var d = document.createElement('a');
+        d.href = url; d.download = name; d.style.display = 'none';
+        document.body.appendChild(d); d.click(); d.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        msg.textContent = '✅ Grade ' + g + ' reviewer downloaded. iPhone: tap Download if asked, then find it in Files › Downloads.';
+      }).catch(function () { location.href = a.href; });
     });
   });
 </script>
