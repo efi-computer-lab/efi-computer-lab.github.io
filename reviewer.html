@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Exam Reviewer · EFI Computer Lab</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root{--night:#1b1a2e;--panel-2:#3a3459;--bone:#f2e9d0;--dim:#a79fcb;--gold:#ffd166;--green:#22c55e;--blue:#3b82f6}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#3a2f12,var(--night) 65%);color:var(--bone);
+    font:17px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;justify-content:center;padding:28px 16px 40px}
+  main{width:100%;max-width:460px;text-align:center}
+  .eyebrow{font:12px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--dim);margin:0 0 10px}
+  h1{margin:0 0 6px;font-size:28px;color:var(--gold)}
+  .sub{margin:0 0 22px;font-size:19px}
+  .grades{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  a.g{display:block;padding:18px 8px;border-radius:18px;background:var(--panel-2);color:var(--bone);text-decoration:none;
+    font-size:26px;font-weight:700;box-shadow:0 0 0 3px var(--c),0 8px 20px rgba(0,0,0,.4)}
+  a.g small{display:block;font-size:13px;font-weight:400;color:var(--dim)}
+  a.g:active{transform:scale(.97)}
+  a.g.last{grid-column:1/-1}
+  #msg{min-height:3em;margin-top:22px;color:var(--gold);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">EFI COMPUTER LAB</p>
+  <h1>📝 Exam Reviewer</h1>
+  <p class="sub">What grade are you in?</p>
+  <div class="grades">
+    <a class="g" style="--c:var(--green)" data-g="6"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 6</a>
+    <a class="g" style="--c:var(--green)" data-g="7"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 7</a>
+    <a class="g" style="--c:var(--green)" data-g="8"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 8</a>
+    <a class="g" style="--c:var(--green)" data-g="9"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 9</a>
+    <a class="g" style="--c:var(--blue)"  data-g="10" href="First_Term_Pointers_Grades_10-12.pdf">Grade 10</a>
+    <a class="g" style="--c:var(--blue)"  data-g="11" href="First_Term_Pointers_Grades_10-12.pdf">Grade 11</a>
+    <a class="g last" style="--c:var(--blue)" data-g="12" href="First_Term_Pointers_Grades_10-12.pdf">Grade 12</a>
+  </div>
+  <p id="msg" role="status"></p>
+</main>
+<script>
+  // Tap a grade -> the reviewer for that grade downloads (file name says the grade).
+  document.querySelectorAll('a.g').forEach(function (a) {
+    var g = a.getAttribute('data-g');
+    a.setAttribute('download', 'EFI_Computer_Reviewer_Grade_' + g + '.pdf');
+    a.addEventListener('click', function () {
+      document.getElementById('msg').textContent = '⬇ Downloading the Grade ' + g + ' reviewer… check your Downloads.';
+    });
+  });
+</script>
+</body>
+</html>
