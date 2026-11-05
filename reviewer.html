@@ -16,53 +16,98 @@
   h1{margin:0 0 6px;font-size:28px;color:var(--gold)}
   .sub{margin:0 0 22px;font-size:19px}
   .grades{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-  a.g{display:block;padding:18px 8px;border-radius:18px;background:var(--panel-2);color:var(--bone);text-decoration:none;
-    font-size:26px;font-weight:700;box-shadow:0 0 0 3px var(--c),0 8px 20px rgba(0,0,0,.4)}
-  a.g small{display:block;font-size:13px;font-weight:400;color:var(--dim)}
-  a.g:active{transform:scale(.97)}
-  a.g.last{grid-column:1/-1}
-  #msg{min-height:3em;margin-top:22px;color:var(--gold);font-weight:600}
+  button.g{display:block;width:100%;padding:18px 8px;border:0;border-radius:18px;background:var(--panel-2);color:var(--bone);
+    font:700 26px "Segoe UI",system-ui,sans-serif;cursor:pointer;box-shadow:0 0 0 3px var(--c),0 8px 20px rgba(0,0,0,.4)}
+  button.g:active,.opt:active{transform:scale(.97)}
+  button.g.last{grid-column:1/-1}
+  #choose[hidden],#pick[hidden]{display:none}
+  .opts{display:grid;gap:14px;text-align:left}
+  .opt{display:block;padding:16px 18px;border-radius:18px;background:var(--panel-2);color:var(--bone);text-decoration:none;
+    box-shadow:0 0 0 3px var(--c),0 8px 20px rgba(0,0,0,.4)}
+  .opt b{display:block;font-size:22px;margin-bottom:4px}
+  .opt span{display:block;font-size:15px;color:var(--bone)}
+  .opt em{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font:600 13px/1.4 "Segoe UI",system-ui,sans-serif;
+    font-style:normal;background:var(--c);color:#10101a}
+  .back{margin-top:18px;background:none;border:0;color:var(--dim);font-size:16px;text-decoration:underline;cursor:pointer}
+  #msg{min-height:3em;margin-top:18px;color:var(--gold);font-weight:600}
 </style>
 </head>
 <body>
 <main>
   <p class="eyebrow">EFI COMPUTER LAB</p>
   <h1>📝 Exam Reviewer</h1>
-  <p class="sub">What grade are you in?</p>
-  <div class="grades">
-    <a class="g" style="--c:var(--green)" data-g="6"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 6</a>
-    <a class="g" style="--c:var(--green)" data-g="7"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 7</a>
-    <a class="g" style="--c:var(--green)" data-g="8"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 8</a>
-    <a class="g" style="--c:var(--green)" data-g="9"  href="First_Term_Pointers_Grades_6-9.pdf">Grade 9</a>
-    <a class="g" style="--c:var(--blue)"  data-g="10" href="First_Term_Pointers_Grades_10-12.pdf">Grade 10</a>
-    <a class="g" style="--c:var(--blue)"  data-g="11" href="First_Term_Pointers_Grades_10-12.pdf">Grade 11</a>
-    <a class="g last" style="--c:var(--blue)" data-g="12" href="First_Term_Pointers_Grades_10-12.pdf">Grade 12</a>
-  </div>
-  <p id="msg" role="status"></p>
+
+  <!-- Step 1: grade -->
+  <section id="pick">
+    <p class="sub">What grade are you in?</p>
+    <div class="grades">
+      <button class="g" style="--c:var(--green)" data-g="6"  data-f="First_Term_Pointers_Grades_6-9.pdf">Grade 6</button>
+      <button class="g" style="--c:var(--green)" data-g="7"  data-f="First_Term_Pointers_Grades_6-9.pdf">Grade 7</button>
+      <button class="g" style="--c:var(--green)" data-g="8"  data-f="First_Term_Pointers_Grades_6-9.pdf">Grade 8</button>
+      <button class="g" style="--c:var(--green)" data-g="9"  data-f="First_Term_Pointers_Grades_6-9.pdf">Grade 9</button>
+      <button class="g" style="--c:var(--blue)"  data-g="10" data-f="First_Term_Pointers_Grades_10-12.pdf">Grade 10</button>
+      <button class="g" style="--c:var(--blue)"  data-g="11" data-f="First_Term_Pointers_Grades_10-12.pdf">Grade 11</button>
+      <button class="g last" style="--c:var(--blue)" data-g="12" data-f="First_Term_Pointers_Grades_10-12.pdf">Grade 12</button>
+    </div>
+  </section>
+
+  <!-- Step 2: download or open online -->
+  <section id="choose" hidden>
+    <p class="sub" id="chooseTitle">Grade 6 reviewer</p>
+    <div class="opts">
+      <a class="opt" id="dl" style="--c:var(--green)" href="#">
+        <b>⬇ Download to my phone</b>
+        <span>Saves the reviewer on your phone. Open it and review anytime.</span>
+        <em>✓ Works without internet after downloading</em>
+      </a>
+      <a class="opt" id="web" style="--c:var(--gold)" href="#" target="_blank" rel="noopener">
+        <b>🌐 Open on the website</b>
+        <span>Read the reviewer in your browser. Nothing is saved on your phone.</span>
+        <em>⚠ Needs internet every time</em>
+      </a>
+    </div>
+    <p id="msg" role="status"></p>
+    <button class="back" id="back" type="button">← Choose another grade</button>
+  </section>
 </main>
 <script>
-  // Tap a grade -> the reviewer for that grade downloads (file name says the grade).
+  // Step 1: tap a grade. Step 2: Download (saved on the phone, works offline later) or Open online (needs internet).
+  var pick = document.getElementById('pick'), choose = document.getElementById('choose');
+  var dl = document.getElementById('dl'), web = document.getElementById('web'), msg = document.getElementById('msg');
+  var cur = null;
+  document.querySelectorAll('button.g').forEach(function (b) {
+    b.addEventListener('click', function () {
+      cur = { g: b.getAttribute('data-g'), f: b.getAttribute('data-f') };
+      document.getElementById('chooseTitle').textContent = 'Grade ' + cur.g + ' reviewer';
+      web.href = cur.f;
+      dl.href = cur.f;
+      dl.setAttribute('download', 'EFI_Computer_Reviewer_Grade_' + cur.g + '.pdf');
+      msg.textContent = '';
+      pick.hidden = true; choose.hidden = false; window.scrollTo(0, 0);
+    });
+  });
+  document.getElementById('back').addEventListener('click', function () {
+    choose.hidden = true; pick.hidden = false; msg.textContent = '';
+  });
   // iPhone Safari opens a PDF link instead of saving it, so the file is fetched and handed over as a plain
-  // "file to save" (octet-stream) — Safari then shows its Download prompt. If that fails, the PDF just opens.
-  var msg = document.getElementById('msg');
-  document.querySelectorAll('a.g').forEach(function (a) {
-    var g = a.getAttribute('data-g'), name = 'EFI_Computer_Reviewer_Grade_' + g + '.pdf';
-    a.setAttribute('download', name);
-    a.addEventListener('click', function (e) {
-      if (!window.fetch || !window.Blob || !window.URL) return;          // old browser: normal link
-      e.preventDefault();
-      msg.textContent = '⬇ Getting the Grade ' + g + ' reviewer…';
-      fetch(a.href, { cache: 'no-store' }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        return r.arrayBuffer();
-      }).then(function (buf) {
-        var url = URL.createObjectURL(new Blob([buf], { type: 'application/octet-stream' }));
-        var d = document.createElement('a');
-        d.href = url; d.download = name; d.style.display = 'none';
-        document.body.appendChild(d); d.click(); d.remove();
-        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-        msg.textContent = '✅ Grade ' + g + ' reviewer downloaded. iPhone: tap Download if asked, then find it in Files › Downloads.';
-      }).catch(function () { location.href = a.href; });
+  // "file to save" (octet-stream); Safari then shows its Download prompt. If that fails, the PDF just opens.
+  dl.addEventListener('click', function (e) {
+    if (!cur || !window.fetch || !window.Blob || !window.URL) return;   // old browser: normal download link
+    e.preventDefault();
+    var name = dl.getAttribute('download');
+    msg.textContent = '⬇ Getting the Grade ' + cur.g + ' reviewer…';
+    fetch(cur.f, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var url = URL.createObjectURL(new Blob([buf], { type: 'application/octet-stream' }));
+      var d = document.createElement('a');
+      d.href = url; d.download = name; d.style.display = 'none';
+      document.body.appendChild(d); d.click(); d.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      msg.textContent = '✅ Downloaded! Find it in your Downloads (iPhone: tap Download if asked, then Files › Downloads). You can now review it without internet.';
+    }).catch(function () {
+      msg.textContent = '⚠ No internet right now. Connect to Wi-Fi or data, then try again.';
     });
   });
 </script>
