@@ -224,8 +224,15 @@ body[data-touch="true"] #prompt:not(:empty){pointer-events:auto;cursor:pointer;f
 @keyframes rotateHint{50%{transform:rotate(90deg)}}
 @media(max-height:500px) and (pointer:coarse){body[data-touch="true"] #touchStick{width:130px;height:130px}body[data-touch="true"] #touchKnob{left:39px;top:39px}body[data-touch="true"] .touch-actions{grid-template-columns:repeat(3,66px)}body[data-touch="true"] .touch-actions button{min-height:48px}body[data-touch="true"] #touchUse{min-height:62px}}
 
+/* 2026-11-08b: right-side buttons smaller (teacher: too big) */
+body[data-touch="true"] .touch-actions{grid-template-columns:repeat(3,54px);gap:5px}
+body[data-touch="true"] .touch-actions button{min-height:40px;font:600 11px system-ui}
+body[data-touch="true"] #touchUse{min-height:50px;font:800 16px system-ui;letter-spacing:1px}
+@media(max-height:500px) and (pointer:coarse){body[data-touch="true"] .touch-actions{grid-template-columns:repeat(3,50px)}body[data-touch="true"] .touch-actions button{min-height:36px}body[data-touch="true"] #touchUse{min-height:46px}}
+body[data-touch="true"] .touch-actions{grid-template-columns:repeat(3,60px)!important}body[data-touch="true"] .touch-actions button:not(#touchUse){font:600 10px system-ui!important;padding:4px 1px}
+
 </style><!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611081437',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611081450',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
