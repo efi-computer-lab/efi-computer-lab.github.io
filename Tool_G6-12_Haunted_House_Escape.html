@@ -238,7 +238,7 @@ body[data-touch="true"] #prompt:not(:empty){font:700 13px system-ui!important;pa
 @media(max-width:700px){body[data-touch="true"] #hud footer{max-width:calc(100vw - 240px)}}
 
 </style><!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611081504',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611120805',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -62039,6 +62039,8 @@ export function installTouchControls({document=globalThis.document,env=globalThi
  env.addEventListener('resize',reset);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)reset();});
  return {enabled,state,reset,update({playing,hidden=false,canUse=false}){
+  // The TAP label never sits on top of screens, messages or the map.
+  const pr=document.getElementById?.('prompt'),tt=document.getElementById?.('toast'),mp=document.getElementById?.('map');if(pr)pr.style.visibility=!playing||tt?.style.opacity==='1'||(mp&&!mp.hidden)?'hidden':'';
   if(!playing){if(active)reset();active=false;root.hidden=true;return;}
   active=true;root.hidden=false;use.textContent=hidden?'LEAVE':'USE';use.classList?.toggle('ready',hidden||canUse);
  }};
