@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IT HELP DESK</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611151739',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611152223',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -47,7 +47,9 @@ window.GAME_CONTENT = {
   ranks: ['Intern', 'Junior Technician', 'Technician', 'Senior Technician', 'IT Manager'],
   shop: { title: '🧰 IT Supply Closet', coffee: '☕ Coffee', coffeeDesc: 'Heal 50', drink: '⚡ Energy drink', drinkDesc: 'Run fast for 15 s' },
   weapons: { zapper: 'Antivirus Blaster', zapperDesc: 'Zaps malware bugs' },
+  askName: { english: true, label: 'English name', placeholder: 'e.g. Anna', empty: 'Type your English name first.', error: 'English name only (letters A-Z). Example: Anna' },
   words: {
+    record: '📋 Record for your teacher', gradeLbl: 'Grade', pointsLbl: 'Points', skillPts: 'Skill points',
     watch: '👀 Watch', tryIt: '👆 Try', alone: '💪 Alone', useIt: '💪 Use it', check: '❓ Check', learn: '📖 Learn', pick: '✅ Choose',
     again: 'Nice! Now do it alone', glowing: '👉 Click the glowing button', notThat: 'Not that one. Look again!',
     rescue: '👀 Watch once more, then try again', done: '✅ Ticket closed!', backToTown: '🚶 Back to the school',
@@ -349,7 +351,7 @@ window.GAME_CONTENT = {
     ]),
     scoring: { objective: 0, hint: 0 },
     timer: { limit: null },
-    ui: { askName: true, leaderboard: true, minimap: true, beacon: '#4dabf7', menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 The school network is safe!' },
+    ui: { askName: C.askName, leaderboard: true, minimap: true, beacon: '#4dabf7', menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 The school network is safe!' },
     hooks: {
       start(game) {
         const s = window.IT_DESK.SLOTS[game.difficulty] || window.IT_DESK.SLOTS.g10;
@@ -592,6 +594,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 /* name entry · leaderboard · objective tip · flash · status chips · vignette · minimap */
 .gk-name { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 10px 0 4px; font-weight: 700; }
 .gk-name .gk-input { width: 240px; font-size: 18px; text-align: center; }
+.gk-name-msg { color: #ff8787; font-weight: 700; text-align: center; margin: 2px 0 6px; }
 .gk-name .gk-input.need { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.35); }
 .gk-lead-title { margin: 14px 0 6px; font-weight: 800; color: var(--gk-accent); }
 .gk-chars { margin: 10px auto 4px; max-width: 640px; }
@@ -1747,7 +1750,7 @@ GK_LIBRARY.worlds = {
       if (levels) {
         pick = '<div class="gk-levels">' + levels.names.map((n, i) => '<button class="gk-btn' + (i === levels.unlocked - 1 ? ' primary' : '') + '" data-level="' + i + '"' + (i >= levels.unlocked ? ' disabled' : '') + '>' + (i >= levels.unlocked ? '🔒 ' : '') + U.esc(n) + '</button>').join('') + '</div>';
       }
-      const ask = !!cfg.ui.askName, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
+      const ask = !!cfg.ui.askName, AN = U.isObj(cfg.ui.askName) ? cfg.ui.askName : {}, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
       // difficulty (config.difficulty): one button per choice; the chosen one is highlighted
       const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
       // characters (config.characters) and the camera (ui.views, kept per computer in GK.Settings 'view')
@@ -1768,7 +1771,7 @@ GK_LIBRARY.worlds = {
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
         (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
-        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + who + diff + comb + cam +
+        (ask ? '<div class="gk-name"><label for="gk-name">' + U.esc(AN.label || 'Your name') + '</label><input id="gk-name" class="gk-input" maxlength="24" autocomplete="off" spellcheck="false" placeholder="' + U.esc(AN.placeholder || 'Type your name') + '"></div><div class="gk-name-msg" style="display:none"></div>' : '') + who + diff + comb + cam +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
         (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
@@ -1804,8 +1807,13 @@ GK_LIBRARY.worlds = {
       s.querySelectorAll('[data-level]').forEach(b => {
         b.onclick = () => {
           if (nameBox) {
-            if (!nameBox.value.trim()) { nameBox.focus(); nameBox.classList.add('need'); return; }
-            this.game.setPlayerName(nameBox.value);
+            // ui.askName: {english: true} = English letters only (A-Z, space, - ' .), at least 2 letters; the name is required
+            const v = nameBox.value.trim().replace(/\s+/g, ' '), msg = s.querySelector('.gk-name-msg');
+            const bad = !v ? (AN.empty || 'Type your name first.') : AN.english && (!/^[A-Za-z][A-Za-z .'-]*$/.test(v) || v.replace(/[^A-Za-z]/g, '').length < 2) ? (AN.error || 'Use your English name (letters A-Z only).') : '';
+            if (bad) { nameBox.focus(); nameBox.classList.add('need'); if (msg) { msg.textContent = '⚠️ ' + bad; msg.style.display = ''; } return; }
+            const nm = AN.english ? v.replace(/(^|[ '-])([a-z])/g, (m0, a, b) => a + b.toUpperCase()) : v;   // anna tran → Anna Tran
+            nameBox.value = nm;
+            this.game.setPlayerName(nm);
           }
           onPlay(Number(b.getAttribute('data-level')));
         };
@@ -2314,7 +2322,7 @@ GK_LIBRARY.worlds = {
     }
     /** The name typed on the title screen (ui.askName): kept for restarts while the page is open (not saved: lab PCs are shared). */
     setPlayerName(name) {
-      this.playerName = String(name || '').trim().slice(0, 18) || 'Player';
+      this.playerName = String(name || '').trim().slice(0, 24) || 'Player';
       this.state.vars.playerName = this.playerName;
     }
     // ================= difficulty (config.difficulty) =================
@@ -8582,6 +8590,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       '.dk-cmd{background:#0c0c0c;color:#e8e8e8;height:100%;display:flex;flex-direction:column;font:14px Consolas,monospace}.dk-cmd pre{flex:1;margin:0;padding:8px 10px;overflow:auto;white-space:pre-wrap}.dk-cmdrow{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#1a1a1a}.dk-cmdin{flex:1;background:#000;color:#fff;border:1px solid #555;font:15px Consolas,monospace;padding:6px}.dk-cmdrow .dk-small{color:#222}',
       '.dk-uac{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:20;background:#fff;border-top:6px solid #1c7ed6;border-radius:10px;padding:16px 20px;width:min(440px,80%);box-shadow:0 10px 40px rgba(0,0,0,.5)}',
       '.dk-ad{background:#fff3bf;border:2px dashed #f08c00;padding:8px;margin:6px 0;text-align:center}.dk-ad .dk-b{font-size:18px;font-weight:800;color:#d9480f}.dk-ad small{display:block;color:#999}',
+      '.dk-record{background:#e7f5ff;border:3px solid #1c7ed6;border-radius:14px;padding:10px 14px;margin:0 auto 12px;max-width:560px;text-align:left;color:#1b1b1b}.dk-record>b{font-size:18px}',
+      '.dk-recline{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0;font-size:16px}.dk-rectab{border-collapse:collapse;width:100%;font-size:15px}.dk-rectab td{padding:3px 8px;border-bottom:1px solid #cfe2f3}.dk-rectab td:nth-child(3){color:#f08c00;letter-spacing:2px}.dk-dim{color:#ced4da}',
       '.dk-rep td{padding:4px 8px;text-align:left}.dk-rep{margin:8px auto;border-collapse:collapse}',
     ].join('\n');
     document.head.appendChild(st);
@@ -8614,17 +8624,19 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         },
         report: () => reportHtml(game, D, W),
         printReport: () => printReport(game, D, W),
+        record: () => recordHtml(game, D, W),
+        skills: () => skillsFor(D, game.difficulty).map(k => ({ id: k, name: ((D.skills || {})[k] || { name: k }).name, points: skillPoints(game, k) })),
         deck() {
           const cards = game.state.desk.cards;
           const body = U.el('div', '');
-          body.innerHTML = cards.length ? cards.map(id => skillCard(D, id)).join('') : '<p>' + esc(W.none) + '</p>';
+          body.innerHTML = recordHtml(game, D, W) + (cards.length ? cards.map(id => skillCard(D, id)).join('') : '<p>' + esc(W.none) + '</p>');
           game.ui.panel({ title: W.cards, body, wide: true });
         },
         stats: () => game.state.desk,
       };
       void desk;
       // the 🃏 deck chip on the HUD (K opens it)
-      deckEl = U.el('div', 'gk-guide-chip gk-desk-chip', 'K  ' + W.cards);
+      deckEl = U.el('div', 'gk-guide-chip gk-desk-chip', 'K  ' + W.cards + ' · 📋');
       deckEl.style.cssText = 'position:absolute;right:12px;top:52%;pointer-events:auto;cursor:pointer';
       deckEl.onclick = () => game.desk.deck();
       game.ui.hud.appendChild(deckEl);
@@ -8633,7 +8645,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         if (!s) return;
         const box = U.el('div', 'gk-desk-report');
         box.style.cssText = 'background:#fff;color:#222;border-radius:12px;padding:10px 14px;margin:10px auto;max-width:560px;text-align:left';
-        box.innerHTML = reportHtml(game, D, W);
+        box.innerHTML = recordHtml(game, D, W) + reportHtml(game, D, W);
         if ((game.state.desk.report || []).length) {
           const pb = U.el('button', 'gk-btn primary', W.printReport || '🖨 Print my report');
           pb.style.marginTop = '8px'; pb.onclick = () => printReport(game, D, W);
@@ -8662,10 +8674,40 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
   });
 
   const skillCard = (D, id) => { const s = (D.skills || {})[id] || { name: id }; return '<div class="dk-skill"><span>' + esc(s.icon || '⭐') + '</span><b>' + esc(s.name) + '</b><small>' + esc(s.card || '') + '</small></div>'; };
+  /** Every skill of the chosen grade, in job order (the teacher's record sheet uses the same order). */
+  function skillsFor(D, diff) {
+    const out = [], sl = (D.slots || {})[diff] || {};
+    for (const s in sl) {
+      const j = (D.jobs || {})[sl[s]]; if (!j) continue;
+      for (const t of j.tasks || []) { const k = ((D.tasks || {})[t] || {}).skill || t; if (out.indexOf(k) < 0) out.push(k); }
+      if (j.skill && out.indexOf(j.skill) < 0) out.push(j.skill);
+    }
+    return out;
+  }
+  /** Skill points 0-3: 3 = done alone, 2 = done alone with several mistakes or a wrong check answer, 1 = needed the
+      ghost-hand rescue, 0 = not done yet. */
+  function skillPoints(game, k) {
+    const d = game.state.desk, s = d.stats[k];
+    if (d.cards.indexOf(k) < 0) return 0;
+    if (!s) return 3;
+    if (s.rescued) return 1;
+    if (s.misses > 3 || s.quizWrong > 0) return 2;
+    return 3;
+  }
+  /** The record card the teacher copies into the record sheet: name, grade, points, every skill 0-3. */
+  function recordHtml(game, D, W) {
+    const list = skillsFor(D, game.difficulty), pts = list.map(k => skillPoints(game, k)), sum = pts.reduce((a, b) => a + b, 0);
+    const total = game.result ? game.result.total : game.scoring.total, v = game.state.vars;
+    const grade = String(game.difficulty || '').replace(/\D/g, '');
+    return '<div class="dk-record"><b>' + esc(W.record || '📋 Record for your teacher') + '</b>' +
+      '<div class="dk-recline"><span>👤 ' + esc(v.playerName || '') + '</span><span>🎓 ' + esc(W.gradeLbl || 'Grade') + ' ' + esc(grade) + '</span><span>⭐ ' + esc(W.pointsLbl || 'Points') + ': <b>' + total + '</b> / 100</span></div>' +
+      '<table class="dk-rectab">' + list.map((k, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(((D.skills || {})[k] || { name: k }).name) + '</td><td>' + '★★★'.slice(0, pts[i]) + '<span class="dk-dim">' + '★★★'.slice(pts[i]) + '</span></td><td><b>' + pts[i] + '</b></td></tr>').join('') + '</table>' +
+      '<div class="dk-recline"><span>' + esc(W.skillPts || 'Skill points') + ': <b>' + sum + '</b> / ' + (list.length * 3) + '</span></div></div>';
+  }
   function reportHtml(game, D, W) {
-    const st = game.state.desk.stats, strong = [], weak = [];
-    for (const id in st) { const s = st[id], name = ((D.skills || {})[id] || { name: id }).name; if (s.rescued || s.misses > 5 || s.quizWrong > 1) weak.push(name); else strong.push(name); }
-    return '<b>' + esc(W.report) + '</b><table class="dk-rep"><tr><td>' + esc(W.strong) + ':</td><td>' + (strong.map(esc).join(', ') || '–') + '</td></tr><tr><td>' + esc(W.review) + ':</td><td>' + (weak.map(esc).join(', ') || esc(W.none)) + '</td></tr></table>';
+    const strong = [], weak = [];   // done skills: 2-3 skill points = I can do, 1 = review
+    for (const id of skillsFor(D, game.difficulty)) { const p = skillPoints(game, id), name = ((D.skills || {})[id] || { name: id }).name; if (p >= 2) strong.push(name); else if (p === 1) weak.push(name); }
+    return '<b>' + esc(W.report) + '</b><table class="dk-rep"><tr><td>' + esc(W.strong) + ':</td><td>' + (strong.map(esc).join(', ') || '–') + '</td></tr><tr><td>' + esc(W.review) + ':</td><td>' + (weak.map(esc).join(', ') || esc(W.noReview || 'Nothing! Great work.')) + '</td></tr></table>';
   }
 
   /** The printable report (Grade 10-12 health check): every job's problem found + fix, the skills, the name and date. */
@@ -8676,7 +8718,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     const html = '<html><head><meta charset="utf-8"><title>' + esc(D.reportTitle || 'Report') + '</title><style>body{font:14px Segoe UI,sans-serif;margin:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:6px;text-align:left}h1{margin:0}</style></head><body>' +
       '<h1>' + esc(D.reportTitle || 'Report') + '</h1><p><b>Name:</b> ' + esc(v.playerName || '') + ' &nbsp; <b>Grade:</b> ' + esc(String(game.difficulty || '').replace('g', '')) + ' &nbsp; <b>Date:</b> ' + new Date().toLocaleDateString() + '</p>' +
       '<table><tr><th>#</th><th>Computer / user</th><th>Problem found</th><th>Fix</th><th>Done</th></tr>' + rows + '</table>' +
-      '<p><b>Skills used:</b> ' + skills.map(esc).join(', ') + '</p>' + reportHtml(game, D, W) + '<p>Score: ' + (game.result ? game.result.total : game.scoring.total) + ' / 100</p></body></html>';
+      '<p><b>Skills used:</b> ' + skills.map(esc).join(', ') + '</p>' + recordHtml(game, D, W) + reportHtml(game, D, W) + '<p>Score: ' + (game.result ? game.result.total : game.scoring.total) + ' / 100</p></body></html>';
     try {
       const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;width:0;height:0;border:0'; document.body.appendChild(f);
       f.contentDocument.write(html); f.contentDocument.close(); f.contentWindow.print(); setTimeout(() => f.remove(), 3000);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FIX-IT TOWN</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611151710',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611152223',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -48,7 +48,9 @@ window.GAME_CONTENT = {
     red: '🟥 Red paint', blue: '🟦 Blue paint', green: '🟩 Green paint', paintDesc: 'New colour',
   },
   van: 'repair van', shopName: 'garage', pcName: 'computer', hallName: 'Mayor\'s computer',
+  askName: { english: true, label: 'English name', placeholder: 'e.g. Anna', empty: 'Type your English name first.', error: 'English name only (letters A-Z). Example: Anna' },
   words: {
+    record: '📋 Record for your teacher', gradeLbl: 'Grade', pointsLbl: 'Points', skillPts: 'Skill points',
     watch: '👀 Watch', tryIt: '👆 Try', alone: '💪 Alone', useIt: '💪 Use it', check: '❓ Check', learn: '📖 Learn', pick: '✅ Choose',
     again: 'Nice! Now do it alone', glowing: '👉 Click the glowing button', notThat: 'Not that one. Look again!',
     rescue: '👀 Watch once more, then you try again', done: '✅ Fixed!', backToTown: '🚐 Back to town',
@@ -383,7 +385,7 @@ window.GAME_CONTENT = {
     objectives: slots.map((s, i) => ({ id: 'o-' + s, type: 'flag', flag: 'desk_' + s, target: s, title: O[s === 'hall' ? 'hall' : s], tip: s === 'hall' ? C.tips.hall : '{{c' + (i + 1) + '}} · ' + C.tips.drive })),
     scoring: { objective: 0, hint: 0 },
     timer: { limit: null },
-    ui: { askName: true, leaderboard: true, minimap: { colors: true }, beacon: '#ffe066', menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 Town fixed!' },
+    ui: { askName: C.askName, leaderboard: true, minimap: { colors: true }, beacon: '#ffe066', menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 Town fixed!' },
     hooks: {
       start(game) {
         const s = window.FIX_IT.SLOTS[game.difficulty] || window.FIX_IT.SLOTS.g6;
@@ -626,6 +628,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 /* name entry · leaderboard · objective tip · flash · status chips · vignette · minimap */
 .gk-name { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 10px 0 4px; font-weight: 700; }
 .gk-name .gk-input { width: 240px; font-size: 18px; text-align: center; }
+.gk-name-msg { color: #ff8787; font-weight: 700; text-align: center; margin: 2px 0 6px; }
 .gk-name .gk-input.need { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.35); }
 .gk-lead-title { margin: 14px 0 6px; font-weight: 800; color: var(--gk-accent); }
 .gk-chars { margin: 10px auto 4px; max-width: 640px; }
@@ -1781,7 +1784,7 @@ GK_LIBRARY.worlds = {
       if (levels) {
         pick = '<div class="gk-levels">' + levels.names.map((n, i) => '<button class="gk-btn' + (i === levels.unlocked - 1 ? ' primary' : '') + '" data-level="' + i + '"' + (i >= levels.unlocked ? ' disabled' : '') + '>' + (i >= levels.unlocked ? '🔒 ' : '') + U.esc(n) + '</button>').join('') + '</div>';
       }
-      const ask = !!cfg.ui.askName, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
+      const ask = !!cfg.ui.askName, AN = U.isObj(cfg.ui.askName) ? cfg.ui.askName : {}, lead = cfg.ui.leaderboard ? this.game.leaders() : null;
       // difficulty (config.difficulty): one button per choice; the chosen one is highlighted
       const choices = this.game.difficultyChoices(), dlabels = (cfg.difficulty && cfg.difficulty.choices) || choices;
       // characters (config.characters) and the camera (ui.views, kept per computer in GK.Settings 'view')
@@ -1802,7 +1805,7 @@ GK_LIBRARY.worlds = {
         '<h1>' + U.esc(cfg.title) + '</h1>' +
         (cfg.subtitle ? '<p class="gk-sub">' + U.esc(cfg.subtitle) + '</p>' : '') +
         (cfg.description ? '<p>' + U.esc(cfg.description) + '</p>' : '') + cont +
-        (ask ? '<div class="gk-name"><label for="gk-name">Your name</label><input id="gk-name" class="gk-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Type your name"></div>' : '') + who + diff + comb + cam +
+        (ask ? '<div class="gk-name"><label for="gk-name">' + U.esc(AN.label || 'Your name') + '</label><input id="gk-name" class="gk-input" maxlength="24" autocomplete="off" spellcheck="false" placeholder="' + U.esc(AN.placeholder || 'Type your name') + '"></div><div class="gk-name-msg" style="display:none"></div>' : '') + who + diff + comb + cam +
         (cfg.ui.showControls !== false ? this.controlsHtml(cfg) : '') +
         (levels ? pick : '<button class="gk-btn ' + (resume ? '' : 'primary ') + 'big" data-level="0">' + (resume ? '★ New game' : '▶ Play') + '</button>') +
         (lead && lead.length ? '<div class="gk-lead-title">🏆 Top players on this computer</div>' + this.leaderTable(lead, 0, 5) : '') +
@@ -1838,8 +1841,13 @@ GK_LIBRARY.worlds = {
       s.querySelectorAll('[data-level]').forEach(b => {
         b.onclick = () => {
           if (nameBox) {
-            if (!nameBox.value.trim()) { nameBox.focus(); nameBox.classList.add('need'); return; }
-            this.game.setPlayerName(nameBox.value);
+            // ui.askName: {english: true} = English letters only (A-Z, space, - ' .), at least 2 letters; the name is required
+            const v = nameBox.value.trim().replace(/\s+/g, ' '), msg = s.querySelector('.gk-name-msg');
+            const bad = !v ? (AN.empty || 'Type your name first.') : AN.english && (!/^[A-Za-z][A-Za-z .'-]*$/.test(v) || v.replace(/[^A-Za-z]/g, '').length < 2) ? (AN.error || 'Use your English name (letters A-Z only).') : '';
+            if (bad) { nameBox.focus(); nameBox.classList.add('need'); if (msg) { msg.textContent = '⚠️ ' + bad; msg.style.display = ''; } return; }
+            const nm = AN.english ? v.replace(/(^|[ '-])([a-z])/g, (m0, a, b) => a + b.toUpperCase()) : v;   // anna tran → Anna Tran
+            nameBox.value = nm;
+            this.game.setPlayerName(nm);
           }
           onPlay(Number(b.getAttribute('data-level')));
         };
@@ -2348,7 +2356,7 @@ GK_LIBRARY.worlds = {
     }
     /** The name typed on the title screen (ui.askName): kept for restarts while the page is open (not saved: lab PCs are shared). */
     setPlayerName(name) {
-      this.playerName = String(name || '').trim().slice(0, 18) || 'Player';
+      this.playerName = String(name || '').trim().slice(0, 24) || 'Player';
       this.state.vars.playerName = this.playerName;
     }
     // ================= difficulty (config.difficulty) =================
@@ -7949,7 +7957,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     files: { icon: '📁', name: 'File Explorer' }, settings: { icon: '⚙️', name: 'Settings' }, store: { icon: '🛍️', name: 'Store' },
     taskmgr: { icon: '📊', name: 'Task Manager' }, devmgr: { icon: '🖥️', name: 'Device Manager' }, typing: { icon: '⌨️', name: 'Typing Tutor' },
     music: { icon: '🎵', name: 'Music' }, coupon: { icon: '🏷️', name: 'Coupon Toolbar' }, game: { icon: '🎮', name: 'Game Launcher' }, video: { icon: '🎬', name: 'Video Maker' },
-    maps: { icon: '🗺️', name: 'Maps' },
+    maps: { icon: '🗺️', name: 'Maps' }, cmd: { icon: '⬛', name: 'Command Prompt' }, office: { icon: '📄', name: 'LibreOffice' },
   };
   const WALLS = { bloom: 'linear-gradient(135deg,#1c3faa,#5b8def 55%,#a5c8ff)', beach: 'linear-gradient(#5ec8f2 0 55%,#f3d9a4 55%)', forest: 'linear-gradient(#a8e063,#2f7a32)',
     space: 'radial-gradient(circle at 70% 30%,#5b2a86,#0b0b2b 70%)', school: 'linear-gradient(135deg,#ffb703,#fb8500)', sunset: 'linear-gradient(#ff7e5f,#feb47b)' };
@@ -7968,8 +7976,14 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       procs: [{ id: 'explorer', name: 'Windows Explorer', cpu: 1, mem: 80, sys: true }, { id: 'security', name: 'Windows Security', cpu: 0, mem: 40, sys: true }],
       startup: [{ id: 'security', name: 'Windows Security', impact: 'Low', on: true, sys: true }],
       ended: [], printed: 0, flags: {},
+      admins: ['Owner'], acctSel: null,
+      net: { wifi: true, airplane: false, ip: '192.168.1.24', gateway: '192.168.1.1' },
+      hosts: { 'google.com': true, '8.8.8.8': true, '192.168.1.1': true, '10.0.0.5': true },
+      sec: { rtp: true, fw: true, threats: [], scanned: false, scanning: false },
+      cmdOut: [], files: [{ name: 'Budget.xlsx', kb: 48 }, { name: 'Notes.txt', kb: 2 }, { name: 'Photos', dir: true }], webPage: 'home', uac: null,
     };
   }
+  const netOk = S => S.net.wifi && !S.net.airplane && !(S.devices.find(d => d.id === 'wifi') || { ok: true }).ok === false;
   /** Run an action on the pretend PC. Returns the event names it caused (for traps / goals). */
   function act(S, id, sim) { const ev = act0(S, id, sim); (S.log = S.log || []).push.apply(S.log, ev); return ev; }
   function act0(S, id, sim) {
@@ -8066,6 +8080,50 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     if ((m = /^dev-(\w+)$/.exec(id)) && S.devices.some(d => d.id === m[1])) { S.devSel = m[1]; return ev; }
     if (id === 'dm-update') { const d = S.devices.find(x => x.id === S.devSel); if (d) { S.devBusy = true; sim.later(1000, () => { d.ok = true; S.devBusy = false; }); ev.push('driver:' + d.id); } return ev; }
     if (id === 'dm-uninstall') { ev.push('trap:uninstalldev'); return ev; }
+    // ---- accounts: Standard / Administrator ----
+    if ((m = /^acc-user-(\w+)$/.exec(id))) { S.acctSel = S.acctSel === m[1] ? null : m[1]; return ev; }
+    if ((m = /^acc-(std|admin)-(\w+)$/.exec(id))) { const u = m[2]; S.admins = S.admins.filter(x => x !== u); if (m[1] === 'admin') S.admins.push(u); ev.push('type:' + u + ':' + m[1]); return ev; }
+    // ---- network ----
+    if (id === 'net-wifi') { S.net.wifi = !S.net.wifi; ev.push('wifi:' + (S.net.wifi ? 'on' : 'off')); return ev; }
+    if (id === 'net-airplane') { S.net.airplane = !S.net.airplane; ev.push('airplane:' + (S.net.airplane ? 'on' : 'off')); return ev; }
+    // ---- Windows Security ----
+    if (id === 'sec-open') { S.page = 'security'; return ev; }
+    if (id === 'sec-rtp') { S.sec.rtp = !S.sec.rtp; if (!S.sec.rtp) ev.push('trap:rtpoff'); return ev; }
+    if (id === 'sec-fw') { S.sec.fw = !S.sec.fw; if (!S.sec.fw) ev.push('trap:fwoff'); return ev; }
+    if (id === 'sec-scan') { S.page = 'security'; S.sec.scanning = true; sim.later(1200, () => { S.sec.scanning = false; S.sec.scanned = true; }); ev.push('scan'); return ev; }
+    if (id === 'sec-remove') { if (S.sec.threats.length) { S.removed = (S.removed || []).concat(S.sec.threats); S.sec.threats = []; S.procs = S.procs.filter(p => !p.malware); ev.push('threats:removed'); } return ev; }
+    if (id === 'sec-allow') { ev.push('trap:allow'); return ev; }
+    // ---- Command Prompt ----
+    if (id.indexOf('cmd:') === 0) {
+      const line = id.slice(4), out = S.cmdOut, net = netOk(S);
+      out.push('C:\\Users\\' + S.users[0] + '> ' + line);
+      let mm;
+      if (line === 'ipconfig' || line === 'ipconfig /all') {
+        if (!net) out.push('Wireless LAN adapter Wi-Fi:', '   Media State . . . . . : Media disconnected');
+        else out.push('Wireless LAN adapter Wi-Fi:', '   IPv4 Address. . . . . : ' + S.net.ip, '   Subnet Mask . . . . . : 255.255.255.0', '   Default Gateway . . . : ' + S.net.gateway);
+      } else if ((mm = /^ping ([\w.-]+)$/.exec(line))) {
+        const h = mm[1], known = h in S.hosts || /^\d+\.\d+\.\d+\.\d+$/.test(h);
+        if (!net) { out.push('Ping request could not find host ' + h + '. Check the name and try again.'); ev.push('ping:' + h + ':fail'); }
+        else if (!known) { out.push('Ping request could not find host ' + h + '.'); ev.push('ping:' + h + ':fail'); }
+        else if (S.hosts[h] === false) { out.push('Pinging ' + h + ':', 'Request timed out.', 'Request timed out.', 'Request timed out.', 'Request timed out.', 'Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)'); ev.push('ping:' + h + ':fail'); }
+        else { out.push('Pinging ' + h + ':'); for (let i = 0; i < 4; i++) out.push('Reply from ' + h + ': time=' + (11 + i * 3) + 'ms'); out.push('Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)'); ev.push('ping:' + h + ':ok'); }
+      } else if (line === 'dir') {
+        out.push(' Directory of C:\\Users\\' + S.users[0] + '\\Documents');
+        for (const f of S.files) out.push((f.dir ? '   <DIR>          ' : '   ' + String(f.kb).padStart(6) + ' KB      ') + f.name);
+        out.push('   ' + S.files.filter(f => !f.dir).length + ' File(s)');
+      } else if (line === 'help') out.push('IPCONFIG  shows the network address', 'PING      checks if another computer answers', 'DIR       lists the files in a folder', 'CLS       clears the screen');
+      else if (line === 'cls') S.cmdOut = [];
+      else if (line) out.push("'" + line.split(' ')[0] + "' is not recognized as a command. Type help.");
+      if (S.cmdOut.length > 40) S.cmdOut = S.cmdOut.slice(-40);
+      return ev;
+    }
+    if (id === 'cx-cmd') { openApp('cmd'); return ev; }
+    // ---- safe download (Edge) + the "Do you want to allow this app…" question ----
+    if (id === 'web-download') { S.webPage = 'download'; return ev; }
+    if (id === 'dl-official') { S.uac = { app: 'office', publisher: 'The Document Foundation', ok: true }; return ev; }
+    if (id === 'dl-ad') { ev.push('trap:fakedl'); return ev; }
+    if (id === 'uac-yes') { const u = S.uac; S.uac = null; if (u && u.ok) { S.installing = u.app; sim.later(900, () => { if (S.apps.indexOf(u.app) < 0) S.apps.push(u.app); S.installing = null; }); ev.push('install:' + u.app); } return ev; }
+    if (id === 'uac-no') { S.uac = null; return ev; }
     // ---- hardware (traps) ----
     if (id === 'hw-plug') { ev.push('trap:plug'); return ev; }
     if (id === 'hw-hold') { ev.push('trap:hold'); return ev; }
@@ -8076,9 +8134,9 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
   const B = (id, label, html, cls, extra) => '<button class="dk-b ' + (cls || '') + '" data-id="' + id + '" data-l="' + esc(label) + '"' + (extra || '') + '>' + html + '</button>';
   const appName = a => (APPS[a] || { name: a }).name, appIcon = a => (APPS[a] || { icon: '▫️' }).icon;
   function drawSettings(S) {
-    const nav = [['system', '🖥️', 'System'], ['bt', '🔵', 'Bluetooth & devices'], ['personal', '🎨', 'Personalisation'], ['apps', '🧩', 'Apps'], ['accounts', '👤', 'Accounts'], ['update', '🔄', 'Windows Update']];
+    const nav = [['system', '🖥️', 'System'], ['bt', '🔵', 'Bluetooth & devices'], ['personal', '🎨', 'Personalisation'], ['apps', '🧩', 'Apps'], ['network', '🌐', 'Network & internet'], ['accounts', '👤', 'Accounts'], ['privacy', '🛡️', 'Privacy & security'], ['update', '🔄', 'Windows Update']];
     const sysPages = ['system', 'display', 'sound', 'storage', 'about', 'temp'];
-    const navOn = k => (k === 'system' ? sysPages.indexOf(S.page) >= 0 : k === 'apps' ? (S.page === 'apps' || S.page === 'installed') : S.page === k);
+    const navOn = k => (k === 'system' ? sysPages.indexOf(S.page) >= 0 : k === 'apps' ? (S.page === 'apps' || S.page === 'installed') : k === 'privacy' ? (S.page === 'privacy' || S.page === 'security') : S.page === k);
     let h = '<div class="dk-set"><div class="dk-setnav">' + nav.map(n => B('set-' + n[0], n[2], n[1] + ' ' + n[2], navOn(n[0]) ? 'on' : '')).join('') + '</div><div class="dk-setmain">';
     const bar = (pre, val, label) => '<div class="dk-bar">' + Array.from({ length: 11 }, (_, i) => B(pre + i, label + ' ' + i * 10 + '%', '', i * 10 <= val ? 'fill' : '')).join('') + '<span class="dk-barv">' + val + '%</span></div>';
     const card = (id, icon, title, sub) => B(id, title, '<span class="dk-ci">' + icon + '</span><span><b>' + esc(title) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><span class="dk-chev">›</span>', 'dk-card');
@@ -8105,7 +8163,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       h += '<h3>Apps › Installed apps</h3>' + S.apps.filter(a => a !== 'settings' && a !== 'store').map(a => '<div class="dk-applist">' + appIcon(a) + ' ' + esc(appName(a)) + B('app-menu-' + a, 'More (…) for ' + appName(a), '⋯', 'dk-small') +
         (S.appMenu === a ? '<div class="dk-pop">' + B('app-uninstall-' + a, 'Uninstall', '🗑️ Uninstall', 'dk-danger') + '</div>' : '') + '</div>').join('');
     } else if (p === 'accounts') {
-      if (S.accPage === 'other') h += '<h3>Accounts › Other users</h3>' + S.users.map(u => '<div class="dk-applist">👤 ' + esc(u) + '</div>').join('') + B('acc-add', 'Add account', '➕ Add account', 'dk-primary');
+      if (S.accPage === 'other') h += '<h3>Accounts › Other users</h3>' + S.users.slice(1).map(u => '<div class="dk-applist">👤 ' + esc(u) + ' <small class="dk-muted">' + (S.admins.indexOf(u) >= 0 ? 'Administrator' : 'Standard user') + '</small>' + B('acc-user-' + u, 'Change account type for ' + u, '⚙️ Account type', 'dk-small') +
+        (S.acctSel === u ? '<div class="dk-pop">' + B('acc-std-' + u, 'Standard user', '👤 Standard user') + '<br>' + B('acc-admin-' + u, 'Administrator', '🛡️ Administrator') + '</div>' : '') + '</div>').join('') + B('acc-add', 'Add account', '➕ Add account', 'dk-primary');
       else if (S.accPage === 'add') h += '<h3>Accounts › Add account</h3><p>Who will use this PC?</p><div class="dk-chips">' + ['Mia', 'Leo', 'Guest'].map(n => B('acc-name-' + n, n, '👤 ' + n, S.newUser === n ? 'on' : '')).join('') + '</div>' + (S.newUser ? B('acc-finish', 'Finish', '✔ Finish', 'dk-primary') : '');
       else h += '<h3>Accounts</h3><div class="dk-applist">👤 ' + esc(S.users[0]) + ' (you)</div>' + card('acc-other', '👥', 'Other users', 'Add a person');
     } else if (p === 'bt') {
@@ -8113,6 +8172,19 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         (S.prSearch ? '<p class="dk-busy">🔎 Looking for printers…</p>' : S.prFound ? '<div class="dk-chips">' + B('pr-pick-Office', 'Office printer', '🖨️ Office') + B('pr-pick-Photo', 'Photo printer', '🖨️ Photo') + '</div>' : B('pr-add', 'Add device', '➕ Add device', 'dk-primary'));
       else if (S.btPage === 'add') h += '<h3>Devices › Add a device</h3>' + (S.btSearch ? '<p class="dk-busy">🔎 Looking…</p>' : S.btFound ? '<div class="dk-chips">' + B('bt-pick-Headphones', 'Headphones', '🎧 Headphones') + B('bt-pick-Speaker', 'Speaker', '🔊 Speaker') + '</div>' : B('bt-bluetooth', 'Bluetooth', '🔵 Bluetooth', 'dk-card'));
       else h += '<h3>Bluetooth & devices</h3>' + S.bt.map(x => '<div class="dk-applist">🔵 ' + esc(x) + ' connected ✔</div>').join('') + card('bt-add', '➕', 'Add device', 'Bluetooth') + card('bt-printers', '🖨️', 'Printers & scanners', S.printers.length + ' printer(s)');
+    } else if (p === 'network') {
+      const on = netOk(S);
+      h += '<h3>🌐 Network & internet</h3><p>' + (on ? '<span class="dk-good">✔ Connected · School-WiFi</span>' : '<span class="dk-warn">✖ Not connected</span>') + '</p>' +
+        '<div class="dk-applist">📶 Wi-Fi ' + B('net-wifi', 'Wi-Fi on / off', S.net.wifi ? '✔ On' : '✖ Off', S.net.wifi ? 'dk-small on' : 'dk-small') + '</div>' +
+        '<div class="dk-applist">✈️ Airplane mode ' + B('net-airplane', 'Airplane mode on / off', S.net.airplane ? '✔ On' : '✖ Off', S.net.airplane ? 'dk-small on' : 'dk-small') + '</div>';
+    } else if (p === 'privacy') h += '<h3>🛡️ Privacy & security</h3>' + card('sec-open', '🛡️', 'Windows Security', 'Virus protection, firewall');
+    else if (p === 'security') {
+      const X = S.sec;
+      h += '<h3>🛡️ Windows Security</h3>' +
+        '<div class="dk-applist">🦠 Real-time protection ' + B('sec-rtp', 'Real-time protection on / off', X.rtp ? '✔ On' : '✖ Off', X.rtp ? 'dk-small on' : 'dk-small') + '</div>' +
+        '<div class="dk-applist">🧱 Firewall ' + B('sec-fw', 'Firewall on / off', X.fw ? '✔ On' : '✖ Off', X.fw ? 'dk-small on' : 'dk-small') + '</div>' +
+        (X.scanning ? '<p class="dk-busy">🔎 Scanning…</p>' : B('sec-scan', 'Quick scan', '🔎 Quick scan', 'dk-primary')) +
+        (X.scanned ? (X.threats.length ? '<p class="dk-warn">⚠️ Threats found: ' + X.threats.map(esc).join(', ') + '</p>' + B('sec-remove', 'Remove threats', '🗑️ Remove threats', 'dk-danger') + ' ' + B('sec-allow', 'Allow on device', 'Allow on device', 'dk-small') : '<p class="dk-good">✔ No current threats</p>') : '');
     } else if (p === 'update') {
       const u = S.updates;
       h += '<h3>🔄 Windows Update</h3>' + (u === 'none' ? '<p>Last checked: 3 months ago ⚠️</p>' + B('upd-check', 'Check for updates', '🔎 Check for updates', 'dk-primary')
@@ -8148,7 +8220,11 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     const p = S.procs.find(x => x.id === a);
     if (p && p.frozen) return '<div class="dk-frozen">❄️ ' + esc(appName(a)) + ' is not responding…<br><small>Clicking does nothing. Use Task Manager.</small></div>';
     if (a === 'notes') return '<div class="dk-notes">My homework notes…<br>✏️ Science: plants need light.</div>';
-    if (a === 'web') return '<div class="dk-web"><div class="dk-url">🔒 school.example/homework</div><h3>📚 Homework page</h3><p>Today: read page 12.</p></div>';
+    if (a === 'web') {
+      if (S.webPage === 'download') return '<div class="dk-web"><div class="dk-url">🔒 libreoffice.org/download</div><div class="dk-ad">' + B('dl-ad', 'FAST DOWNLOAD (ad)', '⬇️⬇️ FAST DOWNLOAD!!! ⬇️⬇️', '') + '<small>Ad</small></div><h3>📄 LibreOffice (official site)</h3><p>Free office suite.</p>' + B('dl-official', 'Download LibreOffice', '⬇️ Download LibreOffice', 'dk-primary') + '</div>';
+      return '<div class="dk-web"><div class="dk-url">🔒 school.example/homework</div><h3>📚 Homework page</h3><p>Today: read page 12.</p>' + B('web-download', 'Go to libreoffice.org', '🔗 libreoffice.org', 'dk-small') + '</div>';
+    }
+    if (a === 'cmd') return '<div class="dk-cmd"><pre>' + esc(['Microsoft Windows [Version 10.0.22631]', ''].concat(S.cmdOut).join('\n')) + '</pre><div class="dk-cmdrow"><span>C:\\Users\\' + esc(S.users[0]) + '&gt;</span><input data-id="cmd-input" class="dk-cmdin" spellcheck="false" autocomplete="off" placeholder="type a command">' + B('cmd-run', 'Run', '↵ Run', 'dk-small') + '</div></div>';
     if (a === 'files') return '<div class="dk-files">📁 Documents<br>📁 Pictures<br>📁 Downloads</div>';
     return '<div class="dk-appbody"><span>' + appIcon(a) + '</span><b>' + esc(appName(a)) + '</b></div>';
   }
@@ -8172,7 +8248,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         (S.open.power ? '<div class="dk-pmenu">' + B('pw-sleep', 'Sleep', '💤 Sleep') + B('pw-shutdown', 'Shut down', '⏻ Shut down') + B('pw-restart', 'Restart', '🔁 Restart') + '</div>' : '') +
         (S.open.user ? '<div class="dk-pmenu left">' + B('ac-settings', 'Change account settings', '⚙️ Account settings') + B('ac-lock', 'Lock', '🔒 Lock') + B('ac-signout', 'Sign out', '🚪 Sign out') + '</div>' : '') + '</div>';
     }
-    if (S.open.ctx) h += '<div class="dk-ctx">' + B('cx-taskmgr', 'Task Manager', '📊 Task Manager') + B('cx-devmgr', 'Device Manager', '🖥️ Device Manager') + B('cx-settings', 'Settings', '⚙️ Settings') + '</div>';
+    if (S.open.ctx) h += '<div class="dk-ctx">' + B('cx-taskmgr', 'Task Manager', '📊 Task Manager') + B('cx-devmgr', 'Device Manager', '🖥️ Device Manager') + B('cx-cmd', 'Terminal (Command Prompt)', '⬛ Terminal') + B('cx-settings', 'Settings', '⚙️ Settings') + '</div>';
+    if (S.uac) h += '<div class="dk-uac"><b>🛡️ Do you want to allow this app to make changes to your device?</b><p>' + esc(appName(S.uac.app)) + '<br>Verified publisher: <b>' + esc(S.uac.publisher) + '</b></p>' + B('uac-yes', 'Yes', 'Yes', 'dk-primary') + B('uac-no', 'No', 'No', 'dk-small') + '</div>';
     if (S.open.quick) h += '<div class="dk-quick"><div>🔊 Volume ' + B('q-mute', 'Mute', S.mute ? '🔇' : '🔈', 'dk-small') + '</div><div class="dk-bar">' + Array.from({ length: 11 }, (_, i) => B('qvol-' + i, 'Volume ' + i * 10 + '%', '', i * 10 <= S.volume && !S.mute ? 'fill' : '')).join('') + '</div>' +
       '<div>☀️ Brightness</div><div class="dk-bar">' + Array.from({ length: 11 }, (_, i) => B('qbr-' + i, 'Brightness ' + i * 10 + '%', '', i * 10 <= S.brightness ? 'fill' : '')).join('') + '</div></div>';
     h += '<div class="dk-taskbar"><div class="dk-tbmid">' + B('start', 'Start', '<span class="dk-winlogo">⊞</span>', 'dk-tb', ' data-rc="1"') + B('tb-files', 'File Explorer', '📁', 'dk-tb') + B('tb-web', 'Edge', '🌐', 'dk-tb') + B('tb-store', 'Store', '🛍️', 'dk-tb') + B('tb-settings', 'Settings', '⚙️', 'dk-tb') +
@@ -8246,6 +8323,11 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       '.dk-why{margin-top:12px;font-size:17px;padding:10px;border-radius:10px;background:#f1f3f5}.dk-why.bad{background:#fff5f5}.dk-why.good{background:#ebfbee}',
       '.dk-skill{display:inline-flex;flex-direction:column;align-items:center;width:150px;margin:6px;padding:12px;border-radius:14px;background:linear-gradient(#fff3bf,#ffe066);box-shadow:0 3px 8px rgba(0,0,0,.2);vertical-align:top}.dk-skill b{font-size:15px;margin:4px 0}.dk-skill span{font-size:36px}.dk-skill small{font-size:12px;color:#5c4a2e}',
       '.dk-learn{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0}.dk-learn div{width:150px;padding:10px;border-radius:12px;background:#e7f5ff;font-size:14px}.dk-learn b{display:block;font-size:16px}.dk-learn span{font-size:34px}',
+      '.dk-cmd{background:#0c0c0c;color:#e8e8e8;height:100%;display:flex;flex-direction:column;font:14px Consolas,monospace}.dk-cmd pre{flex:1;margin:0;padding:8px 10px;overflow:auto;white-space:pre-wrap}.dk-cmdrow{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#1a1a1a}.dk-cmdin{flex:1;background:#000;color:#fff;border:1px solid #555;font:15px Consolas,monospace;padding:6px}.dk-cmdrow .dk-small{color:#222}',
+      '.dk-uac{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:20;background:#fff;border-top:6px solid #1c7ed6;border-radius:10px;padding:16px 20px;width:min(440px,80%);box-shadow:0 10px 40px rgba(0,0,0,.5)}',
+      '.dk-ad{background:#fff3bf;border:2px dashed #f08c00;padding:8px;margin:6px 0;text-align:center}.dk-ad .dk-b{font-size:18px;font-weight:800;color:#d9480f}.dk-ad small{display:block;color:#999}',
+      '.dk-record{background:#e7f5ff;border:3px solid #1c7ed6;border-radius:14px;padding:10px 14px;margin:0 auto 12px;max-width:560px;text-align:left;color:#1b1b1b}.dk-record>b{font-size:18px}',
+      '.dk-recline{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0;font-size:16px}.dk-rectab{border-collapse:collapse;width:100%;font-size:15px}.dk-rectab td{padding:3px 8px;border-bottom:1px solid #cfe2f3}.dk-rectab td:nth-child(3){color:#f08c00;letter-spacing:2px}.dk-dim{color:#ced4da}',
       '.dk-rep td{padding:4px 8px;text-align:left}.dk-rep{margin:8px auto;border-collapse:collapse}',
     ].join('\n');
     document.head.appendChild(st);
@@ -8277,17 +8359,20 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
           runJob(game, D, W, gradeOpts(), slot, jid, job, ok => { if (done) done(ok); });
         },
         report: () => reportHtml(game, D, W),
+        printReport: () => printReport(game, D, W),
+        record: () => recordHtml(game, D, W),
+        skills: () => skillsFor(D, game.difficulty).map(k => ({ id: k, name: ((D.skills || {})[k] || { name: k }).name, points: skillPoints(game, k) })),
         deck() {
           const cards = game.state.desk.cards;
           const body = U.el('div', '');
-          body.innerHTML = cards.length ? cards.map(id => skillCard(D, id)).join('') : '<p>' + esc(W.none) + '</p>';
+          body.innerHTML = recordHtml(game, D, W) + (cards.length ? cards.map(id => skillCard(D, id)).join('') : '<p>' + esc(W.none) + '</p>');
           game.ui.panel({ title: W.cards, body, wide: true });
         },
         stats: () => game.state.desk,
       };
       void desk;
       // the 🃏 deck chip on the HUD (K opens it)
-      deckEl = U.el('div', 'gk-guide-chip gk-desk-chip', 'K  ' + W.cards);
+      deckEl = U.el('div', 'gk-guide-chip gk-desk-chip', 'K  ' + W.cards + ' · 📋');
       deckEl.style.cssText = 'position:absolute;right:12px;top:52%;pointer-events:auto;cursor:pointer';
       deckEl.onclick = () => game.desk.deck();
       game.ui.hud.appendChild(deckEl);
@@ -8296,7 +8381,12 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         if (!s) return;
         const box = U.el('div', 'gk-desk-report');
         box.style.cssText = 'background:#fff;color:#222;border-radius:12px;padding:10px 14px;margin:10px auto;max-width:560px;text-align:left';
-        box.innerHTML = reportHtml(game, D, W);
+        box.innerHTML = recordHtml(game, D, W) + reportHtml(game, D, W);
+        if ((game.state.desk.report || []).length) {
+          const pb = U.el('button', 'gk-btn primary', W.printReport || '🖨 Print my report');
+          pb.style.marginTop = '8px'; pb.onclick = () => printReport(game, D, W);
+          box.appendChild(pb);
+        }
         s.appendChild(box);
       }, 30));
     },
@@ -8320,12 +8410,57 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
   });
 
   const skillCard = (D, id) => { const s = (D.skills || {})[id] || { name: id }; return '<div class="dk-skill"><span>' + esc(s.icon || '⭐') + '</span><b>' + esc(s.name) + '</b><small>' + esc(s.card || '') + '</small></div>'; };
+  /** Every skill of the chosen grade, in job order (the teacher's record sheet uses the same order). */
+  function skillsFor(D, diff) {
+    const out = [], sl = (D.slots || {})[diff] || {};
+    for (const s in sl) {
+      const j = (D.jobs || {})[sl[s]]; if (!j) continue;
+      for (const t of j.tasks || []) { const k = ((D.tasks || {})[t] || {}).skill || t; if (out.indexOf(k) < 0) out.push(k); }
+      if (j.skill && out.indexOf(j.skill) < 0) out.push(j.skill);
+    }
+    return out;
+  }
+  /** Skill points 0-3: 3 = done alone, 2 = done alone with several mistakes or a wrong check answer, 1 = needed the
+      ghost-hand rescue, 0 = not done yet. */
+  function skillPoints(game, k) {
+    const d = game.state.desk, s = d.stats[k];
+    if (d.cards.indexOf(k) < 0) return 0;
+    if (!s) return 3;
+    if (s.rescued) return 1;
+    if (s.misses > 3 || s.quizWrong > 0) return 2;
+    return 3;
+  }
+  /** The record card the teacher copies into the record sheet: name, grade, points, every skill 0-3. */
+  function recordHtml(game, D, W) {
+    const list = skillsFor(D, game.difficulty), pts = list.map(k => skillPoints(game, k)), sum = pts.reduce((a, b) => a + b, 0);
+    const total = game.result ? game.result.total : game.scoring.total, v = game.state.vars;
+    const grade = String(game.difficulty || '').replace(/\D/g, '');
+    return '<div class="dk-record"><b>' + esc(W.record || '📋 Record for your teacher') + '</b>' +
+      '<div class="dk-recline"><span>👤 ' + esc(v.playerName || '') + '</span><span>🎓 ' + esc(W.gradeLbl || 'Grade') + ' ' + esc(grade) + '</span><span>⭐ ' + esc(W.pointsLbl || 'Points') + ': <b>' + total + '</b> / 100</span></div>' +
+      '<table class="dk-rectab">' + list.map((k, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(((D.skills || {})[k] || { name: k }).name) + '</td><td>' + '★★★'.slice(0, pts[i]) + '<span class="dk-dim">' + '★★★'.slice(pts[i]) + '</span></td><td><b>' + pts[i] + '</b></td></tr>').join('') + '</table>' +
+      '<div class="dk-recline"><span>' + esc(W.skillPts || 'Skill points') + ': <b>' + sum + '</b> / ' + (list.length * 3) + '</span></div></div>';
+  }
   function reportHtml(game, D, W) {
-    const st = game.state.desk.stats, strong = [], weak = [];
-    for (const id in st) { const s = st[id], name = ((D.skills || {})[id] || { name: id }).name; if (s.rescued || s.misses > 5 || s.quizWrong > 1) weak.push(name); else strong.push(name); }
-    return '<b>' + esc(W.report) + '</b><table class="dk-rep"><tr><td>' + esc(W.strong) + ':</td><td>' + (strong.map(esc).join(', ') || '–') + '</td></tr><tr><td>' + esc(W.review) + ':</td><td>' + (weak.map(esc).join(', ') || esc(W.none)) + '</td></tr></table>';
+    const strong = [], weak = [];   // done skills: 2-3 skill points = I can do, 1 = review
+    for (const id of skillsFor(D, game.difficulty)) { const p = skillPoints(game, id), name = ((D.skills || {})[id] || { name: id }).name; if (p >= 2) strong.push(name); else if (p === 1) weak.push(name); }
+    return '<b>' + esc(W.report) + '</b><table class="dk-rep"><tr><td>' + esc(W.strong) + ':</td><td>' + (strong.map(esc).join(', ') || '–') + '</td></tr><tr><td>' + esc(W.review) + ':</td><td>' + (weak.map(esc).join(', ') || esc(W.noReview || 'Nothing! Great work.')) + '</td></tr></table>';
   }
 
+  /** The printable report (Grade 10-12 health check): every job's problem found + fix, the skills, the name and date. */
+  function printReport(game, D, W) {
+    const R = game.state.desk.report || [], v = game.state.vars, st = game.state.desk.stats;
+    const rows = R.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.found) + '</td><td>' + esc(r.fix) + '</td><td>' + (r.rescues ? 'with help' : 'alone') + '</td></tr>').join('');
+    const skills = Object.keys(st).map(k => ((D.skills || {})[k] || { name: k }).name);
+    const html = '<html><head><meta charset="utf-8"><title>' + esc(D.reportTitle || 'Report') + '</title><style>body{font:14px Segoe UI,sans-serif;margin:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:6px;text-align:left}h1{margin:0}</style></head><body>' +
+      '<h1>' + esc(D.reportTitle || 'Report') + '</h1><p><b>Name:</b> ' + esc(v.playerName || '') + ' &nbsp; <b>Grade:</b> ' + esc(String(game.difficulty || '').replace('g', '')) + ' &nbsp; <b>Date:</b> ' + new Date().toLocaleDateString() + '</p>' +
+      '<table><tr><th>#</th><th>Computer / user</th><th>Problem found</th><th>Fix</th><th>Done</th></tr>' + rows + '</table>' +
+      '<p><b>Skills used:</b> ' + skills.map(esc).join(', ') + '</p>' + recordHtml(game, D, W) + reportHtml(game, D, W) + '<p>Score: ' + (game.result ? game.result.total : game.scoring.total) + ' / 100</p></body></html>';
+    try {
+      const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;width:0;height:0;border:0'; document.body.appendChild(f);
+      f.contentDocument.write(html); f.contentDocument.close(); f.contentWindow.print(); setTimeout(() => f.remove(), 3000);
+    } catch (e) { /* printing not available */ }
+    return html;
+  }
   /** Run one job on the pretend PC (full-screen overlay). */
   function runJob(game, D, W, G, slot, jid, job, finish) {
     const root = game.ui.layer, ov = U.el('div', 'dk-overlay');
@@ -8356,12 +8491,16 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     // ---------- the screen ----------
     const draw = () => {
       if (closed || !task) return;
+      const hadFocus = document.activeElement && document.activeElement.classList.contains('dk-cmdin');
       screen.innerHTML = drawDesktop(S, task);
+      const pre = screen.querySelector('.dk-cmd pre'); if (pre) pre.scrollTop = pre.scrollHeight;
+      if (hadFocus || (task && mode !== 'watch' && screen.querySelector('.dk-cmdin') && nextTarget() && nextTarget().indexOf('cmd:') === 0)) { const i = screen.querySelector('.dk-cmdin'); if (i) i.focus(); }
       $('.dk-hw').style.display = task.hardware ? '' : 'none';
       glow();
     };
     const tokens = () => (task ? task.path.reduce((a, p) => a.concat(p.split('|')), []) : []);
-    const sel = id => id.replace(/:right$/, '');
+    const sel = id => (id.indexOf('cmd:') === 0 ? 'cmd-input' : id.replace(/:right$/, ''));
+    const norm = t => String(t || '').trim().toLowerCase().replace(/\s+/g, ' ');
     const visible = id => { const el = ov.querySelector('[data-id="' + sel(id) + '"]'); if (!el) return null; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? el : null; };
     /** The next click: the deepest step of the path that is on screen now. */
     // reach = the furthest step clicked so far; the next click is the deepest step up to reach + 1 that is on screen
@@ -8402,6 +8541,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       if (mode !== 'try' && mode !== 'alone') return;
       const target = nextTarget(), onPath = tokens().indexOf(id) >= 0 || (task.also || []).indexOf(id) >= 0, traps = task.traps || {};
       if (mode === 'try' && id !== target) {
+        if (target && target.indexOf('cmd:') === 0) { bubble('⌨️ Type: ' + target.slice(4), ''); return; }
         const trapText = traps[id] || traps[(act(clone(S), id, { later() {} }).find(e => traps[e]))];
         bubble(trapText ? '⚠️ ' + trapText : W.glowing, trapText ? 'bad' : '');
         if (ev) ev.preventDefault();
@@ -8417,7 +8557,9 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       draw(); kickIdle(); check();
     };
     const clone = s => JSON.parse(JSON.stringify(s));
-    screen.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) handle(b.dataset.id, e); });
+    const runCmd = () => { const i = ov.querySelector('.dk-cmdin'); if (!i) return; const t = norm(i.value); i.value = ''; if (t) handle('cmd:' + t); const j = ov.querySelector('.dk-cmdin'); if (j) j.focus(); };
+    screen.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b || b.dataset.id === 'cmd-input') return; if (b.dataset.id === 'cmd-run') return runCmd(); handle(b.dataset.id, e); });
+    screen.addEventListener('keydown', e => { if (e.target.classList && e.target.classList.contains('dk-cmdin') && e.key === 'Enter') { e.preventDefault(); runCmd(); } });
     screen.addEventListener('contextmenu', e => { e.preventDefault(); const b = e.target.closest('[data-rc]'); if (b) handle(b.dataset.id + ':right', e); });
     $('.dk-hw').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) handle(b.dataset.id, e); });
     let checking = false;
@@ -8447,7 +8589,8 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         if (!id) { n++; setTimeout(step, 400 * stepT); return; }   // waiting for something (an update, a restart)
         const el = visible(id), r = el.getBoundingClientRect(), s2 = stage.getBoundingClientRect();
         gh.style.left = (r.left - s2.left + r.width / 2 - 8) + 'px'; gh.style.top = (r.top - s2.top + r.height / 2 - 4) + 'px';
-        cap.textContent = (id.endsWith(':right') ? '🖱️ Right-click ' : '👆 ') + (el.dataset.l || id);
+        cap.textContent = id.indexOf('cmd:') === 0 ? '⌨️ Type: ' + id.slice(4) + '  ↵' : (id.endsWith(':right') ? '🖱️ Right-click ' : '👆 ') + (el.dataset.l || id);
+        if (id.indexOf('cmd:') === 0) el.value = id.slice(4);
         setTimeout(() => {
           if (closed) return;
           gh.classList.add('tap'); el.classList.add('dk-glow');
@@ -8545,9 +8688,9 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
         '<p style="font-size:20px">🪙 +' + coins + ' ' + esc(W.coins) + ' &nbsp; ⭐ +' + pts + ' ' + esc(W.points) + '</p><button class="dk-cbtn go">' + esc(W.backToTown) + '</button>');
       c.querySelector('.dk-cbtn.go').onclick = () => {
         game.state.desk.jobs[jid] = { score: pts, rescues: rec.rescues, quizWrong: rec.quizWrong };
-        const cv = D.coinsVar || 'coins';
-        game.state.vars[cv] = (Number(game.state.vars[cv]) || 0) + coins;
-        if (game.ui.setCoins) game.ui.setCoins(game.state.vars[cv]);
+        if (game.addCoins && D.coinsVar === 'arsenal') game.addCoins(coins);
+        else { const cv = D.coinsVar || 'coins'; game.state.vars[cv] = (Number(game.state.vars[cv]) || 0) + coins; if (game.ui.setCoins) game.ui.setCoins(game.state.vars[cv]); }
+        if (job.report) (game.state.desk.report = game.state.desk.report || []).push({ who: job.customer || jid, found: job.report.found, fix: job.report.fix, rescues: rec.rescues });
         if (pts) game.scoring.add(pts, job.customer || jid, 'job');
         game.state.flags['desk_' + slot] = true;
         game.emit('desk:job', { id: jid, slot });
