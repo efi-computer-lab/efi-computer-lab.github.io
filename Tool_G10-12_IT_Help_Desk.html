@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IT HELP DESK</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611152251',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611152343',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -333,8 +333,8 @@ window.GAME_CONTENT = {
         { id: 'drink', name: C.shop.drink, desc: C.shop.drinkDesc, icon: '⚡', price: 40, actions: [{ do: 'power', power: 'speed', seconds: 15 }] },
       ],
     },
-    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); url '' = not connected yet
-    gradebook: { url: '', key: 'efi-w9-2026', game: 'it-help-desk', sections: { g10: 'Grade 10 Tesla', g11: 'Grade 11 Einstein', g12: 'Grade 12 Hawkings' }, words: C.gradebook },
+    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); the teacher's "IT Help Desk Results" sheet, deployed 2026-11-15
+    gradebook: { url: 'https://script.google.com/macros/s/AKfycbyUKp70I9lwlWjPhYkh13J_H-Rv-9zZi8fy4wYeRWE4rKaJdVTHI1xdMPC5wBW4zZQ1DQ/exec', key: 'efi-w9-2026', game: 'it-help-desk', sections: { g10: 'Grade 10 Tesla', g11: 'Grade 11 Einstein', g12: 'Grade 12 Hawkings' }, words: C.gradebook },
     desktop: {
       skills: C.skills, words: C.words, coinsVar: 'arsenal', reportTitle: C.reportTitle,
       tasks: TASKS, jobs: JOBS, slots: SLOTS,

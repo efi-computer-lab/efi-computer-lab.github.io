@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FIX-IT TOWN</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611152251',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611152343',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -371,8 +371,8 @@ window.GAME_CONTENT = {
     ] },
     music: { bpm: 112, root: 220, mode: 'major', prog: [0, 5, 3, 4], wave: 'triangle', arpWave: 'sine', drums: true, volume: 0.04 },
     vehicle: { speed: 11, getIn: 'Drive the', getOut: 'Get out' },
-    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); url '' = not connected yet
-    gradebook: { url: '', key: 'efi-w9-2026', game: 'fix-it-town', sections: { g6: 'Grade 6 Kepler', g7: 'Grade 7 Galileo', g8: 'Grade 8 Darwin', g9: ['Grade 9 Curie', 'Grade 9 Newton'] }, words: C.gradebook },
+    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); the teacher's "Fix-It Town Results" sheet, deployed 2026-11-15
+    gradebook: { url: 'https://script.google.com/macros/s/AKfycbwEdqlRIvNt034RXAsd4SD75Qqf62IIaiPIfkX0SpsrN1DpWVgU086jcdXWsT8IDbZ2nA/exec', key: 'efi-w9-2026', game: 'fix-it-town', sections: { g6: 'Grade 6 Kepler', g7: 'Grade 7 Galileo', g8: 'Grade 8 Darwin', g9: ['Grade 9 Curie', 'Grade 9 Newton'] }, words: C.gradebook },
     desktop: {
       skills: C.skills, words: C.words, coinsVar: 'coins',
       tasks: TASKS, jobs: JOBS, slots: SLOTS,
