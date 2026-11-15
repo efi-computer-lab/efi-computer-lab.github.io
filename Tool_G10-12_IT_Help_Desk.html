@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IT HELP DESK</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611152223',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611152251',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -47,6 +47,7 @@ window.GAME_CONTENT = {
   ranks: ['Intern', 'Junior Technician', 'Technician', 'Senior Technician', 'IT Manager'],
   shop: { title: '🧰 IT Supply Closet', coffee: '☕ Coffee', coffeeDesc: 'Heal 50', drink: '⚡ Energy drink', drinkDesc: 'Run fast for 15 s' },
   weapons: { zapper: 'Antivirus Blaster', zapperDesc: 'Zaps malware bugs' },
+  gradebook: { classTitle: 'Your class', classNeed: 'Pick your class first.' },
   askName: { english: true, label: 'English name', placeholder: 'e.g. Anna', empty: 'Type your English name first.', error: 'English name only (letters A-Z). Example: Anna' },
   words: {
     record: '📋 Record for your teacher', gradeLbl: 'Grade', pointsLbl: 'Points', skillPts: 'Skill points',
@@ -308,7 +309,7 @@ window.GAME_CONTENT = {
     grade: '10-12',
     subject: 'Computer systems and administration · Windows 11 · command line',
     world: 'school',
-    mechanics: ['standard', 'desktop-sim', 'hazards', 'weapons', 'music'],
+    mechanics: ['standard', 'desktop-sim', 'gradebook', 'hazards', 'weapons', 'music'],
     models: ['circuit', 'combat', 'kenney-models', 'stylized-characters', 'stylized-nature'],
     scripts: ['helpdesk.js'],
     scenes: [{ id: 'school', title: 'EFI School', world: 'school' }],
@@ -332,6 +333,8 @@ window.GAME_CONTENT = {
         { id: 'drink', name: C.shop.drink, desc: C.shop.drinkDesc, icon: '⚡', price: 40, actions: [{ do: 'power', power: 'speed', seconds: 15 }] },
       ],
     },
+    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); url '' = not connected yet
+    gradebook: { url: '', key: 'efi-w9-2026', game: 'it-help-desk', sections: { g10: 'Grade 10 Tesla', g11: 'Grade 11 Einstein', g12: 'Grade 12 Hawkings' }, words: C.gradebook },
     desktop: {
       skills: C.skills, words: C.words, coinsVar: 'arsenal', reportTitle: C.reportTitle,
       tasks: TASKS, jobs: JOBS, slots: SLOTS,
@@ -757,7 +760,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-pet-card small { font-size: 12px; opacity: .85; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/school/world","assets/models/circuit","assets/models/combat","assets/models/kenney-models","assets/models/stylized-characters","assets/models/stylized-nature","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/desktop-sim/desktop-sim","mechanics/hazards/hazards","mechanics/weapons/weapons","mechanics/music/music"],"local":["helpdesk.js"],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","desktop-sim","hazards","weapons","music"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/school/world","assets/models/circuit","assets/models/combat","assets/models/kenney-models","assets/models/stylized-characters","assets/models/stylized-nature","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/desktop-sim/desktop-sim","mechanics/gradebook/gradebook","mechanics/hazards/hazards","mechanics/weapons/weapons","mechanics/music/music"],"local":["helpdesk.js"],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","desktop-sim","gradebook","hazards","weapons","music"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -808,6 +811,7 @@ GK_LIBRARY.mechanics = {
   traversal: { needs: [], spatial: true, about: 'nature moves: swim zones (slower, floaty, stamina meter: too tired = back to the checkpoint) and climb walls / rope ladders (hold W to climb); vineWall + ropeLadder models' },
   weapons: { needs: ['hazards'], spatial: true, about: 'a tool the player shoots with (zapper, blaster): bolts damage enemies with hp; enemy turrets shoot back; spark bursts' },
   vehicle: { needs: ['interaction'], spatial: true, about: 'drive a car / van (E to get in and out, W/S drive, A/D steer, Shift boost); camera behind the vehicle; parked position saved' },
+  gradebook: { needs: ['desktop-sim'], spatial: false, about: 'sends each result (English name, class, points, skill points 0-3) to the Google Sheet web app of the teacher (gradebook.gs + SETUP.md); class picker for grades with 2 classes; outbox in localStorage' },
   'desktop-sim': { needs: ['interaction'], spatial: false, about: 'a pretend Windows 11 PC that teaches itself: jobs of tasks run Watch (ghost hand) → Try (glowing button) → Alone (hint ladder) → quick check; skill cards; per-skill results' },
 };
 GK_LIBRARY.presets = {
@@ -8700,7 +8704,7 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     const total = game.result ? game.result.total : game.scoring.total, v = game.state.vars;
     const grade = String(game.difficulty || '').replace(/\D/g, '');
     return '<div class="dk-record"><b>' + esc(W.record || '📋 Record for your teacher') + '</b>' +
-      '<div class="dk-recline"><span>👤 ' + esc(v.playerName || '') + '</span><span>🎓 ' + esc(W.gradeLbl || 'Grade') + ' ' + esc(grade) + '</span><span>⭐ ' + esc(W.pointsLbl || 'Points') + ': <b>' + total + '</b> / 100</span></div>' +
+      '<div class="dk-recline"><span>👤 ' + esc(v.playerName || '') + '</span><span>🎓 ' + esc(v.section || ((W.gradeLbl || 'Grade') + ' ' + grade)) + '</span><span>⭐ ' + esc(W.pointsLbl || 'Points') + ': <b>' + total + '</b> / 100</span></div>' +
       '<table class="dk-rectab">' + list.map((k, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(((D.skills || {})[k] || { name: k }).name) + '</td><td>' + '★★★'.slice(0, pts[i]) + '<span class="dk-dim">' + '★★★'.slice(pts[i]) + '</span></td><td><b>' + pts[i] + '</b></td></tr>').join('') + '</table>' +
       '<div class="dk-recline"><span>' + esc(W.skillPts || 'Skill points') + ': <b>' + sum + '</b> / ' + (list.length * 3) + '</span></div></div>';
   }
@@ -8990,6 +8994,106 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
     // test hook
     game.deskJob = { get S() { return S; }, get mode() { return mode; }, get task() { return task && task.id; }, click: id => handle(id), next: nextTarget, close: () => close(false), overlay: ov, get ghost() { return ghostOn; } };
   }
+})();
+
+</script>
+<script>/* mechanics/gradebook/gradebook.js */
+/* Game Kit · mechanics/gradebook — sends each student's result to the teacher's Google Sheet for this game
+   (an Apps Script web app: mechanics/gradebook/gradebook.gs + SETUP.md), the same way Bayside and Haunted House do.
+   Config gradebook: {url, key, game, title, sections: {difficultyId: 'Grade 6 Kepler' | ['Grade 9 Curie', 'Grade 9 Newton']},
+     words: {classTitle, classNeed}}.
+   - Title screen: when the chosen grade has more than one class, a class picker appears and is required before Play.
+   - A result = {game, session, grade, section, english name, points, status, jobs done, skill points, every skill 0-3,
+     minutes}; it is sent after every finished job (desk:job), at the win, and with sendBeacon when the page closes.
+   - The newest result of each session waits in localStorage ('gk.gradebook.outbox') until it is delivered, so a Wi-Fi
+     drop-out loses nothing and the next game on that PC sends it. No url = nothing is sent (offline copies still work).
+   Needs desktop-sim for the skill points (game.desk.skills()). ?nocloud=1 turns sending off (tests). */
+(function () {
+  'use strict';
+  const U = GK.util, OUTBOX = 'gk.gradebook.outbox';
+  const read = () => { try { return JSON.parse(localStorage.getItem(OUTBOX) || '{}'); } catch (e) { return {}; } };
+  const write = o => { try { localStorage.setItem(OUTBOX, JSON.stringify(o)); } catch (e) { /* storage off */ } };
+  const off = () => /[?&]nocloud=1/.test(location.search);
+  let chosen = null, busy = false;
+
+  function flush(cfg) {
+    if (!cfg.url || off() || busy || !window.fetch) return;
+    busy = true;
+    const box = read(), ids = Object.keys(box);
+    let p = Promise.resolve();
+    ids.forEach(id => {
+      const item = box[id];
+      p = p.then(() => fetch(cfg.url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(item) })
+        .then(() => { const cur = read(); if (cur[id] && cur[id].sent === item.sent) { delete cur[id]; write(cur); } }));
+    });
+    p.catch(() => { /* offline: try again later */ }).then(() => { busy = false; });
+  }
+
+  GK.Mechanics.add('gradebook', {
+    configKeys: ['gradebook'],
+    setup(game) {
+      const cfg = game.cfg.gradebook || {}, W = Object.assign({ classTitle: 'Your class', classNeed: 'Pick your class first.' }, cfg.words);
+      const sectionsOf = d => U.list((cfg.sections || {})[d]);
+      // ---- the class picker on the title screen (only when a grade has more than one class) ----
+      game.on('ui:title', ({ screen }) => {
+        if (!screen || screen.querySelector('.gk-class')) return;
+        const box = U.el('div', 'gk-class');
+        box.style.cssText = 'margin:8px 0;text-align:center';
+        const anchor = screen.querySelector('[data-diff]') && screen.querySelector('[data-diff]').parentNode;
+        if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor.nextSibling); else screen.appendChild(box);
+        const draw = () => {
+          const list = sectionsOf(game.difficulty);
+          if (list.length < 2) { box.innerHTML = ''; return; }
+          if (list.indexOf(chosen) < 0) chosen = null;
+          box.innerHTML = '<div class="gk-label" style="font-weight:700;margin-bottom:4px">' + U.esc(W.classTitle) + '</div>' +
+            list.map(s => '<button class="gk-btn' + (s === chosen ? ' primary' : '') + '" data-class="' + U.esc(s) + '" style="margin:0 4px">' + U.esc(s) + '</button>').join('') +
+            '<div class="gk-class-msg" style="display:none;color:#ff8787;font-weight:700;margin-top:4px">⚠️ ' + U.esc(W.classNeed) + '</div>';
+          box.querySelectorAll('[data-class]').forEach(b => { b.onclick = () => { chosen = b.getAttribute('data-class'); draw(); }; });
+        };
+        draw();
+        screen.addEventListener('click', e => {
+          const t = e.target.closest && e.target.closest('[data-diff], [data-level]');
+          if (!t) return;
+          if (t.hasAttribute('data-diff')) { setTimeout(draw, 0); return; }
+          if (sectionsOf(game.difficulty).length > 1 && !chosen) {   // Play without a class: stop it here
+            e.stopPropagation(); e.preventDefault();
+            draw(); const m = box.querySelector('.gk-class-msg'); if (m) m.style.display = '';
+          }
+        }, true);
+      });
+      // ---- sending ----
+      const send = status => {
+        const v = game.state.vars, list = game.desk && game.desk.skills ? game.desk.skills() : [];
+        const sum = list.reduce((a, s) => a + s.points, 0), max = list.length * 3;
+        const sl = (game.cfg.desktop && game.cfg.desktop.slots && game.cfg.desktop.slots[game.difficulty]) || {};
+        const slots = Object.keys(sl), done = slots.filter(s => game.state.flags['desk_' + s]).length;
+        const item = {
+          key: cfg.key, game: cfg.game, title: cfg.title || game.cfg.title, session: v.gbSession, sent: Date.now(),
+          grade: String(game.difficulty || '').replace(/\D/g, ''), section: v.section || '', english: v.playerName || '',
+          points: Math.round(game.result ? game.result.total : game.scoring.total), status,
+          jobsDone: done, jobsTotal: slots.length, skillPoints: sum, skillMax: max, skillPct: max ? Math.round(sum / max * 100) : 0,
+          skills: list.map(s => ({ name: s.name, points: s.points })), minutes: Math.round(game.state.time / 6) / 10, startedAt: v.gbStarted || '',
+        };
+        if (!item.session || !item.english) return;
+        const box = read(); box[item.session] = item; write(box);
+        flush(cfg);
+      };
+      game.gradebook = { send, flush: () => flush(cfg), pending: () => Object.keys(read()).length };
+      game.on('desk:job', () => send('Provisional'));
+      game.on('game:win', () => send('Complete'));
+      window.addEventListener('pagehide', () => {
+        if (!cfg.url || off() || !navigator.sendBeacon) return;
+        for (const it of Object.values(read())) navigator.sendBeacon(cfg.url, new Blob([JSON.stringify(it)], { type: 'text/plain;charset=utf-8' }));
+      });
+    },
+    start(game) {
+      const v = game.state.vars, cfg = game.cfg.gradebook || {};
+      const list = U.list((cfg.sections || {})[game.difficulty]);
+      if (!v.gbSession) { v.gbSession = (cfg.game || 'game') + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); v.gbStarted = new Date().toISOString(); }
+      if (!v.section) v.section = list.length > 1 ? (chosen || list[0]) : (list[0] || '');
+      flush(cfg);   // anything left over from an earlier game on this PC
+    },
+  });
 })();
 
 </script>
