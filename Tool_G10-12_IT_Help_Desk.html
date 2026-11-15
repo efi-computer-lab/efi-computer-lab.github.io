@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IT HELP DESK</title>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611152343',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611160015',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -21,8 +21,8 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
    Tasks (the click / command steps) live in game.js; their words live here under tasks.<id>. */
 window.GAME_CONTENT = {
   title: 'IT HELP DESK',
-  subtitle: 'Solve the school\'s IT tickets · stop the malware outbreak',
-  intro: 'You are the new student IT technician. Walk to each ticket, fix the computer on screen and get promoted. Fast fixes get ★★★. Then something nasty gets into the network…',
+  subtitle: 'Run the school IT help desk · close the tickets · stop the malware outbreak',
+  intro: 'You are the new student IT technician. Staff come to the help desk with computer problems. Click a person to fix their PC: the computer shows you how first, then you do it. Fast fixes get ★★★ and coins. Then something nasty gets into the network…',
   difficulty: {
     title: 'Your grade',
     g10: 'Grade 10', g10Short: 'G10', g10Text: 'Specs, accounts and permissions, updates, Windows Security',
@@ -30,14 +30,12 @@ window.GAME_CONTENT = {
     g12: 'Grade 12', g12Short: 'G12', g12Text: 'Troubleshooting, command line (ipconfig, ping, dir), maintenance plan',
   },
   characters: { title: 'Your technician', leo: 'Leo', leoText: 'Calm under pressure', kai: 'Kai', kaiText: 'Command-line fan', mia: 'Mia', miaText: 'Never misses a detail', zara: 'Zara', zaraText: 'Security expert' },
-  objectives: {
-    t1: '🎫 Ticket 1 · Classroom A', t2: '🎫 Ticket 2 · Classroom B', t3: '🎫 Ticket 3 · Library', t4: '🎫 Ticket 4 · Office',
-    t5: '🎫 Ticket 5 · Classroom A', t6: '🎫 Ticket 6 · Classroom B', clean: '🦠 Zap the malware bugs', server: '🖥️ Fix the school server',
-  },
-  tips: { walk: 'Walk to the glowing computer and press E.', clean: 'Click to shoot with the Antivirus Blaster. R reloads.', server: 'The server is in the hall.' },
+  objectives: { t1: '🎫 Ticket 1', t2: '🎫 Ticket 2', t3: '🎫 Ticket 3', t4: '🎫 Ticket 4', t5: '🎫 Ticket 5', t6: '🎫 Ticket 6', clean: '🦠 Zap the malware bugs', server: '🖥️ Fix the school server' },
+  tips: { queue: 'Click the bubble (🔧 Fix).', clean: 'Click every bug on the floor!', server: 'The server is the last ticket.' },
   messages: {
-    welcome: '🎫 New tickets! Follow the beam to the first computer.',
-    outbreak: '🚨 MALWARE OUTBREAK! Bugs are loose in the school. Take the Antivirus Blaster (click to shoot)!',
+    welcome: '🎫 The help desk is open! Click a person\'s bubble to start a ticket.',
+    outbreakTitle: '🚨 MALWARE OUTBREAK!',
+    outbreak: '🚨 Malware bugs are loose in the office! Click every bug to zap it.',
     cleaned: '✅ The halls are clean. Now fix the server!',
     serverLocked: '🔒 Finish the tickets and clear the malware first!',
     hurt: '🦠 A bug bit you!', usb: '💾 Lost USB stick found! +15 coins',
@@ -47,6 +45,9 @@ window.GAME_CONTENT = {
   ranks: ['Intern', 'Junior Technician', 'Technician', 'Senior Technician', 'IT Manager'],
   shop: { title: '🧰 IT Supply Closet', coffee: '☕ Coffee', coffeeDesc: 'Heal 50', drink: '⚡ Energy drink', drinkDesc: 'Run fast for 15 s' },
   weapons: { zapper: 'Antivirus Blaster', zapperDesc: 'Zaps malware bugs' },
+  queue: { fix: '🔧 Fix', shop: '🛒 Shop', shopTitle: '🛒 Office upgrades', promoted: '🎖️ Promoted: ', boss: '⭐ CRITICAL:', arrives: 'needs help!',
+    rate3: '★★★ Super fast! +{n} coins', rate2: '★★ Good job! +{n} coins', rate1: '★ Fixed. Try to be faster!', bought: '✅ Bought!', poor: '🪙 Not enough coins yet. Close more tickets!', have: '✔ In your office' },
+  upgrades: { coffee: 'Coffee machine', coffeeDesc: 'people wait longer', plants: 'Plants', plantsDesc: 'a calmer office', screen: 'Status screen', screenDesc: 'looks pro', rack: 'New server rack', rackDesc: 'more power' },
   gradebook: { classTitle: 'Your class', classNeed: 'Pick your class first.' },
   askName: { english: true, label: 'English name', placeholder: 'e.g. Anna', empty: 'Type your English name first.', error: 'English name only (letters A-Z). Example: Anna' },
   words: {
@@ -197,18 +198,18 @@ window.GAME_CONTENT = {
 </script>
 <script>/* game.js */
 /* IT HELP DESK — Grades 10–12, Term 2 Lesson 1 "Computer systems and administration" (Desktop curriculum blueprint).
-   First person in the school (worlds/school). You are the student IT technician: six tickets at classroom, library and
-   office computers, each fixed on the self-teaching pretend Windows PC (mechanics/desktop-sim: watch → try → alone →
-   check; Grade 12 types real commands: ipconfig, ping, dir). Fast fixes get ★★★ and coins; every 2 tickets = a promotion.
-   After the 6th ticket: MALWARE OUTBREAK. Bugs chase you through the halls; zap them with the Antivirus Blaster
-   (mechanics/weapons), then fix the school server. The end screen prints an IT HEALTH-CHECK REPORT (the lesson's
-   assessment: every problem found + fix, skills, score).
+   A 3D IT-office DIORAMA with a fixed camera (worlds/it-office, mechanics/service-queue): staff walk in with tickets and
+   wait in line with a patience bar; click a person's bubble to fix their computer on the self-teaching pretend Windows PC
+   (mechanics/desktop-sim: watch → try → alone → check; Grade 12 types real commands: ipconfig, ping, dir). Quick fixes
+   = ★★★ + coins, coins buy office upgrades, promotions every 2 tickets. After ticket 6: MALWARE OUTBREAK — bugs crawl
+   over the floor, click them all, then the server ticket. The end screen prints an IT HEALTH-CHECK REPORT.
      G10  specs · account types (Standard vs Administrator) · updates · Windows Security on · virus scan · Guest account
      G11  CPU/memory hog · startup apps · drivers · disk space · safe install (official site, verified publisher) · uninstall
      G12  troubleshoot no-internet (ipconfig → fix → ping) · isolate printer vs server (ping) · dir · driver + test ·
           full health check · lab maintenance plan
-   SCORE = 100: six tickets × 12 (less 2 per ghost rescue, 1 per wrong check answer, at least half), the server 18,
-   10 lost USB sticks × 1. Saves after every ticket. Every word is in content.js. Test: tests/it-help-desk.html */
+   SCORE = 100: six tickets × 13 (less 2 per ghost rescue, 1 per wrong check answer, at least half), the server 22.
+   Results go to the teacher's Google Sheet (mechanics/gradebook). Saves after every ticket. Words: content.js.
+   Test: tests/it-help-desk.html (?difficulty=g11|g12) */
 (function () {
   const C = window.GAME_CONTENT, T = C.tasks, O = C.objectives;
   const win = (S, app, st) => { S.windows.push({ app, st: st || 'normal' }); S.focus = app; };
@@ -278,65 +279,60 @@ window.GAME_CONTENT = {
     g12_ca: ['ip12', 'net12', 'ping12'], g12_cb: ['pingsrv12', 'pingpr12'], g12_lib: ['dir12'], g12_off: ['driver12', 'pingtest12'], g12_ca2: ['perf12', 'disk12'], g12_lab: [], g12_server: ['f12scan', 'f12fw', 'f12ping'],
   };
   const JOBS = {};
-  for (const id in JOB_TASKS) JOBS[id] = Object.assign({}, C.jobs[id], { tasks: JOB_TASKS[id], points: /server/.test(id) ? 18 : 12, coins: /server/.test(id) ? 100 : 50 }, id === 'g12_ca' ? { skill: 'troubleshoot' } : {});
+  for (const id in JOB_TASKS) JOBS[id] = Object.assign({}, C.jobs[id], { tasks: JOB_TASKS[id], points: /server/.test(id) ? 22 : 13, coins: /server/.test(id) ? 100 : 50 }, id === 'g12_ca' ? { skill: 'troubleshoot' } : {});
   const ORDER = { g10: ['g10_ca', 'g10_cb', 'g10_lib', 'g10_off', 'g10_ca2', 'g10_cb2', 'g10_server'], g11: ['g11_ca', 'g11_cb', 'g11_lib', 'g11_off', 'g11_ca2', 'g11_cb2', 'g11_server'], g12: ['g12_ca', 'g12_cb', 'g12_lib', 'g12_off', 'g12_ca2', 'g12_lab', 'g12_server'] };
   const slots = ['t1', 't2', 't3', 't4', 't5', 't6', 'server'], SLOTS = {};
   for (const g in ORDER) { SLOTS[g] = {}; slots.forEach((s, i) => { SLOTS[g][s] = ORDER[g][i]; }); }
   window.IT_DESK = { SLOTS, JOBS };
 
-  // ---------------- the school ----------------
-  const pc = (id, where, rot) => Object.assign({ id, type: 'terminal', model: 'computer', name: 'computer', light: { color: '#4dabf7', range: 3, intensity: 0.6 }, rot: rot || 's',
-    interact: { type: 'desktop', slot: id, prompt: 'Fix the' } }, where);
-  const VIRUS_AT = [[8, 13], [16, 11.5], [24, 14.5], [32, 12], [21, 21], [26, 19.5], [31, 22.5], [36, 21.5]];
-  const virusIds = VIRUS_AT.map((p, i) => 'bug' + (i + 1));
-  const USB_AT = [[6, 13], [14, 11], [24, 15], [32, 13], [10, 5], [25, 5], [36, 3], [6, 21], [14, 23], [36, 23]];
-  const entities = [
-    pc('t1', { pos: [9, 0.76, 3] }), pc('t2', { pos: [19, 0.76, 3] }), pc('t3', { pos: [33, 0.75, 7] }, 'w'), pc('t4', { pos: [5, 0.76, 21] }), pc('t5', { pos: [9, 0.76, 7] }, 'n'), pc('t6', { pos: [23, 0.76, 7] }, 'n'),
-    pc('server', { model: 'terminal', name: 'school server', pos: [28, 0, 23.2], rot: 'n' }, {}),
-    { id: 'rack1', type: 'decoration', model: 'server', pos: [25.5, 0, 23.5], rot: 'n' }, { id: 'rack2', type: 'decoration', model: 'server', pos: [30.5, 0, 23.5], rot: 'n' },
-    { id: 'closet', type: 'terminal', model: 'shopKiosk', name: 'IT supply closet', pos: [37, 0, 13], rot: 'w', light: { color: '#ffd43b', range: 4, intensity: 0.6 }, interact: { type: 'shop', prompt: 'Open the' } },
-  ];
-  entities[6].interact = { type: 'desktop', slot: 'server', prompt: 'Fix the', requires: { all: slots.slice(0, 6).map(s => 'desk_' + s).concat([{ objective: 'o-clean' }]) }, lockedText: C.messages.serverLocked };
-  VIRUS_AT.forEach((p, i) => entities.push({ id: virusIds[i], type: 'hazard', model: 'virus', name: 'malware bug', pos: [p[0], 0.2, p[1]], scale: 0.75, visible: false, gait: 'hop', speed: 1.5, wait: 0.4, bob: 0.25,
-    damage: 8, knockback: 4, hp: 2, chase: 9, chaseSpeed: 2.6, points: 0, coins: 10, tags: ['virus', 'enemy'], onHit: [{ do: 'say', text: C.messages.hurt, style: 'bad' }] }));
-  USB_AT.forEach((p, i) => entities.push({ id: 'usb' + (i + 1), type: 'collectible', model: 'chip', item: 'usb', tags: ['usb'], name: 'lost USB stick', pos: [p[0], 0, p[1]], color: '#4dabf7', points: 1, light: { color: '#4dabf7', range: 2.5, intensity: 0.5 } }));
-  const ticketObj = (s, i) => ({ id: 'o-' + s, type: 'flag', flag: 'desk_' + s, target: s, title: O['t' + (i + 1)], tip: '{{c' + (i + 1) + '}} · ' + C.tips.walk });
+  const CHARACTERS = { default: 'leo', title: C.characters.title, choices: [
+    { id: 'leo', label: C.characters.leo, text: C.characters.leoText, look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#1c7ed6', pants: '#343a40', shoes: '#212529', accent: '#ffd166', pack: false, scarf: false } },
+    { id: 'kai', label: C.characters.kai, text: C.characters.kaiText, look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#212529', pants: '#495057', shoes: '#8b5a2b', accent: '#4cc9f0', pack: false, scarf: false } },
+    { id: 'mia', label: C.characters.mia, text: C.characters.miaText, look: { body: 'f', skin: '#e0ac69', hair: '#6b3e26', hairStyle: 'long', shirt: '#2f9e44', pants: '#343a40', shoes: '#7a5232', accent: '#ffd166', pack: false, scarf: false } },
+    { id: 'zara', label: C.characters.zara, text: C.characters.zaraText, look: { body: 'f', skin: '#c68642', hair: '#d9a441', hairStyle: 'ponytail', shirt: '#7048e8', pants: '#343a40', shoes: '#6b4a2b', accent: '#ffd166', pack: false, scarf: false } },
+  ] };
+  // ---------------- the IT office (a 3D diorama, fixed camera: mechanics/service-queue) ----------------
+  const LOOKS = {
+    t1: { body: 'f', skin: '#e0ac69', hair: '#3b2a1a', hairStyle: 'ponytail', shirt: '#e64980', pants: '#343a40' },
+    t2: { body: 'm', skin: '#c68642', hair: '#1b1b1b', hairStyle: 'short', shirt: '#2f9e44', pants: '#495057' },
+    t3: { body: 'm', skin: '#f1c27d', hair: '#6b3e26', hairStyle: 'short', shirt: '#7048e8', pants: '#343a40' },
+    t4: { body: 'm', skin: '#f0c08a', hair: '#555555', hairStyle: 'short', shirt: '#212529', pants: '#212529' },
+    t5: { body: 'f', skin: '#e0ac69', hair: '#3b2a1a', hairStyle: 'ponytail', shirt: '#e64980', pants: '#343a40' },
+    t6: { body: 'm', skin: '#c68642', hair: '#1b1b1b', hairStyle: 'short', shirt: '#2f9e44', pants: '#495057' },
+    server: { body: 'f', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'long', shirt: '#1c4b82', pants: '#212529' },
+  };
+  const hidden = (id, model, where, extra) => Object.assign({ id, type: 'decoration', model, visible: false, solid: false }, where, extra);
+  const BUGS = 8;
+  const entities = [{ id: 'tech', type: 'decoration', at: 'tech', solid: false }]
+    .concat(slots.map(s => ({ id: 'cust-' + s, type: 'decoration', at: 'outside', solid: false, visible: false })))
+    .concat(Array.from({ length: BUGS }, (_, i) => hidden('bug' + (i + 1), 'virus', { at: 'bug' + (i + 1) }, { scale: 0.55 })))
+    .concat([
+      hidden('upCoffee', 'table', { at: 'up1' }, { color: '#495057' }), hidden('upCoffee2', 'computer', { pos: [2.5, 0.76, 3.2] }, { look: { screen: '#ffd43b' } }),
+      hidden('upPlant1', 'plant', { at: 'up2' }), hidden('upPlant2', 'plant', { pos: [18.8, 0, 7] }),
+      hidden('upScreen', 'screen', { pos: [12.5, 1.3, 2.1] }, { look: { color: '#4dabf7' } }), hidden('upRack', 'server', { at: 'up4' }),
+    ]);
+  const U2 = C.upgrades;
 
   window.GAME = {
     id: 'it-help-desk',
     type: 'first-person-3d',
+    world: 'it-office',
     title: C.title, subtitle: C.subtitle, description: C.intro,
     grade: '10-12',
     subject: 'Computer systems and administration · Windows 11 · command line',
-    world: 'school',
-    mechanics: ['standard', 'desktop-sim', 'gradebook', 'hazards', 'weapons', 'music'],
-    models: ['circuit', 'combat', 'kenney-models', 'stylized-characters', 'stylized-nature'],
-    scripts: ['helpdesk.js'],
-    scenes: [{ id: 'school', title: 'EFI School', world: 'school' }],
-    resume: { checkpoints: true },
-    player: { health: 100, respawnOnDeath: true, walkSpeed: 4.4, sprintSpeed: 7 },
-    vars: { playerName: 'Technician', rank: 0 },
-    items: { usb: { name: 'lost USB stick', icon: '💾', color: '#4dabf7', hidden: true } },
+    mechanics: ['standard', 'desktop-sim', 'gradebook', 'service-queue', 'music'],
+    models: ['kenney-models', 'stylized-characters', 'stylized-nature'],
+    scenes: [{ id: 'office', title: 'IT Office', world: 'it-office' }],
+    resume: true,
+    player: { walkSpeed: 0, sprintSpeed: 0, canJump: false },
+    vars: { coins: 0, playerName: 'Technician' },
     difficulty: { default: 'g10', title: C.difficulty.title, choices: ['g10', 'g11', 'g12'].map(g => ({ id: g, label: C.difficulty[g], short: C.difficulty[g + 'Short'], text: C.difficulty[g + 'Text'] })) },
-    characters: { default: 'leo', title: C.characters.title, choices: [
-      { id: 'leo', label: C.characters.leo, text: C.characters.leoText, look: { body: 'm', skin: '#f1c27d', hair: '#3b2a1a', hairStyle: 'short', shirt: '#1c7ed6', pants: '#343a40', shoes: '#212529', accent: '#ffd166', pack: false, scarf: false } },
-      { id: 'kai', label: C.characters.kai, text: C.characters.kaiText, look: { body: 'm', skin: '#8d5524', hair: '#1b1b1b', hairStyle: 'spiky', shirt: '#212529', pants: '#495057', shoes: '#8b5a2b', accent: '#4cc9f0', pack: false, scarf: false } },
-      { id: 'mia', label: C.characters.mia, text: C.characters.miaText, look: { body: 'f', skin: '#e0ac69', hair: '#6b3e26', hairStyle: 'long', shirt: '#2f9e44', pants: '#343a40', shoes: '#7a5232', accent: '#ffd166', pack: false, scarf: false } },
-      { id: 'zara', label: C.characters.zara, text: C.characters.zaraText, look: { body: 'f', skin: '#c68642', hair: '#d9a441', hairStyle: 'ponytail', shirt: '#7048e8', pants: '#343a40', shoes: '#6b4a2b', accent: '#ffd166', pack: false, scarf: false } },
-    ] },
+    characters: CHARACTERS,
     music: { bpm: 100, root: 196, mode: 'minor', prog: [0, 5, 3, 4], wave: 'triangle', arpWave: 'sine', drums: true, volume: 0.04 },
-    arsenal: {
-      start: 'zapper', requires: 'outbreak', objectiveCoins: 0, dropChance: 0.35, coinsName: 'coins', coinIcon: '🪙', shopTitle: C.shop.title,
-      weapons: [{ id: 'zapper', name: C.weapons.zapper, desc: C.weapons.zapperDesc, icon: '⚡', owned: true, model: 'zapper', color: '#4cc9f0', damage: 1, cooldown: 0.22, speed: 32, range: 45, mag: 12, reserve: 60, maxReserve: 120, reload: 1.1, ammoPack: 24, ammoPrice: 20 }],
-      extras: [
-        { id: 'coffee', name: C.shop.coffee, desc: C.shop.coffeeDesc, icon: '☕', price: 30, actions: [{ do: 'heal', amount: 50 }] },
-        { id: 'drink', name: C.shop.drink, desc: C.shop.drinkDesc, icon: '⚡', price: 40, actions: [{ do: 'power', power: 'speed', seconds: 15 }] },
-      ],
-    },
-    // results go to the teacher's Google Sheet for this game (mechanics/gradebook/SETUP.md); the teacher's "IT Help Desk Results" sheet, deployed 2026-11-15
+    // results go to the teacher's "IT Help Desk Results" Google Sheet (mechanics/gradebook/SETUP.md), deployed 2026-11-15
     gradebook: { url: 'https://script.google.com/macros/s/AKfycbyUKp70I9lwlWjPhYkh13J_H-Rv-9zZi8fy4wYeRWE4rKaJdVTHI1xdMPC5wBW4zZQ1DQ/exec', key: 'efi-w9-2026', game: 'it-help-desk', sections: { g10: 'Grade 10 Tesla', g11: 'Grade 11 Einstein', g12: 'Grade 12 Hawkings' }, words: C.gradebook },
     desktop: {
-      skills: C.skills, words: C.words, coinsVar: 'arsenal', reportTitle: C.reportTitle,
+      skills: C.skills, words: C.words, coinsVar: 'coins', reportTitle: C.reportTitle,
       tasks: TASKS, jobs: JOBS, slots: SLOTS,
       grades: {
         g10: { watch: 'auto', tryIt: true, ladder: [2, 4, 6] },
@@ -344,24 +340,33 @@ window.GAME_CONTENT = {
         g12: { watch: 'button', tryIt: false, ladder: [3, 6, 9] },
       },
     },
+    queue: {
+      order: slots.slice(0, 6), boss: 'server', looks: LOOKS,
+      patience: { g10: 160, g11: 150, g12: 140 }, arriveEvery: 22, maxWaiting: 3,
+      ranks: C.ranks, chipColor: '#1c7ed6', words: C.queue,
+      outbreak: { count: BUGS, title: C.messages.outbreakTitle, text: C.messages.outbreak, done: C.messages.cleaned },
+      upgrades: [
+        { id: 'coffee', icon: '☕', name: U2.coffee, desc: U2.coffeeDesc, price: 60, patience: 0.25, show: ['upCoffee', 'upCoffee2'] },
+        { id: 'plants', icon: '🪴', name: U2.plants, desc: U2.plantsDesc, price: 40, patience: 0.1, show: ['upPlant1', 'upPlant2'] },
+        { id: 'screen', icon: '📺', name: U2.screen, desc: U2.screenDesc, price: 50, show: ['upScreen'] },
+        { id: 'rack', icon: '🗄️', name: U2.rack, desc: U2.rackDesc, price: 80, show: ['upRack'] },
+      ],
+    },
     entities,
-    triggers: [{ on: 'desk:job', if: { all: slots.slice(0, 6).map(s => 'desk_' + s) }, once: true,
-      actions: [{ do: 'flag', set: 'outbreak' }, { do: 'show', target: virusIds }, { do: 'say', text: C.messages.outbreak, style: 'bad' }] }],
     ordered: true,
-    objectives: slots.slice(0, 6).map(ticketObj).concat([
-      { id: 'o-clean', type: 'defeat', tag: 'virus', count: VIRUS_AT.length, title: O.clean, tip: C.tips.clean, onComplete: [{ do: 'say', text: C.messages.cleaned, style: 'good' }] },
-      { id: 'o-server', type: 'flag', flag: 'desk_server', target: 'server', title: O.server, tip: C.tips.server },
+    objectives: slots.slice(0, 6).map((s, i) => ({ id: 'o-' + s, type: 'flag', flag: 'desk_' + s, title: O['t' + (i + 1)], tip: '{{c' + (i + 1) + '}} · ' + C.tips.queue })).concat([
+      { id: 'o-clean', type: 'flag', flag: 'outbreakDone', title: O.clean, tip: C.tips.clean },
+      { id: 'o-server', type: 'flag', flag: 'desk_server', title: O.server, tip: C.tips.server },
     ]),
     scoring: { objective: 0, hint: 0 },
     timer: { limit: null },
-    ui: { askName: C.askName, leaderboard: true, minimap: true, beacon: '#4dabf7', menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 The school network is safe!' },
+    ui: { askName: C.askName, leaderboard: true, markers: false, crosshair: false, lockHint: false, views: null, menuUrl: '../../index.html', menuLabel: 'All games', winTitle: '🏆 The school network is safe!' },
     hooks: {
       start(game) {
         const s = window.IT_DESK.SLOTS[game.difficulty] || window.IT_DESK.SLOTS.g10;
         slots.forEach((k, i) => { const j = window.IT_DESK.JOBS[s[k]]; game.state.vars['c' + (i + 1)] = j ? j.customer : ''; });
-        if (window.IT_DESK_GAME) window.IT_DESK_GAME.start(game);
+        game.ui.toast(C.messages.welcome, 'good');
       },
-      update(game, dt) { if (window.IT_DESK_GAME) window.IT_DESK_GAME.update(game, dt); },
     },
   };
 })();
@@ -760,7 +765,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 7px; border-radius: 
 .gk-pet-card small { font-size: 12px; opacity: .85; }
 
 </style>
-<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/school/world","assets/models/circuit","assets/models/combat","assets/models/kenney-models","assets/models/stylized-characters","assets/models/stylized-nature","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/desktop-sim/desktop-sim","mechanics/gradebook/gradebook","mechanics/hazards/hazards","mechanics/weapons/weapons","mechanics/music/music"],"local":["helpdesk.js"],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","desktop-sim","gradebook","hazards","weapons","music"],"spatial":true,"warnings":[]} };</script>
+<script>window.GK_LOADER = { result: {"css":["core/gk.css"],"js":["core/core","core/rules","core/store","core/input","core/audio","core/ui","core/scoring","core/validate","core/teacher","core/game","game-types/_spatial/geometry","game-types/../assets/models/lowpoly","game-types/../assets/models/circuit","game-types/../assets/models/combat","game-types/../assets/models/people","game-types/_spatial/physics","game-types/_spatial/body","game-types/_spatial/world","game-types/../worlds/_parts","game-types/_spatial/spatial","game-types/first-person-3d/renderer","game-types/first-person-3d/type","worlds/_deskroom","worlds/it-office/world","assets/models/kenney-models","assets/models/stylized-characters","assets/models/stylized-nature","mechanics/interaction/interaction","mechanics/inventory/inventory","mechanics/objectives/objectives","mechanics/dialogue/dialogue","mechanics/puzzles/puzzles","mechanics/world-objects/world-objects","mechanics/npcs/npcs","mechanics/sequences/sequences","mechanics/desktop-sim/desktop-sim","mechanics/gradebook/gradebook","mechanics/service-queue/service-queue","mechanics/music/music"],"local":[],"mechanics":["interaction","inventory","objectives","dialogue","puzzles","world-objects","npcs","sequences","desktop-sim","gradebook","service-queue","music"],"spatial":true,"warnings":[]} };</script>
 <script>/* game-types/index.js */
 /* Game-type library index: what core/load.js needs to know to load a type.
    Adding a type = a folder game-types/<name>/ + one entry here. Paths are relative to game-types/.
@@ -811,6 +816,7 @@ GK_LIBRARY.mechanics = {
   traversal: { needs: [], spatial: true, about: 'nature moves: swim zones (slower, floaty, stamina meter: too tired = back to the checkpoint) and climb walls / rope ladders (hold W to climb); vineWall + ropeLadder models' },
   weapons: { needs: ['hazards'], spatial: true, about: 'a tool the player shoots with (zapper, blaster): bolts damage enemies with hp; enemy turrets shoot back; spark bursts' },
   vehicle: { needs: ['interaction'], spatial: true, about: 'drive a car / van (E to get in and out, W/S drive, A/D steer, Shift boost); camera behind the vehicle; parked position saved' },
+  'service-queue': { needs: ['desktop-sim'], spatial: true, about: '3D help-desk diorama with a fixed camera: customers walk in, queue with patience bars, click a bubble to fix their PC (desktop-sim); stars, coins, promotions, upgrades shop, optional bug-zapping outbreak' },
   gradebook: { needs: ['desktop-sim'], spatial: false, about: 'sends each result (English name, class, points, skill points 0-3) to the Google Sheet web app of the teacher (gradebook.gs + SETUP.md); class picker for grades with 2 classes; outbox in localStorage' },
   'desktop-sim': { needs: ['interaction'], spatial: false, about: 'a pretend Windows 11 PC that teaches itself: jobs of tasks run Watch (ghost hand) → Try (glowing button) → Alone (hint ladder) → quick check; skill cards; per-skill results' },
 };
@@ -846,6 +852,8 @@ GK_LIBRARY.worlds = {
   'skull-fort': { name: 'Skull Fort', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape act 6: landing cove, cannonball lane with alcoves, walled courtyard, a moat for a plank (glasstile) bridge, the keep yard (boss arena)' },
   'storm-rock': { name: 'Storm Rock', files: ['worlds/_course', 'assets/models/island', 'assets/models/wild', 'worlds/_wild'], about: 'Island Escape final battle: a stormy rock plateau arena, a beach to the south, a pirate ship to the north' },
   'fix-it-town': { name: 'Fix-It Town', files: ['assets/models/town-data', 'assets/models/town'], about: 'sunny little town for driving: 3 × 3 roads, repair shop, 6 family houses with porch PCs, Town Hall, café, parks, hedge all round' },
+  'repair-shop': { name: 'Repair Shop', files: ['worlds/_deskroom'], about: 'help-desk diorama for a fixed camera: counter + work PC, waiting line to a door, shelves, chairs (Fix-It Shop look)' },
+  'it-office': { name: 'IT Office', files: ['worlds/_deskroom'], about: 'help-desk diorama for a fixed camera: counter + work PC, server racks, waiting line to a door (IT office look)' },
   _template: { name: 'Blank room', about: 'one room: copy it to start a world' },
 };
 
@@ -5441,6 +5449,7 @@ GK_LIBRARY.worlds = {
       game.input.onLockChange = locked => { if (!locked && game.state.mode === 'playing') game.pause(); };
       game.input.onClick = locked => {
         if (game.state.mode !== 'playing') return;
+        if (game.fixedCam) return;   // game.fixedCam: a diorama with a fixed camera; mechanics handle clicks themselves
         if (locked) { game.clickInteract = true; game.clickFire = true; } else game.input.lock();
       };
     }
@@ -5583,14 +5592,14 @@ GK_LIBRARY.worlds = {
       const views = this.game.cfg.ui.views, v = GK.Settings.get('view', 'first');
       return views && views.some(x => x[0] === v) ? v : 'first';
     }
-    begin() { this.game.input.lock(); }
-    onModal(open) { if (open) this.game.input.unlock(); else this.game.input.lock(); }
+    begin() { if (!this.game.fixedCam) this.game.input.lock(); }
+    onModal(open) { if (open || this.game.fixedCam) this.game.input.unlock(); else this.game.input.lock(); }
     update(dt, mode) {
       const g = this.game;
-      if (mode === 'playing') {
+      if (mode === 'playing' && !g.fixedCam) {
         const m = g.input.takeMouse(), z = 1 - (g.zoom || 0);   // looking down a sight: the mouse turns slower
         g.player.look(m[0] * z, m[1] * z);
-      }
+      } else if (g.fixedCam) g.input.takeMouse();
       const fall = g.player && !g.player.grounded ? g.player.vel[1] : 0;
       GK.Spatial.update(g, dt, g.input);
       if (mode === 'playing') {   // a slow computer: switch off shadows, then detail, then bloom (this visit only)
@@ -5607,7 +5616,7 @@ GK_LIBRARY.worlds = {
       if (this.flashes.length) { for (const f of this.flashes) f.t -= dt; this.flashes = this.flashes.filter(f => f.t > 0); }
       if (mode === 'playing' && g.cfg.ui.views && g.input.hits.has('KeyV')) this.toggleView();
       if (mode === 'playing' && g.input.hits.has('KeyC') && g.ui.toggleGuide) g.ui.toggleGuide();   // ui.controlsGuide: C opens / closes it
-      if (mode === 'playing' && g.setFocus) {
+      if (mode === 'playing' && g.setFocus && !g.fixedCam) {
         const hit = g.world.raycast(g.player.eye(), g.player.forward(), g.player.cfg.reach);
         g.setFocus(hit.entity && hit.entity.currentInteraction() ? hit.entity : null);
       }
@@ -5628,14 +5637,18 @@ GK_LIBRARY.worlds = {
         this.viewBtn.style.display = g.state.mode === 'playing' || g.state.mode === 'paused' ? '' : 'none';
       }
       let look = g.player.forward();
+      // game.fixedCam = {eye, look | dir, fov}: a fixed camera (a diorama: the player body is not drawn and does not steer the view)
+      const FC = g.fixedCam;
+      if (FC) { third = false; eye = FC.eye.slice(); look = FC.dir || [FC.look[0] - eye[0], FC.look[1] - eye[1], FC.look[2] - eye[2]]; const L = Math.hypot(look[0], look[1], look[2]) || 1; look = look.map(v => v / L); }
       if (third) {
         const c = this.thirdCamera(eye);
         if (c.dist < 1.1) third = false;   // backed against a wall: no room for the camera, show first person until there is
         else { eye = c.pos; look = c.dir; }
       }
       this.camPos = eye;
-      r.setCamera(eye, look, (g.player.cfg.fov + (g.fovKick || 0)) * (1 - (g.zoom || 0)));   // game.fovKick: a mechanic widens the view (speed); game.zoom: a sight
-      { const f = g.player.forward(), fl = Math.hypot(f[0], f[2]) || 1, k = r.quality.shadowRange * 0.45;   // sun shadows cover what is in front of you
+      r.setCamera(eye, look, FC ? (FC.fov || 50) : (g.player.cfg.fov + (g.fovKick || 0)) * (1 - (g.zoom || 0)));   // game.fovKick: a mechanic widens the view (speed); game.zoom: a sight
+      if (FC) r.setShadowFocus(FC.look || eye);
+      else { const f = g.player.forward(), fl = Math.hypot(f[0], f[2]) || 1, k = r.quality.shadowRange * 0.45;   // sun shadows cover what is in front of you
         r.setShadowFocus([g.player.pos[0] + f[0] / fl * k, g.player.pos[1], g.player.pos[2] + f[2] / fl * k]); }
       const blobA = r.quality.shadows && r.env.shadows ? 0.5 : 1;   // real sun shadows: the round contact shadows only darken a little
       // anything further than the end of the fog cannot be seen: skip those chunks and entities (big worlds stay fast)
@@ -5693,7 +5706,8 @@ GK_LIBRARY.worlds = {
       }
       const vm = g.viewModel;
       const live = g.state.mode === 'playing' || g.state.mode === 'paused';
-      if (third && g.world && g.hideHero) { /* game.hideHero: the player is inside something (a vehicle draws itself) */ }
+      if (FC) { /* fixed camera: no player body, no tool in the hand */ }
+      else if (third && g.world && g.hideHero) { /* game.hideHero: the player is inside something (a vehicle draws itself) */ }
       else if (third && g.world) this.drawHero(items, vm && vm.model ? vm : null);
       else if ((g.climbing || g.swimming) && live) this.drawLimbs(items, eye);
       else if (vm && vm.model && live) this.drawHeld(items, vm, eye);
@@ -5991,652 +6005,78 @@ GK_LIBRARY.worlds = {
 })();
 
 </script>
-<script>/* worlds/school/world.js */
-/* World · school
-   A small school: two classrooms and a library off a main hallway, an office and a hall below.
-   ENVIRONMENT ONLY: no items, puzzles, missions or scoring.
-   Named locations:
-     desk1 … desk10 (student desks; top y 0.76) · shelf1 … shelf3 (library) · officeDesk (top y 0.76)
-     classroomADoor · classroomBDoor · libraryDoor · officeDoor · hallDoor (doorways)
-     boardA · boardB (whiteboards) · trophyCase · hallCentre · hallwayEast · hallwayWest
-   Spawns: default (hallway west end, facing east) · hall
-   Areas: classroomA · classroomB · library · hallway · office · hall       Routes: hallway · hall */
-GK.Worlds.add('school', {
-  name: 'School',
-  description: 'Classrooms, a library, an office and a hall around one hallway.',
-  lighting: { sky: ['#8ec5f5', '#e2f1fb'], fog: [35, 90], sun: { dir: [0.5, 1, 0.4], intensity: 0.5 }, ambient: { sky: '#90a4bd', ground: '#5c554d' } },
-  map: {
-    cell: 2, wallHeight: 3,
-    colors: { wall: '#efe6d2', wallTop: '#d8ccb2', floor: '#c9b89b', floor2: '#c1af92' },
-    //      col: 0123456789 123456789
-    grid: [
-      '####################', // 0
-      '#.k.k.k#.k.k.#.....#', // 1
-      '#......#.....#.LLL.#', // 2
-      '#.k.k.k#.k.k.#.....#', // 3
-      '###a####b#####c#####', // 4
-      '#..................#', // 5
-      '#S.................#', // 6
-      '#..................#', // 7
-      '####d####e##########', // 8
-      '#.......#..........#', // 9
-      '#.O.....#..........#', // 10
-      '#.......#..........#', // 11
-      '####################', // 12
-    ],
-    spawnRot: 'e',
-    legend: {   // furniture comes from the shared world parts (worlds/_parts.js)
-      k: { part: 'studentDesk', location: 'desk#' },
-      L: { part: 'bookshelf', location: 'shelf#' },
-      O: { part: 'officeDesk', location: 'officeDesk' },
-      a: { part: 'doorway', location: 'classroomADoor' }, b: { part: 'doorway', location: 'classroomBDoor' }, c: { part: 'doorway', location: 'libraryDoor' },
-      d: { part: 'doorway', location: 'officeDoor' }, e: { part: 'doorway', location: 'hallDoor' },
-    },
-  },
-  decorations: [
-    { model: 'whiteboard', pos: [8, 0.9, 2.03] }, { model: 'whiteboard', pos: [21, 0.9, 2.03], look: { size: [2, 1.2] } },
-    { model: 'table', pos: [33, 0, 7], color: '#8b6b4a' },
-    { model: 'shelf', pos: [35, 0, 10.2], rot: 's', color: '#6d4c33', look: { empty: true } },   // trophy case in the hallway
-    { model: 'trophy', pos: [34.6, 1.55, 10.25] }, { model: 'trophy', pos: [35.4, 1.55, 10.25], color: '#bdc3c7' },
-    { model: 'plant', pos: [3, 0, 11] }, { model: 'plant', pos: [37, 0, 11] }, { model: 'plant', pos: [37, 0, 15] },
-    { model: 'shelf', pos: [2.25, 0, 22], rot: 'e', color: '#6d4c33' },
-    { model: 'cone', pos: [22, 0, 20] }, { model: 'cone', pos: [34, 0, 20] }, { model: 'cone', pos: [22, 0, 23] }, { model: 'cone', pos: [34, 0, 23] },
-    { model: 'crate', pos: [37, 0, 19], look: { size: 0.8 }, color: '#c0392b' },
-  ],
-  locations: {
-    boardA: { pos: [8, 0, 3.2], rot: 's' }, boardB: { pos: [21, 0, 3.2], rot: 's' },
-    trophyCase: { pos: [35, 0, 11.2], rot: 'n' }, hallCentre: { pos: [28, 0, 21.5] },
-    hallwayEast: { pos: [36, 0, 13] }, hallwayWest: { pos: [4, 0, 13] },
-  },
-  spawns: { hall: { pos: [28, 0, 19], rot: 's' } },
-  areas: {
-    classroomA: { pos: [8, 0, 5], size: [12, 4, 6] }, classroomB: { pos: [21, 0, 5], size: [10, 4, 6] }, library: { pos: [33, 0, 5], size: [10, 4, 6] },
-    hallway: { pos: [20, 0, 13], size: [36, 4, 6] }, office: { pos: [9, 0, 21], size: [14, 4, 6] }, hall: { pos: [28, 0, 21], size: [20, 4, 6] },
-  },
-  routes: { hallway: [[5, 12], [35, 12], [35, 14], [5, 14]], hall: ['hallCentre', [34, 21.5]] },
-});
-
-</script>
-<script>/* assets/models/circuit.js */
-/* Game Kit · assets/models/circuit.js
-   Giant computer parts, for worlds where the player is tiny (inside a computer, a phone, a robot…).
-   Same rules as lowpoly.js: fn(look) → GK.Geo, centred on x/z, standing on y = 0, FRONT facing +z.
-   Sizes are in metres at "shrunk" scale, so a capacitor is a tower and a chip is a building.
-     capacitor  icChip  ramStick  heatsink  fan  platter  readArm  coinCell  keycap  led  trace  resistor
-     usbPort  psu  cableRun  standoff  databit  packet  virus  gpuCore
-   look.size changes the main dimensions (see each model); look.color the main colour. */
+<script>/* worlds/_deskroom.js */
+/* worlds/_deskroom.js — builder for the help-desk diorama rooms (repair-shop, it-office) — small 3D "diorama" rooms for help-desk games seen by a FIXED camera from the front
+   (no front wall). ENVIRONMENT ONLY. Room 20 × 14 m: back wall, side walls, a door gap in the right wall.
+   Named locations (the same in both rooms):
+     tech (behind the counter, faces the camera) · bench (the work PC on the counter) · serve (in front of the counter)
+     wait1 … wait4 (the waiting line toward the door) · door (just inside the door) · outside (beyond the door)
+     up1 … up4 (empty spots for upgrades) · bug1 … bug8 (floor spots, e.g. for a malware outbreak)
+   Camera (for game.fixedCam): eye [10, 12.5, 25], look [10, 0.6, 7.5]. Spawn: default (behind the counter). */
 (function () {
   'use strict';
-  const U = GK.util, M = GK.Models;
-  const G = () => new GK.Geo();
-  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
-  const sz = (o, d) => (o.size == null ? d : o.size);
-  const METAL = '#c3c9d1', DARK = '#1b1d24', GOLD = '#d9a92b';
-
-  // electrolytic capacitor: size [radius, height]
-  M.add('capacitor', o => {
-    const s = sz(o, [1.1, 4.2]), r = s[0], h = s[1], c = o.color || '#23408e';
-    const g = G().cyl(0, 0, 0, r * 1.02, 0.25, '#111', { seg: 14 })
-      .cyl(0, 0.25, 0, r, h - 0.25, c, { seg: 14 })
-      .cyl(0, h, 0, r * 0.97, 0.1, METAL, { seg: 14 })
-      .box(0, h + 0.1, 0, r * 1.5, 0.05, 0.14, '#7f8791').box(0, h + 0.1, 0, 0.14, 0.05, r * 1.5, '#7f8791');
-    return g.box(0, 0.6, r * 0.97, r * 0.42, h * 0.72, 0.06, o.stripe || '#a9c1f0');
-  });
-
-  // integrated circuit (a "building"): size [width, depth, height]
-  M.add('icChip', o => {
-    const s = sz(o, [5, 5, 1.2]), w = s[0], d = s[1], h = s[2], c = o.color || DARK;
-    const g = G().box(0, 0.25, 0, w, h, d, c, { top: dk(c, 1.25) });
-    const pins = Math.max(3, Math.round(w / 0.8));
-    for (let i = 0; i < pins; i++) {
-      const x = -w / 2 + (i + 0.5) * (w / pins);
-      g.box(x, 0, d / 2 + 0.2, 0.28, 0.6, 0.4, METAL).box(x, 0, -d / 2 - 0.2, 0.28, 0.6, 0.4, METAL);
-    }
-    const pinsZ = Math.max(3, Math.round(d / 0.8));
-    for (let i = 0; i < pinsZ; i++) {
-      const z = -d / 2 + (i + 0.5) * (d / pinsZ);
-      g.box(w / 2 + 0.2, 0, z, 0.4, 0.6, 0.28, METAL).box(-w / 2 - 0.2, 0, z, 0.4, 0.6, 0.28, METAL);
-    }
-    g.cyl(-w / 2 + 0.6, 0.25 + h, -d / 2 + 0.6, 0.22, 0.02, '#555', { seg: 8 });
-    g.box(0, 0.25 + h, 0, w * 0.6, 0.02, d * 0.12, o.mark || '#6b7280');
-    if (o.glow) g.box(0, 0.25 + h, d * 0.25, w * 0.3, 0.03, d * 0.08, o.glow, { glow: 1 });
-    return g;
-  });
-
-  // memory module standing on its gold contacts: size [length, height]
-  M.add('ramStick', o => {
-    const s = sz(o, [9, 3.6]), L = s[0], H = s[1], t = 0.25, c = o.color || '#1e7a4a';
-    const g = G().box(0, 0.45, 0, L, H, t, c);
-    const n = 8, gap = L / n;
-    for (let i = 0; i < n; i++) {
-      const x = -L / 2 + (i + 0.5) * gap;
-      g.box(x, 0.45 + H * 0.3, t / 2 + 0.08, gap * 0.7, H * 0.45, 0.16, DARK).box(x, 0.45 + H * 0.3, -t / 2 - 0.08, gap * 0.7, H * 0.45, 0.16, DARK);
-    }
-    for (let i = 0; i < 24; i++) g.box(-L / 2 + 0.3 + i * (L - 0.6) / 23, 0, 0, 0.18, 0.45, t * 1.02, GOLD, { glow: 0.25 });
-    return g.box(L * 0.12, 0, 0, 0.3, 0.45, t * 1.05, '#0e1a12').box(0, 0.45 + H - 0.2, 0, L, 0.2, t * 1.04, dk(c, 0.8));
-  });
-
-  // cooler fins on a base: size [width, depth, height]
-  M.add('heatsink', o => {
-    const s = sz(o, [6, 4, 3]), w = s[0], d = s[1], h = s[2], c = o.color || '#9aa3ad';
-    const g = G().box(0, 0, 0, w, 0.5, d, dk(c, 0.85));
-    const fins = Math.max(4, Math.round(w / 0.6));
-    for (let i = 0; i < fins; i++) g.box(-w / 2 + (i + 0.5) * (w / fins), 0.5, 0, 0.12, h - 0.5, d, c, { top: U.shade(c, 1.2) });
-    return g;
-  });
-
-  // flat cooling fan (spin it with the entity's `spin`): size = width
-  M.add('fan', o => {
-    const s = sz(o, 6), r = s / 2, c = o.color || '#3a4150', frame = o.frame || '#22262e';
-    const g = G();
-    g.box(0, 0, -r, s, 0.35, 0.4, frame).box(0, 0, r, s, 0.35, 0.4, frame).box(-r, 0, 0, 0.4, 0.35, s, frame).box(r, 0, 0, 0.4, 0.35, s, frame);
-    g.cyl(0, 0, 0, r * 0.24, 0.4, dk(c, 0.8), { seg: 12 }).cyl(0, 0.4, 0, r * 0.12, 0.03, o.hub || '#4cc9f0', { seg: 10, glow: 0.9 });
-    const blades = 7;
-    for (let i = 0; i < blades; i++) {
-      const b = G().box(r * 0.55, 0.08, 0, r * 0.7, 0.12, r * 0.32, c).rotX(0.35).rotY(i / blades * Math.PI * 2);
-      g.add(b);
-    }
-    if (o.ring) for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; g.box(Math.cos(a) * r * 0.9, 0.35, Math.sin(a) * r * 0.9, 0.25, 0.04, 0.25, o.ring, { glow: 1 }); }
-    return g;
-  });
-
-  // hard-disk platter (low enough to step onto; spin it): size = radius
-  M.add('platter', o => {
-    const r = sz(o, 4), c = o.color || '#d4dae2';
-    return G().cyl(0, 0, 0, r, 0.22, c, { seg: 28, top: U.shade(c, 1.08) })
-      .cyl(0, 0.22, 0, r * 0.82, 0.01, dk(c, 0.92), { seg: 28 }).cyl(0, 0.23, 0, r * 0.62, 0.01, U.shade(c, 1.12), { seg: 28 })
-      .cyl(0, 0.24, 0, r * 0.4, 0.01, dk(c, 0.9), { seg: 24 }).cyl(0, 0, 0, r * 0.14, 0.7, '#7d858f', { seg: 12 })
-      .box(r * 0.5, 0.25, 0, r * 0.3, 0.012, 0.08, '#4cc9f0', { glow: 0.8 });
-  });
-
-  // hard-disk read/write arm, pivot at the origin, reaching along -x: size = length
-  M.add('readArm', o => {
-    const L = sz(o, 5);
-    return G().cyl(0, 0, 0, 0.6, 1.4, '#4b5563', { seg: 10 }).box(-L / 2, 0.9, 0, L, 0.2, 0.5, o.color || '#9ca3af')
-      .box(-L, 0.55, 0, 0.5, 0.4, 0.45, '#374151').box(-L, 0.5, 0, 0.12, 0.06, 0.12, '#ef4444', { glow: 1 });
-  });
-
-  // coin-cell battery (CMOS): size [radius, height]
-  M.add('coinCell', o => {
-    const s = sz(o, [2.2, 0.8]), r = s[0], h = s[1];
-    return G().cyl(0, 0, 0, r, h, o.color || '#d5d8dc', { seg: 20, top: '#e9ecef' })
-      .box(0, h, 0, r * 0.6, 0.04, 0.2, '#6c757d').box(0, h, 0, 0.2, 0.04, r * 0.6, '#6c757d');
-  });
-
-  // giant keyboard key, low enough to step onto (0.36 m): size = width. look.on lights the top (pressed).
-  M.add('keycap', o => {
-    const s = sz(o, 1.7), c = o.color || '#2f3542', on = o.on;
-    return G().box(0, 0, 0, s, 0.26, s, dk(c, 0.8)).box(0, 0.26, 0, s * 0.82, 0.1, s * 0.82, on ? (o.lit || '#4cc9f0') : c, { glow: on ? 0.9 : 0.05, top: on ? (o.lit || '#4cc9f0') : U.shade(c, 1.25) });
-  });
-
-  // status LED on a little base
-  M.add('led', o => {
-    const c = o.color || '#2ecc71';
-    return G().box(0, 0, 0, 0.5, 0.2, 0.5, '#2d3436').sphere(0, 0.32, 0, 0.22, c, { glow: o.off ? 0.1 : 1 });
-  });
-
-  // copper/gold trace on the board (flat, put it at y ≈ 0.01, not solid): size [length, width]
-  M.add('trace', o => {
-    const s = sz(o, [8, 0.35]);
-    return G().box(0, 0, 0, s[0], 0.02, s[1], o.color || GOLD, { glow: o.glow == null ? 0.35 : o.glow }).box(-s[0] / 2, 0, 0, 0.7, 0.03, 0.7, o.color || GOLD, { glow: 0.5 }).box(s[0] / 2, 0, 0, 0.7, 0.03, 0.7, o.color || GOLD, { glow: 0.5 });
-  });
-
-  // resistor lying on its side: size = length
-  M.add('resistor', o => {
-    const L = sz(o, 3), c = o.color || '#d8c39a';
-    const body = G().cyl(0, -L / 2, 0, 0.45, L, c, { seg: 10 });
-    const bands = o.bands || ['#8e44ad', '#c0392b', '#e67e22', GOLD];
-    bands.forEach((b, i) => body.cyl(0, -L / 2 + 0.4 + i * 0.5, 0, 0.47, 0.18, b, { seg: 10 }));
-    return body.rotZ(Math.PI / 2).move(0, 0.55, 0).box(-L / 2 - 0.6, 0, 0, 0.1, 0.55, 0.1, METAL).box(L / 2 + 0.6, 0, 0, 0.1, 0.55, 0.1, METAL)
-      .box(-L / 2 - 0.3, 0.5, 0, 0.7, 0.1, 0.1, METAL).box(L / 2 + 0.3, 0.5, 0, 0.7, 0.1, 0.1, METAL);
-  });
-
-  // USB-A socket frame you can walk into (front +z): size [width, height, depth]
-  M.add('usbPort', o => {
-    const s = sz(o, [5, 3, 3]), w = s[0], h = s[1], d = s[2], c = o.color || '#b8bec6', t = 0.2;
-    return G().box(0, 0, 0, w, t, d, c).box(0, h - t, 0, w, t, d, c).box(-w / 2 + t / 2, 0, 0, t, h, d, c).box(w / 2 - t / 2, 0, 0, t, h, d, c)
-      .box(0, h * 0.55, -0.2, w - 0.8, h * 0.3, d - 0.4, o.tongue || '#1f6feb', { glow: 0.25 })
-      .box(-w * 0.25, h * 0.8, d / 2, 0.5, 0.3, 0.02, '#e9ecef').box(w * 0.25, h * 0.8, d / 2, 0.5, 0.3, 0.02, '#e9ecef');
-  });
-
-  // power-supply unit: size [width, height, depth]
-  M.add('psu', o => {
-    const s = sz(o, [6, 4, 4]), w = s[0], h = s[1], d = s[2], c = o.color || '#2d3436';
-    const g = G().box(0, 0, 0, w, h, d, c, { top: U.shade(c, 1.2) });
-    for (let i = 0; i < 9; i++) g.box(-w * 0.35 + i * w * 0.0875, h * 0.25, d / 2 + 0.01, 0.12, h * 0.5, 0.04, '#111');
-    return g.box(w * 0.3, h * 0.72, d / 2 + 0.02, w * 0.25, h * 0.16, 0.02, '#f1c40f').box(w * 0.3, h * 0.75, d / 2 + 0.04, 0.12, h * 0.1, 0.02, '#111')
-      .box(-w * 0.32, h * 0.82, d / 2 + 0.02, 0.4, 0.25, 0.03, o.light || '#e74c3c', { glow: 1 });
-  });
-
-  // bundle of thick wires lying along x: size [length, radius]
-  M.add('cableRun', o => {
-    const s = sz(o, [10, 0.35]), L = s[0], r = s[1];
-    const cols = o.colors || ['#e74c3c', '#f1c40f', '#2d3436', '#2d3436', '#e67e22'];
-    const g = G();
-    cols.forEach((c, i) => g.add(G().cyl(0, -L / 2, 0, r, L, c, { seg: 8 }).rotZ(Math.PI / 2).move(0, r + (i % 2) * r * 1.6, (i - (cols.length - 1) / 2) * r * 2.1)));
-    return g.box(-L / 2, 0, 0, 0.8, r * 4.5, cols.length * r * 2.3, '#e9ecef').box(L / 2, 0, 0, 0.8, r * 4.5, cols.length * r * 2.3, '#e9ecef');
-  });
-
-  // brass board standoff / screw post: size [radius, height]
-  M.add('standoff', o => {
-    const s = sz(o, [0.6, 2]);
-    return G().cyl(0, 0, 0, s[0], s[1], o.color || '#c9a227', { seg: 6 }).cyl(0, s[1], 0, s[0] * 1.3, 0.25, '#9aa3ad', { seg: 12 }).box(0, s[1] + 0.25, 0, s[0] * 1.6, 0.04, 0.12, '#555');
-  });
-
-  // collectible "data bit": a glowing cube
-  M.add('databit', o => {
-    const c = o.color || '#4cc9f0';
-    return G().box(0, -0.2, 0, 0.4, 0.4, 0.4, c, { glow: 0.85 }).box(0, -0.25, 0, 0.26, 0.5, 0.26, '#ffffff', { glow: 1 });
-  });
-  // collectible data packet: a little crate of data
-  M.add('packet', o => {
-    const c = o.color || '#f39c12';
-    return G().box(0, -0.25, 0, 0.6, 0.45, 0.45, c, { glow: 0.45 }).box(0, -0.06, 0, 0.62, 0.08, 0.47, '#fff', { glow: 0.8 }).box(0, -0.25, 0, 0.08, 0.46, 0.47, '#fff', { glow: 0.8 });
-  });
-
-  // computer virus: spiky glowing ball with eyes: size = radius
-  M.add('virus', o => {
-    const r = sz(o, 0.6), c = o.color || '#9b2fd6', y = r + 0.25;
-    const g = G().sphere(0, y, 0, r, c, { glow: 0.55, seg: 10, rings: 8 });
-    const spikes = [[0, 1, 0], [0, -1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0.7, 0.7, 0], [-0.7, 0.7, 0], [0, 0.7, 0.7], [0, 0.7, -0.7]];
-    for (const v of spikes) {
-      const sp = G().cone(0, r * 0.85, 0, r * 0.22, r * 0.6, o.spike || '#e84393', { seg: 6, glow: 0.6 });
-      if (v[0]) sp.rotZ(-Math.atan2(v[0], v[1]));
-      else if (v[2]) sp.rotX(Math.atan2(v[2], v[1]));
-      else if (v[1] < 0) sp.rotX(Math.PI);
-      g.add(sp.move(0, y, 0));
-    }
-    return g.box(-r * 0.32, y + r * 0.1, r * 0.92, r * 0.28, r * 0.28, 0.05, '#fff', { glow: 1 }).box(r * 0.32, y + r * 0.1, r * 0.92, r * 0.28, r * 0.28, 0.05, '#fff', { glow: 1 })
-      .box(-r * 0.32, y + r * 0.13, r * 0.95, r * 0.12, r * 0.12, 0.05, '#111').box(r * 0.32, y + r * 0.13, r * 0.95, r * 0.12, r * 0.12, 0.05, '#111');
-  });
-
-  // graphics-card core field: a grid of tiny glowing cores on a board: size [width, depth]
-  M.add('gpuCore', o => {
-    const s = sz(o, [6, 4]), w = s[0], d = s[1], c = o.color || '#111827';
-    const g = G().box(0, 0, 0, w, 0.6, d, c);
-    const nx = Math.round(w / 0.7), nz = Math.round(d / 0.7), cols = o.cores || ['#22c55e', '#4cc9f0', '#a855f7'];
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) g.box(-w / 2 + (i + 0.5) * w / nx, 0.6, -d / 2 + (j + 0.5) * d / nz, w / nx * 0.6, 0.06, d / nz * 0.6, cols[(i + j) % cols.length], { glow: 0.7 });
-    return g;
-  });
-
-  // ---------- game pieces: power-ups, enemies, hazards, lights ----------
-  // power-up orb with a ring of sparks (float + spin it): look.color
-  M.add('powerup', o => {
-    const c = o.color || '#2ecc71', g = G().sphere(0, 0, 0, 0.32, c, { glow: 0.95, seg: 10, rings: 8 }).sphere(0, 0, 0, 0.16, '#ffffff', { glow: 1 });
-    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; g.box(Math.cos(a) * 0.55, -0.04, Math.sin(a) * 0.55, 0.1, 0.08, 0.1, c, { glow: 1 }); }
-    return g;
-  });
-
-  // a software "bug": a cute beetle with glowing eyes: size = body length, look.color
-  M.add('bug', o => {
-    const L = sz(o, 1.1), c = o.color || '#27ae60', g = G();
-    g.add(G().sphere(0, 0, 0, 0.5, c, { seg: 10, rings: 6 }).scale(L * 0.7, 0.55, L).move(0, 0.42, -0.05));
-    g.box(0, 0.62, -0.05, 0.05, 0.02, L * 0.95, dk(c, 0.55));
-    g.sphere(0, 0.42, L * 0.5, 0.26, dk(c, 0.6), { seg: 8, rings: 5 });
-    g.box(-0.11, 0.5, L * 0.5 + 0.2, 0.1, 0.1, 0.04, '#fff', { glow: 1 }).box(0.11, 0.5, L * 0.5 + 0.2, 0.1, 0.1, 0.04, '#fff', { glow: 1 });
-    g.box(-0.11, 0.5, L * 0.5 + 0.22, 0.05, 0.05, 0.03, '#111').box(0.11, 0.5, L * 0.5 + 0.22, 0.05, 0.05, 0.03, '#111');
-    for (const sx of [-1, 1]) for (const zz of [-0.3, 0, 0.3]) g.box(sx * L * 0.42, 0, zz * L, L * 0.4, 0.06, 0.06, '#222').box(sx * L * 0.6, 0, zz * L, 0.06, 0.25, 0.06, '#222');
-    return g.box(-0.1, 0.55, L * 0.62, 0.03, 0.03, 0.35, '#222').box(0.1, 0.55, L * 0.62, 0.03, 0.03, 0.35, '#222')
-      .sphere(-0.1, 0.56, L * 0.62 + 0.18, 0.05, o.tip || '#f1c40f', { glow: 1 }).sphere(0.1, 0.56, L * 0.62 + 0.18, 0.05, o.tip || '#f1c40f', { glow: 1 });
-  });
-
-  // a dust bunny: a fluffy grey ball with eyes: size = radius
-  M.add('dustBunny', o => {
-    const r = sz(o, 0.55), c = o.color || '#a4a9b3', g = G();
-    g.sphere(0, r, 0, r, c, { seg: 8, rings: 6 });
-    for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; g.sphere(Math.cos(a) * r * 0.75, r * (0.8 + (i % 2) * 0.5), Math.sin(a) * r * 0.75, r * 0.45, U.shade(c, i % 2 ? 1.12 : 0.9), { seg: 6, rings: 4 }); }
-    return g.box(-r * 0.3, r * 1.15, r * 0.95, r * 0.25, r * 0.25, 0.05, '#fff', { glow: 1 }).box(r * 0.3, r * 1.15, r * 0.95, r * 0.25, r * 0.25, 0.05, '#fff', { glow: 1 })
-      .box(-r * 0.3, r * 1.15, r * 0.98, r * 0.1, r * 0.12, 0.04, '#111').box(r * 0.3, r * 1.15, r * 0.98, r * 0.1, r * 0.12, 0.04, '#111');
-  });
-
-  // electric spark pad on the floor (a pulsing hazard): size = radius, look.off dims it
-  M.add('sparkPad', o => {
-    const r = sz(o, 1.1), on = !o.off, c = o.color || '#ffd23f';
-    const g = G().cyl(0, 0, 0, r, 0.06, '#2d3436', { seg: 14 }).cyl(0, 0.06, 0, r * 0.85, 0.02, on ? c : '#4b5058', { seg: 14, glow: on ? 0.9 : 0 });
-    if (on) for (let i = 0; i < 5; i++) {
-      const a = i / 5 * Math.PI * 2;
-      g.add(G().box(r * 0.35, 0.08, 0, r * 0.6, 0.05, 0.08, '#ffffff', { glow: 1 }).box(r * 0.62, 0.08, 0.12, 0.08, 0.05, 0.3, '#ffffff', { glow: 1 }).rotY(a));
-      g.box(Math.cos(a) * r * 0.5, 0.1, Math.sin(a) * r * 0.5, 0.06, 0.6 + (i % 2) * 0.4, 0.06, c, { glow: 1 });
-    }
-    return g;
-  });
-
-  // glowing light strip for walls (place it against a wall, not solid): size [length, height]
-  M.add('lightStrip', o => {
-    const s = sz(o, [6, 0.25]), c = o.color || '#4cc9f0';
-    return G().box(0, 0, 0, s[0] + 0.3, s[1] + 0.16, 0.1, '#1b1f2a').box(0, 0.08, 0.06, s[0], s[1], 0.06, c, { glow: 1 });
-  });
-
-  // an energy cell (collectible battery): look.color is the glowing band
-  M.add('energyCell', o => {
-    const c = o.color || '#2ecc71';
-    return G().cyl(0, -0.4, 0, 0.2, 0.7, '#d5d8dc', { seg: 10 }).cyl(0, -0.2, 0, 0.21, 0.3, c, { seg: 10, glow: 0.9 }).cyl(0, 0.3, 0, 0.08, 0.08, '#d5d8dc', { seg: 8 });
-  });
+  const at = (x, z, rot) => ({ pos: [x, 0, z], rot: rot || 's' });
+  const LOC = {
+    tech: at(10, 5.2, 's'), bench: at(10, 6.4, 's'), serve: at(10, 9.2, 'n'),
+    wait1: at(13, 10.2, 'w'), wait2: at(15, 11.2, 'w'), wait3: at(17, 12.2, 'w'), wait4: at(17, 9.6, 'w'),
+    door: at(18.6, 12.6, 'w'), outside: at(22.5, 12.6, 'w'),
+    up1: at(2.5, 3.2, 's'), up2: at(4.2, 12.2, 'e'), up3: at(16.8, 3.2, 's'), up4: at(6.5, 3.2, 's'),
+    bug1: at(4, 9, 0), bug2: at(7, 11.5, 0), bug3: at(13, 8.5, 0), bug4: at(16, 7, 0), bug5: at(3, 6, 0), bug6: at(11.5, 12.5, 0), bug7: at(15, 4.5, 0), bug8: at(6, 5, 0),
+  };
+  // grid: 10 × 7 cells of 2 m; no front wall (the camera looks in from the front); a door gap in the right wall (row 6)
+  const GRID = [
+    '############',
+    '#..........#',
+    '#..........#',
+    '#..........#',
+    '#..........#',
+    '#..........#',
+    '#...........',
+    '............',
+  ];
+  function room(id, T) {
+    const D = [];
+    const add = (model, x, z, rot, look, extra) => D.push(Object.assign({ model, pos: [x, extra && extra.y || 0, z], rot: rot || 's', look }, extra && extra.solid === false ? { solid: false } : {}));
+    // the counter: 4 desks in a row, the work PC in the middle
+    for (const x of [6.4, 8.2, 11.8, 13.6]) add('desk', x, 7, 's', { color: T.counter });
+    add('desk', 10, 7, 's', { color: T.counter });
+    add('computer', 10, 7, 'n', { screen: T.screen }, { y: 0.76 });
+    add('chair', 10, 4.6, 's', { color: T.chair });
+    // the back wall: shelves, a sign, posters
+    add('shelf', 4, 1.6, 's', { color: T.shelf }); add('shelf', 16, 1.6, 's', { color: T.shelf });
+    add('poster', 7.5, 2.05, 's', { color: T.poster }, { y: 1.4 }); add('poster', 12.5, 2.05, 's', { color: T.poster2 }, { y: 1.4 });
+    add('sign', 10, 2.06, 's', { color: T.sign, text: T.title }, { y: 2.1 });
+    // waiting chairs and plants
+    add('chair', 3, 11.5, 'e', { color: T.chair }); add('chair', 3, 9.8, 'e', { color: T.chair });
+    add('plant', 1.4, 13, 's', {}); add('plant', 19, 2.2, 's', {});
+    for (const p of T.extra) add(p[0], p[1], p[2], p[3], p[4], p[5]);
+    GK.Worlds.add(id, {
+      name: T.name,
+      description: T.description,
+      lighting: { sky: T.sky, fog: [60, 140], sun: { dir: [-0.4, 0.9, 0.5], color: '#fff4dc', intensity: 0.62 }, ambient: { sky: T.ambSky, ground: T.ambGround }, grid: false, water: false, clouds: false, shadowStrength: 0.45 },
+      map: { cell: 2, wallHeight: 3.2, grid: GRID, colors: { wall: T.wall, wallTop: T.wallTop, floor: T.floor, floor2: T.floor2 } },
+      mergeScenery: true,
+      decorations: D,
+      locations: LOC,
+      spawns: { default: { pos: [10, 0, 4], rot: 's' } },
+      areas: { room: { pos: [10, 0, 7], size: [20, 4, 14] } },
+      routes: {},
+    });
+  }
+  GK.DeskRoom = { room };
 })();
 
 </script>
-<script>/* assets/models/combat.js */
-/* Game Kit · assets/models/combat.js
-   Things for action games (mechanics/weapons + hazards) and for network / internet worlds.
-   Same rules as lowpoly.js: fn(look) → GK.Geo, centred on x/z, standing on y = 0, FRONT facing +z
-   (held tools and bolts are centred on their middle instead).
-     held tools: zapper  blaster          shots: bolt  spark          enemies: turret  queenBug  glitchCore  target
-     boss fight: pylon                    network: router  serverRack  firewall  dataTower  satDish  mailbox  cloudGate
-   look.size changes the main dimensions (see each model); look.color the main colour. */
+<script>/* worlds/it-office/world.js */
+/* World · it-office — IT Help Desk diorama (built by worlds/_deskroom.js; locations listed there). ENVIRONMENT ONLY. */
 (function () {
-  'use strict';
-  const U = GK.util, M = GK.Models;
-  const G = () => new GK.Geo();
-  const dk = (c, f) => U.shade(c, f == null ? 0.7 : f);
-  const sz = (o, d) => (o.size == null ? d : o.size);
-  const DARK = '#1b1d24', METAL = '#c3c9d1';
-  const along = g => g.rotX(Math.PI / 2);   // turn a vertical cylinder to point forward (+z)
-
-  // ---------- held tools (drawn in the player's hand; centred, muzzle at +z) ----------
-  // a chunky toy-like bug zapper: look.color body, look.glow coil/tip
-  M.add('zapper', o => {
-    const c = o.color || '#f5b700', gl = o.glow || '#4cc9f0', g = G();
-    g.box(0, -0.05, -0.02, 0.09, 0.09, 0.3, c, { top: dk(c, 1.15) });                   // body
-    g.box(0, -0.15, -0.11, 0.06, 0.13, 0.07, dk(c, 0.55));                              // handle
-    g.box(0, -0.09, -0.04, 0.02, 0.05, 0.06, DARK);                                     // trigger
-    g.add(along(G().cyl(0, 0, 0, 0.045, 0.1, DARK, { seg: 10 })).move(0, 0, 0.12));     // barrel
-    g.add(along(G().cyl(0, 0, 0, 0.034, 0.03, gl, { seg: 10, glow: 1 })).move(0, 0, 0.215));   // glowing tip
-    for (let i = 0; i < 4; i++) g.box(0, 0.04, -0.12 + i * 0.06, 0.1, 0.022, 0.025, gl, { glow: 1 });   // coil
-    return g.box(0, 0.055, 0.0, 0.03, 0.03, 0.2, '#ffffff', { glow: 0.6 });
-  });
-  // a sleek antivirus blaster: look.color body, look.glow energy lines
-  M.add('blaster', o => {
-    const c = o.color || '#e6e9f2', gl = o.glow || '#a855f7', g = G();
-    g.box(0, -0.05, -0.04, 0.075, 0.075, 0.36, c, { top: dk(c, 1.1) });
-    g.box(0, 0.025, -0.06, 0.05, 0.035, 0.22, dk(gl, 0.6));                              // top rail
-    g.box(0, -0.17, -0.12, 0.055, 0.14, 0.065, '#2d2f3a');                              // grip
-    g.box(0, -0.12, 0.06, 0.05, 0.07, 0.08, '#2d2f3a');                                 // front grip
-    g.add(along(G().cyl(0, 0, 0, 0.03, 0.16, DARK, { seg: 10 })).move(0, -0.012, 0.13));
-    g.add(along(G().cyl(0, 0, 0, 0.026, 0.02, gl, { seg: 10, glow: 1 })).move(0, -0.012, 0.29));
-    g.box(0.039, -0.03, -0.04, 0.005, 0.02, 0.28, gl, { glow: 1 }).box(-0.039, -0.03, -0.04, 0.005, 0.02, 0.28, gl, { glow: 1 });
-    return g.box(0, 0.045, -0.16, 0.035, 0.03, 0.05, gl, { glow: 1 });
-  });
-
-  // spread gun: three short barrels side by side: look.color, look.glow
-  M.add('scatterGun', o => {
-    const c = o.color || '#ff7a1a', gl = o.glow || '#ffd23f', g = G();
-    g.box(0, -0.06, -0.04, 0.13, 0.1, 0.3, c, { top: dk(c, 1.15) });
-    g.box(0, -0.17, -0.12, 0.06, 0.13, 0.07, dk(c, 0.5)).box(0, 0.04, -0.1, 0.09, 0.03, 0.16, '#2d2f3a');
-    for (const x of [-0.04, 0, 0.04]) {
-      g.add(along(G().cyl(0, 0, 0, 0.022, 0.14, DARK, { seg: 8 })).move(x, -0.01, 0.1));
-      g.add(along(G().cyl(0, 0, 0, 0.016, 0.02, gl, { seg: 8, glow: 1 })).move(x, -0.01, 0.235));
-    }
-    return g.box(0.068, -0.03, -0.04, 0.006, 0.03, 0.24, gl, { glow: 1 }).box(-0.068, -0.03, -0.04, 0.006, 0.03, 0.24, gl, { glow: 1 });
-  });
-  // rapid-fire gun: long body with a drum: look.color, look.glow
-  M.add('rapidGun', o => {
-    const c = o.color || '#2ecc71', gl = o.glow || '#a5ffcf', g = G();
-    g.box(0, -0.05, -0.06, 0.08, 0.08, 0.42, c, { top: dk(c, 1.15) });
-    g.add(G().cyl(0, 0, 0, 0.06, 0.07, '#2d2f3a', { seg: 10 }).rotZ(Math.PI / 2).move(-0.035, -0.06, -0.02));
-    g.box(0, -0.17, -0.16, 0.055, 0.13, 0.06, '#2d2f3a');
-    g.add(along(G().cyl(0, 0, 0, 0.024, 0.18, DARK, { seg: 8 })).move(0, -0.01, 0.15));
-    for (let i = 0; i < 5; i++) g.box(0, 0.03, -0.2 + i * 0.07, 0.085, 0.015, 0.03, gl, { glow: 1 });
-    return g.add(along(G().cyl(0, 0, 0, 0.02, 0.02, gl, { seg: 8, glow: 1 })).move(0, -0.01, 0.33));
-  });
-  // long laser rifle with a scope: look.color, look.glow
-  M.add('beamRifle', o => {
-    const c = o.color || '#e6e9f2', gl = o.glow || '#ff2d55', g = G();
-    g.box(0, -0.045, -0.1, 0.06, 0.07, 0.5, c, { top: dk(c, 1.1) });
-    g.box(0, -0.15, -0.2, 0.05, 0.12, 0.06, '#2d2f3a').box(0, -0.02, -0.33, 0.05, 0.08, 0.1, '#2d2f3a');
-    g.add(along(G().cyl(0, 0, 0, 0.022, 0.12, DARK, { seg: 8 })).move(0, 0.05, -0.12));   // scope
-    g.add(along(G().cyl(0, 0, 0, 0.018, 0.02, gl, { seg: 8, glow: 1 })).move(0, 0.05, 0.0));
-    g.add(along(G().cyl(0, 0, 0, 0.016, 0.22, '#9aa0a6', { seg: 8 })).move(0, -0.015, 0.15));
-    g.box(0.032, -0.03, -0.1, 0.005, 0.02, 0.44, gl, { glow: 1 }).box(-0.032, -0.03, -0.1, 0.005, 0.02, 0.44, gl, { glow: 1 });
-    return g.add(along(G().cyl(0, 0, 0, 0.02, 0.02, gl, { seg: 8, glow: 1 })).move(0, -0.015, 0.37));
-  });
-  // bomb launcher: a fat tube with a glowing orb inside: look.color, look.glow
-  M.add('orbLauncher', o => {
-    const c = o.color || '#8e44ad', gl = o.glow || '#ff9f43', g = G();
-    g.add(along(G().cyl(0, 0, 0, 0.075, 0.42, c, { seg: 12 })).move(0, -0.02, -0.2));
-    g.add(along(G().cyl(0, 0, 0, 0.085, 0.04, '#2d2f3a', { seg: 12 })).move(0, -0.02, 0.2));
-    g.sphere(0, -0.02, 0.2, 0.05, gl, { seg: 8, rings: 6, glow: 1 });
-    g.box(0, -0.19, -0.12, 0.055, 0.14, 0.065, '#2d2f3a').box(0, 0.06, -0.08, 0.03, 0.05, 0.1, '#2d2f3a');
-    for (let i = 0; i < 3; i++) g.add(along(G().cyl(0, 0, 0, 0.079, 0.012, gl, { seg: 12, glow: 1 })).move(0, -0.02, -0.15 + i * 0.1));
-    return g;
-  });
-
-  // ---------- pickups ----------
-  M.add('ammoBox', o => {
-    const c = o.color || '#3d5a3d', g = G().box(0, 0, 0, 0.55, 0.32, 0.36, c, { top: dk(c, 1.2) });
-    g.box(0, 0.32, 0, 0.58, 0.05, 0.39, dk(c, 0.6)).box(0, 0.12, 0.181, 0.36, 0.12, 0.01, '#f5b700', { glow: 0.9 });
-    for (const x of [-0.12, 0, 0.12]) g.box(x, 0.37, 0, 0.06, 0.12, 0.06, '#f5b700', { glow: 0.7 });
-    return g;
-  });
-  M.add('coinStack', o => {
-    const g = G();
-    for (let i = 0; i < 4; i++) g.cyl(Math.sin(i * 1.7) * 0.03, i * 0.07, Math.cos(i * 1.7) * 0.03, 0.17, 0.06, '#f5c542', { seg: 12, glow: 0.6 });
-    return g.cyl(0.25, 0, 0.05, 0.17, 0.06, '#f5c542', { seg: 12, glow: 0.6 }).box(0, 0.3, 0, 0.1, 0.02, 0.02, '#fff8d6', { glow: 1 });
-  });
-  M.add('healthPack', o => {
-    const g = G().box(0, 0, 0, 0.5, 0.3, 0.36, '#f4f6fb', { top: '#ffffff' });
-    return g.box(0, 0.08, 0.181, 0.24, 0.07, 0.01, '#ff2d55', { glow: 1 }).box(0, 0.0, 0.181, 0.07, 0.23, 0.012, '#ff2d55', { glow: 1 })
-      .box(0, 0.3, 0, 0.24, 0.01, 0.07, '#ff2d55', { glow: 1 }).box(0, 0.3, 0, 0.07, 0.012, 0.24, '#ff2d55', { glow: 1 });
-  });
-
-  // ---------- traps and obstacles ----------
-  // laser gate across a passage: size = width; look.off = beams off (posts only); look.color
-  M.add('laserGate', o => {
-    const w = sz(o, 4), c = o.color || '#ff2d55', g = G();
-    for (const x of [-w / 2, w / 2]) g.box(x, 0, 0, 0.3, 2.2, 0.3, '#2d3436', { top: '#636e72' }).box(x, 2.2, 0, 0.36, 0.12, 0.36, o.off ? '#4b5058' : c, { glow: o.off ? 0 : 1 });
-    if (!o.off) for (const y of [0.35, 0.85, 1.35, 1.85]) g.box(0, y, 0, w - 0.3, 0.05, 0.05, c, { glow: 1 });
-    else for (const y of [0.35, 0.85, 1.35, 1.85]) g.box(-w / 2 + 0.2, y, 0, 0.06, 0.04, 0.06, '#4b5058').box(w / 2 - 0.2, y, 0, 0.06, 0.04, 0.06, '#4b5058');
-    return g;
-  });
-  // crusher: a heavy block that slams down (look.off = raised, safe): size = width
-  M.add('crusher', o => {
-    const w = sz(o, 2.2), up = !!o.off, g = G(), y = up ? 2.6 : 0.05;
-    for (const x of [-w / 2 - 0.15, w / 2 + 0.15]) g.box(x, 0, 0, 0.2, 4.2, 0.4, '#2d3436', { top: '#636e72' });
-    g.box(0, 4.0, 0, w + 0.5, 0.3, 0.5, '#2d3436');
-    g.box(0, y, 0, w, 1.4, w, '#7f8c8d', { top: '#95a5a6' });
-    g.box(0, y + 0.2, w / 2 + 0.01, w * 0.8, 0.12, 0.02, up ? '#f5b700' : '#ff2d55', { glow: 1 }).box(0, y + 0.2, -w / 2 - 0.01, w * 0.8, 0.12, 0.02, up ? '#f5b700' : '#ff2d55', { glow: 1 });
-    for (let i = 0; i < 5; i++) g.box(-w / 2 + (i + 0.5) * w / 5, y - 0.04, 0, 0.12, 0.08, w * 0.9, '#2d3436');
-    return g;
-  });
-  // rolling spike ball: size = radius; look.color
-  M.add('roller', o => {
-    const r = sz(o, 0.7), c = o.color || '#c0392b', g = G().sphere(0, r, 0, r, c, { seg: 10, rings: 7 });
-    const dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -1], [0.7, 0.7, 0], [-0.7, 0.7, 0], [0, 0.7, 0.7], [0, 0.7, -0.7], [0.7, -0.5, 0.5], [-0.7, -0.5, -0.5]];
-    for (const v of dirs) g.box(v[0] * r * 1.05, r + v[1] * r * 1.05 - 0.06, v[2] * r * 1.05, 0.14, 0.14, 0.14, '#ecf0f1');
-    return g.box(-r * 0.3, r * 1.25, r * 0.8, r * 0.18, r * 0.18, 0.04, '#ffd23f', { glow: 1 }).box(r * 0.3, r * 1.25, r * 0.8, r * 0.18, r * 0.18, 0.04, '#ffd23f', { glow: 1 });
-  });
-  // a puddle of corrupted data (goo): size = radius; look.color
-  M.add('goo', o => {
-    const r = sz(o, 1.4), c = o.color || '#7CFC00', g = G().cyl(0, 0, 0, r, 0.04, dk(c, 0.5), { seg: 14 }).cyl(0, 0.04, 0, r * 0.82, 0.02, c, { seg: 14, glow: 0.8 });
-    for (let i = 0; i < 6; i++) { const a = i * 1.05; g.sphere(Math.cos(a) * r * 0.5, 0.08, Math.sin(a) * r * 0.5, 0.09 + (i % 3) * 0.04, c, { seg: 6, rings: 4, glow: 1 }); }
-    return g;
-  });
-  // breakable data crate with loot inside: size = edge; look.color
-  M.add('dataCrate', o => {
-    const s = sz(o, 1.2), c = o.color || '#8e6c3a', g = G().box(0, 0, 0, s, s, s, c, { top: dk(c, 1.15) });
-    for (const f of [1, -1]) {
-      g.box(0, s * 0.45, f * (s / 2 + 0.01), s * 0.9, 0.08, 0.02, dk(c, 0.6)).box(0, s * 0.45, f * (s / 2 + 0.02), 0.08, s * 0.9, 0.02, dk(c, 0.6));
-      g.box(f * (s / 2 + 0.01), s * 0.45, 0, 0.02, 0.08, s * 0.9, dk(c, 0.6));
-    }
-    return g.box(0, s * 0.62, s / 2 + 0.03, s * 0.3, s * 0.18, 0.01, '#f5d76e', { glow: 0.9 });
-  });
-  // the shop: a glowing vending kiosk: look.color
-  M.add('shopKiosk', o => {
-    const c = o.color || '#2d3a73', g = G().box(0, 0, 0, 1.6, 2.4, 1.0, c, { top: dk(c, 1.3) });
-    g.box(0, 0.9, 0.51, 1.2, 1.1, 0.02, '#0b1020').box(0, 2.4, 0, 1.8, 0.35, 1.1, '#f5b700', { glow: 0.9 });
-    for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) g.box(-0.4 + k * 0.4, 1.0 + r * 0.32, 0.53, 0.26, 0.2, 0.02, ['#4cc9f0', '#ff7a1a', '#2ecc71', '#ff2d55', '#a855f7'][(r * 3 + k) % 5], { glow: 1 });
-    return g.box(0, 0.35, 0.51, 0.9, 0.18, 0.04, '#111').box(0, 2.48, 0.56, 1.3, 0.18, 0.02, '#1b1d24');
-  });
-
-  // ---------- smartphone scenery ----------
-  // a flat app icon tile on the home screen (walk over it): size = edge; look.color, look.mark (symbol colour)
-  M.add('appTile', o => {
-    const s = sz(o, 4.2), c = o.color || '#3b82f6', m = o.mark || '#ffffff', g = G().box(0, 0, 0, s, 0.12, s, dk(c, 0.6));
-    g.box(0, 0.12, 0, s * 0.9, 0.04, s * 0.9, c, { glow: 0.55 });
-    return g.box(0, 0.16, 0, s * 0.42, 0.03, s * 0.12, m, { glow: 1 }).box(0, 0.16, 0, s * 0.12, 0.03, s * 0.42, m, { glow: 1 });
-  });
-  // a floating chat bubble: size = width; look.color
-  M.add('chatBubble', o => {
-    const w = sz(o, 2.4), c = o.color || '#2ecc71', g = G().box(0, 0.3, 0, w, w * 0.55, 0.3, c, { glow: 0.6 });
-    for (let i = 0; i < 3; i++) g.box(-w * 0.25 + i * w * 0.25, 0.3 + w * 0.22, 0.16, w * 0.12, w * 0.12, 0.02, '#ffffff', { glow: 1 });
-    return g.box(-w * 0.32, 0, 0, w * 0.2, 0.32, 0.3, c, { glow: 0.6 });
-  });
-  // a giant camera lens on a wall: size = radius
-  M.add('lens', o => {
-    const r = sz(o, 3), g = G();
-    const ring = (rad, d, col, gl) => g.add(along(G().cyl(0, 0, 0, rad, d, col, { seg: 20, glow: gl || 0 })).move(0, r + 0.3, 0));
-    ring(r, 0.4, '#2d3436'); ring(r * 0.82, 0.5, '#111'); ring(r * 0.55, 0.55, '#1d4a8a', 0.6); ring(r * 0.25, 0.6, '#a5f3fc', 1);
-    return g.box(r * 0.3, r * 1.35 + 0.3, 0.3, r * 0.18, r * 0.18, 0.05, '#ffffff', { glow: 1 });
-  });
-  // a settings cog: size = radius (spin it)
-  M.add('cog', o => {
-    const r = sz(o, 1.2), c = o.color || '#9aa0a6', g = G();
-    g.add(along(G().cyl(0, 0, 0, r, 0.3, c, { seg: 16 })).move(0, 0, 0)).add(along(G().cyl(0, 0, 0, r * 0.35, 0.34, '#2d3436', { seg: 10 })));
-    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; g.box(Math.cos(a) * r * 1.08, Math.sin(a) * r * 1.08 - 0.16, 0, r * 0.3, r * 0.3, 0.3, c); }
-    return g.move(0, r * 1.3, 0);
-  });
-  // a big phone battery with charge bars: size [width, height], look.level 0..1
-  M.add('phoneBattery', o => {
-    const s = sz(o, [3, 5]), w = s[0], h = s[1], lv = o.level == null ? 0.2 : o.level, g = G().box(0, 0, 0, w, h, w * 0.6, '#2d3436', { top: '#3d4458' });
-    g.box(0, h, 0, w * 0.4, 0.3, w * 0.3, '#636e72');
-    const bars = 5;
-    for (let i = 0; i < bars; i++) { const on = (i + 1) / bars <= lv + 0.01; g.box(0, 0.3 + i * (h - 0.6) / bars, w * 0.31, w * 0.7, (h - 0.6) / bars * 0.7, 0.04, on ? (lv < 0.3 ? '#ff4d6d' : '#2ecc71') : '#1b1d24', { glow: on ? 1 : 0 }); }
-    return g;
-  });
-  // a diary page / story note (pick it up): look.color
-  M.add('notePage', o => {
-    const c = o.color || '#fff3b0', g = G().box(0, 0.2, 0, 0.5, 0.65, 0.04, c, { glow: 0.7 });
-    for (let i = 0; i < 4; i++) g.box(0, 0.32 + i * 0.12, 0.025, 0.36, 0.025, 0.01, '#8a6d3b');
-    return g.box(0.15, 0.78, 0.025, 0.12, 0.08, 0.01, '#ff2d55', { glow: 1 });
-  });
-
-  // ---------- shots ----------
-  // glowing energy ball (centred): size = radius, look.color
-  M.add('bolt', o => {
-    const r = sz(o, 0.11), c = o.color || '#4cc9f0';
-    return G().sphere(0, 0, 0, r, c, { seg: 8, rings: 6, glow: 1 }).sphere(0, 0, 0, r * 0.55, '#ffffff', { seg: 6, rings: 4, glow: 1 });
-  });
-  // a tiny spark for bursts (centred)
-  M.add('spark', o => G().box(0, -0.05, 0, 0.1, 0.1, 0.1, o.color || '#ffffff', { glow: 1 }));
-
-  // ---------- enemies ----------
-  // a pop-up "spam cannon" turret: look.color, size = height
-  M.add('turret', o => {
-    const h = sz(o, 1.5), c = o.color || '#e84393', g = G();
-    g.cyl(0, 0, 0, 0.55, 0.25, '#2d3436', { seg: 10 }).cyl(0, 0.25, 0, 0.22, h * 0.45, '#636e72', { seg: 8 });
-    const y = 0.25 + h * 0.45;
-    g.box(0, y, 0, 0.9, 0.62, 0.8, c, { top: dk(c, 1.2) });
-    g.box(0, y + 0.62, 0, 0.7, 0.08, 0.6, dk(c, 0.6));
-    g.box(0, y + 0.18, 0.41, 0.6, 0.3, 0.02, '#111');                                   // screen
-    g.box(-0.13, y + 0.26, 0.425, 0.12, 0.12, 0.02, '#ff2d55', { glow: 1 }).box(0.13, y + 0.26, 0.425, 0.12, 0.12, 0.02, '#ff2d55', { glow: 1 });
-    g.add(along(G().cyl(0, 0, 0, 0.12, 0.5, '#2d3436', { seg: 8 })).move(0, y + 0.08, 0.4));
-    return g.add(along(G().cyl(0, 0, 0, 0.09, 0.04, '#ffd23f', { seg: 8, glow: 1 })).move(0, y + 0.08, 0.9));
-  });
-  // a practice target on a stand: size = radius
-  M.add('target', o => {
-    const r = sz(o, 0.55), g = G().box(0, 0, 0, 0.12, 1.1, 0.12, '#636e72').box(0, 0, 0, 0.7, 0.08, 0.5, '#2d3436');
-    const rings = ['#ffffff', o.color || '#ff2d55', '#ffffff', o.color || '#ff2d55'];
-    rings.forEach((col, i) => g.add(along(G().cyl(0, 0, 0, r * (1 - i * 0.24), 0.05 + i * 0.012, col, { seg: 14, glow: 0.4 })).move(0, 1.1 + r, 0.04)));
-    return g;
-  });
-  // the queen of the bugs (boss): a giant beetle with a crown and armour plates: size = body length
-  M.add('queenBug', o => {
-    const L = sz(o, 3.2), c = o.color || '#8e44ad', k = L / 1.1;
-    const g = M.get('bug')({ size: 1.1, color: c, tip: '#ff2d55' });
-    for (let i = 0; i < 5; i++) {   // a golden crown on the head
-      const a = (i / 4 - 0.5) * 2.2;
-      g.cone(Math.sin(a) * 0.2, 0.6, 0.55 + Math.cos(a) * 0.06 - 0.06, 0.05, 0.2, '#f5b700', { seg: 5, glow: 0.8 });
-    }
-    g.cyl(0, 0.58, 0.52, 0.23, 0.06, '#f5b700', { seg: 10, glow: 0.5 });
-    g.add(G().sphere(0, 0, 0, 0.5, dk(c, 0.45), { seg: 8, rings: 5 }).scale(0.9, 0.28, 0.85).move(0, 0.7, -0.12));   // armour shell
-    g.sphere(-0.2, 0.86, -0.3, 0.07, '#ff2d55', { glow: 1 }).sphere(0.2, 0.86, -0.3, 0.07, '#ff2d55', { glow: 1 }).sphere(0, 0.92, -0.05, 0.08, '#ff2d55', { glow: 1 });
-    return g.scale(k, k, k);
-  });
-  // GLITCH's final form: a huge virus inside a spinning ring: size = radius
-  M.add('glitchCore', o => {
-    const r = sz(o, 1.4), c = o.color || '#6c1aa8', g = M.get('virus')({ size: r, color: c, spike: o.spike || '#ff2d55' });
-    const y = r + 0.25, R = r * 1.65;
-    for (let i = 0; i < 16; i++) {
-      const a = i / 16 * Math.PI * 2;
-      g.box(Math.cos(a) * R, y - 0.06, Math.sin(a) * R, 0.35, 0.12, 0.35, i % 2 ? '#ff2d55' : '#4cc9f0', { glow: 1 });
-    }
-    return g;
-  });
-
-  // ---------- boss fight ----------
-  // shield pylon: a glowing crystal on a base; look.off = powered down (grey); look.color
-  M.add('pylon', o => {
-    const c = o.off ? '#4b5058' : (o.color || '#4cc9f0'), gl = o.off ? 0 : 1, g = G();
-    g.cyl(0, 0, 0, 0.9, 0.35, '#2d3436', { seg: 10 }).cyl(0, 0.35, 0, 0.6, 0.25, '#636e72', { seg: 10 });
-    g.cone(0, 1.1, 0, 0.45, 1.6, c, { seg: 6, glow: gl }).add(G().cone(0, 0, 0, 0.45, 0.5, c, { seg: 6, glow: gl }).rotX(Math.PI).move(0, 1.1, 0));
-    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2; g.box(Math.cos(a) * 0.75, 0.6, Math.sin(a) * 0.75, 0.12, 1.2, 0.12, '#636e72').box(Math.cos(a) * 0.75, 1.8, Math.sin(a) * 0.75, 0.16, 0.16, 0.16, c, { glow: gl }); }
-    return g;
-  });
-
-  // ---------- network / internet scenery ----------
-  // a giant home router: size [width, height, depth]
-  M.add('router', o => {
-    const s = sz(o, [7, 2.2, 4]), w = s[0], h = s[1], d = s[2], c = o.color || '#ecf0f1', g = G();
-    g.box(0, 0.3, 0, w, h, d, c, { top: dk(c, 0.9) }).box(0, 0, 0, w * 0.9, 0.3, d * 0.9, DARK);
-    for (const x of [-0.38, -0.13, 0.13, 0.38]) g.cyl(x * w, 0.3 + h, -d * 0.35, 0.18, h * 1.9, '#2d3436', { seg: 8 }).sphere(x * w, 0.3 + h * 2.9, -d * 0.35, 0.22, '#2d3436', { seg: 6, rings: 4 });
-    const leds = ['#2ecc71', '#2ecc71', '#4cc9f0', '#f5b700', '#2ecc71', '#e84393'];
-    leds.forEach((col, i) => g.box(-w * 0.35 + i * w * 0.14, 0.3 + h * 0.6, d / 2 + 0.01, 0.35, 0.18, 0.04, col, { glow: 1 }));
-    for (let i = 0; i < 4; i++) g.box(-w * 0.3 + i * w * 0.2, 0.5, d / 2 + 0.02, 0.6, 0.45, 0.06, '#111');
-    return g;
-  });
-  // a tall server rack with blinking lights: size [width, height, depth], look.color, look.light
-  M.add('serverRack', o => {
-    const s = sz(o, [1.8, 4.6, 1.4]), w = s[0], h = s[1], d = s[2], c = o.color || '#20232e', li = o.light || '#2ecc71', g = G();
-    g.box(0, 0, 0, w, h, d, c, { top: dk(c, 1.4) });
-    const units = Math.floor((h - 0.4) / 0.42);
-    for (let i = 0; i < units; i++) {
-      const y = 0.25 + i * 0.42;
-      for (const f of [1, -1]) {   // lights on both faces: racks stand back to back in aisles
-        const z = f * (d / 2 + 0.01), z2 = f * (d / 2 + 0.03);
-        g.box(0, y, z, w * 0.86, 0.32, 0.03, '#2d3240');
-        g.box(-w * 0.32 * f, y + 0.12, z2, 0.1, 0.08, 0.02, (i + (f < 0)) % 3 ? li : '#f5b700', { glow: 1 });
-        g.box(-w * 0.18 * f, y + 0.12, z2, 0.1, 0.08, 0.02, (i + (f < 0)) % 2 ? li : '#4cc9f0', { glow: 1 });
-        g.box(w * 0.18 * f, y + 0.1, z2, w * 0.3, 0.05, 0.02, '#3d4458');
-      }
-    }
-    return g;
-  });
-  // a firewall: a wall of glowing bricks (not usually solid): size [length, height]
-  M.add('firewall', o => {
-    const s = sz(o, [6, 3]), L = s[0], H = s[1], g = G(), cols = ['#ff7a1a', '#ff2d55', '#f5b700'];
-    const rows = Math.max(2, Math.round(H / 0.5)), bw = 1;
-    for (let r = 0; r < rows; r++) {
-      const off = r % 2 ? bw / 2 : 0, n = Math.ceil(L / bw) + 1;
-      for (let i = 0; i < n; i++) {
-        const x0 = -L / 2 + i * bw - off, x1 = Math.min(L / 2, x0 + bw - 0.06), a = Math.max(-L / 2, x0);
-        if (x1 - a < 0.1) continue;
-        g.box((a + x1) / 2, r * (H / rows), 0, x1 - a, H / rows - 0.06, 0.3, cols[(r + i) % 3], { glow: 0.85 });
-      }
-    }
-    return g;
-  });
-  // a data-centre tower with stacked light rings: size [radius, height]
-  M.add('dataTower', o => {
-    const s = sz(o, [1.2, 6]), r = s[0], h = s[1], c = o.color || '#2d3a73', g = G().cyl(0, 0, 0, r, h, c, { seg: 10 });
-    for (let y = 0.8; y < h - 0.3; y += 1.1) g.cyl(0, y, 0, r * 1.04, 0.12, o.light || '#4cc9f0', { seg: 10, glow: 1 });
-    return g.cone(0, h, 0, r * 0.6, 0.8, '#ecf0f1').sphere(0, h + 0.95, 0, 0.18, '#e84393', { glow: 1 });
-  });
-  // a satellite dish on a post: size = dish radius
-  M.add('satDish', o => {
-    const r = sz(o, 1.4), g = G().cyl(0, 0, 0, 0.18, 2.2, '#636e72', { seg: 8 });
-    g.add(G().cyl(0, 0, 0, r, 0.35, o.color || '#dfe6e9', { seg: 14, rTop: r * 0.25 }).rotX(-Math.PI / 3).move(0, 2.6, 0));
-    return g.box(0, 2.6, r * 0.55, 0.06, 0.06, r * 0.9, '#2d3436').sphere(0, 2.75, r * 1.0, 0.12, '#e84393', { glow: 1 });
-  });
-  // an inbox/mailbox kiosk: look.color
-  M.add('mailbox', o => {
-    const c = o.color || '#3498db', g = G().box(0, 0, 0, 0.3, 1.0, 0.3, '#636e72').box(0, 1.0, 0, 1.0, 0.7, 0.8, c, { top: dk(c, 1.2) });
-    return g.box(0, 1.25, 0.41, 0.6, 0.08, 0.02, '#111').box(0.52, 1.0, 0, 0.04, 0.7, 0.06, '#ff2d55').box(0.52, 1.6, 0.1, 0.04, 0.2, 0.3, '#ff2d55', { glow: 0.6 });
-  });
-  // a glowing gateway frame (the way out to the cloud / the next area): size [width, height]
-  M.add('cloudGate', o => {
-    const s = sz(o, [3, 3.6]), w = s[0], h = s[1], c = o.color || '#4cc9f0', g = G();
-    g.box(-w / 2 - 0.2, 0, 0, 0.4, h, 0.6, '#2d3436').box(w / 2 + 0.2, 0, 0, 0.4, h, 0.6, '#2d3436').box(0, h, 0, w + 0.8, 0.4, 0.6, '#2d3436');
-    g.box(-w / 2 + 0.02, 0, 0, 0.08, h, 0.7, c, { glow: 1 }).box(w / 2 - 0.02, 0, 0, 0.08, h, 0.7, c, { glow: 1 }).box(0, h - 0.06, 0, w, 0.08, 0.7, c, { glow: 1 });
-    return g;
+  const room = GK.DeskRoom.room;
+  room('it-office', {
+    name: 'IT Office', title: 'IT HELP DESK', description: 'A school IT office: help-desk counter, server racks along the back wall, monitors, waiting chairs, a door on the right.',
+    sky: ['#a5d8ff', '#d0ebff'], ambSky: '#c5dbf3', ambGround: '#4a5568',
+    wall: '#dbe4ee', wallTop: '#b7c6d8', floor: '#5c6b7a', floor2: '#566472', counter: '#1c4b82', chair: '#495057', shelf: '#495057',
+    poster: '#ff6b6b', poster2: '#ffd43b', sign: '#4dabf7', screen: '#69db7c',
+    extra: [['server', 2.2, 2.2, 's', {}], ['server', 3.4, 2.2, 's', {}], ['server', 16.8, 2.2, 's', {}], ['server', 18, 2.2, 's', {}], ['whiteboard', 7.5, 2.05, 's', {}, { y: 0.9 }]],
   });
 })();
 
@@ -9097,934 +8537,264 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
 })();
 
 </script>
-<script>/* mechanics/hazards/hazards.js */
-/* Game Kit · mechanics/hazards   (spatial game types only)
-   Enemies and traps: things that hurt on touch (viruses, bugs, drones, lasers…), pulsing floor traps (spark
-   pads), enemies that chase you, turrets that shoot, and bosses. Use with config.player.health + respawnOnDeath.
-     { id, type: 'hazard', model: 'virus', route: 'worldRoute' | path: [[x,z], 'location', …],
-       speed: 2, wait: 0.3, damage: 25, onHit: [actions], label, points: 50,
-       hp: 3,                                         // can be shot (mechanics/weapons): hits needed to defeat it
-       squash: true, respawn: 20,                     // with a shield power-up, touching it defeats it; comes back
-       chase: 8, chaseSpeed: 3,                       // runs at you when you are this close and it can see you
-       shoots: { every: 2, range: 16, speed: 10, damage: 10, color },   // fires bolts at you (turrets, bosses)
-       pulse: [on, off], phase: 0,                    // a trap that is dangerous for `on` s, then safe for `off` s
-       boss: true, engage: 30, armor: condition,      // boss bar at the top; immune while `armor` is true
-       summon: { every: 8, ids: ['m1', 'm2'], max: 3 },  // a boss brings hidden `minion: true` hazards back to life
-       rage: { below: 0.5, speed: 1.5 },              // faster (and shoots faster) under half health
-       onDefeat: [actions], contactEvery: 1, knockback: 5 }
-   Touching one costs `damage` health (again every `contactEvery` s while touching), knocks you back, flashes the
-   screen, runs onHit and emits hazard:hit {id}. Defeating one (shot or squashed) gives `points` and emits
-   hazard:defeated {id} and "defeated:<tag>" for each tag (squashing also emits hazard:squashed / "squashed:<tag>").
-   Objective {type: 'defeat', tag, count} counts defeats and points at the nearest enemy with that tag.
-   With the powerups mechanic: a shield blocks damage (and squashes `squash` hazards); freeze stops every hazard.
-   Adds game.hurtPlayer(amount, sourceEntity), game.hitHazard(entity, damage), game.defeatHazard(entity) and the
-   condition {hp: {id, lte}}.
-   Disable or remove one ({do:'disable'} / {do:'remove'}) to make it safe.
-   Difficulty (config.difficulty, the chosen choice's options):
-     enemies: 0.5     keep this share of the ordinary enemies (shootable, harmful, not bosses / minions / crates) in
-                      each scene: every other one starts removed (hidden waves too). A tag that a 'defeat' objective
-                      counts keeps at least that share of its enemies (rounded up), and the objective needs that share.
-     bossDamage: 3    shots do this many times their damage to bosses (phase thresholds keep working)
-     summons: 0.5     bosses keep at most this share of their minions alive (at least 1)
-   Without these options (or with the value 1) nothing changes. */
+<script>/* mechanics/service-queue/service-queue.js */
+/* Game Kit · mechanics/service-queue — a 3D help-desk DIORAMA (fixed camera, no walking): customers walk in through the
+   door, wait in line with a patience bar, and the student clicks a customer's bubble (🔧 Fix) to fix their computer on
+   the self-teaching pretend PC (mechanics/desktop-sim). Time-management game feel: ★★★ for quick service, coins,
+   promotions, an upgrades shop (things appear in the room), and an optional "malware outbreak" (click the bugs).
+   Works in the first-person-3d type through its game.fixedCam hook (worlds: repair-shop, it-office — see worlds/_deskroom.js).
+   Config queue: {
+     camera: {eye, look, fov}, order: [slot, …] (the jobs, in arrival order; default = desktop.slots of the grade minus boss),
+     boss: 'slot' (arrives last, after the others and the outbreak), looks: {slot: characterLook}, techLook (default: the chosen character),
+     patience: seconds (per grade: {g6: 150, …} allowed), arriveEvery: seconds, maxWaiting: 3,
+     stars: {fast: 0.4 (share of patience used for ★★★)}, starCoins: [0, 15, 30],
+     ranks: ['Apprentice', …] (one more every `rankEvery` jobs, default 2), upgrades: [{id, name, icon, price, show: [entity ids], patience: +0.25}],
+     outbreak: {count, title, text, done} (needs entities bug1…bugN: decorations with model 'virus', visible: false),
+     words: {fix, waiting, angry, shop, shopTitle, promoted, rate3, rate2, rate1, arrives, boss, outbreakHint} }
+   Flags: desk_<slot> (from desktop-sim), outbreakDone. Objectives can read them. Events: queue:arrive {slot}, queue:served {slot, stars}.
+   state.queue = plain data (who is where), saved with the game; a resume puts finished customers away and the rest back outside. */
 (function () {
   'use strict';
-  const P = GK.Prefabs, V = GK.vec, Ph = GK.Physics, U = GK.util, FROZEN = '#9fd8ff';
-
-  /** Everything that blocks enemies and their line of sight this frame (walls, closed doors, solid props). */
-  function solidsOf(g) {
-    if (!g.hzSolids || g.hzSolidsAt !== g.state.time) { g.hzSolids = g.world.solids(); g.hzSolidsAt = g.state.time; }
-    return g.hzSolids;
+  const U = GK.util, V = GK.vec;
+  const WORDS = { fix: '🔧 Fix', waiting: 'waiting', angry: 'grumpy!', shop: '🛒 Shop', shopTitle: '🛒 Upgrades', promoted: '🎖️ Promoted: ',
+    rate3: '★★★ Super fast! +{n} coins', rate2: '★★ Good! +{n} coins', rate1: '★ Fixed. Be quicker next time!', arrives: 'is here!', boss: '⭐ VIP customer!',
+    outbreakHint: 'Click the bugs to zap them!', bought: '✅ Bought!', poor: '🪙 Not enough coins yet.', have: '✔ Got it' };
+  if (!document.getElementById('gk-queue-css')) {
+    const st = document.createElement('style');
+    st.id = 'gk-queue-css';
+    st.textContent = [
+      '.sq-layer{position:absolute;inset:0;pointer-events:none;z-index:5}',
+      '.sq-bub{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;background:#fff;border-radius:14px;padding:6px 8px 7px;box-shadow:0 4px 14px rgba(0,0,0,.35);text-align:center;min-width:92px;font:600 14px system-ui,sans-serif;color:#222;cursor:pointer;border:3px solid #fff}',
+      '.sq-bub:after{content:"";position:absolute;left:50%;bottom:-11px;margin-left:-8px;border:8px solid transparent;border-top-color:#fff}',
+      '.sq-bub:hover{border-color:#ffd43b;transform:translate(-50%,-100%) scale(1.06)}',
+      '.sq-bub .ic{font-size:26px;line-height:1}.sq-bub .nm{font-size:13px;white-space:nowrap}.sq-bub .fx{display:block;margin-top:3px;background:#2f9e44;color:#fff;border-radius:9px;padding:3px 8px;font-size:14px}',
+      '.sq-bar{height:6px;border-radius:3px;background:#e9ecef;margin-top:4px;overflow:hidden}.sq-bar i{display:block;height:100%;background:#40c057}',
+      '.sq-bub.mad{border-color:#ff8787}.sq-bub.mad .sq-bar i{background:#fa5252}.sq-bub.vip{border-color:#ffd43b;background:#fff9db}',
+      '.sq-bug{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;font-size:34px;cursor:crosshair;filter:drop-shadow(0 2px 2px #0008);user-select:none}',
+      '.sq-bug:hover{transform:translate(-50%,-50%) scale(1.25)}',
+      '.sq-shop{position:absolute;right:12px;top:58%;pointer-events:auto;cursor:pointer}',
+      '.sq-banner{position:absolute;left:50%;top:84px;transform:translateX(-50%);background:rgba(201,42,42,.92);color:#fff;padding:8px 18px;border-radius:14px;font:800 20px system-ui;pointer-events:none}',
+    ].join('\n');
+    document.head.appendChild(st);
   }
-  function clearLine(g, a, b) {
-    const d = V.sub(b, a), dist = V.len(d);
-    if (dist < 0.01) return true;
-    const dir = V.scale(d, 1 / dist);
-    for (const s of solidsOf(g)) { const t = Ph.rayBox(a, dir, s); if (t > 0 && t < dist - 0.25) return false; }
-    return true;
-  }
-  /** Walk an enemy toward (x, z) with wall collision. Returns the distance left. */
-  function walk(ent, g, x, z, speed, dt) {
-    const b = ent.body;
-    b.pos = ent.pos;
-    const dx = x - ent.pos[0], dz = z - ent.pos[2], l = Math.hypot(dx, dz);
-    if (l < 0.05) return l;
-    const v = Math.min(speed, l / Math.max(dt, 1e-4));
-    b.vel[0] = dx / l * v; b.vel[1] = 0; b.vel[2] = dz / l * v;
-    const y = ent.pos[1];
-    Ph.move(solidsOf(g), b, dt);
-    ent.pos[1] = y;   // enemies keep their height (they float or crawl at one level)
-    if (ent.def.faceTravel) ent.yaw = Math.atan2(dx, dz);
-    return Math.hypot(x - ent.pos[0], z - ent.pos[2]);
-  }
-  /** Where an enemy looks and shoots from: near the top of its model (low centres clip low scenery). */
-  function eyeOf(ent) { const b = ent.box(true); return [(b.min[0] + b.max[0]) / 2, Math.max(b.min[1] + 0.3, b.max[1] - 0.35), (b.min[2] + b.max[2]) / 2]; }
-  function defeat(ent, g, how) {
-    const d = ent.def;
-    if (ent.state.dead || ent.removed) return;
-    if (d.points) g.scoring.add(d.points, (ent.name || 'enemy') + (how === 'squash' ? ' squashed' : ' defeated'), 'bonus');
-    g.audio.play(how === 'squash' ? 'success' : 'boom');
-    if (g.burst) g.burst(ent.center(), d.burst || (ent.look && ent.look.color) || '#ff4d6d', d.boss ? 30 : 10);
-    if (how === 'squash') { g.ui.flash('#ffffff'); g.ui.toast('SQUASHED! +' + d.points, 'good'); }
-    if (d.boss) { g.ui.setBoss(null); g.ui.toast('💥 ' + (ent.name || 'Boss') + ' DEFEATED! +' + d.points, 'good'); if (g.shake) g.shake(0.8, 0.25); }
-    g.emit('hazard:defeated', { id: ent.id });
-    for (const t of ent.tags) g.emit('defeated:' + t, {});
-    if (how === 'squash') {
-      g.emit('hazard:squashed', { id: ent.id });
-      for (const t of ent.tags) g.emit('squashed:' + t, {});
-    }
-    ent.state.dead = true;
-    ent.chasing = false;
-    if (d.respawn) { ent.hide(); g.later(d.respawn, () => revive(ent)); }
-    else if (d.minion) ent.hide();
-    else ent.remove();
-    if (d.onDefeat) GK.run(g, d.onDefeat, { entity: ent });
-    if (g.missions) g.missions.check();
-  }
-  /** Which ordinary enemies a difficulty leaves out, worked out once from the whole config (every scene), so a
-      scene, a restore and a resume always agree: {drop: {id: true}, ratio: {tag: kept / total}}. */
-  function thinPlan(game) {
-    const share = Number(game.difficultyOpts ? game.difficultyOpts().enemies : 1);
-    const key = game.difficulty + ':' + share;
-    if (game.hzPlan && game.hzPlan.key === key) return game.hzPlan;
-    const plan = { key, drop: {}, ratio: {} };
-    game.hzPlan = plan;
-    if (!(share > 0 && share < 1)) return plan;
-    const base = game.base, tpls = base.templates || {}, defs = P.get('hazard').defaults;
-    const stages = base.scenes || base.levels || [];
-    const lists = [base.entities].concat(stages.map(s => s.entities));
-    const counted = {};   // tags that 'defeat' objectives count (other than the catch-all 'enemy')
-    for (const o of U.list(base.objectives).concat(...stages.map(s => U.list(s.objectives)))) if (o && o.type === 'defeat' && o.tag !== 'enemy') counted[o.tag] = true;
-    const all = [], byTag = {};
-    for (const list of lists) {
-      let i = 0;
-      for (const raw of U.list(list)) {
-        if (!raw || typeof raw !== 'object') continue;
-        const e = Object.assign({}, defs, raw.use ? tpls[raw.use] : null, raw);
-        if (e.type !== 'hazard' || !(e.hp > 0) || e.boss || e.minion || e.solid || !(e.damage > 0 || e.shoots)) continue;
-        // keep ceil(n · share) in each scene, spread out: the 1st, 3rd, 5th… for a half
-        const m = { id: e.id, tags: U.list(e.tags), keep: !e.id || Math.ceil((i + 1) * share) > Math.ceil(i * share) };
-        i++;
-        all.push(m);
-        for (const t of m.tags) (byTag[t] = byTag[t] || []).push(m);
-      }
-    }
-    // a counted group never drops below its share, so its objective stays possible
-    for (const t in counted) {
-      const ms = byTag[t] || [], want = Math.ceil(ms.length * share);
-      let kept = ms.filter(m => m.keep).length;
-      for (const m of ms) { if (kept >= want) break; if (!m.keep) { m.keep = true; kept++; } }
-    }
-    for (const m of all) if (!m.keep) plan.drop[m.id] = true;
-    for (const t in byTag) plan.ratio[t] = byTag[t].filter(m => m.keep).length / byTag[t].length;
-    return plan;
-  }
-  function revive(ent, at) {
-    if (ent.removed) return;
-    ent.state.dead = false;
-    ent.state.hp = ent.def.hp || 0;
-    ent.chasing = false; ent.returning = false; ent.touching = false;
-    if (at) ent.pos = at.slice(); else if (ent.def.chase && !ent.path.length) ent.pos = ent.home.slice();
-    ent.show();
-  }
-  function contact(ent, g) {
-    const d = ent.def;
-    if (!ent.enabled || !ent.active || ent.state.off || ent.state.dead || g.state.mode !== 'playing') return;
-    if (!d.damage && !d.squash) return;   // harmless (practice targets)
-    ent.contactT = d.contactEvery || 1;
-    if (g.shielded && g.shielded()) {
-      if (d.squash) defeat(ent, g, 'squash'); else g.audio.play('blocked');
-      return;
-    }
-    if (g.hurtPlayer(d.damage, ent)) {
-      g.emit('hazard:hit', { id: ent.id });
-      if (d.onHit) GK.run(g, d.onHit, { entity: ent });
-    }
-  }
+  const fill = (t, o) => String(t).replace(/\{(\w+)\}/g, (a, k) => (o[k] != null ? o[k] : a));
 
-  /** gait: how a creature moves (drawn only, nothing changes in the game): 'waddle' (rocks side to side: crabs),
-      'trot' (bounces and nods: boars), 'hop' (jumps along), 'flap' (flutters up and down: bats), 'slither' (sways:
-      snakes), 'stomp' (heavy steps: big bosses). Shooters lean back before they throw and forward as they throw;
-      a hit knocks them back a little. */
-  function gait(ent, dt, moved) {
-    const g = ent.def.gait, t = ent.t || 0;
-    ent.gaitK = U.lerp(ent.gaitK || 0, moved > 0.001 ? 1 : 0, Math.min(1, dt * 8));
-    ent.gaitPh = (ent.gaitPh || 0) + moved * (g === 'hop' ? 3.2 : g === 'stomp' ? 2.4 : 6.5);
-    const k = ent.gaitK, ph = ent.gaitPh;
-    let lift = 0, roll = 0, pitch = 0;
-    if (g === 'waddle') { roll = Math.sin(ph) * 0.2 * k; lift = Math.abs(Math.sin(ph)) * 0.05 * k; }
-    else if (g === 'trot') { pitch = Math.sin(ph * 2) * 0.09 * k; lift = Math.abs(Math.sin(ph)) * 0.1 * k; }
-    else if (g === 'hop') lift = Math.abs(Math.sin(ph)) * 0.35 * k;
-    else if (g === 'flap') { lift = Math.sin(t * 11) * 0.1; roll = Math.sin(t * 5.5) * 0.18; }
-    else if (g === 'slither') { roll = Math.sin(t * 7) * 0.12 * (0.4 + k); lift = 0; }
-    else if (g === 'stomp') { roll = Math.sin(ph) * 0.07 * k; lift = Math.abs(Math.sin(ph)) * 0.16 * k; }
-    // throwing: lean back while about to shoot, snap forward when the shot leaves
-    if (ent.def.shoots && ent.sees && ent.shootT < 0.45) pitch -= (0.45 - Math.max(0, ent.shootT)) / 0.45 * 0.35;
-    if (ent.throwT > 0) { ent.throwT -= dt; pitch += ent.throwT / 0.3 * 0.4; }
-    if (ent.hurtT > 0) { ent.hurtT -= dt; pitch -= ent.hurtT / 0.25 * 0.3; lift += ent.hurtT * 0.3; }
-    ent.lift = lift; ent.roll = roll; ent.pitch = pitch;
-  }
-
-  P.add('hazard', {
-    defaults: { model: 'virus', solid: false, speed: 2, wait: 0.3, damage: 25, bob: 0.12, faceTravel: true, points: 50, hp: 0, contactEvery: 1, knockback: 5 },
-    init(ent, game) {
-      const d = ent.def, w = ent.world;
-      ent.path = d.route ? (w.routes[d.route] || []).map(p => p.slice())
-        : (d.path || []).map(p => w.toPos(Array.isArray(p) ? { pos: p } : typeof p === 'string' ? { at: p } : p));
-      if (d.route && !w.routes[d.route]) w.problem('Hazard "' + ent.id + '": unknown route "' + d.route + '". This world has: ' + Object.keys(w.routes).join(', '));
-      if (d.summon) for (const id of d.summon.ids || []) if (!w.byId[id] && !(game.cfg.entities || []).some(e => e.id === id)) w.problem('Hazard "' + ent.id + '": summons unknown "' + id + '"');
-      if (ent.path.length && !d.pos && !d.cell && !d.at) ent.pos = ent.path[0].slice();
-      if (ent.state.pathI == null) ent.state.pathI = 0;
-      if (ent.state.hp == null) ent.state.hp = d.hp || 0;
-      ent.home = ent.pos.slice();
-      ent.body = { pos: ent.pos, vel: [0, 0, 0], r: d.bodyRadius || 0.4, h: 0.8, step: 0.45, grounded: true };
-      ent.waitT = 0; ent.contactT = 0; ent.aiT = Math.random() * 0.2; ent.lostT = 0;
-      ent.shootT = d.shoots ? (d.shoots.every || 2) * (0.5 + Math.random() * 0.5) : 0;
-      ent.summonT = d.summon ? (d.summon.first != null ? d.summon.first : d.summon.every || 8) : 0;
-      if (d.pulse) { ent.state.off = false; ent.pulseT = d.pulse[0] - (d.phase || 0); }
-      ent.onTouch = g => contact(ent, g);
-      if (thinPlan(game).drop[ent.id]) ent.removed = true;   // an easier difficulty: fewer enemies
-      if (d.solid) {   // a solid hazard (a loot crate, a barrier): it blocks the player, but shots treat it as a target
-        const base = GK.Entity.prototype.collider;
-        ent.collider = function () { const b = base.call(this); b.hazard = true; return b; };
-      }
-    },
-    restore(ent) { ent.home = ent.home || ent.pos.slice(); ent.chasing = false; ent.returning = false; },
-    update(ent, dt, game) {
-      const d = ent.def, g = game;
-      if (!ent.enabled || !ent.active || ent.state.dead || g.state.mode !== 'playing') return;
-      if (g.frozen && g.frozen()) { ent.tint = FROZEN; return; }
-      if (ent.tint === FROZEN) ent.tint = null;
-      if (d.pulse) {   // dangerous for pulse[0] seconds, then safe for pulse[1] seconds
-        ent.pulseT -= dt;
-        if (ent.pulseT <= 0) {
-          ent.state.off = !ent.state.off;
-          ent.pulseT = d.pulse[ent.state.off ? 1 : 0];
-          ent.setLook({ off: ent.state.off });
-          if (!ent.state.off) ent.touching = false;   // standing on it when it switches on still hurts
-        }
-      }
-      if (ent.touching && !ent.state.off) { ent.contactT -= dt; if (ent.contactT <= 0) contact(ent, g); }
-      const x0 = ent.pos[0], z0 = ent.pos[2];
-
-      // senses: distance to the player and line of sight, a few times a second
-      const pl = g.player, eye = pl.eye();
-      const range = Math.max(d.chase || 0, d.shoots ? d.shoots.range || 16 : 0, d.boss ? d.engage || 30 : 0);
-      if (range) {
-        ent.aiT -= dt;
-        if (ent.aiT <= 0) {
-          ent.aiT = 0.2;
-          ent.dist = Math.hypot(eye[0] - ent.pos[0], eye[2] - ent.pos[2]);
-          ent.sees = ent.dist <= range && Math.abs(eye[1] - ent.pos[1]) < 6 && clearLine(g, eyeOf(ent), [eye[0], eye[1] - 0.25, eye[2]]);
-          if (d.boss && ent.sees) ent.state.engaged = true;
-          if (d.chase) {
-            if (ent.sees && ent.dist <= d.chase) { ent.chasing = true; ent.lostT = 0; }
-            else if (ent.chasing) {
-              ent.lostT += 0.2;
-              if (ent.lostT > 2.5 || ent.dist > d.chase * 1.8) { ent.chasing = false; ent.returning = true; ent.stuckT = 0; }
-            }
-          }
-        }
-      }
-      const rage = d.rage && d.hp && ent.state.hp <= d.hp * (d.rage.below || 0.5) ? d.rage : null;
-      const mul = rage ? rage.speed || 1.5 : 1;
-
-      // movement: chase · go back to the patrol · patrol (holdT: another mechanic holds it still, e.g. a boss winding up)
-      const held = ent.holdT > 0;
-      if (held) ent.holdT -= dt;
-      if (held) { /* standing still */ } else if (ent.chasing) {
-        walk(ent, g, pl.pos[0], pl.pos[2], (d.chaseSpeed || d.speed * 1.3) * mul, dt);
-        ent.yaw = Math.atan2(pl.pos[0] - ent.pos[0], pl.pos[2] - ent.pos[2]);
-      } else if (ent.returning) {
-        const t = ent.path.length ? ent.path[ent.state.pathI % ent.path.length] : ent.home;
-        const before = Math.hypot(t[0] - ent.pos[0], t[2] - ent.pos[2]);
-        const left = walk(ent, g, t[0], t[2], d.speed * mul, dt);
-        ent.stuckT = before - left < 0.2 * d.speed * dt ? (ent.stuckT || 0) + dt : 0;
-        if (left < 0.3 || ent.stuckT > 1.5) { if (left >= 0.3) { ent.pos[0] = t[0]; ent.pos[2] = t[2]; } ent.returning = false; }
-      } else if (ent.path.length) {
-        if (ent.waitT > 0) ent.waitT -= dt;
-        else {
-          const t = ent.path[ent.state.pathI % ent.path.length], mx = t[0] - ent.pos[0], mz = t[2] - ent.pos[2], ml = Math.hypot(mx, mz);
-          const step = d.speed * mul * dt;
-          if (ml <= step) {
-            ent.pos[0] = t[0]; ent.pos[2] = t[2];
-            ent.state.pathI = (ent.state.pathI + 1) % ent.path.length;
-            ent.waitT = d.wait;
-          } else {
-            ent.pos[0] += mx / ml * step; ent.pos[2] += mz / ml * step;
-            if (d.faceTravel) ent.yaw = Math.atan2(mx, mz);
-          }
-        }
-      }
-
-      // shooting (turrets, bosses, ranged enemies)
-      if (d.shoots && g.enemyFire && ent.sees && !held && ent.dist <= (d.shoots.range || 16)) {
-        if (!ent.chasing && !ent.path.length) ent.yaw = Math.atan2(eye[0] - ent.pos[0], eye[2] - ent.pos[2]);
-        ent.shootT -= dt * (rage ? 1.6 : 1);
-        if (ent.shootT <= 0) {
-          ent.shootT = (d.shoots.every || 2) * (0.85 + Math.random() * 0.3);
-          const c = eyeOf(ent);
-          g.enemyFire(ent, c, [eye[0], eye[1] - 0.25, eye[2]], d.shoots);   // the same line it saw you along
-          ent.throwT = 0.3;
-        }
-      }
-      if (d.gait) gait(ent, dt, Math.hypot(ent.pos[0] - x0, ent.pos[2] - z0));
-
-      // bosses bring their minions back
-      if (d.summon && ent.state.engaged && !(d.armor !== undefined && d.summon.whileArmored === false && GK.test(g, d.armor))) {
-        ent.summonT -= dt * (rage ? 1.5 : 1);
-        if (ent.summonT <= 0) {
-          ent.summonT = d.summon.every || 8;
-          const mins = (d.summon.ids || []).map(id => g.world.get(id)).filter(Boolean);
-          const alive = mins.filter(m => m.active && !m.state.dead).length;
-          const free = mins.find(m => !m.removed && (!m.active || m.state.dead));
-          const share = Number(g.difficultyOpts ? g.difficultyOpts().summons : 1);
-          const max = share > 0 && share < 1 ? Math.max(1, Math.ceil((d.summon.max || 3) * share)) : (d.summon.max || 3);
-          if (free && alive < max) {
-            const a = Math.random() * Math.PI * 2, r = d.summon.radius || 2.5;
-            revive(free, [ent.pos[0] + Math.cos(a) * r, free.home[1], ent.pos[2] + Math.sin(a) * r]);
-            free.enabled = true; free.chasing = !!free.def.chase;
-            if (g.burst) g.burst(free.center(), '#a855f7', 8);
-            g.emit('hazard:summoned', { id: free.id });
-          }
-        }
-      }
-    },
-  });
-
-  // {hp: {id: 'boss', lte: 10}} — an enemy's health (e.g. a boss changes phase); false once it is gone
-  GK.Conditions.add('hp', (g, v) => { const e = g.world && g.world.get(v.id); return !!e && !e.removed && GK.compare(e.state.hp, v); });
-
-  // {type:'defeat', tag:'bug', count:5} — counts defeated enemies with that tag; the marker points at the nearest one
-  GK.Objectives.add('defeat', {
-    need(o, g) {
-      const n = o.count || 1, r = g ? thinPlan(g).ratio[o.tag] : undefined;
-      return r !== undefined && r < 1 ? Math.max(1, Math.ceil(n * r)) : n;
-    },
-    progress: (o, g) => g.state.events['defeated:' + o.tag] || 0,
-    target(o, g, from) {
-      if (!g.world) return null;
-      let best = null, bd = Infinity;
-      for (const e of g.world.entities) {
-        if (e.type !== 'hazard' || !e.active || e.state.dead || e.tags.indexOf(o.tag) < 0) continue;
-        const dd = V.dist(e.pos, from);
-        if (dd < bd) { bd = dd; best = e.top(); }
-      }
-      return best;
-    },
-  });
-
-  GK.Mechanics.add('hazards', {
+  GK.Mechanics.add('service-queue', {
+    configKeys: ['queue'],
     setup(game) {
-      game.hurtCD = 0;
-      game.ui.setBoss(null);
-      /** Hurt the player (enemy touch, enemy bolt, trap). Blocked by a shield; short safe time after each hit. */
-      game.hurtPlayer = (amount, src) => {
-        const g = game;
-        if (g.state.mode !== 'playing' || g.hurtCD > 0) return false;
-        if (g.shielded && g.shielded()) { g.audio.play('blocked'); return false; }
-        g.hurtCD = 0.5;
-        if (amount && g.player.health != null) g.player.damage(amount);
-        g.audio.play('hurt');
-        g.ui.flash('#ff2d55');
-        if (g.shake) g.shake(0.3, 0.14);
-        const kb = src && src.def && src.def.knockback;
-        if (kb && src.pos) {
-          const dx = g.player.pos[0] - src.pos[0], dz = g.player.pos[2] - src.pos[2], l = Math.hypot(dx, dz) || 1;
-          g.player.vel[0] += dx / l * kb; g.player.vel[2] += dz / l * kb;
-          if (g.player.grounded) g.player.vel[1] = 3;
-        }
-        g.emit('player:hit', { id: src && src.id });
-        return true;
+      const Q = game.cfg.queue || {}, W = Object.assign({}, WORDS, Q.words);
+      game.state.queue = { people: {}, t: 0, nextAt: 1, served: 0, bugs: {}, bought: {} };
+      const layer = U.el('div', 'sq-layer');
+      game.ui.hud.appendChild(layer);
+      const shopBtn = U.el('div', 'gk-guide-chip sq-shop', W.shop);
+      if ((Q.upgrades || []).length) layer.appendChild(shopBtn);
+      let banner = null;
+      const S = () => game.state.queue;
+      const grade = () => game.difficulty;
+      const order = () => {
+        const sl = (game.cfg.desktop && game.cfg.desktop.slots && game.cfg.desktop.slots[grade()]) || {};
+        return (Q.order || Object.keys(sl)).filter(s => s !== Q.boss && sl[s]);
       };
-      /** A shot hit an enemy: 'defeated' | 'hit' | 'blocked' (armoured / cannot be shot). */
-      game.hitHazard = (ent, damage) => {
-        const d = ent.def;
-        if (!ent.active || ent.state.dead) return 'miss';
-        if (d.boss) ent.state.engaged = true;
-        if (!d.hp || (d.armor !== undefined && GK.test(game, d.armor))) { ent.hi = 0.35; game.audio.play('blocked'); return 'blocked'; }
-        const mul = d.boss ? Number(game.difficultyOpts ? game.difficultyOpts().bossDamage : 1) : 1;
-        ent.state.hp -= (damage || 1) * (mul > 0 ? mul : 1);
-        ent.hi = 0.9;
-        if (d.chase) ent.chasing = true;
-        if (d.boss) ent.state.engaged = true;
-        game.emit('hazard:damaged', { id: ent.id });
-        if (ent.state.hp <= 0) { defeat(ent, game, 'shot'); return 'defeated'; }
-        if (ent.def.gait) ent.hurtT = 0.25;
-        game.audio.play('hit');
-        return 'hit';
+      const jobOf = slot => game.desk && game.cfg.desktop.jobs[game.desk.jobFor(slot)];
+      const loc = n => game.world.locations[n] && game.world.locations[n].pos;
+      const ent = slot => game.world.get('cust-' + slot);
+      const patienceMax = () => {
+        const p = Q.patience == null ? 150 : (U.isObj(Q.patience) ? (Q.patience[grade()] || 150) : Q.patience);
+        let k = 1; for (const u of Q.upgrades || []) if (S().bought[u.id] && u.patience) k += u.patience;
+        return p * k;
       };
-      game.defeatHazard = (ent, how) => defeat(ent, game, how || 'shot');
-      game.on('player:respawn', () => { for (const e of game.world.entities) if (e.type === 'hazard' && e.chasing) { e.chasing = false; e.returning = true; e.stuckT = 0; } });
-    },
-    update(game, dt) {
-      if (game.hurtCD > 0) game.hurtCD -= dt;
-      // boss bar: the nearest engaged boss
-      let boss = null, bd = Infinity;
-      for (const e of game.world.entities) {
-        if (e.type !== 'hazard' || !e.def.boss || !e.active || e.state.dead || !e.state.engaged) continue;
-        const dd = V.dist(e.pos, game.player.pos);
-        if (dd < bd) { bd = dd; boss = e; }
-      }
-      game.ui.setBoss(boss ? { name: boss.name || 'Boss', hp: Math.max(0, boss.state.hp), max: boss.def.hp || 1, shielded: boss.def.armor !== undefined && GK.test(game, boss.def.armor) } : null);
-    },
-  });
-})();
-
-</script>
-<script>/* mechanics/weapons/weapons.js */
-/* Game Kit · mechanics/weapons   (spatial game types; made for first-person-3d)
-   Tools the player shoots with — zappers, blasters, paint guns… — with LIMITED AMMO, reloading, several weapon
-   types, COINS and a SHOP to buy more.
-     arsenal: {
-       weapons: [{ id, name, model, look, color, icon, desc,
-                   damage: 1, cooldown: 0.22, speed: 30, range: 45, boltSize: 0.11,
-                   mag: 12, reserve: 48, maxReserve: 120, reload: 1.2,     // magazine, spare ammo, reload seconds
-                   pellets: 1, spread: 0,                                  // several bolts at once (scatter)
-                   splash: 0,                                              // explodes: hurts every enemy this close
-                   pierce: false,                                          // goes through enemies
-                   price: 0, ammoPrice: 20, ammoPack: 24,                  // shop: buy it, buy a pack of ammo
-                   melee: true, reach: 2.6, arc: 90, maxTargets: 3, swing: 0.3, // a sword: no ammo, hits what is in front
-                   viewScale: 0.55,                                        // size of the tool drawn in the hand (first person)
-                   anim: 'bow' | 'sling' | 'load' | 'thrust',              // how it moves in the hand (below)
-                   zoom: 0.35,                                             // hold the RIGHT mouse button: look down the sight (0 = no sight)
-                   projectile: 'arrowShot', drop: 0,                       // the model that flies (default a glowing bolt);
-                                                                           // drop: m/s² of fall, aimed so it still lands on the crosshair
-                   owned: true, always: true }, …],                        // owned from the start; usable before `requires`
-       start: 'zapper', requires: {has: 'zapper'},                         // owned at the start; usable once true
-       coins: 0, objectiveCoins: 15, dropChance: 0.35,                     // coins for each objective; ammo drops
-       coinsName: 'coins', coinIcon: '🪙',                                 // what the money is called and its icon (e.g. 'shells', '🐚')
-       extras: [{ id, name, icon, desc, price, actions }] }                // other things to buy (heal, shield…)
-     weapon: {…}  — the old single-weapon form still works (one weapon, owned from the start).
-   Controls: click / hold the mouse / hold Q = fire (or swing) · R = reload · 1-9 or the mouse wheel = switch weapon.
-   A melee weapon (melee: true) needs no ammo: a swing hits up to maxTargets enemies (with hp) within `reach` metres
-   inside an `arc` (degrees) in front of the player, not through walls. `always: true` weapons work before the arsenal's
-   `requires` is met (e.g. a sword before the zapper is found); when `requires` becomes true while a melee weapon is in
-   the hand, the first owned gun is drawn. game.viewModel gets {melee, swing: 0..1} so views can animate the swing.
-   An empty magazine reloads by itself if there is spare ammo. Coins come from defeated enemies (their `coins`, or
-   points ÷ 4), objectives, coin pickups and loot crates; spend them at a shop: { interact: { type: 'shop' } }.
-   Pickups: { type: 'pickup', kind: 'ammo' | 'coins' | 'health', amount, respawn }. Enemies sometimes drop ammo.
-   Bolts stop at walls and damage hazards with `hp` (mechanics/hazards: game.hitHazard). Hazards with `shoots` fire
-   enemy bolts through game.enemyFire(); they hurt the player through game.hurtPlayer. Power-up 'rapid' doubles the
-   fire rate and uses no ammo. game.burst(pos, color, n) = a burst of glowing sparks.
-   Adds game.fire(), game.reload(instant), game.selectWeapon(id | slot), game.giveWeapon(id), game.addAmmo(n),
-   game.addCoins(n), game.coins(), game.buy(id), game.openShop(), game.armed(), game.weaponState().
-   Conditions {coins: {gte}}, {weapon: 'id'}; actions {do:'coins', add}, {do:'giveWeapon', weapon}, {do:'ammo', amount},
-   {do:'shop'}. Events weapon:fire / hit / reload / switch, shop:open, shop:buy {id}, coins.
-   Bolts, sparks and loot come from small pools made once per scene (ids fx-…), so snapshot/restore keep working.
-   Animation (game.viewModel, drawn by the view): a new weapon comes up from below (raise), a shot kicks, a reload dips
-   and tilts it. `anim` also sets the model's look: 'bow' {draw, arrow} and 'sling' {pull, pebble} lose the arrow/pebble
-   when they shoot, fit a new one and pull back (arms pose 'bow' / 'sling'); 'load' {loaded} is empty until reloaded;
-   'thrust' (melee) stabs forward instead of slashing. No firing while game.handsBusy() (climbing, swimming).
-   SIGHT: right click switches it ON / OFF (or hold the 'aim' key, default Z) with a shooting weapon: the view zooms in by `zoom`, the
-   tool comes up to the middle of the screen, the mouse turns slower, you walk slower and cannot sprint, and shots do not
-   spread. game.aimK (0..1) is how far the sight is up; game.zoom is the zoom the view uses. */
-(function () {
-  'use strict';
-  const V = GK.vec, Ph = GK.Physics, U = GK.util;
-  const POOL = { bolt: 16, enemy: 12, spark: 32, loot: 8 };
-  const WDEF = { name: 'Zapper', model: 'zapper', color: '#4cc9f0', icon: '⚡', damage: 1, cooldown: 0.22, speed: 30, range: 45, boltSize: 0.11,
-    mag: 12, reserve: 48, maxReserve: 120, reload: 1.2, pellets: 1, spread: 0, splash: 0, pierce: false, price: 0, ammoPrice: 20, ammoPack: 24 };
-  const PICKUP = { ammo: { model: 'ammoBox', color: '#f5b700', amount: 1 }, coins: { model: 'coinStack', color: '#f5d76e', amount: 10 }, health: { model: 'healthPack', color: '#ff6b81', amount: 30 } };
-
-  GK.Prefabs.add('fx', { defaults: { solid: false, visible: false } });
-  GK.Prefabs.add('pickup', {
-    defaults: { solid: false, kind: 'ammo', hover: 0.35, spin: 2, bob: 0.1, respawn: 0 },
-    init(ent) {
-      const k = PICKUP[ent.def.kind] || PICKUP.ammo;
-      if (!ent.def.model) ent.setModel(k.model, ent.def.look);
-      ent.onTouch = g => { if (ent.active && g.state.mode === 'playing' && g.takePickup) g.takePickup(ent); };
-    },
-  });
-
-  function solids(g) {
-    if (!g.hzSolids || g.hzSolidsAt !== g.state.time) { g.hzSolids = g.world.solids(); g.hzSolidsAt = g.state.time; }
-    return g.hzSolids;
-  }
-  /** Nearest wall along a segment (t, or Infinity). Solid hazards (crates) are hit as enemies, not walls. */
-  function wallAt(g, o, dir, max) {
-    let best = Infinity;
-    for (const s of solids(g)) { if (s.hazard) continue; const t = Ph.rayBox(o, dir, s); if (t > 0 && t < max && t < best) best = t; }
-    return best;
-  }
-  function enemyAt(g, o, dir, max, skip) {
-    let best = { t: Infinity, e: null };
-    for (const e of g.world.entities) {
-      if (e.type !== 'hazard' || !e.active || e.state.dead || !e.def.hp || (skip && skip.has(e.id))) continue;   // traps without hp do not stop shots
-      const b = e.pickBox();
-      for (let i = 0; i < 3; i++) { b.min[i] -= 0.2; b.max[i] += 0.2; }   // a little aim help for young players
-      const t = Ph.rayBox(o, dir, b);
-      if (t >= 0 && t < max && t < best.t) best = { t, e };
-    }
-    return best;
-  }
-  function take(list) { return list.find(e => !e.visible) || null; }
-  /** The held weapon's look this frame (weapon `anim`): after a shot the arrow / pebble / harpoon is gone, then a new
-      one is fitted and (bow, sling) pulled back. Steps of 0.1 so only a few shapes are ever built. */
-  function animLook(game, w, o, rk) {
-    if (!w.anim || w.anim === 'thrust') return w.look;
-    const k = U.clamp(game.sinceFire / Math.max(0.15, game.lastCool || w.cooldown), 0, 1);
-    const has = o.mag > 0 || !!(game.hasPower && game.hasPower('rapid'));
-    const q = x => Math.round(x * 10) / 10;
-    if (w.anim === 'load') return Object.assign({}, w.look, { loaded: rk != null ? rk > 0.55 : has && k > 0.7 });
-    const ready = rk != null ? rk > 0.6 : has && k > 0.4;
-    const pull = rk == null && ready ? q(U.clamp((k - 0.55) / 0.45, 0, 1) * 0.7) : 0;
-    return Object.assign({}, w.look, w.anim === 'bow' ? { draw: pull, arrow: ready } : { pull, pebble: ready });
-  }
-
-  function config(game) {
-    const c = game.cfg;
-    const A = c.arsenal ? U.merge(c.arsenal) : { weapons: [c.weapon || {}], requires: c.weapon && c.weapon.requires };
-    A.weapons = U.list(A.weapons).map((w, i) => Object.assign({}, WDEF, { id: w.id || ('weapon' + (i + 1)) }, w));
-    A.byId = {}; A.weapons.forEach(w => { A.byId[w.id] = w; });
-    A.start = A.start || A.weapons[0].id;
-    A.objectiveCoins = A.objectiveCoins == null ? 15 : A.objectiveCoins;
-    A.dropChance = A.dropChance == null ? 0.35 : A.dropChance;
-    A.extras = U.list(A.extras);
-    A.gun0 = A.weapons.find(w => !w.melee) || A.weapons[0];   // the respawn top-up goes to the first gun
-    return A;
-  }
-  /** Starting arsenal: the start weapon plus every weapon marked owned: true. */
-  function fresh(A) {
-    const owned = {};
-    for (const w of A.weapons) if (w.id === A.start || w.owned) owned[w.id] = { mag: w.mag, res: w.reserve };
-    return { cur: A.start, owned, coins: A.coins || 0 };
-  }
-
-  GK.Interactions.add('shop', { prompt: 'Open the', run(g, ent, def, done) { g.openShop(def, () => done(true)); } });
-  GK.Conditions.add('coins', (g, v) => GK.compare(g.coins ? g.coins() : 0, U.isObj(v) ? v : { gte: v }));
-  GK.Conditions.add('weapon', (g, v) => U.list(v).every(id => !!(g.state.arsenal && g.state.arsenal.owned[id])));
-  GK.Actions.add('coins', (g, a) => g.addCoins && g.addCoins(a.add || 0));
-  GK.Actions.add('giveWeapon', (g, a) => g.giveWeapon && g.giveWeapon(a.weapon));
-  GK.Actions.add('ammo', (g, a) => g.addAmmo && g.addAmmo(a.amount));
-  GK.Actions.add('shop', (g, a) => g.openShop && g.openShop(a));
-
-  GK.Mechanics.add('weapons', {
-    configKeys: ['weapon', 'arsenal'],
-    setup(game) {
-      const A = game.arsenalCfg = config(game);
-      if (!game.state.arsenal) game.state.arsenal = fresh(A);
-      game.gunsWere = undefined;   // set on the first update (after a restore), so travel never switches weapons
-      const M = game.input.map;
-      if (!M.fire) M.fire = ['KeyQ'];
-      if (!M.reload) M.reload = ['KeyR'];
-      if (!M.aim) M.aim = ['KeyZ'];
-      game.aimK = 0; game.zoom = 0;
-      const add = (kind, n, model, look, type) => {
-        const out = [];
-        for (let i = 1; i <= n; i++) out.push(game.world.add({ id: 'fx-' + kind + i, type: type || 'fx', model, look, visible: false }));
-        return out;
+      const charLook = () => {
+        const c = game.cfg.characters, id = game.character || (c && c.default), ch = c && c.choices && c.choices.find(x => x.id === id);
+        return Q.techLook || (ch && ch.look) || {};
       };
-      const fx = game.fx = {
-        bolts: add('bolt', POOL.bolt, 'bolt', { color: A.weapons[0].color }),
-        enemy: add('enemy', POOL.enemy, 'bolt', { color: '#ff4d6d', size: 0.16 }),
-        sparks: add('spark', POOL.spark, 'spark', { color: '#ffffff' }),
-        loot: add('loot', POOL.loot, 'ammoBox', {}, 'pickup'),
+      // ---- people ----
+      const person = (slot, p) => {
+        const e = ent(slot); if (!e) return;
+        const job = jobOf(slot) || {};
+        e.figure = e.figure || { look: Object.assign({ pack: false, scarf: false }, (Q.looks || {})[slot] || job.look || {}), walk: 0, phase: 0, scale: 1 };
+        e.visible = true;
+        if (!p.pos) p.pos = loc('outside').slice();
+        e.pos = p.pos.slice();
       };
-      game.cool = 0; game.kick = 0; game.reloadT = 0; game.emptyT = 0; game.swingT = 0; game.swingMax = 0.3; game.sinceFire = 9; game.lastCool = 0.3; game.drawT = 0;
-      game.ui.setWeapon(null);
-      const st = () => game.state.arsenal;
-      const gunsReady = () => A.requires === undefined || GK.test(game, A.requires);
-      const usable = w => !!w && (w.always || gunsReady());
-      game.usable = id => usable(A.byId[id]);
-      game.armed = () => usable(A.byId[st().cur]);
-      game.weaponState = () => { const s = st(), w = A.byId[s.cur]; return { def: w, id: s.cur, mag: s.owned[s.cur].mag, res: s.owned[s.cur].res, reloading: game.reloadT > 0, melee: !!w.melee }; };
-      game.coins = () => st().coins;
-      game.addCoins = (n, at) => {
-        if (!n) return;
-        st().coins = Math.max(0, st().coins + n);
-        if (n > 0) game.ui.coinPop('+' + n);
-        game.emit('coins', { amount: n });
-      };
-      game.giveWeapon = id => {
-        const w = A.byId[id];
-        if (!w) return false;
-        const o = st().owned[id];
-        if (o) o.res = Math.min(w.maxReserve, o.res + w.ammoPack);
-        else st().owned[id] = { mag: w.mag, res: w.reserve };
-        game.selectWeapon(id);
-        return true;
-      };
-      /** Ammo for every weapon you own: `packs` packs each (default half a pack). */
-      game.addAmmo = packs => {
-        const k = packs == null ? 0.5 : packs;
-        for (const id in st().owned) { const w = A.byId[id], o = st().owned[id]; if (w.melee) continue; o.res = Math.min(w.maxReserve, o.res + Math.max(1, Math.round(w.ammoPack * k))); }
-      };
-      game.selectWeapon = ref => {
-        const id = typeof ref === 'number' ? (A.weapons[ref - 1] || {}).id : ref;
-        if (!id || !st().owned[id] || id === st().cur || !usable(A.byId[id])) return false;
-        st().cur = id; game.reloadT = 0; game.cool = 0.25; game.kick = 0; game.drawT = 0.3; game.sinceFire = 9; game.input.aimToggle = false;
+      const spotOf = p => (p.state === 'serve' ? loc('serve') : p.state === 'leave' ? loc('outside') : loc('wait' + (p.line + 1)) || loc('wait4'));
+      const waitingList = () => Object.keys(S().people).filter(k => S().people[k].state === 'wait').sort((a, b) => S().people[a].arrived - S().people[b].arrived);
+      const relineup = () => waitingList().forEach((k, i) => { S().people[k].line = i; });
+      const arrive = slot => {
+        const p = S().people[slot] = { state: 'wait', arrived: S().t, waited: 0, line: 0, pos: loc('outside').slice() };
+        relineup(); person(slot, p);
+        const job = jobOf(slot) || {};
+        game.ui.toast((slot === Q.boss ? W.boss + ' ' : '🚪 ') + (job.customer || slot) + ' ' + W.arrives, 'good');
         game.audio.play('click');
-        game.emit('weapon:switch', { id });
-        return true;
+        game.emit('queue:arrive', { slot });
       };
-      game.reload = instant => {
-        const s = st(), w = A.byId[s.cur], o = s.owned[s.cur];
-        if (w.melee || o.mag >= w.mag || o.res <= 0 || (game.reloadT > 0 && !instant)) return false;
-        if (instant) { const n = Math.min(w.mag - o.mag, o.res); o.mag += n; o.res -= n; game.reloadT = 0; return true; }
-        game.reloadT = w.reload; game.reloadMax = w.reload;
-        game.audio.play('reload');
-        game.emit('weapon:reload', { id: s.cur });
-        return true;
+      const serve = slot => {
+        const p = S().people[slot]; if (!p || p.state !== 'wait' || game.state.mode !== 'playing') return;
+        p.state = 'serve'; relineup();
+        // the customer steps up to the counter, then the pretend PC opens
+        setTimeout(() => {
+          if (game.state.mode !== 'playing') { p.state = 'wait'; relineup(); return; }
+          game.desk.open(slot, ok => {
+            if (!ok) { p.state = 'wait'; p.arrived = S().t - p.waited; relineup(); return; }
+            const used = p.waited / patienceMax(), fast = (Q.stars && Q.stars.fast) || 0.4;
+            const stars = used <= fast ? 3 : used <= 1 ? 2 : 1, coins = (Q.starCoins || [0, 15, 30])[stars - 1];
+            if (coins) addCoins(coins);
+            game.ui.toast(fill(stars === 3 ? W.rate3 : stars === 2 ? W.rate2 : W.rate1, { n: coins }), 'good');
+            p.state = 'leave'; p.stars = stars; S().served++;
+            const every = Q.rankEvery || 2, ranks = Q.ranks || [];
+            const r = Math.min(ranks.length - 1, Math.floor(S().served / every));
+            if (ranks.length && r > (S().rank || 0)) { S().rank = r; setTimeout(() => game.ui.toast(W.promoted + ranks[r], 'good'), 1300); }
+            chip();
+            game.emit('queue:served', { slot, stars });
+            if (game.saveResume) game.saveResume();
+          });
+        }, game.fast ? 10 : 700);
       };
-      game.burst = (pos, color, n) => {
-        for (let i = 0; i < (n || 8); i++) {
-          const s = take(fx.sparks);
-          if (!s) return;
-          if (s.look.color !== color) s.setLook({ color });
-          const a = Math.random() * Math.PI * 2, up = Math.random();
-          const sp = 2 + Math.random() * 3.5;
-          s.pos = pos.slice(); s.v = [Math.cos(a) * sp * (1 - up * 0.5), 1.5 + up * 4, Math.sin(a) * sp * (1 - up * 0.5)];
-          s.life = s.maxLife = 0.45 + Math.random() * 0.4;
-          s.alpha = 1; s.scale = [1, 1, 1];
-          s.show();
+      const addCoins = n => {
+        const v = game.state.vars; v.coins = (Number(v.coins) || 0) + n; game.ui.setCoins(v.coins);
+      };
+      const chip = () => {
+        const ranks = Q.ranks || [];
+        if (ranks.length) game.ui.setChips([{ text: '🎖️ ' + ranks[S().rank || 0], color: Q.chipColor || '#4dabf7' }]);
+      };
+      // ---- bubbles (DOM over the 3D view) ----
+      const bubbles = {};
+      const bubble = slot => {
+        if (bubbles[slot]) return bubbles[slot];
+        const b = U.el('div', 'sq-bub' + (slot === Q.boss ? ' vip' : ''));
+        b.innerHTML = '<div class="ic"></div><div class="nm"></div><div class="sq-bar"><i></i></div><span class="fx">' + U.esc(W.fix) + '</span>';
+        b.onclick = e => { e.stopPropagation(); serve(slot); };
+        layer.appendChild(b);
+        return (bubbles[slot] = b);
+      };
+      const drawBubbles = () => {
+        const view = game.view, r = view && view.renderer;
+        for (const slot in S().people) {
+          const p = S().people[slot], b = bubble(slot), e = ent(slot);
+          const show = p.state === 'wait' && e && game.state.mode === 'playing';
+          b.style.display = show ? '' : 'none';
+          if (!show || !r) continue;
+          const job = jobOf(slot) || {}, sp = r.project([e.pos[0], e.pos[1] + 2.15, e.pos[2]]);
+          b.style.left = sp.x + 'px'; b.style.top = sp.y + 'px';
+          const left = Math.max(0, 1 - p.waited / patienceMax());
+          b.querySelector('.ic').textContent = job.icon || job.avatar || '💻';
+          b.querySelector('.nm').textContent = job.customer || slot;
+          b.querySelector('.sq-bar i').style.width = Math.round(left * 100) + '%';
+          b.classList.toggle('mad', left <= 0);
         }
       };
-      game.enemyFire = (src, from, to, o) => {
-        const b = take(fx.enemy);
-        if (!b) return;
-        o = o || {};
-        const dir = V.norm(V.sub(to, from)), sp = o.speed || 10;
-        if (o.color && b.look.color !== o.color) b.setLook({ color: o.color, size: 0.16 });
-        b.pos = from.slice(); b.v = V.scale(dir, sp); b.life = (o.range || 18) / sp + 0.5; b.dmg = o.damage || 10; b.src = src;
-        b.show();
-        if (game.lightFlash) game.lightFlash(from, o.color || '#ff4d6d', 4, 0.08);
-        game.audio.play('enemyShot');
+      // ---- the outbreak (optional): bugs on the floor, click to zap ----
+      const bugEls = {};
+      const startOutbreak = () => {
+        const O = Q.outbreak; if (!O || S().outbreak) return;
+        S().outbreak = true;
+        for (let i = 1; i <= O.count; i++) { const e = game.world.get('bug' + i); if (e) { e.visible = true; S().bugs['bug' + i] = { alive: true, a: Math.random() * 6.28 }; } }
+        banner = U.el('div', 'sq-banner', O.title || '🚨 MALWARE OUTBREAK!');
+        layer.appendChild(banner);
+        game.ui.toast(O.text || W.outbreakHint, 'bad');
+        game.audio.play('wrong');
       };
-      game.fire = () => {
-        if (!game.armed() || game.state.mode !== 'playing' || game.cool > 0 || game.reloadT > 0) return false;
-        if (game.handsBusy && game.handsBusy()) return false;   // climbing or swimming: both hands are busy
-        const s = st(), w = A.byId[s.cur], o = s.owned[s.cur], rapid = game.hasPower && game.hasPower('rapid');
-        if (w.melee) return swing(w, rapid);
-        if (!rapid && o.mag < 1) {
-          if (o.res > 0) game.reload();
-          else { game.audio.play('empty'); game.cool = 0.35; if (game.emptyT <= 0) { game.ui.toast('Out of ammo! Find an ammo box or buy ammo at a shop.', 'bad'); game.emptyT = 3; } }
-          return false;
+      const zap = id => {
+        const b = S().bugs[id]; if (!b || !b.alive) return;
+        b.alive = false; const e = game.world.get(id); if (e) e.visible = false;
+        if (bugEls[id]) bugEls[id].style.display = 'none';
+        game.audio.play('success');
+        if (Object.values(S().bugs).every(x => !x.alive)) {
+          game.state.flags.outbreakDone = true; S().outbreak = 'done';
+          if (banner) banner.remove();
+          game.ui.toast((Q.outbreak && Q.outbreak.done) || '✅ All bugs zapped!', 'good');
+          if (game.missions) game.missions.check();
         }
-        if (!rapid) o.mag -= 1;
-        game.cool = w.cooldown * (rapid ? 0.5 : 1);
-        game.sinceFire = 0; game.lastCool = game.cool;
-        const p = game.player, eye = p.eye(), f = p.forward(), yaw = p.yaw;
-        // aim where the crosshair points (in third person: along the camera's line), start at the tip of the tool
-        const ray = (game.aimRay && game.aimRay()) || { o: eye, d: f };
-        const tWall = wallAt(game, ray.o, ray.d, w.range), tEnemy = enemyAt(game, ray.o, ray.d, w.range).t;
-        const aim = V.add(ray.o, V.scale(ray.d, Math.min(tWall, tEnemy, w.range)));
-        const muzzle = game.muzzlePoint ? game.muzzlePoint(aim) : null;   // third person: the gun's muzzle
-        let start = muzzle || [eye[0] + f[0] * 0.55 + Math.cos(yaw) * 0.16, eye[1] + f[1] * 0.55 - 0.13, eye[2] + f[2] * 0.55 - Math.sin(yaw) * 0.16];
-        let dir = V.norm(V.sub(aim, start));
-        if (muzzle) {
-          // third person, point-blank: the wall or enemy is closer than the end of the barrel (narrow corridors, an enemy
-          // right in front of you). The shot lands there and then, at the gun, instead of starting from your head.
-          const toM = V.sub(muzzle, eye), lm = V.len(toM);
-          if (wallAt(game, eye, V.scale(toM, 1 / lm), lm) < Infinity || V.dot(V.sub(aim, muzzle), toM) <= 0) {
-            pointBlank(w, ray, aim);
-            game.kick = 1;
-            if (game.lightFlash) game.lightFlash(aim, w.color, 4, 0.1);
-            game.audio.play(w.splash ? 'boom' : 'hit');
-            game.emit('weapon:fire', { id: s.cur, pointBlank: true });
-            return true;
-          }
-        } else if (wallAt(game, start, dir, V.dist(start, aim) - 0.3) < Infinity) {
-          // first person: the tip sits beside the eye; if scenery is in its way but not in the crosshair's, shoot along the crosshair
-          start = V.add(eye, V.scale(f, 0.4)); dir = V.norm(V.sub(aim, start));
-        }
-        const pm = w.projectile || 'bolt', lift = w.drop ? 0.5 * w.drop * V.dist(start, aim) / w.speed : 0;   // a falling shot starts a little up
-        for (let i = 0; i < (w.pellets || 1); i++) {
-          const b = take(fx.bolts);
-          if (!b) break;
-          let d = dir;
-          const sp = w.spread * (1 - 0.75 * (game.aimK || 0));   // the sight steadies the shot
-          if (sp) d = V.norm([dir[0] + (Math.random() - 0.5) * sp * 2, dir[1] + (Math.random() - 0.5) * sp * 2, dir[2] + (Math.random() - 0.5) * sp * 2]);
-          if (b.model !== pm) b.setModel(pm, pm === 'bolt' ? { color: w.color, size: w.boltSize } : {});
-          else if (pm === 'bolt' && (b.look.color !== w.color || b.look.size !== w.boltSize)) b.setLook({ color: w.color, size: w.boltSize });
-          b.pos = start.slice(); b.v = V.scale(d, w.speed); b.v[1] += lift; b.life = w.range / w.speed; b.w = w; b.hits = w.pierce ? new Set() : null;
-          b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / V.len(b.v), -1, 1)); b.roll = 0;
-          b.show();
-        }
-        game.kick = 1;
-        if (game.lightFlash) game.lightFlash(start, w.color, 4, 0.07);
-        game.audio.play(w.splash ? 'boom' : w.pellets > 1 ? 'hit' : 'zap');
-        game.emit('weapon:fire', { id: s.cur });
-        return true;
       };
-      /** A melee swing: hits up to maxTargets enemies in reach, in front, not behind a wall. */
-      const swing = (w, rapid) => {
-        const s = st();
-        game.cool = w.cooldown * (rapid ? 0.6 : 1);
-        game.swingMax = Math.min(w.swing || 0.3, game.cool); game.swingT = game.swingMax; game.kick = 1; game.sinceFire = 0; game.lastCool = game.cool;
-        const p = game.player, eye = p.eye(), f = p.forward(), fl = Math.hypot(f[0], f[2]) || 1, fh = [f[0] / fl, 0, f[2] / fl];
-        const reach = w.reach || 2.6, cosArc = Math.cos((w.arc || 90) * Math.PI / 360), hits = [];
-        for (const e of game.world.entities) {
-          if (e.type !== 'hazard' || !e.active || e.state.dead || !e.def.hp) continue;
-          const b = e.pickBox(), cp = [U.clamp(eye[0], b.min[0], b.max[0]), U.clamp(eye[1], b.min[1], b.max[1]), U.clamp(eye[2], b.min[2], b.max[2])];
-          const d = V.dist(eye, cp);
-          if (d > reach) continue;
-          const c = e.center(), tl = Math.hypot(c[0] - eye[0], c[2] - eye[2]) || 1;
-          if (d > 0.5 && ((c[0] - eye[0]) * fh[0] + (c[2] - eye[2]) * fh[2]) / tl < cosArc) continue;   // not in front
-          if (d > 0.3 && wallAt(game, eye, V.norm(V.sub(cp, eye)), d - 0.15) < Infinity) continue;       // behind a wall
-          hits.push({ e, d, cp });
+      const drawBugs = dt => {
+        const r = game.view && game.view.renderer;
+        for (const id in S().bugs) {
+          const b = S().bugs[id], e = game.world.get(id);
+          if (!bugEls[id]) { const el = U.el('div', 'sq-bug', '🦠'); el.onclick = ev => { ev.stopPropagation(); zap(id); }; layer.appendChild(el); bugEls[id] = el; }
+          const el = bugEls[id];
+          if (!b.alive || !e || game.state.mode !== 'playing') { el.style.display = 'none'; continue; }
+          // crawl around the room, turning now and then, staying inside
+          b.a += (Math.random() - 0.5) * dt * 3;
+          const sp = game.fast ? 0 : 1.6, nx = e.pos[0] + Math.cos(b.a) * sp * dt, nz = e.pos[2] + Math.sin(b.a) * sp * dt;
+          if (nx < 2.5 || nx > 17.5 || nz < 3.5 || nz > 13) b.a += Math.PI; else { e.pos[0] = nx; e.pos[2] = nz; }
+          e.yaw = -b.a + Math.PI / 2;
+          if (!r) continue;
+          const s = r.project([e.pos[0], e.pos[1] + 0.5, e.pos[2]]);
+          el.style.display = ''; el.style.left = s.x + 'px'; el.style.top = s.y + 'px';
         }
-        hits.sort((a, b) => a.d - b.d);
-        for (const h of hits.slice(0, w.maxTargets || 3)) {
-          const r = game.hitHazard ? game.hitHazard(h.e, w.damage) : 'blocked';
-          game.ui.hitMarker(r === 'blocked' ? 'blocked' : 'hit');
-          if (r !== 'defeated') game.burst(h.cp, r === 'blocked' ? '#4cc9f0' : w.color, 6);
-          game.emit('weapon:hit', { id: h.e.id, melee: true });
-        }
-        if (game.lightFlash) game.lightFlash(V.add(eye, V.scale(f, 0.9)), w.color, 3, 0.1);
-        if (hits.length && game.shake) game.shake(0.12, 0.05);
-        game.audio.play(hits.length ? 'slash' : 'swing');
-        game.emit('weapon:fire', { id: s.cur, melee: true, hits: hits.length });
-        return true;
       };
-      /** A shot that lands at once (third person, the target closer than the muzzle): hit the enemy under the crosshair,
-          or burst on the wall; splash weapons explode there. */
-      const pointBlank = (w, ray, aim) => {
-        if (w.splash) { fx.explode(aim, w); game.ui.hitMarker('hit'); return; }
-        const e = enemyAt(game, ray.o, ray.d, V.dist(ray.o, aim) + 0.6).e;
-        if (!e) { game.burst(aim, w.color, 4); return; }
-        let r = 'blocked';
-        for (let i = 0; i < (w.pellets || 1); i++) {
-          r = game.hitHazard ? game.hitHazard(e, w.damage) : 'blocked';
-          if (r === 'defeated' || r === 'blocked' || r === 'miss') break;
-        }
-        game.ui.hitMarker(r === 'blocked' ? 'blocked' : 'hit');
-        if (r !== 'defeated') game.burst(aim, r === 'blocked' ? '#4cc9f0' : w.color, 6);
-        game.emit('weapon:hit', { id: e.id });
-      };
-      const explode = (pos, w) => {
-        for (const e of game.world.entities) {
-          if (e.type !== 'hazard' || !e.active || e.state.dead) continue;
-          if (V.dist(e.center(), pos) <= w.splash) game.hitHazard(e, w.damage);
-        }
-        game.burst(pos, '#ff9f43', 16); game.burst(pos, '#fff3b0', 6);
-        if (game.lightFlash) game.lightFlash(pos, '#ff9f43', w.splash * 3, 0.3);
-        if (game.shake) game.shake(0.25, 0.1);
-        game.audio.play('boom');
-      };
-      fx.explode = explode;
-      game.takePickup = ent => {
-        const d = ent.def, kind = ent.kind || d.kind, k = PICKUP[kind] || PICKUP.ammo, amount = ent.amount != null ? ent.amount : d.amount != null ? d.amount : k.amount;
-        if (kind === 'health') {
-          if (game.player.health == null || game.player.health >= game.player.maxHealth) return;   // keep it for later
-          game.player.heal(amount); game.ui.toast('+' + amount + ' health', 'good');
-        } else if (kind === 'coins') { game.addCoins(amount); game.ui.toast('+' + amount + ' coins', 'good'); }
-        else { game.addAmmo(amount === 1 ? 0.5 : amount); game.ui.toast('+ Ammo for your weapons', 'good'); }
-        game.audio.play('pickup');
-        if (game.lightFlash) game.lightFlash(ent.center(), k.color, 4, 0.2);
-        game.emit('pickup', { id: ent.id, kind });
-        if (ent.loot) { ent.hide(); ent.lootT = 0; }
-        else if (d.respawn) { ent.hide(); game.later(d.respawn, () => { if (!ent.removed) ent.show(); }); }
-        else ent.remove();
-      };
-      game.dropLoot = (pos, kind, amount) => {
-        const L = take(fx.loot);
-        if (!L) return;
-        const k = PICKUP[kind] || PICKUP.ammo;
-        if (L.model !== k.model) L.setModel(k.model, {});
-        L.kind = kind; L.amount = amount; L.loot = true; L.lootT = 25;
-        L.pos = [pos[0], pos[1], pos[2]]; L.touching = false;
-        L.show();
-      };
-      // coins for defeated enemies and finished objectives; some enemies drop ammo
-      game.on('hazard:defeated', ({ id }) => {
-        const e = game.world.get(id);
-        if (!e) return;
-        const n = e.def.coins != null ? e.def.coins : Math.round((e.def.points || 0) / 4);
-        game.addCoins(n);
-        if (e.def.drop !== false && !e.def.boss && Math.random() < (e.def.dropChance != null ? e.def.dropChance : A.dropChance)) game.dropLoot(e.pos, 'ammo', 1);
-      });
-      game.on('objective:complete', ({ id }) => { const o = game.missions && game.missions.get(id); if (o && !o.optional && A.objectiveCoins) game.addCoins(A.objectiveCoins); });
-      game.on('player:respawn', () => { const w = A.gun0, o = st().owned[w.id]; if (o && !w.melee && o.mag + o.res < w.mag * 2) o.res = w.mag * 2 - o.mag; });
-
-      /** The shop panel: every weapon (buy it, or buy ammo for it) and the extras. */
-      game.openShop = (def, done) => {
-        def = def || {};
-        game.emit('shop:open', {});
-        const body = U.el('div', 'gk-shop');
+      // ---- shop ----
+      shopBtn.onclick = e => {
+        e.stopPropagation();
+        const body = U.el('div', '');
         const draw = () => {
-          const s = st();
-          body.innerHTML = '';
-          body.appendChild(U.el('div', 'gk-shop-coins', (A.coinIcon || '🪙') + ' ' + s.coins + ' ' + (A.coinsName || 'coins')));
-          const grid = U.el('div', 'gk-shop-grid');
-          const bar = (label, k) => '<div class="gk-shop-stat"><span>' + label + '</span><i><b style="width:' + Math.round(U.clamp(k, 0.05, 1) * 100) + '%"></b></i></div>';
-          for (const w of A.weapons) {
-            const owned = s.owned[w.id], price = owned ? w.ammoPrice : w.price;
-            const card = U.el('div', 'gk-shop-card' + (owned ? ' owned' : '') + (s.cur === w.id ? ' active' : ''));
-            card.innerHTML = '<div class="gk-shop-icon" style="--c:' + U.css(w.color) + '">' + U.esc(w.icon || '⚡') + '</div>' +
-              '<b>' + U.esc(w.name) + '</b><small>' + U.esc(w.desc || '') + '</small>' +
-              bar('Power', (w.damage * (w.pellets || 1) + (w.splash ? 3 : 0)) / 8) + bar('Speed', 0.09 / Math.max(0.09, w.cooldown)) + (w.melee ? bar('Reach', (w.reach || 2.6) / 4) : bar('Ammo', w.mag / 30));
-            const btn = U.el('button', 'gk-btn' + (owned ? '' : ' primary'), w.melee && owned ? '✔ No ammo needed' : owned ? 'Ammo +' + w.ammoPack + ' · ' + (A.coinIcon || '🪙') + ' ' + price : (price ? 'Buy · ' + (A.coinIcon || '🪙') + ' ' + price : 'Free'));
-            btn.disabled = (w.melee && owned) || s.coins < price || (owned && owned.res >= w.maxReserve);
-            btn.onclick = () => { game.buy(w.id); draw(); };
-            card.appendChild(btn);
-            if (owned && s.cur !== w.id && usable(w)) { const eq = U.el('button', 'gk-btn small', 'Equip'); eq.onclick = () => { game.selectWeapon(w.id); draw(); }; card.appendChild(eq); }
-            grid.appendChild(card);
-          }
-          for (const x of A.extras) {
-            const card = U.el('div', 'gk-shop-card extra');
-            card.innerHTML = '<div class="gk-shop-icon">' + U.esc(x.icon || '✨') + '</div><b>' + U.esc(x.name) + '</b><small>' + U.esc(x.desc || '') + '</small>';
-            const btn = U.el('button', 'gk-btn primary', 'Buy · ' + (A.coinIcon || '🪙') + ' ' + x.price);
-            btn.disabled = s.coins < x.price;
-            btn.onclick = () => { game.buy(x.id); draw(); };
-            card.appendChild(btn);
-            grid.appendChild(card);
-          }
-          body.appendChild(grid);
+          body.innerHTML = '<p style="font-size:18px">🪙 ' + (Number(game.state.vars.coins) || 0) + '</p>' + (Q.upgrades || []).map(u => {
+            const own = S().bought[u.id];
+            return '<button class="gk-btn' + (own ? '' : ' primary') + '" data-u="' + u.id + '" style="display:block;width:100%;margin:6px 0;font-size:17px"' + (own ? ' disabled' : '') + '>' +
+              U.esc(u.icon + ' ' + u.name) + (u.desc ? ' · ' + U.esc(u.desc) : '') + ' · ' + (own ? W.have : '🪙 ' + u.price) + '</button>';
+          }).join('');
+          body.querySelectorAll('[data-u]').forEach(b => b.onclick = () => {
+            const u = Q.upgrades.find(x => x.id === b.dataset.u), coins = Number(game.state.vars.coins) || 0;
+            if (coins < u.price) { game.ui.toast(W.poor, 'bad'); game.audio.play('deny'); return; }
+            game.state.vars.coins = coins - u.price; game.ui.setCoins(game.state.vars.coins);
+            S().bought[u.id] = true; applyUpgrades();
+            game.audio.play('success'); game.ui.toast(W.bought, 'good'); draw();
+          });
         };
         draw();
-        game.audio.play('checkpoint');
-        game.ui.panel({ title: def.title || A.shopTitle || 'Upgrade Shop', body, wide: true, buttons: [{ label: 'Close', primary: true }], noCancel: true, onClose: () => { if (done) done(); } });
+        game.ui.panel({ title: W.shopTitle, body });
       };
-      /** Buy a weapon (or a pack of ammo for one you own) or an extra. Returns true if it worked. */
-      game.buy = id => {
-        const s = st(), w = A.byId[id], x = A.extras.find(e => e.id === id);
-        if (w) {
-          const owned = s.owned[id], price = owned ? w.ammoPrice : w.price;
-          if ((w.melee && owned) || s.coins < price || (owned && owned.res >= w.maxReserve)) { game.audio.play('deny'); return false; }
-          s.coins -= price;
-          if (owned) owned.res = Math.min(w.maxReserve, owned.res + w.ammoPack);
-          else game.giveWeapon(id);
-          game.ui.toast(owned ? '+' + w.ammoPack + ' ammo for the ' + w.name : 'You bought the ' + w.name + '! Press ' + (A.weapons.indexOf(w) + 1) + ' to switch to it.', 'good');
-        } else if (x) {
-          if (s.coins < x.price) { game.audio.play('deny'); return false; }
-          s.coins -= x.price;
-          GK.run(game, x.actions);
-          game.ui.toast(x.name + '!', 'good');
-        } else return false;
-        game.audio.play('success');
-        game.emit('shop:buy', { id });
-        return true;
-      };
-    },
-    update(game, dt) {
-      const A = game.arsenalCfg, fx = game.fx, inp = game.input, s = game.state.arsenal;
-      // the gun becomes usable (e.g. the zapper was found) while the sword is in the hand: draw the gun
-      const ready = A.requires === undefined || GK.test(game, A.requires);
-      if (game.gunsWere === false && ready && A.byId[s.cur] && A.byId[s.cur].melee) {
-        const gun = A.weapons.find(w => !w.melee && s.owned[w.id]);
-        if (gun) game.selectWeapon(gun.id);
-      }
-      game.gunsWere = ready;
-      const armed = game.armed();
-      if (armed) {
-        // switch: 1-5 or the mouse wheel
-        for (let i = 1; i <= A.weapons.length && i <= 9; i++) if (inp.hits.has('Digit' + i) || inp.hits.has('Numpad' + i)) game.selectWeapon(i);
-        if (inp.wheel) {
-          const owned = A.weapons.filter(w => s.owned[w.id] && game.usable(w.id)), i = owned.findIndex(w => w.id === s.cur);
-          if (owned.length > 1) game.selectWeapon(owned[(i + (inp.wheel > 0 ? 1 : -1) + owned.length) % owned.length].id);
+      const applyUpgrades = () => { for (const u of Q.upgrades || []) if (S().bought[u.id]) for (const id of U.list(u.show)) { const e = game.world.get(id); if (e) e.visible = true; } };
+      game.queue = { serve, arrive, zap, startOutbreak, state: S, bubbles: () => bubbles, bugs: () => bugEls };
+      // ---- each frame ----
+      game.queue.tick = dt => {
+        const st = S(); st.t += dt;
+        const all = order(), waiting = waitingList();
+        // arrivals: the next customer comes every arriveEvery seconds while the line has room
+        const nextSlot = all.find(s => !st.people[s]);
+        if (nextSlot && st.t >= st.nextAt && waiting.length < (Q.maxWaiting || 3)) { arrive(nextSlot); st.nextAt = st.t + (game.fast ? 0 : Q.arriveEvery || 20); }
+        if (!nextSlot && !waiting.length && all.every(s => game.state.flags['desk_' + s])) {
+          if (Q.outbreak && !st.outbreak) startOutbreak();
+          else if (Q.boss && !st.people[Q.boss] && (!Q.outbreak || st.outbreak === 'done')) arrive(Q.boss);
         }
-        if (inp.pressed('reload')) game.reload();
-        // fire: a click, the mouse held down while looking around, or Q
-        if (!game.focus && (game.clickFire || (inp.mouse && inp.locked) || inp.down('fire'))) game.fire();
-      }
-      inp.wheel = 0;
-      game.clickFire = false;
-      // the sight: right mouse held (or Z) with a shooting weapon, while nothing else is going on
-      const cur = A.byId[s.cur], canAim = armed && cur && !cur.melee && (cur.zoom == null ? 0.35 : cur.zoom) > 0 && game.state.mode === 'playing' && !(game.handsBusy && game.handsBusy()) && game.reloadT <= 0;
-      if (!(armed && cur && !cur.melee && (cur.zoom == null ? 0.35 : cur.zoom) > 0) || (game.handsBusy && game.handsBusy())) inp.aimToggle = false;   // a spear, climbing, swimming: the sight switches off
-      const aiming = canAim && (inp.aimToggle || inp.down('aim'));
-      game.aimK = U.clamp(game.aimK + (aiming ? dt : -dt) * 7, 0, 1);
-      game.zoom = canAim ? game.aimK * (cur.zoom == null ? 0.35 : cur.zoom) : 0;
-      if (game.player) game.player.aiming = aiming;
-      if (game.ui.hud) game.ui.hud.classList.toggle('gk-aiming', game.aimK > 0.6);
-      if (game.cool > 0) game.cool -= dt;
-      if (game.emptyT > 0) game.emptyT -= dt;
-      if (game.reloadT > 0) { game.reloadT -= dt; if (game.reloadT <= 0) { game.reloadT = 0; game.reload(true); game.audio.play('click'); } }
-      game.kick = Math.max(0, game.kick - dt * 7);
-      if (game.swingT > 0) game.swingT = Math.max(0, game.swingT - dt);
-      if (game.drawT > 0) game.drawT = Math.max(0, game.drawT - dt);
-      game.sinceFire += dt;
-      const w = A.byId[s.cur], o = s.owned[s.cur];
-      const rk = game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null;
-      const lower = rk != null ? Math.sin(Math.PI * rk) : 0;
-      game.viewModel = armed ? { model: w.model, look: animLook(game, w, o, rk), scale: w.viewScale, kick: w.melee ? 0 : game.kick, glow: w.projectile ? 0 : game.kick * 0.25, lower, melee: !!w.melee,
-        swing: game.swingT > 0 ? 1 - game.swingT / (game.swingMax || 0.3) : 0, anim: w.anim || null, reload: rk, raise: game.drawT / 0.3, aim: game.aimK } : null;
-      if (game.viewModel && (w.anim === 'bow' || w.anim === 'sling')) game.viewModel.arms = { pose: w.anim, draw: game.viewModel.look.draw || 0, pull: game.viewModel.look.pull || 0 };
-      game.ui.setWeapon(armed ? {
-        name: w.name, icon: w.icon, color: w.color, mag: o.mag, magMax: w.mag, res: o.res, rapid: !!(game.hasPower && game.hasPower('rapid')), melee: !!w.melee,
-        reload: game.reloadT > 0 ? 1 - game.reloadT / (game.reloadMax || 1) : null,
-        slots: A.weapons.map((x, i) => ({ n: i + 1, icon: x.icon, owned: !!s.owned[x.id] && game.usable(x.id), active: x.id === s.cur })),
-      } : null);
-      game.ui.setCoins(armed || s.coins ? s.coins : null);
-
-      // player bolts
-      for (const b of fx.bolts) {
-        if (!b.visible) continue;
-        if (!b.v || !b.w) { b.hide(); continue; }   // restored mid-flight
-        const W = b.w;
-        b.life -= dt;
-        const len = V.len(b.v) * dt, dir = V.norm(b.v);
-        const tw = wallAt(game, b.pos, dir, len), he = enemyAt(game, b.pos, dir, len, b.hits);
-        if (he.e && he.t <= tw) {
-          const at = V.add(b.pos, V.scale(dir, he.t));
-          if (W.splash) { fx.explode(at, W); game.ui.hitMarker('hit'); b.hide(); continue; }
-          const r = game.hitHazard ? game.hitHazard(he.e, W.damage) : 'blocked';
-          game.ui.hitMarker(r === 'blocked' ? 'blocked' : 'hit');
-          if (r !== 'defeated') game.burst(at, r === 'blocked' ? '#4cc9f0' : W.color, 4);
-          game.emit('weapon:hit', { id: he.e.id });
-          if (b.hits && r !== 'blocked') { b.hits.add(he.e.id); b.pos = V.add(b.pos, V.scale(b.v, dt)); }
-          else b.hide();
-        } else if (tw < Infinity) {
-          const at = V.add(b.pos, V.scale(dir, tw));
-          if (W.splash) fx.explode(at, W); else game.burst(at, W.color, 3);
-          b.hide();
-        } else {
-          b.pos = V.add(b.pos, V.scale(b.v, dt));
-          if (W.drop) b.v[1] -= W.drop * dt;
-          if (W.projectile) {   // a model in flight points along its path (round ones tumble)
-            b.yaw = Math.atan2(b.v[0], b.v[2]); b.pitch = Math.asin(U.clamp(b.v[1] / (V.len(b.v) || 1), -1, 1));
-            if (/pebble|coconut/.test(W.projectile)) b.roll = (b.roll || 0) + dt * 14;
+        for (const k of waiting) st.people[k].waited += dt;
+        // walking
+        for (const slot in st.people) {
+          const p = st.people[slot], e = ent(slot); if (!e || !e.figure) continue;
+          const to = spotOf(p), d = V.sub(to, p.pos), L = Math.hypot(d[0], d[2]), sp = game.fast ? 50 : 2.4;
+          if (L > 0.05) { const s = Math.min(L, sp * dt); p.pos[0] += d[0] / L * s; p.pos[2] += d[2] / L * s; e.yaw = Math.atan2(d[0], d[2]); e.figure.walk = 1; e.figure.phase = (e.figure.phase || 0) + dt * 9; }
+          else {
+            e.figure.walk *= 0.8;
+            e.yaw = p.state === 'serve' ? Math.PI : p.state === 'wait' ? Math.atan2(-0.6, -1) : e.yaw;
+            if (p.state === 'leave') { e.visible = false; p.state = 'gone'; }
           }
-          if (b.life <= 0) { if (W.splash) fx.explode(b.pos, W); b.hide(); }
+          e.pos = p.pos.slice();
+          if (p.stars === 3 && p.state === 'leave') e.figure.armsUp = 1.2;
         }
-      }
-      // enemy bolts
-      const pl = game.player;
-      for (const b of fx.enemy) {
-        if (!b.visible) continue;
-        if (!b.v) { b.hide(); continue; }
-        b.life -= dt;
-        const len = V.len(b.v) * dt, dir = V.norm(b.v);
-        const tw = wallAt(game, b.pos, dir, len);
-        const tp = Ph.rayBox(b.pos, dir, Ph.bodyBox(pl.pos, pl.r + 0.15, pl.h));
-        if (tp >= 0 && tp <= len && tp <= tw) {
-          b.hide();
-          if (game.hurtPlayer && game.hurtPlayer(b.dmg, b.src)) {
-            game.emit('hazard:hit', { id: b.src && b.src.id });
-            if (b.src && b.src.def && b.src.def.onHit) GK.run(game, b.src.def.onHit, { entity: b.src });
-          } else game.burst(b.pos, '#4cc9f0', 4);
-        } else if (tw < Infinity) {
-          game.burst(V.add(b.pos, V.scale(dir, tw)), b.look.color, 3);
-          b.hide();
-        } else {
-          b.pos = V.add(b.pos, V.scale(b.v, dt));
-          if (b.life <= 0) b.hide();
-        }
-      }
-      // sparks
-      for (const sp of fx.sparks) {
-        if (!sp.visible) continue;
-        if (!sp.v) { sp.hide(); continue; }
-        sp.life -= dt;
-        if (sp.life <= 0) { sp.hide(); continue; }
-        sp.v[1] -= 9 * dt;
-        sp.pos = V.add(sp.pos, V.scale(sp.v, dt));
-        const k = sp.life / sp.maxLife;
-        sp.alpha = Math.min(1, k * 1.5); sp.scale = [k, k, k];
-      }
-      // dropped loot disappears after a while
-      for (const L of fx.loot) if (L.visible && L.loot) { L.lootT -= dt; if (L.lootT <= 0) L.hide(); }
+        drawBubbles(); drawBugs(dt);
+      };
+      game.on('game:win', () => { layer.style.display = 'none'; });
     },
-    restore(game) {
-      if (!game.state.arsenal) { game.state.arsenal = fresh(game.arsenalCfg); game.state.arsenal.coins = 0; }
-      game.reloadT = 0; game.swingT = 0; game.gunsWere = undefined; game.aimK = 0; game.zoom = 0;
-      if (game.fx) for (const k in game.fx) if (Array.isArray(game.fx[k])) for (const e of game.fx[k]) e.hide();
+    start(game) {
+      const Q = game.cfg.queue || {}, v = game.state.vars, S = game.state.queue;
+      // the fixed camera and a technician behind the counter (the chosen character)
+      game.fixedCam = Object.assign({ eye: [10, 10.2, 20.5], look: [10, 0.6, 8.2], fov: 50 }, Q.camera);
+      const tech = game.world.get('tech');
+      if (tech) {
+        const c = game.cfg.characters, id = game.character || (c && c.default), ch = c && c.choices && c.choices.find(x => x.id === id);
+        tech.figure = { look: Object.assign({ pack: false, scarf: false }, Q.techLook || (ch && ch.look) || {}), walk: 0, phase: 0 };
+      }
+      game.ui.setCoins(Number(v.coins) || 0);
+      // a resume: finished customers stay away, the others come back in
+      for (const slot in S.people) {
+        const p = S.people[slot];
+        if (game.state.flags['desk_' + slot]) { p.state = 'gone'; const e = game.world.get('cust-' + slot); if (e) e.visible = false; }
+        else if (p.state === 'serve') p.state = 'wait';
+      }
+      if (S.outbreak === true) { S.outbreak = false; S.bugs = {}; }
+      for (const u of Q.upgrades || []) if (S.bought[u.id]) for (const id of U.list(u.show)) { const e = game.world.get(id); if (e) e.visible = true; }
+      if (Q.ranks && Q.ranks.length) game.ui.setChips([{ text: '🎖️ ' + Q.ranks[S.rank || 0], color: Q.chipColor || '#4dabf7' }]);
     },
-    answers(game) {
-      const A = game.arsenalCfg;
-      return [{ where: 'Shop prices', answer: A.weapons.map(w => w.name + ' ' + (w.price || 'free') + ' (ammo ' + w.ammoPrice + ')').join(' · ') }];
-    },
+    update(game, dt) { if (game.queue && game.state.mode === 'playing') game.queue.tick(dt); },
   });
 })();
 
@@ -10109,47 +8879,6 @@ GK.ModelData["kenney-tree"] = {"q":1000,"p":[133,209,-133,0,198,-114,0,209,-188,
       if (!S.timer) S.timer = setInterval(() => { try { tick(); } catch (e) { /* sound is optional */ } }, 60);
     },
   });
-})();
-
-</script>
-<script>/* helpdesk.js */
-/* IT HELP DESK · helpdesk.js — ticket ratings (★★★ for a fast fix + bonus coins), promotions every 2 tickets (HUD chip),
-   lost USB sticks → coins, finished computers go dark, a save after every ticket. Loaded by GAME.scripts. */
-(function () {
-  'use strict';
-  const C = window.GAME_CONTENT, M = C.messages;
-  let usbSeen = 0;
-  const done = g => ['t1', 't2', 't3', 't4', 't5', 't6', 'server'].filter(s => g.state.flags['desk_' + s]).length;
-  const rankOf = g => Math.min(C.ranks.length - 1, Math.floor(done(g) / 2) + (g.state.flags.desk_server ? 1 : 0));
-  const chip = g => g.ui.setChips([{ text: '🎖️ ' + C.ranks[rankOf(g)], color: '#4dabf7' }]);
-  window.IT_DESK_GAME = {
-    start(g) {
-      usbSeen = (g.state.collected && g.state.collected['#usb']) || 0;
-      if (g.state.vars.tStart == null) g.state.vars.tStart = g.state.time;
-      for (const s of ['t1', 't2', 't3', 't4', 't5', 't6', 'server']) if (g.state.flags['desk_' + s]) { const e = g.world.get(s); if (e) e.setLook({ screen: '#2b2f36' }); }
-      chip(g);
-      if (!g._deskHooked) {
-        g._deskHooked = true;
-        g.on('desk:job', e => {
-          const pc = g.world.get(e.slot); if (pc) pc.setLook({ screen: '#2b2f36' });
-          const secs = g.state.time - (g.state.vars.tStart || 0), ins = e.slot === 'server' ? 2 : 1;
-          const stars = secs < 150 * ins ? 3 : secs < 300 * ins ? 2 : 1;
-          g.state.vars.tStart = g.state.time;
-          if (g.addCoins) g.addCoins(stars === 3 ? 30 : stars === 2 ? 15 : 0);
-          g.ui.toast(stars === 3 ? M.rate3 : stars === 2 ? M.rate2 : M.rate1, 'good');
-          const before = g.state.vars.rank || 0, now = rankOf(g);
-          if (now > before) { g.state.vars.rank = now; setTimeout(() => g.ui.toast(M.rank + C.ranks[now], 'good'), 1200); }
-          chip(g);
-          if (g.saveResume && g.player) g.saveResume({ pos: g.player.pos.slice(), rot: 0 });
-        });
-      }
-      g.ui.toast(M.welcome, 'good');
-    },
-    update(g) {
-      const n = (g.state.collected && g.state.collected['#usb']) || 0;
-      if (n > usbSeen) { if (g.addCoins) g.addCoins(15 * (n - usbSeen)); usbSeen = n; g.ui.toast(M.usb, 'good'); }
-    },
-  };
 })();
 
 </script>
