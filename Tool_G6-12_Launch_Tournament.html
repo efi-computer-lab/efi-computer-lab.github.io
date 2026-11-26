@@ -411,7 +411,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261416',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261423',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -2859,7 +2859,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     crease(ctx, tint(color, -.24), 1.2, [10, 13], [8, 17], [4, 18]);
   }
 
-  function face(ctx, f, pose, injuries, hitSide) {
+  function face(ctx, f, pose, injuries, hitSide, gaze) {
     ctx.save();
     ctx.translate(neck[0], neck[1] - headAboveNeck);
     ctx.scale(f.build.head * 1.08, f.build.head * 1.05);
@@ -2913,6 +2913,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       crease(ctx, f.hair, stern ? 2.5 : 1.9, [x+side*3,-5.4-brow], [x,-7], [x-side*3,-5.4+brow]);
       if (pose.closedEyes) crease(ctx, ink, 1.95, [x-2.5,.8], [x,3.5], [x+2.5,.8]);
       else if (pose.hurt) stroke(ctx, ink, 1.95, [[x+side*2.2,-.4],[x-side*1.5,1.9],[x+side*2.2,4]]);
+      else if (gaze) {
+        rect(ctx, x - 2.8, -1, 5.6, 6.7, 2.2, ink);
+        rect(ctx, x - 2.35, -.55, 4.7, 5.8, 1.75, '#fff6e8');
+        oval(ctx, x + gaze * 1.1, 2.35, 1.18, 2.15, ink);
+      }
       else {
         rect(ctx, x - 2.1, -1, 4.2, 6.7, stern ? [1.1,1.1,1.8,1.8] : 2.1, ink);
         if (!stern) oval(ctx, x - .55, .35, .66, .66, '#fff5dc');
@@ -3119,7 +3124,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     diver: 33, mage: 43, scout: 31, warden: 30, knight: 44, soldier: 31
   };
 
-  function draw(ctx, x, y, scale, fighter, attacksLeft = false, motion = {}) {
+  function draw(ctx, x, y, scale, fighter, attacksLeft, motion = {}) {
     const pose = poseFor(fighter, motion);
     const { injuries } = motion;
     const height = scale * fighter.build.height;
@@ -3154,7 +3159,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.restore();
     }
     drawNeck(ctx, fighter);
-    face(ctx, fighter, pose, injuries?.head, attack);
+    face(ctx, fighter, pose, injuries?.head, attack, attacksLeft == null ? 0 : attack);
     root.LaunchArt.injury(ctx, pose.lead.start[0] * attack, pose.lead.start[1], injuries?.shoulder);
     root.LaunchArt.injury(ctx, fighter.build.waist * .43 * attack, -49, injuries?.body);
     ctx.restore();
