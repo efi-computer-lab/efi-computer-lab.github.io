@@ -472,7 +472,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261739',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261829',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -4307,7 +4307,6 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
 
     const tookHit = !!trace?.part && inFlight && elapsed >= trace.flightMs;
-    const revealTarget = position && !travelling && (trace.part || trace.landed);
     const pendingLocation = match.stage === 'flight' && trace && elapsed < trace.flightMs ? trace.location : null;
     const aimedPull = queued || inFlight ? trace.pull : pendingAim?.pull || drawPull;
     const charge = aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
@@ -4316,7 +4315,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     for (const id of actors) {
       const side = T.sideOf(match, id);
       const isVictim = id === victim;
-      if (side !== home && !(revealTarget && isVictim)) continue;
+      // The shot camera reveals fighters as they enter the frame, regardless of the shot's outcome.
+      if (side !== home && !position) continue;
       const enemy = side !== T.sideOf(match, active);
       const { x, y } = isVictim ? victimAt : P.fighterPosition(scene.level, mirrored,
         T.setbackOf(match, id), enemy, T.duoSlot(match, id, state.round));
