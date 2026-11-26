@@ -411,7 +411,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261309',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261416',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -2405,19 +2405,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   'use strict';
 
   const ink = '#2c2530';
-  const stance = {
-    bow:     { ready: [25, -65, 0, -.10, 1, 0], fire: [36, -66, 0, .10, 0, 0], finish: [28, -58, .12, -.06, 0, 0] },
-    axe:     { ready: [-13, -98, -2.05, -.24, 8, 0], fire: [38, -70, -.25, .26, 2, 6], finish: [36, -40, .82, .22, 7, 0] },
-    blaster: { ready: [25, -61, 0, -.10, 5, 0], fire: [31, -61, 0, .04, 2, 0], finish: [23, -68, -.25, -.18, 3, 0] },
-    bomb:    { ready: [-19, -92, -.55, -.23, 8, 0], fire: [38, -67, -.17, .30, 0, 4], finish: [34, -48, .62, .22, 6, 0] },
-    disc:    { ready: [-14, -53, -.45, -.24, 8, 0], fire: [43, -62, .02, .28, 0, 5], finish: [29, -72, -.68, .29, 2, 0] },
-    pie:     { ready: [3, -53, 0, -.13, 13, 0], fire: [40, -65, -.20, .24, 2, 4], finish: [35, -69, -.50, .24, 2, 0] },
-    bubble:  { ready: [16, -83, -.48, -.08, 2, 0], fire: [33, -74, -.20, .17, 1, 0], finish: [36, -56, .50, .11, 0, 0] },
-    orb:     { ready: [11, -44, -.42, -.20, 10, 0], fire: [34, -81, -.50, .24, 0, 9], finish: [32, -83, -.68, -.10, 0, 3] },
-    boom:    { ready: [-13, -91, -1.30, -.30, 4, 0], fire: [40, -74, -.30, .24, 1, 4], finish: [43, -53, .60, .29, 4, 0] },
-    hammer:  { ready: [-12, -105, -1.80, -.19, 13, 0], fire: [42, -69, -.05, .37, 0, 10], finish: [32, -37, 1.02, .28, 10, 0] },
-    sword:   { ready: [-16, -102, -1.88, -.23, 10, 0], fire: [43, -75, -.34, .32, 0, 8], finish: [38, -49, .95, .27, 6, 0] },
-    cork:    { ready: [24, -66, -.02, -.09, 9, 0], fire: [37, -66, -.02, .07, 4, 0], finish: [27, -75, -.32, -.20, 2, 0] }
+  const armStances = {
+    bow:     { ready: [30, -64, 0], fire: [42, -64, 0], finish: [35, -53, .12] },
+    axe:     { ready: [34, -99, -.88], fire: [46, -66, -.25], finish: [37, -42, .82] },
+    blaster: { ready: [34, -63, 0], fire: [41, -63, 0], finish: [33, -67, -.25] },
+    bomb:    { ready: [37, -93, -.46], fire: [45, -64, -.17], finish: [39, -48, .62] },
+    disc:    { ready: [35, -49, -.46], fire: [47, -62, .02], finish: [35, -72, -.68] },
+    pie:     { ready: [31, -49, 0], fire: [44, -63, -.20], finish: [38, -69, -.50] },
+    bubble:  { ready: [34, -72, -.28], fire: [42, -68, -.12], finish: [36, -55, .50] },
+    orb:     { ready: [32, -46, -.42], fire: [42, -77, -.50], finish: [36, -77, -.68] },
+    boom:    { ready: [34, -94, -.95], fire: [45, -69, -.30], finish: [44, -52, .60] },
+    hammer:  { ready: [35, -99, -.75], fire: [46, -67, -.05], finish: [36, -38, 1.02] },
+    sword:   { ready: [36, -99, -1.18], fire: [46, -71, -.34], finish: [38, -50, .95] },
+    cork:    { ready: [35, -63, -.02], fire: [42, -63, -.02], finish: [33, -69, -.32] }
   };
   const trousers = {
     elf: '#315e55', logger: '#495267', artist: '#674572', festival: '#a85b55',
@@ -2429,19 +2429,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const between = (a, b, t) => a.map((value, i) => value + (b[i] - value) * t);
   const colors = new Map();
   const pelvis = -37;
-  const neck = [2, -73];
+  const neck = [0, -73];
   const headAboveNeck = 16.5;
-
-  function rotated(x, y, angle) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    return [x * cos - y * sin, x * sin + y * cos];
-  }
-
-  function torsoPoint(pose, x, y) {
-    const point = rotated(x, y - pelvis, pose.lean);
-    return [pose.x + point[0], pose.hips + point[1]];
-  }
 
   function bendLimb(start, target, upper, lower, side) {
     const dx = target[0] - start[0], dy = target[1] - start[1];
@@ -2523,81 +2512,82 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function poseFor(fighter, motion) {
-    const form = stance[fighter.weapon.id];
+    const form = armStances[fighter.weapon.id];
     const charge = motion.charge || 0;
     const { shoulders } = fighter.build;
-    const idle = [shoulders + 8, -39, .24, 0, 0, 0];
-    let pose = between(idle, form.ready, smooth(charge));
-    if (motion.snap != null) pose = between(pose, form.fire, smooth(motion.snap));
+    const idle = [shoulders + 6, -34, .18];
+    let hand = between(idle, form.ready, smooth(charge));
+    if (motion.snap != null) hand = between(hand, form.fire, smooth(motion.snap));
     if (motion.after != null) {
       const t = motion.after;
-      pose = t < .42 ? between(form.fire, form.finish, smooth(t / .42)) : between(form.finish, idle, smooth((t - .42) / .58));
+      hand = t < .42 ? between(form.fire, form.finish, smooth(t / .42)) : between(form.finish, idle, smooth((t - .42) / .58));
     }
-    const [handX, handY, propAngle, lean, crouch, lift] = pose;
+
     const impact = motion.impact || 0;
-    const head = motion.part === 'head' ? smooth(impact / .15) * (1 - smooth((impact - .20) / .80)) : 0;
-    const folded = motion.part === 'body' ? smooth(impact / .27) * (1 - smooth((impact - .34) / .66)) : 0;
-    const fall = motion.part === 'legs' ? smooth(impact / .33) * (1 - smooth((impact - .60) / .40)) : 0;
-    const reaction = Math.max(head, folded, fall);
-    const time = motion.time || 0;
-    const breath = motion.reduced || motion.part || motion.snap != null || motion.after != null
-      ? 0 : Math.sin(time / 430) * .85 * (1 - charge);
-    const tilt = lean - .44 * head - .13 * fall + .38 * folded;
+    const reaction = motion.part ? smooth(impact / .21) * (1 - smooth((impact - .35) / .65)) : 0;
+    const down = motion.down || 0;
+    const drop = 22 * down + (1 - down) * reaction * (motion.part === 'legs' ? 14 : 6);
+    const flinch = reaction + down * (1 - reaction);
+    const shoulder = shoulders * .81;
     const aim = motion.angle || 0;
-    const launcher = ['bow', 'blaster', 'bubble', 'cork'].includes(fighter.weapon.id);
+    const weapon = fighter.weapon;
+    const bow = weapon.id === 'bow';
+    const launcher = bow || ['blaster', 'bubble', 'cork'].includes(weapon.id);
     const raised = motion.after == null ? Math.max(smooth(charge * 2), motion.snap || 0) : 1 - smooth(motion.after);
-    const arm = bendLimb([shoulders * .78, -67], [
-      handX + 7 * reaction, handY + 8 * fall - 13 * head + 8 * folded
-    ], 20, 22, 1);
-    const weaponAngle = propAngle + aim * raised * (launcher ? 1 : .62) - tilt * (launcher ? raised : .35);
-    const mount = root.LaunchArt.weaponMount(arm.end, weaponAngle, fighter.weapon, motion);
-    const restingHand = [-shoulders * .88 - 5 - 13 * head, -38 - 19 * reaction];
+    const bowLift = bow ? Math.min(0, Math.sin(aim)) * raised : 0;
+    const lead = bendLimb([shoulder, -66], [
+      hand[0] + 6 * flinch + 10 * bowLift, hand[1] - 9 * flinch + 19 * bowLift
+    ], 17, 18, -1);
+    const mount = root.LaunchArt.weaponMount(lead.end, hand[2] + aim * raised * (launcher ? 1 : .62), weapon, motion);
+    const restingHand = [-idle[0] - 6 * flinch, idle[1] - 9 * flinch];
     const pull = motion.snap != null ? 1 - smooth(motion.snap / .66) :
       motion.after == null ? smooth(charge * 2.7) : 0;
-    const rearTarget = mount.string && pull ? between(restingHand, mount.string, pull) : restingHand;
-    const rear = bendLimb([-shoulders * .68, -68], rearTarget, 20, 21, -1);
+    const supportTarget = mount.string && pull ? between(restingHand, mount.string, pull) : restingHand;
+    const support = bendLimb([-shoulder, -66], supportTarget, 17, 18, 1);
     return {
-      x: -10 * head - 7 * folded - 6 * fall,
-      hips: Math.max(-40, pelvis + crouch + breath + 18 * fall + 7 * folded - lift * .62),
-      lean: tilt,
-      head: -.58 * tilt + .12 * aim * raised - .52 * head + .1 * folded,
-      arm, rear, mount,
-      reaction,
-      cloth: motion.reduced ? 0 : Math.sin(time / 260) * (1 + reaction * 3) + lean * 25,
-      blink: !motion.reduced && time > 0 && (time + fighter.build.shoulders * 57) % 4280 < 115
+      drop, lead, support, mount,
+      cloth: reaction * 6,
+      closedEyes: down > .68,
+      hurt: !!motion.part && reaction > .24
     };
   }
 
-  function leg(ctx, fighter, hip, knee, foot, rear, injuries) {
-    const [x, y] = foot;
+  function leg(ctx, fighter, side, feet, drop, injuries) {
+    const hip = [side * feet * .56, pelvis + drop];
+    const x = side * feet;
+    const ankle = [x, -8];
+    const { joint: knee } = bendLimb(hip, ankle, 15.5, 15.5, -side);
     const thick = fighter.look === 'chef' ? 19 : fighter.build.waist > 19 ? 16 : 14;
-    const pants = rear ? tint(trousers[fighter.look], -.23) : trousers[fighter.look];
-    limb(ctx, hip, knee, [x, y - 6], thick, volume(ctx, pants, knee[0] - 8, knee[1] - 8, knee[0] + 8, knee[1] + 8));
+    const pants = trousers[fighter.look];
+    const fabric = volume(ctx, pants, knee[0] - 8, knee[1] - 8, knee[0] + 8, knee[1] + 8);
+    limb(ctx, hip, knee, ankle, thick, fabric);
     if (fighter.look === 'knight') {
-      poly(ctx, rear ? '#676986' : '#a7b7c3', [[knee[0]-7,knee[1]-5],[knee[0]+5,knee[1]-6],[knee[0]+8,knee[1]+1],[knee[0],knee[1]+7],[knee[0]-6,knee[1]+3]], true);
-    } else if (!rear) {
-      crease(ctx, tint(pants, .22), 1.2, [knee[0] - 3, knee[1] - 8], [knee[0] - 5, knee[1]], [x - 3, y - 11]);
+      const [kx, ky] = knee;
+      poly(ctx, '#a7b7c3', [[kx-6,ky-5],[kx+6,ky-5],[kx+7,ky+1],[kx,ky+7],[kx-7,ky+1]], true);
+    } else {
+      crease(ctx, tint(pants, .22), 1.2, [knee[0], knee[1] - 8], [knee[0], knee[1] - 2], [x, -11]);
     }
+
     const leather = fighter.look === 'knight' ? '#56637b' : fighter.shade;
-    shape(ctx, volume(ctx, leather, x - 7, y - 14, x + 12, y), () => {
-      ctx.moveTo(x - 8, y - 14);
-      ctx.quadraticCurveTo(x - 1, y - 12, x + 7, y - 14);
-      ctx.quadraticCurveTo(x + 6, y - 9, x + 10, y - 8);
-      ctx.quadraticCurveTo(x + 18, y - 7, x + 16, y - 2);
-      ctx.quadraticCurveTo(x + 12, y + 1, x + 5, y);
-      ctx.lineTo(x - 8, y);
-      ctx.quadraticCurveTo(x - 10, y - 2, x - 8, y - 14);
+    const halfWidth = Math.min(10, feet - 1.3);
+    shape(ctx, volume(ctx, leather, x - 7, -14, x + 9, 0), () => {
+      ctx.moveTo(x - halfWidth * .71, -13);
+      ctx.quadraticCurveTo(x, -11, x + halfWidth * .71, -13);
+      ctx.lineTo(x + halfWidth, -4);
+      ctx.quadraticCurveTo(x + halfWidth + 1, 0, x + halfWidth * .49, 0);
+      ctx.lineTo(x - halfWidth * .49, 0);
+      ctx.quadraticCurveTo(x - halfWidth - 1, 0, x - halfWidth, -4);
       ctx.closePath();
     }, true);
-    if (!rear) crease(ctx, tint(fighter.trim, -.12), 1.5, [x - 6, y - 10], [x, y - 8], [x + 5, y - 10]);
-    crease(ctx, tint(leather, .28), 1.5, [x + 3, y - 4], [x + 9, y - 7], [x + 13, y - 4]);
-    root.LaunchArt.injury(ctx, knee[0] + 2, knee[1], injuries);
+    crease(ctx, tint(fighter.trim, -.12), 1.4, [x - halfWidth * .58, -10], [x, -8], [x + halfWidth * .58, -10]);
+    crease(ctx, tint(leather, .28), 1.4, [x - 4, -4], [x, -6], [x + 4, -4]);
+    root.LaunchArt.injury(ctx, ...knee, injuries);
   }
 
-  function arm(ctx, fighter, limbPose, rear, mount, motion) {
+  function arm(ctx, fighter, limbPose, mount, motion) {
     const { start, joint: elbow, end: hand } = limbPose;
-    const fabric = rear ? fighter.shade : fighter.coat;
-    const width = ['knight', 'warden', 'chef', 'mage', 'logger'].includes(fighter.look) ? 15 : 13;
+    const fabric = fighter.coat;
+    const width = ['knight', 'warden', 'chef', 'mage', 'logger'].includes(fighter.look) ? 14 : 12;
     const [x, y] = hand;
     const angle = Math.atan2(y - elbow[1], x - elbow[0]);
     const wrist = [x - 5 * Math.cos(angle), y - 5 * Math.sin(angle)];
@@ -2657,7 +2647,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     crease(ctx, shade, 1.4, [-10, -12], [-14, -23], [-6, -27]);
   }
 
-  function brim(ctx, color, x = 0, width = 27, tilt = -.06) {
+  function brim(ctx, color, x = 0, width = 27, tilt = 0) {
     ctx.save();
     ctx.translate(x, -10);
     ctx.rotate(tilt);
@@ -2746,14 +2736,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         break;
       case 'skater':
         softCap(ctx, shell, f.shade);
-        shape(ctx, volume(ctx, '#a1c8ee', -6,-16,23,-7), () => {
-          ctx.moveTo(-5,-11);
-          ctx.quadraticCurveTo(7,-18,21,-12);
-          ctx.quadraticCurveTo(33,-15,32,-9);
-          ctx.quadraticCurveTo(22,-4,9,-7);
+        shape(ctx, volume(ctx, '#a1c8ee', -16,-17,18,-7), () => {
+          ctx.moveTo(-21,-11);
+          ctx.quadraticCurveTo(0,-20,21,-11);
+          ctx.quadraticCurveTo(17,-6,0,-7);
+          ctx.quadraticCurveTo(-17,-6,-21,-11);
           ctx.closePath();
         }, true);
-        poly(ctx, '#ead8ff', [[-16,-23],[-7,-24],[-11,-20],[-4,-20],[-15,-12],[-12,-19],[-18,-19]]);
+        poly(ctx, '#ead8ff', [[-3,-26],[5,-26],[1,-22],[5,-22],[-3,-17],[-1,-21],[-6,-21]]);
         break;
       case 'chef':
         shape(ctx, volume(ctx, '#fff2db', -22, -34, 20, -7), () => {
@@ -2774,16 +2764,17 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         // Coral keeps the goggles up so the face stays visible during play.
         shape(ctx, f.shade, () => {
           ctx.moveTo(-22,-3);
-          ctx.quadraticCurveTo(-27,-31,-4,-32);
-          ctx.quadraticCurveTo(20,-36,22,-10);
-          ctx.lineTo(20,-4);
-          ctx.quadraticCurveTo(8,-14,-13,-7);
-          ctx.lineTo(-15,8);
-          ctx.lineTo(-22,9);
+          ctx.bezierCurveTo(-25,-24,-15,-32,0,-32);
+          ctx.bezierCurveTo(15,-32,25,-24,22,-3);
+          ctx.lineTo(20,8);
+          ctx.lineTo(16,4);
+          ctx.quadraticCurveTo(20,-13,0,-13);
+          ctx.quadraticCurveTo(-20,-13,-16,4);
+          ctx.lineTo(-20,8);
           ctx.closePath();
         }, true);
-        stroke(ctx, f.trim, 3.5, [[-21,-14],[-10,-22],[16,-21]]);
-        for (const x of [-5,11]) {
+        stroke(ctx, f.trim, 3.5, [[-21,-15],[-11,-21],[11,-21],[21,-15]]);
+        for (const x of [-8,8]) {
           rect(ctx, x - 7, -25, 13, 11, 5, volume(ctx, '#9cddd8', x - 4,-23,x + 4,-15), true);
           stroke(ctx, '#eefff7', 1.2, [[x-2,-21],[x+2,-22]]);
         }
@@ -2799,24 +2790,25 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         }, true);
         crease(ctx, '#f0c9ff89', 1.5, [-14,-18], [-8,-36], [6,-38]);
         rect(ctx, -18,-17,34,5,2,'#ae73bf');
-        brim(ctx, f.shade, 0, 27, -.12);
+        brim(ctx, f.shade);
         poly(ctx, f.trim, [[4,-18],[8,-25],[12,-19],[10,-14],[6,-14]], true);
         oval(ctx, -12, 10, 3, 4.1, f.trim, true);
         break;
       case 'scout':
         softCap(ctx, volume(ctx, '#c1a368', -11,-28,20,-8), '#8b7147');
         rect(ctx, -20,-16,43,5,2,'#675849', true);
-        brim(ctx, '#b69061', 1, 29);
+        brim(ctx, '#b69061', 0, 29);
         rect(ctx, -12, -17, 9, 7, 2, f.trim, true);
         break;
       case 'knight':
         shape(ctx, volume(ctx, '#a7bac7', -22,-26,20,9,.51), () => {
-          ctx.moveTo(-22,12);
-          ctx.bezierCurveTo(-28,-16,-21,-31,-4,-31);
-          ctx.quadraticCurveTo(24,-32,25,-12);
-          ctx.quadraticCurveTo(15,-6,-7,-9);
-          ctx.lineTo(-10,13);
-          ctx.lineTo(-17,16);
+          ctx.moveTo(-18,14);
+          ctx.bezierCurveTo(-28,2,-27,-30,0,-31);
+          ctx.bezierCurveTo(27,-30,28,2,18,14);
+          ctx.lineTo(14,11);
+          ctx.lineTo(16,-8);
+          ctx.quadraticCurveTo(0,-5,-16,-8);
+          ctx.lineTo(-14,11);
           ctx.closePath();
         }, true);
         shape(ctx, volume(ctx, '#bd5751', -22,-42,5,-26), () => {
@@ -2826,21 +2818,22 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
           ctx.quadraticCurveTo(-13,-36,-10,-28);
           ctx.closePath();
         }, true);
-        crease(ctx, '#eef7f3', 2, [-21,-15], [-11,-30], [10,-27]);
-        crease(ctx, '#62687d', 2.2, [-5,-13], [8,-21], [21,-15]);
-        oval(ctx, -16,-3,3,3, f.trim, true);
-        stroke(ctx, '#dae4e6', 1.4, [[-17,2],[-18,10]]);
+        crease(ctx, '#eef7f3', 2, [-21,-15], [-11,-31], [12,-26]);
+        crease(ctx, '#62687d', 2.2, [-18,-13], [0,-19], [18,-13]);
+        for (const side of [-1,1]) {
+          oval(ctx, side*20,-2.2,2.6,2.6, f.trim, true);
+          stroke(ctx, '#dae4e6', 1.4, [[side*20,2],[side*18,9]]);
+        }
         break;
       case 'soldier':
         softCap(ctx, shell, '#454e39');
         shape(ctx, '#495841', () => {
-          ctx.moveTo(-17,-13);
-          ctx.quadraticCurveTo(-4,-16,19,-13);
-          ctx.quadraticCurveTo(30,-12,27,-8);
-          ctx.quadraticCurveTo(16,-4,-12,-9);
+          ctx.moveTo(-23,-11);
+          ctx.quadraticCurveTo(0,-17,23,-11);
+          ctx.quadraticCurveTo(0,-5,-23,-11);
           ctx.closePath();
         }, true);
-        poly(ctx, f.trim, [[-2,-21],[2,-26],[6,-21],[2,-17]], true);
+        poly(ctx, f.trim, [[-4,-21],[0,-26],[4,-21],[0,-17]], true);
         break;
       case 'warden':
         fur(ctx, '#e8e5d6', [[-22,-5],[-22,-16],[-13,-26],[-2,-28],[9,-26],[19,-21],[23,-10],[17,-12],[10,-16],[-2,-17],[-12,-12],[-16,-4]]);
@@ -2853,105 +2846,97 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function beard(ctx, f) {
     const color = f.look === 'warden' ? '#d1d8e2' : '#934939';
     shape(ctx, volume(ctx, color, -12, 7, 13, 20, .42), () => {
-      ctx.moveTo(-12,1);
-      ctx.quadraticCurveTo(-10,10,1,8);
-      ctx.quadraticCurveTo(7,6,13,8);
-      ctx.lineTo(18,6);
-      ctx.bezierCurveTo(18,17,13,22,5,24);
-      ctx.quadraticCurveTo(0,21,-5,23);
-      ctx.quadraticCurveTo(-15,19,-14,5);
+      ctx.moveTo(-17, 3);
+      ctx.quadraticCurveTo(-13, 9, -5, 8);
+      ctx.quadraticCurveTo(0, 6, 5, 8);
+      ctx.quadraticCurveTo(13, 9, 17, 3);
+      ctx.bezierCurveTo(18, 16, 12, 21, 6, 21);
+      ctx.quadraticCurveTo(0, 26, -6, 21);
+      ctx.bezierCurveTo(-12, 21, -18, 16, -17, 3);
       ctx.closePath();
     }, true);
-    crease(ctx, tint(color,.28), 1.4, [-8,13], [-4,17], [0,17]);
-    crease(ctx, tint(color,-.24), 1.2, [9,14], [11,18], [7,20]);
+    crease(ctx, tint(color, .28), 1.4, [-10, 13], [-8, 17], [-4, 18]);
+    crease(ctx, tint(color, -.24), 1.2, [10, 13], [8, 17], [4, 18]);
   }
 
-  function face(ctx, f, pose, startled, injuries) {
+  function face(ctx, f, pose, injuries, hitSide) {
     ctx.save();
-    ctx.translate(...neck);
-    ctx.rotate(pose.head);
-    ctx.translate(0, -headAboveNeck);
+    ctx.translate(neck[0], neck[1] - headAboveNeck);
     ctx.scale(f.build.head * 1.08, f.build.head * 1.05);
-    const hair = volume(ctx, f.hair, -15,-17,12,18,.33);
+    const hair = volume(ctx, f.hair, -15, -17, 15, 18, .33);
     if (f.look === 'warden') {
-      oval(ctx, -3,-1,25,28,volume(ctx, f.coat,-23,-23,18,28),true);
-      crease(ctx, '#b6e2e7', 1.7, [-24,1], [-25,-14], [-17,-22]);
+      oval(ctx, 0, -1, 25, 28, volume(ctx, f.coat, -23, -23, 18, 28), true);
+      crease(ctx, '#b6e2e7', 1.7, [-24, 1], [-25, -14], [-17, -22]);
     } else {
-      shape(ctx, hair, () => {
-        ctx.moveTo(-19,11);
-        ctx.bezierCurveTo(-23,6,-24,-9,-17,-16);
-        ctx.bezierCurveTo(-11,-26,13,-23,18,-13);
-        ctx.quadraticCurveTo(24,-5,20,6);
-        ctx.quadraticCurveTo(12,19,-12,17);
-        ctx.closePath();
-      }, true);
+      oval(ctx, 0, -5, 21, 19, hair, true);
     }
 
-    const skin = volume(ctx, f.skin, 4,-13,-9,19,.44);
-    if (f.look === 'elf') {
-      poly(ctx, skin, [[-13,1],[-26,-5],[-23,8],[-18,12],[-12,9]], true);
-      crease(ctx, tint(f.skin,-.28), 1.4, [-23,0], [-21,6], [-17,7]);
-    }
-    if (f.look !== 'elf') {
-      oval(ctx,-17,3.5,5.1,6,skin,true);
-      crease(ctx,tint(f.skin,-.24),1.3,[-20,2],[-17,1],[-18,6]);
+    const skin = volume(ctx, f.skin, -7, -13, 10, 19, .44);
+    const earShade = tint(f.skin, -.24);
+    for (const side of [-1, 1]) {
+      if (f.look === 'elf') {
+        poly(ctx, skin, [[side*15,0],[side*26,-7],[side*24,5],[side*20,11],[side*16,8]], true);
+        crease(ctx, earShade, 1.35, [side*23,-1], [side*21,5], [side*17,6]);
+      } else {
+        oval(ctx, side * 17.8, 2.7, 4.7, 5.1, skin, true);
+        crease(ctx, earShade, 1.25, [side*20,1], [side*18,1], [side*19,5]);
+      }
     }
     shape(ctx, skin, () => {
-      ctx.moveTo(-17,-9);
-      ctx.quadraticCurveTo(-11,-17,4,-16);
-      ctx.bezierCurveTo(16,-16,19,-10,19,-1);
-      ctx.quadraticCurveTo(22,3,18,7);
-      ctx.bezierCurveTo(19,20,3,23,-8,17);
-      ctx.quadraticCurveTo(-16,14,-16,7);
-      ctx.quadraticCurveTo(-18,-2,-17,-9);
+      ctx.moveTo(0, -17);
+      ctx.bezierCurveTo(16, -17, 19, -11, 19, 0);
+      ctx.bezierCurveTo(19, 11, 11, 20, 0, 20);
+      ctx.bezierCurveTo(-11, 20, -19, 11, -19, 0);
+      ctx.bezierCurveTo(-19, -11, -16, -17, 0, -17);
       ctx.closePath();
     }, true);
 
     if (['artist','skater','mage','elf','scout'].includes(f.look)) {
       shape(ctx, hair, () => {
-        ctx.moveTo(-18,1);
-        ctx.quadraticCurveTo(-21,-8,-16,-14);
-        ctx.quadraticCurveTo(-6,-23,11,-14);
-        ctx.lineTo(16,-8);
-        ctx.quadraticCurveTo(10,-8,5,-11);
-        ctx.lineTo(6,-6);
-        ctx.quadraticCurveTo(-2,-6,-7,-11);
-        ctx.quadraticCurveTo(-11,-4,-15,-3);
-        ctx.lineTo(-15,3);
+        ctx.moveTo(-18, 3);
+        ctx.quadraticCurveTo(-22, -6, -17, -14);
+        ctx.quadraticCurveTo(0, -24, 17, -14);
+        ctx.quadraticCurveTo(21, -8, 18, 2);
+        ctx.lineTo(15, -7);
+        ctx.quadraticCurveTo(8, -7, 1, -11);
+        ctx.lineTo(2, -6);
+        ctx.quadraticCurveTo(-5, -7, -9, -10);
+        ctx.quadraticCurveTo(-14, -7, -15, 0);
         ctx.closePath();
       }, true);
     }
-
     if (f.look === 'logger' || f.look === 'warden') beard(ctx, f);
     const stern = ['knight', 'soldier', 'logger'].includes(f.look);
-    const brow = stern ? 1.9 : .35;
-    for (const [x, width, tilt] of [[-4, 4.6, brow], [10.5, 3.5, -brow]]) {
-      crease(ctx, f.hair, stern ? 2.6 : 1.9, [x-3,-5.2-tilt], [x,-7], [x+3,-5.2+tilt]);
-      if (pose.blink && !startled) crease(ctx, ink, 1.65, [x-2,1], [x,.1], [x+2,1]);
+    const brow = pose.hurt ? -1.3 : stern ? 1.7 : .4;
+    for (const side of [-1, 1]) {
+      const x = side * 7;
+      crease(ctx, f.hair, stern ? 2.5 : 1.9, [x+side*3,-5.4-brow], [x,-7], [x-side*3,-5.4+brow]);
+      if (pose.closedEyes) crease(ctx, ink, 1.95, [x-2.5,.8], [x,3.5], [x+2.5,.8]);
+      else if (pose.hurt) stroke(ctx, ink, 1.95, [[x+side*2.2,-.4],[x-side*1.5,1.9],[x+side*2.2,4]]);
       else {
-        rect(ctx, x-width/2, -1.3,width,startled ? 8 : 6.5,stern ? [1.1,1.1,1.8,1.8] : width/2,ink);
-        if (!stern) oval(ctx, x+.55,.2,.66,.66,'#fff5dc');
+        rect(ctx, x - 2.1, -1, 4.2, 6.7, stern ? [1.1,1.1,1.8,1.8] : 2.1, ink);
+        if (!stern) oval(ctx, x - .55, .35, .66, .66, '#fff5dc');
+      }
+      oval(ctx, side * 12, 7.5, 2.8, 1.65, '#fa8e7b79');
+      if (['elf','chef','scout'].includes(f.look)) {
+        for (const [distance,y] of [[10,6.8],[14,7.2],[12,8.9]]) oval(ctx, side*distance, y, .65, .7, tint(f.skin,-.4));
       }
     }
-    crease(ctx, tint(f.skin,-.34), 1.25, [4.2,2.8], [2.3,7.3], [6.1,6.8]);
-    oval(ctx, -9, 7, 3.1, 1.8, '#fa8e7b91');
-    oval(ctx, 14, 7, 2.6, 1.55, '#fa8e7b77');
-    if (['elf','chef','scout'].includes(f.look)) {
-      for (const [x,y] of [[-11,6],[-7,7.1],[-9,8.5],[14,6.7]]) oval(ctx,x,y,.65,.7,tint(f.skin,-.4));
-    }
-    if (startled) oval(ctx, 6, 11, 3.7, 3, f.hair);
+    crease(ctx, tint(f.skin, -.34), 1.25, [-1.1, 3.5], [-2.1, 7.4], [1.9, 6.9]);
+    if (pose.closedEyes) oval(ctx, 0, 12, 2.8, 1.8, f.hair);
+    else if (pose.hurt) crease(ctx, f.hair, 1.8, [-3.9,12], [0,9], [3.9,12]);
     else if (['artist','festival','chef','diver'].includes(f.look)) {
       shape(ctx, f.hair, () => {
-        ctx.moveTo(1,9.5);
-        ctx.quadraticCurveTo(7,11,11,8.8);
-        ctx.quadraticCurveTo(9,15,5,14);
-        ctx.quadraticCurveTo(2,13,1,9.5);
+        ctx.moveTo(-4.5, 10);
+        ctx.quadraticCurveTo(0, 11.7, 4.5, 10);
+        ctx.quadraticCurveTo(3, 15, 0, 15);
+        ctx.quadraticCurveTo(-3, 15, -4.5, 10);
         ctx.closePath();
       });
-      crease(ctx, '#fff1df',1.1,[4,10.6],[7,11.2],[9,10.4]);
-    } else crease(ctx, f.hair, 1.6, [2,10.5], [6,12.9], [10,10.2]);
-    hat(ctx, f, startled);
-    root.LaunchArt.injury(ctx, 12, 3, injuries);
+      crease(ctx, '#fff1df', 1.1, [-2.9,11], [0,11.8], [2.9,11]);
+    } else crease(ctx, f.hair, 1.6, [-4,10.5], [0,13.4], [4,10.5]);
+    hat(ctx, f, pose.hurt);
+    root.LaunchArt.injury(ctx, hitSide * 12, 3, injuries);
     ctx.restore();
   }
 
@@ -2962,9 +2947,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function outerwear(ctx, f, pose) {
     if (['elf', 'mage', 'knight', 'warden', 'festival'].includes(f.look)) {
-      const length = { elf: -31, mage: -10, knight: -16, warden: -25, festival: -41 }[f.look];
+      const length = Math.min(-pose.drop - 3, { elf: -31, mage: -10, knight: -16, warden: -25, festival: -41 }[f.look]);
       const color = f.look === 'knight' ? '#b85752' : f.shade;
-      const edge = -35 - pose.cloth - pose.reaction * 10;
+      const edge = -35 - pose.cloth;
       shape(ctx, volume(ctx, color, edge, -65, 13, -12), () => {
         ctx.moveTo(-12, -76);
         ctx.quadraticCurveTo(3, -74, 13, -67);
@@ -2993,13 +2978,16 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const { shoulders } = f.build;
     const metal = '#99aebb';
     const fill = volume(ctx,metal,-15,-73,18,-43,.57);
-    poly(ctx,fill,[[-16,-65],[-10,-72],[12,-72],[20,-65],[17,-49],[4,-40],[-9,-45]],true);
-    poly(ctx,'#73849c',[[12,-69],[18,-64],[15,-50],[4,-42],[6,-56]]);
+    poly(ctx,fill,[[-18,-65],[-11,-72],[11,-72],[18,-65],[14,-49],[0,-40],[-14,-49]],true);
+    poly(ctx,'#73849c',[[11,-69],[16,-64],[12,-50],[0,-42],[4,-56]]);
     crease(ctx,'#edf7ef',1.9,[-11,-64],[-1,-70],[9,-65]);
     crease(ctx,'#596b84',1.6,[-11,-56],[1,-50],[15,-57]);
-    poly(ctx,fill,[[shoulders-17,-73],[shoulders-6,-77],[shoulders+2,-72],[shoulders+3,-64],[shoulders-7,-58],[shoulders-16,-63]],true);
-    stroke(ctx,'#dceeee',1.6,[[shoulders-13,-71],[shoulders-6,-74],[shoulders,-69]]);
-    oval(ctx,shoulders-5,-63,2.4,2.3,'#d3aa67',true);
+    for (const side of [-1,1]) {
+      const x = side * (shoulders - 6);
+      poly(ctx,fill,[[x-9,-72],[x,-77],[x+9,-72],[x+8,-64],[x,-58],[x-8,-64]],true);
+      stroke(ctx,'#dceeee',1.6,[[x-6,-71],[x,-74],[x+6,-71]]);
+      oval(ctx,x,-63,2.4,2.3,'#d3aa67',true);
+    }
     shape(ctx, '#bc6452', () => {
       ctx.moveTo(-18,-74);
       ctx.lineTo(-1,-70);
@@ -3052,7 +3040,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       return;
     }
     const robe = f.look === 'mage';
-    const hem = { elf:-28, mage:-11, scout:-34, warden:-29, soldier:-32 }[f.look] ?? -35;
+    const hem = Math.min(-pose.drop - 3, { elf:-28, mage:-11, scout:-34, warden:-29, soldier:-32 }[f.look] ?? -35);
     const hemWidth = robe ? waist+10 : waist+2;
     shape(ctx,color,() => {
       ctx.moveTo(-shoulders,-62);
@@ -3123,51 +3111,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         break;
     }
     rect(ctx,-waist-1,-43,waist*2+2,6.5,2.6,volume(ctx,f.shade,-11,-43,12,-36),true);
-    buckle(ctx,2,-44,f.trim);
-  }
-
-  function draw(ctx, x, y, scale, fighter, facesLeft = false, motion = {}) {
-    const p = poseFor(fighter, motion);
-    const { injuries } = motion;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(facesLeft ? -scale : scale, scale * fighter.build.height);
-    ctx.lineJoin = ctx.lineCap = 'round';
-    const { waist, stance } = fighter.build;
-    const feet = stance * .87;
-    const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, feet + 21);
-    shadow.addColorStop(0, '#1f203b66');
-    shadow.addColorStop(1, '#1f203b00');
-    oval(ctx, 0, 0, feet + 23, 6, shadow);
-    const down = motion.down || 0;
-    if (down) {
-      ctx.translate(20 * down, -24 * down);
-      ctx.rotate(-1.4 * down);
-    }
-    const backFoot = [-feet - 2, -1.5], leadFoot = [feet - 1, 0];
-    for (const [rear, foot] of [[true, backFoot], [false, leadFoot]]) {
-      const hip = torsoPoint(p, (rear ? -.59 : .59) * feet, pelvis);
-      const ankle = [foot[0], foot[1] - 6];
-      const { joint } = bendLimb(hip, ankle, 18, 18, -1);
-      leg(ctx, fighter, hip, joint, foot, rear, rear ? null : injuries?.legs);
-    }
-    ctx.translate(p.x, p.hips);
-    ctx.rotate(p.lean);
-    ctx.translate(0, -pelvis);
-
-    outerwear(ctx, fighter, p);
-    arm(ctx, fighter, p.rear, true);
-    costume(ctx, fighter, p);
-    drawNeck(ctx, fighter);
-    const mount = motion.part || motion.down ? null : p.mount;
-    const behindHead = p.arm.end[1] < -75 && p.arm.end[0] < 19;
-    if (behindHead) arm(ctx, fighter, p.arm, false, mount, motion);
-    face(ctx, fighter, p, !!motion.part, injuries?.head);
-    if (!behindHead) arm(ctx, fighter, p.arm, false, mount, motion);
-    root.LaunchArt.injury(ctx, ...p.arm.start, injuries?.shoulder);
-    root.LaunchArt.injury(ctx, waist * .62, -49, injuries?.body);
-    ctx.restore();
-    if (motion.caption) return captionPoint(fighter, p, down, facesLeft, x, y, scale);
+    buckle(ctx,-5,-44,f.trim);
   }
 
   const crowns = {
@@ -3175,28 +3119,58 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     diver: 33, mage: 43, scout: 31, warden: 30, knight: 44, soldier: 31
   };
 
-  function captionPoint(fighter, pose, down, facesLeft, x, y, scale) {
-    const crown = -headAboveNeck - crowns[fighter.look] * fighter.build.head * 1.05;
-    const [headX, headY] = rotated(0, crown, pose.head);
-    const head = rotated(...torsoPoint(pose, neck[0] + headX, neck[1] + headY), -1.4 * down);
-    const shoulder = rotated(...torsoPoint(pose, 0, -74), -1.4 * down);
-    const tilt = Math.abs(Math.sin(pose.head + pose.lean - 1.4 * down));
-    const labelX = head[0] * (1 - .64 * down);
-    const labelY = Math.min(head[1] - tilt * 17, shoulder[1] - 16);
-    return {
-      x: x + (labelX + 20 * down) * (facesLeft ? -scale : scale),
-      y: y + (labelY - 24 * down - 6) * scale * fighter.build.height
-    };
+  function draw(ctx, x, y, scale, fighter, attacksLeft = false, motion = {}) {
+    const pose = poseFor(fighter, motion);
+    const { injuries } = motion;
+    const height = scale * fighter.build.height;
+    const front = motion.mirrored ? -1 : 1;
+    const attack = front * (attacksLeft ? -1 : 1);
+    const feet = fighter.build.stance * .89;
+    ctx.save();
+    ctx.translate(x, y);
+    // The arena can be mirrored. Keep the costume in the same screen orientation and flip only the arms.
+    ctx.scale(front * scale, height);
+    ctx.lineJoin = ctx.lineCap = 'round';
+    const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, feet + 21);
+    shadow.addColorStop(0, '#1f203b66');
+    shadow.addColorStop(1, '#1f203b00');
+    oval(ctx, 0, 0, feet + 23, 6, shadow);
+    for (const side of [-1, 1]) {
+      leg(ctx, fighter, side, feet, pose.drop, side === attack ? injuries?.legs : null);
+    }
+    ctx.translate(0, pose.drop);
+    outerwear(ctx, fighter, pose);
+    const bow = fighter.weapon.id === 'bow';
+    ctx.save();
+    ctx.scale(attack, 1);
+    if (!bow) arm(ctx, fighter, pose.support);
+    arm(ctx, fighter, pose.lead, motion.part || motion.down ? null : pose.mount, motion);
+    ctx.restore();
+    costume(ctx, fighter, pose);
+    if (bow) {
+      ctx.save();
+      ctx.scale(attack, 1);
+      arm(ctx, fighter, pose.support);
+      ctx.restore();
+    }
+    drawNeck(ctx, fighter);
+    face(ctx, fighter, pose, injuries?.head, attack);
+    root.LaunchArt.injury(ctx, pose.lead.start[0] * attack, pose.lead.start[1], injuries?.shoulder);
+    root.LaunchArt.injury(ctx, fighter.build.waist * .43 * attack, -49, injuries?.body);
+    ctx.restore();
+    if (motion.caption) {
+      const crown = neck[1] - headAboveNeck - crowns[fighter.look] * fighter.build.head * 1.05;
+      return { x, y: y + (crown + pose.drop - 6) * height };
+    }
   }
 
   function releasePoint(fighter, angle) {
-    const pose = poseFor(fighter, { snap: 1, angle });
-    const [x, y] = torsoPoint(pose, ...pose.mount.exit);
+    const { mount } = poseFor(fighter, { snap: 1, angle });
+    const [x, y] = mount.exit;
     const { height } = fighter.build;
-    const { angle: gripAngle, angleScale } = pose.mount;
-    const rotatedAngle = pose.lean + gripAngle * angleScale;
-    const launchAngle = Math.atan2(Math.sin(rotatedAngle) * height, Math.cos(rotatedAngle));
-    return { x, y: y * height, angle: launchAngle / angleScale };
+    const visualAngle = mount.angle * mount.angleScale;
+    const launchAngle = Math.atan2(Math.sin(visualAngle) * height, Math.cos(visualAngle));
+    return { x, y: y * height, angle: launchAngle / mount.angleScale };
   }
 
   root.LaunchFighterArt = { draw, releasePoint };
@@ -3916,11 +3890,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const arc = 240 * scale;
     const hit = demo >= flightEnd && demo < flightEnd + 580 ? (demo - flightEnd) / 580 : null;
     Actor.draw(menuContext, left, floor, scale, selection, false, {
-      time, reduced, angle, charge: Math.min(1, demo / 610),
+      angle, charge: Math.min(1, demo / 610),
       snap: demo >= 610 && demo < flightStart ? (demo - 610) / release : null,
       after: demo >= flightStart ? Math.min(1, (demo - flightStart) / 390) : null
     });
-    Actor.draw(menuContext, right, floor, scale, opponent, true, { time: time + 500, reduced, part: hit == null ? null : 'body', impact: hit });
+    Actor.draw(menuContext, right, floor, scale, opponent, true, { part: hit == null ? null : 'body', impact: hit });
     menuContext.save();
     menuContext.strokeStyle = '#fff8c0';
     menuContext.globalAlpha = .72;
@@ -4152,7 +4126,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         ctx.fill();
       }
       const motion = {
-        time: time + (id === active ? 0 : 430), reduced,
+        mirrored,
         injuries: T.injuriesOf(match, id, isVictim ? pendingLocation : null),
         part: hit ? trace.part : null, impact: reduced ? .32 : impact, down,
         caption: duo && canvas.width / viewWidth >= .48
