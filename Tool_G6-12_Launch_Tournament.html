@@ -472,7 +472,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261443',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261739',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -828,7 +828,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const WIDTH = 1740;
   const VIEW_WIDTH = 820;
-  const MAX_VIEW_WIDTH = 1190;
+  const MAX_VIEW_WIDTH = 1290;
   const HEIGHT = 340;
   const SCALE = 24;
   const ORIGIN = { x: 108, y: 254 };
@@ -990,6 +990,20 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return weapon.releaseMs + Math.min(2850, Math.max(580, (points.length - 1) * 27));
   }
 
+  function followShot(point, mirrored, width, height, camera, blend) {
+    const clampX = x => Math.max(0, Math.min(WIDTH - width, x));
+    const x = mirrorX(point.x, mirrored);
+    const targetX = clampX(x - width * (mirrored ? .56 : .44));
+    const targetLift = Math.max(0, HEIGHT - height * .68 - point.y);
+    // Keep the shot in frame even when a slow device skips part of the pan.
+    return {
+      x: Math.max(clampX(x - width * .86), Math.min(clampX(x - width * .14), camera.x + (targetX - camera.x) * blend)),
+      lift: Math.max(0, HEIGHT - height * .92 - point.y, Math.min(
+        Math.max(0, HEIGHT - height * .1 - point.y), camera.lift + (targetLift - camera.lift) * blend
+      ))
+    };
+  }
+
   function pointAt(points, progress) {
     const index = Math.max(0, Math.min(1, progress)) * (points.length - 1);
     const position = Math.floor(index);
@@ -1011,7 +1025,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const api = {
     WIDTH, VIEW_WIDTH, MAX_VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
-    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, playbackMs, pointAt, aimReadout
+    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, playbackMs, followShot, pointAt, aimReadout
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchPhysics = api;
@@ -3471,7 +3485,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   let answerPublicKey, answerPrivateKey, openingAnswers = false;
   let pointer = null, pull, pending = '', pendingAim, fieldIndex = -1, trace, scene, shownQuestion = '';
   let lastStatus = '', popupKey = '';
-  let camera = 0;
+  let camera = 0, cameraLift = 0, trackedShot = null, lastFrame = 0;
   let viewWidth = P.VIEW_WIDTH, worldHeight = 0, skyHeight = 0, viewportDirty = true;
   let questionFrame = '';
   let launchReport = '';
@@ -4204,17 +4218,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!width || !height) return;
     viewportDirty = false;
     const pixels = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2000000 / (width * height)));
-    viewWidth = Math.min(P.MAX_VIEW_WIDTH, Math.max(duo ? 350 : 180, P.HEIGHT * width / height));
+    viewWidth = Math.min(P.MAX_VIEW_WIDTH, Math.max(duo ? 350 : 180, P.HEIGHT * width / height) * 1.12);
     canvas.width = Math.round(width * pixels);
     canvas.height = Math.round(height * pixels);
     // One scale for both axes keeps angled faces and limbs in proportion across viewports.
     worldHeight = canvas.width * P.HEIGHT / viewWidth;
     skyHeight = (canvas.height - worldHeight) * P.HEIGHT / worldHeight;
-    ctx.setTransform(canvas.width / viewWidth, 0, 0, worldHeight / P.HEIGHT, 0, canvas.height - worldHeight);
+    trackedShot = null;
     questionFrame = '';
   }
 
   function frame(time) {
+    const delta = time - lastFrame;
+    lastFrame = time;
     requestAnimationFrame(frame);
     if (!$('entry').hidden) {
       paintMenu(time);
@@ -4238,7 +4254,6 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     const mirrored = mirrorTurn(match);
     const home = match.left.includes(player) ? 'left' : match.right.includes(player) ? 'right' : mirrored ? 'right' : 'left';
-    camera = home === 'right' ? P.WIDTH - viewWidth : 0;
 
     const elapsed = match.stage === 'flight' && trace ? now - trace.at : -1;
     const inFlight = elapsed >= 0 && elapsed < trace.flightMs + T.IMPACT_MS;
@@ -4249,6 +4264,21 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const snapping = inFlight && afterRelease < 0;
     const travelTime = inFlight ? trace.flightMs - release : 1;
     const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime) : null;
+    if (position) {
+      if (trackedShot !== trace) {
+        camera = mirrored ? P.WIDTH - viewWidth : 0;
+        cameraLift = 0;
+        trackedShot = trace;
+      }
+      const blend = reduced ? 1 : 1 - Math.exp(-delta / 65);
+      const view = P.followShot(position, mirrored, viewWidth, P.HEIGHT + skyHeight, { x: camera, lift: cameraLift }, blend);
+      camera = view.x;
+      cameraLift = view.lift;
+    } else {
+      camera = home === 'right' ? P.WIDTH - viewWidth : 0;
+      cameraLift = 0;
+      trackedShot = null;
+    }
     const drawPull = pointer !== null || !$('aim-controls').hidden ? pull : null;
     const active = T.turnPlayer(match);
     const victim = match.stage === 'flight' && trace ? trace.victim : T.opponentFor(match, active);
@@ -4260,12 +4290,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const victimAt = P.fighterPosition(scene.level, mirrored, T.setbackOf(match, victim) - remainingPush, true, T.duoSlot(match, victim, state.round));
     updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed);
 
-    if (skyHeight > 0) {
+    const visibleSky = skyHeight + cameraLift;
+    const scale = worldHeight / P.HEIGHT;
+    ctx.setTransform(scale, 0, 0, scale, 0, canvas.height - worldHeight + cameraLift * scale);
+    if (visibleSky > 0) {
       ctx.fillStyle = scene.level.far;
-      ctx.fillRect(0, -skyHeight, viewWidth, skyHeight + 1);
+      ctx.fillRect(0, -visibleSky, viewWidth, visibleSky + 1);
     }
     ctx.drawImage(scene.background, camera, 0, viewWidth, P.HEIGHT, 0, 0, viewWidth, P.HEIGHT);
-    Art.ambient(ctx, scene.level, camera, viewWidth, skyHeight, reduced ? 0 : time);
+    Art.ambient(ctx, scene.level, camera, viewWidth, visibleSky, reduced ? 0 : time);
     ctx.save();
     ctx.translate(-camera, 0);
     if (mirrored) {
@@ -4274,6 +4307,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
 
     const tookHit = !!trace?.part && inFlight && elapsed >= trace.flightMs;
+    const revealTarget = position && !travelling && (trace.part || trace.landed);
     const pendingLocation = match.stage === 'flight' && trace && elapsed < trace.flightMs ? trace.location : null;
     const aimedPull = queued || inFlight ? trace.pull : pendingAim?.pull || drawPull;
     const charge = aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
@@ -4281,9 +4315,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const actors = duo ? match.order : [active, victim];
     for (const id of actors) {
       const side = T.sideOf(match, id);
-      if (side !== home) continue;
-      const enemy = side !== T.sideOf(match, active);
       const isVictim = id === victim;
+      if (side !== home && !(revealTarget && isVictim)) continue;
+      const enemy = side !== T.sideOf(match, active);
       const { x, y } = isVictim ? victimAt : P.fighterPosition(scene.level, mirrored,
         T.setbackOf(match, id), enemy, T.duoSlot(match, id, state.round));
       if (!onScreen(x, mirrored)) continue;
@@ -4341,7 +4375,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       for (let lag = 5; lag >= 1; lag--) {
         if (afterRelease > lag * 38) Art.trail(ctx, projectileAt(afterRelease - lag * 38, travelTime), lag, trace.weapon);
       }
-      if (position.y < 12 - skyHeight) Art.airborne(ctx, position.x, 19 - skyHeight);
+      if (position.y < 12 - visibleSky) Art.airborne(ctx, position.x, 19 - visibleSky);
       else {
         const ahead = projectileAt(afterRelease + 3, travelTime);
         const behind = projectileAt(Math.max(0, afterRelease - 3), travelTime);
