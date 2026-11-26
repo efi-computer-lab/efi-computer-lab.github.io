@@ -411,7 +411,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261254',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261309',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -1927,7 +1927,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         break;
       }
       case 'bomb':
-        ctx.rotate(elapsed / 215);
+        ctx.rotate(angle + elapsed / 215);
         dot(ctx, 0, 0, 11, ink);
         dot(ctx, 0, 0, 9, '#6a456f');
         box(ctx, -8, -3, 16, 6, color, 2);
@@ -1951,7 +1951,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         dot(ctx, -3, -3, 2.4, '#f0fff3');
         break;
       case 'orb':
-        ctx.rotate(elapsed / 70);
+        ctx.rotate(angle + elapsed / 70);
         dot(ctx, 0, 0, 11, '#533280');
         dot(ctx, 0, 0, 9, color);
         sparkle(ctx, '#fff5a5', 0, 0, 7);
@@ -1973,17 +1973,45 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  function held(ctx, x, y, angle, weapon, motion) {
+  const launcherMounts = {
+    bow: [7, 0, 3, 0],
+    blaster: [-3, 6, 22, -1],
+    bubble: [0, 0, 16, 0],
+    cork: [-4, 7, 23, -1]
+  };
+  const thrownGrips = {
+    axe: [0, 10], hammer: [0, 10], sword: [-16, 0], bomb: [-6, 6],
+    disc: [-8, 3], pie: [-8, 3], orb: [-7, 6], boom: [-5, 6]
+  };
+
+  function weaponMount(hand, angle, weapon, motion) {
+    const launcher = launcherMounts[weapon.id];
+    const [gripX, gripY] = launcher || thrownGrips[weapon.id];
+    const angleScale = weapon.id === 'pie' || weapon.id === 'disc' ? .56 : 1;
+    const visualAngle = angle * angleScale;
+    const cos = Math.cos(visualAngle), sin = Math.sin(visualAngle);
+    const x = hand[0] - gripX * cos + gripY * sin;
+    const y = hand[1] - gripX * sin - gripY * cos;
+    const flex = motion.snap != null ? 1 - motion.snap : motion.after == null ? (motion.charge || 0) : 0;
+    const point = (px, py) => [x + px * cos - py * sin, y + px * sin + py * cos];
+    return {
+      x, y, angle, angleScale, launcher, flex,
+      exit: launcher ? point(launcher[2], launcher[3]) : [x, y],
+      string: weapon.id === 'bow' ? point(-5 - 23 * flex, 0) : null
+    };
+  }
+
+  function held(ctx, mount, weapon, motion) {
     const id = weapon.id;
-    if (id !== 'bow' && id !== 'blaster' && id !== 'bubble' && id !== 'cork') {
-      if (motion.after == null) projectile(ctx, x + 5, y - 6, angle, 0, weapon);
+    const { x, y, angle, launcher, flex } = mount;
+    if (!launcher) {
+      if (motion.after == null) projectile(ctx, x, y, angle, 0, weapon);
       return;
     }
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
     if (id === 'bow') {
-      const flex = motion.snap != null ? 1 - motion.snap : (motion.charge || 0);
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(-5, -21);
@@ -2209,7 +2237,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  root.LaunchArt = { zone, terrain, frontCover, projectile, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
+  root.LaunchArt = { zone, terrain, frontCover, projectile, weaponMount, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
 })(globalThis);
 
 </script>
@@ -2379,16 +2407,16 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const ink = '#2c2530';
   const stance = {
     bow:     { ready: [25, -65, 0, -.10, 1, 0], fire: [36, -66, 0, .10, 0, 0], finish: [28, -58, .12, -.06, 0, 0] },
-    axe:     { ready: [-23, -89, -2.05, -.28, 8, 0], fire: [38, -70, -.25, .26, 2, 6], finish: [36, -40, .82, .22, 7, 0] },
+    axe:     { ready: [-13, -98, -2.05, -.24, 8, 0], fire: [38, -70, -.25, .26, 2, 6], finish: [36, -40, .82, .22, 7, 0] },
     blaster: { ready: [25, -61, 0, -.10, 5, 0], fire: [31, -61, 0, .04, 2, 0], finish: [23, -68, -.25, -.18, 3, 0] },
-    bomb:    { ready: [-23, -79, -.55, -.30, 8, 0], fire: [38, -67, -.17, .30, 0, 4], finish: [34, -48, .62, .22, 6, 0] },
+    bomb:    { ready: [-19, -92, -.55, -.23, 8, 0], fire: [38, -67, -.17, .30, 0, 4], finish: [34, -48, .62, .22, 6, 0] },
     disc:    { ready: [-14, -53, -.45, -.24, 8, 0], fire: [43, -62, .02, .28, 0, 5], finish: [29, -72, -.68, .29, 2, 0] },
     pie:     { ready: [3, -53, 0, -.13, 13, 0], fire: [40, -65, -.20, .24, 2, 4], finish: [35, -69, -.50, .24, 2, 0] },
     bubble:  { ready: [16, -83, -.48, -.08, 2, 0], fire: [33, -74, -.20, .17, 1, 0], finish: [36, -56, .50, .11, 0, 0] },
     orb:     { ready: [11, -44, -.42, -.20, 10, 0], fire: [34, -81, -.50, .24, 0, 9], finish: [32, -83, -.68, -.10, 0, 3] },
     boom:    { ready: [-13, -91, -1.30, -.30, 4, 0], fire: [40, -74, -.30, .24, 1, 4], finish: [43, -53, .60, .29, 4, 0] },
     hammer:  { ready: [-12, -105, -1.80, -.19, 13, 0], fire: [42, -69, -.05, .37, 0, 10], finish: [32, -37, 1.02, .28, 10, 0] },
-    sword:   { ready: [-17, -86, -2.36, -.23, 10, 0], fire: [43, -75, -.34, .32, 0, 8], finish: [38, -49, .95, .27, 6, 0] },
+    sword:   { ready: [-16, -102, -1.88, -.23, 10, 0], fire: [43, -75, -.34, .32, 0, 8], finish: [38, -49, .95, .27, 6, 0] },
     cork:    { ready: [24, -66, -.02, -.09, 9, 0], fire: [37, -66, -.02, .07, 4, 0], finish: [27, -75, -.32, -.20, 2, 0] }
   };
   const trousers = {
@@ -2400,6 +2428,34 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const smooth = value => { const t = unit(value); return t * t * (3 - 2 * t); };
   const between = (a, b, t) => a.map((value, i) => value + (b[i] - value) * t);
   const colors = new Map();
+  const pelvis = -37;
+  const neck = [2, -73];
+  const headAboveNeck = 16.5;
+
+  function rotated(x, y, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return [x * cos - y * sin, x * sin + y * cos];
+  }
+
+  function torsoPoint(pose, x, y) {
+    const point = rotated(x, y - pelvis, pose.lean);
+    return [pose.x + point[0], pose.hips + point[1]];
+  }
+
+  function bendLimb(start, target, upper, lower, side) {
+    const dx = target[0] - start[0], dy = target[1] - start[1];
+    const reach = Math.hypot(dx, dy);
+    const ux = reach ? dx / reach : 1, uy = reach ? dy / reach : 0;
+    const length = Math.max(Math.abs(upper - lower) + .25, Math.min(upper + lower - .25, reach));
+    const along = (upper * upper - lower * lower + length * length) / (2 * length);
+    const bend = Math.sqrt(Math.max(0, upper * upper - along * along)) * side;
+    return {
+      start,
+      joint: [start[0] + along * ux - bend * uy, start[1] + along * uy + bend * ux],
+      end: [start[0] + length * ux, start[1] + length * uy]
+    };
+  }
 
   function tint(hex, amount) {
     const key = hex + amount;
@@ -2469,7 +2525,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function poseFor(fighter, motion) {
     const form = stance[fighter.weapon.id];
     const charge = motion.charge || 0;
-    const idle = [fighter.build.shoulders + 5, -40, .24, 0, 0, 0];
+    const { shoulders } = fighter.build;
+    const idle = [shoulders + 8, -39, .24, 0, 0, 0];
     let pose = between(idle, form.ready, smooth(charge));
     if (motion.snap != null) pose = between(pose, form.fire, smooth(motion.snap));
     if (motion.after != null) {
@@ -2483,18 +2540,29 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const fall = motion.part === 'legs' ? smooth(impact / .33) * (1 - smooth((impact - .60) / .40)) : 0;
     const reaction = Math.max(head, folded, fall);
     const time = motion.time || 0;
-    const breath = motion.reduced || motion.part ? 0 : Math.sin(time / 430) * .85 * (1 - charge);
+    const breath = motion.reduced || motion.part || motion.snap != null || motion.after != null
+      ? 0 : Math.sin(time / 430) * .85 * (1 - charge);
+    const tilt = lean - .44 * head - .13 * fall + .38 * folded;
+    const aim = motion.angle || 0;
+    const launcher = ['bow', 'blaster', 'bubble', 'cork'].includes(fighter.weapon.id);
+    const raised = motion.after == null ? Math.max(smooth(charge * 2), motion.snap || 0) : 1 - smooth(motion.after);
+    const arm = bendLimb([shoulders * .78, -67], [
+      handX + 7 * reaction, handY + 8 * fall - 13 * head + 8 * folded
+    ], 20, 22, 1);
+    const weaponAngle = propAngle + aim * raised * (launcher ? 1 : .62) - tilt * (launcher ? raised : .35);
+    const mount = root.LaunchArt.weaponMount(arm.end, weaponAngle, fighter.weapon, motion);
+    const restingHand = [-shoulders * .88 - 5 - 13 * head, -38 - 19 * reaction];
+    const pull = motion.snap != null ? 1 - smooth(motion.snap / .66) :
+      motion.after == null ? smooth(charge * 2.7) : 0;
+    const rearTarget = mount.string && pull ? between(restingHand, mount.string, pull) : restingHand;
+    const rear = bendLimb([-shoulders * .68, -68], rearTarget, 20, 21, -1);
     return {
-      x: -18 * head - 12 * folded - 10 * fall,
-      hips: -37 + crouch + breath + 26 * fall + 10 * folded,
-      lean: lean - .54 * head - .16 * fall + .48 * folded,
-      head: -.63 * head + .23 * folded,
-      hand: [handX + 7 * reaction, handY + 12 * fall - 16 * head + 10 * folded],
-      propAngle: propAngle + (motion.angle || 0) * .85,
-      rear: fighter.weapon.id === 'bow' && (charge || motion.snap != null)
-        ? [-7 - (motion.snap != null ? 1 - motion.snap : charge) * 11, -66]
-        : [-fighter.build.shoulders * .84 - 5 - 19 * head, -38 - 24 * reaction],
-      fall, reaction, lift: motion.reduced ? 0 : lift + 4 * head, breath,
+      x: -10 * head - 7 * folded - 6 * fall,
+      hips: Math.max(-40, pelvis + crouch + breath + 18 * fall + 7 * folded - lift * .62),
+      lean: tilt,
+      head: -.58 * tilt + .12 * aim * raised - .52 * head + .1 * folded,
+      arm, rear, mount,
+      reaction,
       cloth: motion.reduced ? 0 : Math.sin(time / 260) * (1 + reaction * 3) + lean * 25,
       blink: !motion.reduced && time > 0 && (time + fighter.build.shoulders * 57) % 4280 < 115
     };
@@ -2526,23 +2594,25 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     root.LaunchArt.injury(ctx, knee[0] + 2, knee[1], injuries);
   }
 
-  function arm(ctx, fighter, from, hand, rear) {
-    const dx = hand[0] - from[0], dy = hand[1] - from[1];
-    const reach = Math.hypot(dx, dy) || 1;
-    const bend = Math.max(1.7, (rear ? 6 : 12) - reach * .22);
-    const elbow = [from[0] + dx * .46 - dy * bend / reach, from[1] + dy * .46 + dx * bend / reach];
+  function arm(ctx, fighter, limbPose, rear, mount, motion) {
+    const { start, joint: elbow, end: hand } = limbPose;
     const fabric = rear ? fighter.shade : fighter.coat;
     const width = ['knight', 'warden', 'chef', 'mage', 'logger'].includes(fighter.look) ? 15 : 13;
     const [x, y] = hand;
-    const forearm = Math.hypot(x - elbow[0], y - elbow[1]) || 1;
-    const wrist = [x - 6 * (x - elbow[0]) / forearm, y - 6 * (y - elbow[1]) / forearm];
-    limb(ctx, from, elbow, wrist, width, volume(ctx, fabric, from[0], from[1] - 9, elbow[0], elbow[1] + 10));
+    const angle = Math.atan2(y - elbow[1], x - elbow[0]);
+    const wrist = [x - 5 * Math.cos(angle), y - 5 * Math.sin(angle)];
+    limb(ctx, start, elbow, wrist, width, volume(ctx, fabric, start[0], start[1] - 9, elbow[0], elbow[1] + 10));
     const cuff = ['knight', 'warden', 'mage', 'elf', 'festival'].includes(fighter.look) ? fighter.trim : fighter.shade;
     ctx.save();
     ctx.translate(...wrist);
-    ctx.rotate(Math.atan2(y - elbow[1], x - elbow[0]));
+    ctx.rotate(angle);
     rect(ctx, -4, -5.75, 5, 11.5, 2, cuff, true);
-    mitt(ctx, 5, 0, fighter.skin);
+    ctx.restore();
+    if (mount) root.LaunchArt.held(ctx, mount, fighter.weapon, motion);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    mitt(ctx, 0, 0, fighter.skin, !!mount);
     ctx.restore();
   }
 
@@ -2798,8 +2868,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function face(ctx, f, pose, startled, injuries) {
     ctx.save();
-    ctx.translate(3, -90);
+    ctx.translate(...neck);
     ctx.rotate(pose.head);
+    ctx.translate(0, -headAboveNeck);
     ctx.scale(f.build.head * 1.08, f.build.head * 1.05);
     const hair = volume(ctx, f.hair, -15,-17,12,18,.33);
     if (f.look === 'warden') {
@@ -2821,20 +2892,20 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       poly(ctx, skin, [[-13,1],[-26,-5],[-23,8],[-18,12],[-12,9]], true);
       crease(ctx, tint(f.skin,-.28), 1.4, [-23,0], [-21,6], [-17,7]);
     }
+    if (f.look !== 'elf') {
+      oval(ctx,-17,3.5,5.1,6,skin,true);
+      crease(ctx,tint(f.skin,-.24),1.3,[-20,2],[-17,1],[-18,6]);
+    }
     shape(ctx, skin, () => {
       ctx.moveTo(-17,-9);
       ctx.quadraticCurveTo(-11,-17,4,-16);
       ctx.bezierCurveTo(16,-16,19,-10,19,-1);
       ctx.quadraticCurveTo(22,3,18,7);
       ctx.bezierCurveTo(19,20,3,23,-8,17);
-      ctx.quadraticCurveTo(-17,14,-17,7);
-      ctx.quadraticCurveTo(-21,-2,-17,-9);
+      ctx.quadraticCurveTo(-16,14,-16,7);
+      ctx.quadraticCurveTo(-18,-2,-17,-9);
       ctx.closePath();
     }, true);
-    if (f.look !== 'elf') {
-      oval(ctx,-17,3.5,4.6,6,skin,true);
-      crease(ctx,tint(f.skin,-.24),1.3,[-19,2],[-16,1],[-17,6]);
-    }
 
     if (['artist','skater','mage','elf','scout'].includes(f.look)) {
       shape(ctx, hair, () => {
@@ -2854,16 +2925,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (f.look === 'logger' || f.look === 'warden') beard(ctx, f);
     const stern = ['knight', 'soldier', 'logger'].includes(f.look);
     const brow = stern ? 1.9 : .35;
-    for (const x of [-5, 9]) {
-      const tilt = x < 0 ? brow : -brow;
+    for (const [x, width, tilt] of [[-4, 4.6, brow], [10.5, 3.5, -brow]]) {
       crease(ctx, f.hair, stern ? 2.6 : 1.9, [x-3,-5.2-tilt], [x,-7], [x+3,-5.2+tilt]);
       if (pose.blink && !startled) crease(ctx, ink, 1.65, [x-2,1], [x,.1], [x+2,1]);
       else {
-        rect(ctx, x-2.3, -1.3,4.6,startled ? 8 : 6.5,stern ? [1.1,1.1,2.1,2.1] : 2.3,ink);
-        if (!stern) oval(ctx, x+.6,.2,.72,.72,'#fff5dc');
+        rect(ctx, x-width/2, -1.3,width,startled ? 8 : 6.5,stern ? [1.1,1.1,1.8,1.8] : width/2,ink);
+        if (!stern) oval(ctx, x+.55,.2,.66,.66,'#fff5dc');
       }
     }
-    crease(ctx, tint(f.skin,-.34), 1.25, [2,3], [-.6,7], [4,6.8]);
+    crease(ctx, tint(f.skin,-.34), 1.25, [4.2,2.8], [2.3,7.3], [6.1,6.8]);
     oval(ctx, -9, 7, 3.1, 1.8, '#fa8e7b91');
     oval(ctx, 14, 7, 2.6, 1.55, '#fa8e7b77');
     if (['elf','chef','scout'].includes(f.look)) {
@@ -2883,6 +2953,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     hat(ctx, f, startled);
     root.LaunchArt.injury(ctx, 12, 3, injuries);
     ctx.restore();
+  }
+
+  function drawNeck(ctx, f) {
+    const [x, y] = neck;
+    poly(ctx, tint(f.skin, -.2), [[x-6,y+2],[x-5,y-9],[x+5,y-9],[x+6,y+2],[x+1,y+5]], true);
   }
 
   function outerwear(ctx, f, pose) {
@@ -3058,46 +3133,70 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.translate(x, y);
     ctx.scale(facesLeft ? -scale : scale, scale * fighter.build.height);
     ctx.lineJoin = ctx.lineCap = 'round';
-    const { shoulders, waist, stance } = fighter.build;
+    const { waist, stance } = fighter.build;
     const feet = stance * .87;
     const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, feet + 21);
     shadow.addColorStop(0, '#1f203b66');
     shadow.addColorStop(1, '#1f203b00');
     oval(ctx, 0, 0, feet + 23, 6, shadow);
-    if (motion.down) {
-      ctx.translate(0, -13 * motion.down);
-      ctx.rotate(-1.4 * motion.down);
+    const down = motion.down || 0;
+    if (down) {
+      ctx.translate(20 * down, -24 * down);
+      ctx.rotate(-1.4 * down);
     }
-    ctx.translate(p.x, -p.lift);
-    leg(ctx, fighter, [-feet * .62, p.hips], [-feet - 3 + 27 * p.fall, -20 + 14 * p.fall], [-feet - 6 * p.fall, 0], true);
-    leg(ctx, fighter, [feet * .62, p.hips], [feet + 1 + 20 * p.fall, -20 + 17 * p.fall], [feet - 3 + 5 * p.fall, 0], false, injuries?.legs);
-    ctx.translate(0, p.hips + 37);
-    ctx.translate(0, -37);
+    const backFoot = [-feet - 2, -1.5], leadFoot = [feet - 1, 0];
+    for (const [rear, foot] of [[true, backFoot], [false, leadFoot]]) {
+      const hip = torsoPoint(p, (rear ? -.59 : .59) * feet, pelvis);
+      const ankle = [foot[0], foot[1] - 6];
+      const { joint } = bendLimb(hip, ankle, 18, 18, -1);
+      leg(ctx, fighter, hip, joint, foot, rear, rear ? null : injuries?.legs);
+    }
+    ctx.translate(p.x, p.hips);
     ctx.rotate(p.lean);
-    ctx.translate(0, 37);
+    ctx.translate(0, -pelvis);
 
     outerwear(ctx, fighter, p);
-    arm(ctx, fighter, [-shoulders * .73, -68], p.rear, true);
+    arm(ctx, fighter, p.rear, true);
     costume(ctx, fighter, p);
+    drawNeck(ctx, fighter);
+    const mount = motion.part || motion.down ? null : p.mount;
+    const behindHead = p.arm.end[1] < -75 && p.arm.end[0] < 19;
+    if (behindHead) arm(ctx, fighter, p.arm, false, mount, motion);
     face(ctx, fighter, p, !!motion.part, injuries?.head);
-    arm(ctx, fighter, [shoulders * .72, -67], p.hand, false);
-    root.LaunchArt.injury(ctx, shoulders * .82, -68, injuries?.shoulder);
+    if (!behindHead) arm(ctx, fighter, p.arm, false, mount, motion);
+    root.LaunchArt.injury(ctx, ...p.arm.start, injuries?.shoulder);
     root.LaunchArt.injury(ctx, waist * .62, -49, injuries?.body);
-    if (!motion.part && !motion.down) {
-      root.LaunchArt.held(ctx, ...p.hand, p.propAngle, fighter.weapon, motion);
-      mitt(ctx, p.hand[0] - 1, p.hand[1], fighter.skin, true);
-    }
     ctx.restore();
+    if (motion.caption) return captionPoint(fighter, p, down, facesLeft, x, y, scale);
+  }
+
+  const crowns = {
+    elf: 36, logger: 30, artist: 29, festival: 41, skater: 31, chef: 44,
+    diver: 33, mage: 43, scout: 31, warden: 30, knight: 44, soldier: 31
+  };
+
+  function captionPoint(fighter, pose, down, facesLeft, x, y, scale) {
+    const crown = -headAboveNeck - crowns[fighter.look] * fighter.build.head * 1.05;
+    const [headX, headY] = rotated(0, crown, pose.head);
+    const head = rotated(...torsoPoint(pose, neck[0] + headX, neck[1] + headY), -1.4 * down);
+    const shoulder = rotated(...torsoPoint(pose, 0, -74), -1.4 * down);
+    const tilt = Math.abs(Math.sin(pose.head + pose.lean - 1.4 * down));
+    const labelX = head[0] * (1 - .64 * down);
+    const labelY = Math.min(head[1] - tilt * 17, shoulder[1] - 16);
+    return {
+      x: x + (labelX + 20 * down) * (facesLeft ? -scale : scale),
+      y: y + (labelY - 24 * down - 6) * scale * fighter.build.height
+    };
   }
 
   function releasePoint(fighter, angle) {
     const pose = poseFor(fighter, { snap: 1, angle });
-    const nozzle = { bow: 3, blaster: 23, bubble: 16, cork: 23 }[fighter.weapon.id];
-    const x = pose.hand[0] + (nozzle == null ? 5 : nozzle * Math.cos(pose.propAngle));
-    const y = pose.hand[1] + 37 + (nozzle == null ? -6 : nozzle * Math.sin(pose.propAngle));
-    const cos = Math.cos(pose.lean);
-    const sin = Math.sin(pose.lean);
-    return { x: pose.x + x * cos - y * sin, y: (pose.hips - pose.lift + x * sin + y * cos) * fighter.build.height };
+    const [x, y] = torsoPoint(pose, ...pose.mount.exit);
+    const { height } = fighter.build;
+    const { angle: gripAngle, angleScale } = pose.mount;
+    const rotatedAngle = pose.lean + gripAngle * angleScale;
+    const launchAngle = Math.atan2(Math.sin(rotatedAngle) * height, Math.cos(rotatedAngle));
+    return { x, y: y * height, angle: launchAngle / angleScale };
   }
 
   root.LaunchFighterArt = { draw, releasePoint };
@@ -3769,7 +3868,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const angle = Math.atan2(shot.pull[1], shot.pull[0]);
       const launch = Actor.releasePoint(fighterFor(shot.player), angle);
       const shooterPosition = P.fighterPosition(scene.level, mirrored, setback, false, slot);
-      const release = { x: shooterPosition.x + launch.x, y: shooterPosition.y + launch.y };
+      const release = { x: shooterPosition.x + launch.x, y: shooterPosition.y + launch.y, angle: launch.angle };
       trace = { ...flight, ...shot, weapon, angle, release, offsetX: release.x - field.origin.x, offsetY: release.y - field.origin.y };
       launchReport = '';
       shotResult.hidden = true;
@@ -3837,7 +3936,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const x = start.x + (end.x - start.x) * t;
       const y = start.y + (end.y - start.y) * t - arc * t * (1 - t);
       const direction = Math.atan2(end.y - start.y + arc * (2 * t - 1), end.x - start.x);
-      Art.projectile(menuContext, x, y, direction, reduced ? 0 : demo - flightStart, selection.weapon);
+      const shotAngle = turnAngle(hand.angle, direction, Math.min(1, (demo - flightStart) / 120));
+      Art.projectile(menuContext, x, y, shotAngle, reduced ? 0 : demo - flightStart, selection.weapon);
     } else if (hit != null) {
       Art.impact(menuContext, end, hit, 'body', selection.weapon, reduced);
     }
@@ -3913,9 +4013,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
   }
 
-  function projectileAt(elapsed, travelTime, reduced) {
+  function turnAngle(from, to, progress) {
+    const difference = Math.atan2(Math.sin(to - from), Math.cos(to - from));
+    return from + difference * progress;
+  }
+
+  function projectileAt(elapsed, travelTime) {
     const point = P.pointAt(trace.points, elapsed / travelTime);
-    const blend = reduced ? 0 : Math.max(0, 1 - elapsed / 110) ** 2;
+    const blend = Math.max(0, 1 - elapsed / 110) ** 2;
     return { x: point.x + trace.offsetX * blend, y: point.y + trace.offsetY * blend };
   }
 
@@ -3946,7 +4051,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     camera = previous === P.WIDTH ? 0 : camera * (P.WIDTH - viewWidth) / (P.WIDTH - previous);
     canvas.width = Math.round(width * pixels);
     canvas.height = Math.round(height * pixels);
-    worldHeight = duo ? Math.min(canvas.height, Math.max(canvas.height * .64, canvas.width * P.HEIGHT / P.WIDTH)) : canvas.height;
+    // One scale for both axes keeps angled faces and limbs in proportion across viewports.
+    worldHeight = canvas.width * P.HEIGHT / viewWidth;
     skyHeight = (canvas.height - worldHeight) * P.HEIGHT / worldHeight;
     ctx.setTransform(canvas.width / viewWidth, 0, 0, worldHeight / P.HEIGHT, 0, canvas.height - worldHeight);
     questionFrame = '';
@@ -3992,7 +4098,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const travelling = inFlight && afterRelease >= 0 && elapsed < trace.flightMs;
     const snapping = inFlight && afterRelease < 0;
     const travelTime = inFlight ? trace.flightMs - release : 1;
-    const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime, reduced) : null;
+    const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime) : null;
     if (position) {
       const follow = P.cameraAt(position.x, mirrored, viewWidth);
       camera += (follow - camera) * (reduced ? 1 : 1 - Math.exp(-delta / 72));
@@ -4048,18 +4154,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const motion = {
         time: time + (id === active ? 0 : 430), reduced,
         injuries: T.injuriesOf(match, id, isVictim ? pendingLocation : null),
-        part: hit ? trace.part : null, impact: reduced ? .32 : impact, down
+        part: hit ? trace.part : null, impact: reduced ? .32 : impact, down,
+        caption: duo && canvas.width / viewWidth >= .48
       };
       if (id === active) Object.assign(motion, {
         charge: Math.min(1, charge), angle, snap: snapping ? elapsed / release : null,
         after: inFlight && !snapping ? Math.min(1, afterRelease / 540) : null
       });
       const actor = fighterFor(id);
-      Actor.draw(ctx, x, y, 1, actor, enemy, motion);
-      if (duo && canvas.width / viewWidth >= .48) {
+      const caption = Actor.draw(ctx, x, y, 1, actor, enemy, motion);
+      if (caption) {
         ctx.save();
-        ctx.translate(x, y - (down ? 28 : 122 * actor.build.height));
-        ctx.scale(mirrored ? -1 : 1, canvas.width * P.HEIGHT / (viewWidth * worldHeight));
+        ctx.translate(caption.x, caption.y);
+        ctx.scale(mirrored ? -1 : 1, 1);
         ctx.font = '750 19px system-ui';
         ctx.textAlign = 'center';
         ctx.lineWidth = 5;
@@ -4086,14 +4193,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         Art.release(ctx, trace.release, trace.pull, afterRelease / 145, trace.weapon.color);
       }
       for (let lag = 5; lag >= 1; lag--) {
-        if (afterRelease > lag * 38) Art.trail(ctx, projectileAt(afterRelease - lag * 38, travelTime, reduced), lag, trace.weapon);
+        if (afterRelease > lag * 38) Art.trail(ctx, projectileAt(afterRelease - lag * 38, travelTime), lag, trace.weapon);
       }
       if (position.y < 12 - skyHeight) Art.airborne(ctx, position.x, 19 - skyHeight);
       else {
-        const ahead = projectileAt(afterRelease + 3, travelTime, reduced);
-        const behind = projectileAt(Math.max(0, afterRelease - 3), travelTime, reduced);
+        const ahead = projectileAt(afterRelease + 3, travelTime);
+        const behind = projectileAt(Math.max(0, afterRelease - 3), travelTime);
         const angle = Math.atan2(ahead.y - behind.y, ahead.x - behind.x);
-        Art.projectile(ctx, position.x, position.y, angle, reduced ? 0 : afterRelease, trace.weapon);
+        const shotAngle = turnAngle(trace.release.angle, angle, Math.min(1, afterRelease / 120));
+        Art.projectile(ctx, position.x, position.y, shotAngle, reduced ? 0 : afterRelease, trace.weapon);
       }
     } else if (position && !snapping && (trace.part || trace.landed)) {
       Art.impact(ctx, position, impact, trace.part, trace.weapon, reduced);
