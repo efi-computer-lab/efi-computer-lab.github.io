@@ -50,7 +50,7 @@ aside h2 { margin: 0 0 8px; font-size: 1.05rem; }
 canvas { width: 100%; height: auto; display: block; background: #1d4240; touch-action: none; }
 canvas[data-aim="true"] { cursor: grab; }
 .turn-bar p { margin: 0; min-height: 1.4em; }
-.challenge { position: absolute; inset: 0; overflow: auto; display: grid; align-content: center; gap: 7px; padding: clamp(8px, 3vw, 27px); background: #11241fed; }
+.challenge { position: absolute; top: clamp(8px, 2.1vh, 20px); left: 50%; transform: translateX(-50%); width: min(510px, calc(100% - 20px)); max-height: calc(100% - 26px); overflow: auto; display: grid; gap: 9px; padding: clamp(10px, 2vw, 19px); border: 1px solid #415a55; border-radius: 13px; box-shadow: 0 8px 24px #0a221d40; }
 .challenge h2 { margin: 0; font-size: clamp(1rem, 2.5vw, 1.45rem); }
 .challenge p { margin: 0; }
 #choices { display: grid; gap: 6px; }
@@ -67,7 +67,6 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .intro h1 br { display: none; }
   .top { padding-inline: 15px; }
   .top span { display: none; }
-  .challenge { position: static; }
 }
 
 /* Relay tournament theme */
@@ -107,7 +106,7 @@ button:hover:not(:disabled) { background: #e5ead8; }
 #fighter-kit { color: var(--ink); font-size: .84rem; font-weight: 750; }
 .roster-field { margin: 20px 0 0; padding: 0; border: 0; min-inline-size: 0; }
 .roster-field legend { padding: 0; margin-bottom: 8px; color: var(--ink); font-size: .96rem; font-weight: 800; }
-.fighter-roster { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+.fighter-roster { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; }
 .fighter-card {
   position: relative; min-width: 0; display: grid; grid-template-rows: auto auto 1fr; justify-items: center;
   padding: 3px 3px 6px; color: var(--ink); background: #fff8e8; border: 1px solid #858779;
@@ -117,18 +116,18 @@ button:hover:not(:disabled) { background: #e5ead8; }
 .fighter-card:has(:checked) { background: #ffde93; border-color: #243b3d; box-shadow: 0 0 0 2px #243b3d, 0 4px #243b3d60; }
 .fighter-card:has(:focus-visible) { outline: 3px solid #247179; outline-offset: 3px; }
 .fighter-card input[type="radio"] { position: absolute; opacity: 0; inset: 0; cursor: pointer; width: 100%; height: 100%; margin: 0; }
-.fighter-card canvas { max-width: 100%; height: auto; max-height: 72px; }
+.fighter-card canvas { max-width: 100%; height: auto; max-height: 90px; }
 .fighter-card strong { font-size: .91rem; line-height: 1.2; }
 .fighter-card span { font-size: .7rem; color: #3d5250; line-height: 1.1; }
 @media (max-width: 470px) {
-  .fighter-roster { gap: 5px; }
+  .fighter-roster { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 5px; }
   .fighter-card { padding: 2px 1px 5px; border-radius: 8px; }
   .fighter-card strong { font-size: .82rem; }
   .fighter-card span { font-size: .61rem; }
 }
 #clock:not(:empty) { color: #203637; background: #ffdb74; padding: 4px 9px; border-radius: 6px; font-weight: 850; }
-.challenge { background: #fff7e7f5; color: var(--ink); }
-#choices button { background: #e4efe3; border-color: #8ea79e; }
+.challenge { background: #fff8e5e6; color: var(--ink); }
+#choices button { background: #f8fff2f2; border-color: #8ea79e; }
 #choices button:hover:not(:disabled) { background: #ffdf85; }
 #feedback { color: #284b4a; background: #edf3df; }
 #notice { background: #ffe5ba; border-color: #c18a54; }
@@ -165,6 +164,24 @@ dialog { color: var(--ink); background: #fff9e9; }
   }
 }
 .challenge { z-index: 2; }
+.playing main { max-width: 1800px; padding: 10px clamp(6px, 1.2vw, 22px) 22px; }
+.playing .game-header { margin-bottom: 8px; }
+.playing .game-header h1 { font-size: clamp(1.25rem, 2.2vw, 2.35rem); }
+.playing #game-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.playing #game-grid > aside { padding: 12px 16px; }
+#field .arena { height: clamp(340px, max(64svh, 33vw), 780px); }
+#range { width: 100%; height: 100%; }
+.round-clock { display: flex; align-items: center; gap: 8px; text-align: center; }
+#answering-player { font-size: .82rem; line-height: 1.15; overflow-wrap: anywhere; }
+@media (max-width: 620px) {
+  #field .arena { height: clamp(320px, 57svh, 480px); }
+  .round-clock { flex-direction: column; gap: 4px; }
+  .challenge h2 { font-size: 1rem; }
+  #choices button { font-size: .88rem; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #field .arena { height: max(260px, 66svh, min(30vw, 540px)); }
+}
 @media (max-width: 600px) {
   .target-range { top: auto; right: 8px; bottom: 8px; padding: 3px 7px; font-size: .7rem; }
   .target-range[data-side="left"] { left: 8px; }
@@ -173,7 +190,7 @@ dialog { color: var(--ink); background: #fff9e9; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611260822',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611260919',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -229,7 +246,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
         <section id="field" aria-label="Launch arena" hidden>
           <div class="scoreboard">
             <div class="side-score"><strong id="left-score"></strong><span id="left-health-label"></span><progress id="left-health" max="100" aria-labelledby="left-health-label"></progress></div>
-            <span id="clock"></span>
+            <div class="round-clock"><span id="answering-player" hidden></span><span id="clock"></span></div>
             <div class="side-score"><strong id="right-score"></strong><span id="right-health-label"></span><progress id="right-health" max="100" aria-labelledby="right-health-label"></progress></div>
           </div>
           <div class="arena">
@@ -246,7 +263,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
               <div id="choices"></div>
             </div>
           </div>
-          <div class="turn-bar">
+          <div id="turn-bar" class="turn-bar">
             <p id="turn" role="status"></p>
             <span id="fighter-kit" hidden></span>
             <button id="keyboard" class="quiet" hidden>Aim with buttons</button>
@@ -378,27 +395,33 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const roster = [
     ['fern', 'Fern', 'Woodland archer', 'elf', '#258064', '#17463f', '#d4ef8c', '#f2bb87', '#693d2d',
-      'bow', 'Acorn Bow', '#d9f373', 10, 1, 135],
+      'bow', 'Acorn Bow', '#d9f373', 10, 1, 205, [17, 12, 12, 1.08, .9]],
     ['bryn', 'Bryn', 'Timber scout', 'logger', '#d54c46', '#423750', '#ffc168', '#a86649', '#392639',
-      'axe', 'Timber Axe', '#ffc377', 14, 1, 115],
+      'axe', 'Timber Axe', '#ffc377', 14, 1, 195, [25, 21, 16, .98, 1.02]],
     ['pip', 'Pip', 'Street artist', 'artist', '#a853bb', '#442978', '#88f5b3', '#d99261', '#31244e',
-      'blaster', 'Paint Popper', '#70f5b0', 7, 1.09, 88],
+      'blaster', 'Paint Popper', '#70f5b0', 7, 1.09, 150, [21, 16, 14, .95, 1.02]],
     ['tavi', 'Tavi', 'Festival maker', 'festival', '#e86640', '#772d5d', '#ffe16d', '#f3b179', '#4e2e51',
-      'bomb', 'Confetti Charge', '#ff94ac', 17, .97, 145],
+      'bomb', 'Confetti Charge', '#ff94ac', 17, .97, 230, [22, 18, 15, 1, 1]],
     ['nova', 'Nova', 'Star skater', 'skater', '#5276d6', '#292657', '#f0baff', '#986148', '#23284e',
-      'disc', 'Comet Disc', '#9ef1ff', 8.5, .98, 105],
+      'disc', 'Comet Disc', '#9ef1ff', 8.5, .98, 190, [19, 12, 16, 1.03, .92]],
     ['nori', 'Nori', 'Pastry chef', 'chef', '#e9b5bf', '#8c436f', '#fff1ba', '#efba8f', '#674245',
-      'pie', 'Custard Pie', '#ffd577', 12.5, .99, 125],
+      'pie', 'Custard Pie', '#ffd577', 12.5, .99, 220, [29, 32, 16, .94, 1.09]],
     ['coral', 'Coral', 'Lagoon diver', 'diver', '#2ba5a4', '#205679', '#ffb378', '#cb8663', '#514050',
-      'bubble', 'Bubble Wand', '#9bffe9', 6.5, .96, 128],
+      'bubble', 'Bubble Wand', '#9bffe9', 6.5, .96, 200, [24, 18, 14, .94, 1.06]],
     ['saff', 'Saff', 'Storm mage', 'mage', '#7852ad', '#392855', '#f8d880', '#b67451', '#3a2654',
-      'orb', 'Storm Orb', '#e7b9ff', 9.5, 1.01, 160],
+      'orb', 'Storm Orb', '#e7b9ff', 9.5, 1.01, 260, [18, 17, 12, 1.11, .91]],
     ['koa', 'Koa', 'Trail explorer', 'scout', '#7c9b3d', '#334b38', '#ffc879', '#9a573d', '#392b33',
-      'boom', 'Leaf Boomerang', '#e1f787', 8, 1.01, 100],
+      'boom', 'Leaf Boomerang', '#e1f787', 8, 1.01, 175, [19, 15, 12, 1, .96]],
     ['rook', 'Rook', 'Ice warden', 'warden', '#478ab4', '#274667', '#caecfa', '#d8a382', '#514350',
-      'hammer', 'Frost Hammer', '#a7e9ff', 15, .98, 154]
-  ].map(([id, name, role, look, coat, shade, trim, skin, hair, weapon, label, color, gravity, speed, releaseMs]) => ({
+      'hammer', 'Frost Hammer', '#a7e9ff', 15, .98, 245, [26, 22, 17, 1.04, 1.02]],
+    ['valen', 'Valen', 'Armored sword warrior', 'knight', '#8b8fa8', '#343655', '#f1b652', '#c38561', '#472b45',
+      'sword', 'Sunsteel Sword', '#ffe5a1', 13, 1.02, 235, [28, 18, 17, 1.13, .93]],
+    ['rowan', 'Rowan', 'Field soldier', 'soldier', '#7d8955', '#3d5249', '#eac77e', '#93604b', '#2f2c39',
+      'cork', 'Signal Cork', '#ffbd75', 8.2, 1.06, 155, [24, 18, 15, 1.01, .98]]
+  ].map(([id, name, role, look, coat, shade, trim, skin, hair, weapon, label, color, gravity, speed, releaseMs,
+    [shoulders, waist, stance, height, head]]) => ({
     id, name, role, look, coat, shade, trim, skin, hair,
+    build: { shoulders, waist, stance, height, head },
     weapon: { id: weapon, name: label, color, gravity, speed, releaseMs }
   }));
 
@@ -418,12 +441,67 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
 </script>
   <script>
+(function (root) {
+  'use strict';
+
+  const WIDTH = 1740;
+  const arenas = [
+    ['Mossgate Ruins', 'ruins', ['#d5ead7', '#86ab8d', '#4f806f', '#344f44', '#a0cb66', '#fff3bd'],
+      [307, 307], [[268,305],[400,274],[530,290],[690,303],[800,303],[910,291],[1080,263],[1220,292],[1400,308]], [[610,42,40],[945,56,30],[58,25,43],[1657,25,43]]],
+    ['Copper Rail Yard', 'rail', ['#ffd5a4', '#d09278', '#946176', '#533a54', '#efa470', '#fff0c7'],
+      [298, 307], [[380,298],[481,310],[620,310],[702,284],[1090,284],[1190,311],[1360,309]], [[742,70,37],[963,92,48],[1457,33,32]]],
+    ['Glacier Pass', 'snow', ['#c9e3fa', '#87a8d5', '#637fac', '#394c73', '#edfaff', '#ffeecb'],
+      [292, 301], [[342,282],[514,229],[607,252],[727,273],[839,252],[1010,282],[1135,218],[1245,252],[1400,300]], [[800,54,27],[44,27,39],[1667,24,35]]],
+    ['Sunken Lagoon', 'lagoon', ['#bdecdf', '#6db8ae', '#489b97', '#34616b', '#8be1c5', '#fff0bc'],
+      [298, 296], [[324,310],[440,328],[575,326],[695,277],[814,310],[945,327],[1159,325],[1280,286],[1415,293]], [[634,70,22],[1110,49,33]]],
+    ['Ember Caldera', 'lava', ['#ffbe93', '#d37d70', '#a65c68', '#56394a', '#ff9563', '#fff0b4'],
+      [312, 310], [[322,308],[409,278],[540,244],[627,267],[736,314],[961,315],[1100,263],[1238,245],[1365,291]], [[830,57,36],[1665,26,38]]],
+    ['Lantern Grove', 'grove', ['#dfd0ef', '#a38cb6', '#736da0', '#454260', '#b1d29a', '#fff2c8'],
+      [297, 300], [[385,306],[523,274],[641,278],[762,314],[928,319],[1030,280],[1162,262],[1315,310],[1450,313]], [[917,80,36],[50,23,30],[1406,46,33]]],
+    ['Dune Outpost', 'dune', ['#f2d7a2', '#d8a978', '#bb8967', '#755545', '#ffdc91', '#fff5cd'],
+      [295, 311], [[331,278],[460,237],[560,242],[735,289],[870,317],[999,318],[1110,293],[1291,256],[1447,293]], [[1084,76,35],[1322,58,26]]],
+    ['Lunar Quarry', 'moon', ['#bfc7ea', '#858cb8', '#656497', '#43496a', '#b4c9ed', '#f0e6ff'],
+      [310, 316], [[309,305],[432,326],[636,326],[738,272],[892,277],[1011,326],[1184,326],[1374,276],[1483,302]], [[777,110,23],[48,23,33],[1668,22,34]]],
+    ['Windmill Heights', 'wind', ['#d7e9ef', '#91b6c0', '#678d91', '#3b5e5d', '#a5c794', '#fff1c4'],
+      [277, 311], [[280,277],[411,248],[530,250],[666,286],[811,323],[979,317],[1098,274],[1175,245],[1319,278],[1463,311]], [[650,61,42],[1041,57,26]]],
+    ['Crystal Hollow', 'crystal', ['#d7d1f2', '#9da2cb', '#726ab2', '#483d73', '#a9f4ed', '#f7e9fc'],
+      [310, 284], [[311,314],[448,279],[570,247],[709,286],[820,327],[950,318],[1130,265],[1283,252],[1486,280]], [[543,41,27],[971,59,36],[1664,27,35]]]
+  ].map(([name, theme, [sky, far, near, floor, line, sun], [left, right], ridges, blocks]) => {
+    const ground = [[0,left],[175,left],...ridges,[1565,right],[WIDTH,right]];
+    const level = { name, theme, sky, far, near, floor, line, sun, ground };
+    level.cover = blocks.map(([x,width,height]) => {
+      const bottom = Math.max(groundAt(level,x), groundAt(level,x + width));
+      return { left:x, right:x + width, top:bottom - height, bottom };
+    });
+    return level;
+  });
+
+  function groundAt(level, x) {
+    const points = level.ground;
+    for (let i = 1; i < points.length; i++) {
+      const [right, y2] = points[i];
+      if (x > right) continue;
+      const [left, y1] = points[i - 1];
+      return y1 + (y2 - y1) * Math.max(0, (x - left) / (right - left));
+    }
+    return points.at(-1)[1];
+  }
+
+  const byRound = round => arenas[Math.max(0, round - 1) % arenas.length];
+  const api = { WIDTH, arenas, byRound, groundAt };
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.LaunchArenas = api;
+})(globalThis);
+
+</script>
+  <script>
 /* Aim, launch scaling and Planck body setup adapted from pemmyz/js_slingshot (MIT). */
 (function (root) {
   'use strict';
 
   const WIDTH = 1740;
   const VIEW_WIDTH = 820;
+  const MAX_VIEW_WIDTH = 1190;
   const HEIGHT = 340;
   const SCALE = 24;
   const ORIGIN = { x: 108, y: 254 };
@@ -433,6 +511,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const FIGHTER_Y = GROUND - 2;
   const STEP = 1 / 60;
   const fighters = typeof module === 'object' && module.exports ? require('./fighters.js') : root.LaunchFighters;
+  const arenas = typeof module === 'object' && module.exports ? require('./arenas.js') : root.LaunchArenas;
   const WEAPONS = fighters.roster.map(fighter => fighter.weapon);
   const weaponFor = id => WEAPONS.find(weapon => weapon.id === id);
 
@@ -447,45 +526,65 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return { x: pull[0] / distance * speed, y: -pull[1] / distance * speed };
   }
 
-  function targetFor() {
-    const x = WIDTH - FIGHTER_X;
-    const y = FIGHTER_Y;
-    // Costumes share the same neutral silhouette so character choice does not change the hit area.
-    return { x, y: y - 55, zones: [
-      { part: 'head', left: x - 20, right: x + 14, top: y - 107, bottom: y - 77 },
-      { part: 'body', left: x - 24, right: x + 24, top: y - 78, bottom: y - 34 },
-      { part: 'legs', left: x - 22, right: x + 22, top: y - 34, bottom: y }
+  const mirrorX = (x, mirrored) => mirrored ? WIDTH - x : x;
+
+  function fighterPosition(level, mirrored, setback = 0, opponent = false) {
+    const x = opponent ? WIDTH - FIGHTER_X + setback : FIGHTER_X - setback;
+    const y = level ? arenas.groundAt(level, mirrorX(x, mirrored)) - 2 : FIGHTER_Y;
+    return { x, y };
+  }
+
+  function fieldFor(level, mirrored, setback) {
+    const position = fighterPosition(level, mirrored, setback);
+    return {
+      level, mirrored,
+      origin: { x: position.x + ORIGIN.x - FIGHTER_X, y: position.y + ORIGIN.y - FIGHTER_Y },
+      cover: level.cover.map(block => mirrored ? { ...block, left: WIDTH - block.right, right: WIDTH - block.left } : block)
+    };
+  }
+
+  function targetFor(fighter = fighters.roster[0], field, setback) {
+    const { x, y } = fighterPosition(field?.level, field?.mirrored, setback, true);
+    const { shoulders, waist, stance, height, head } = fighter.build;
+    const body = Math.max(shoulders, waist);
+    return { x, y: y - 55 * height, zones: [
+      { part: 'head', left: x - 3 - 17 * head, right: x - 3 + 17 * head, top: y - (90 + 17 * head) * height, bottom: y - (90 - 14 * head) * height },
+      { part: 'body', left: x - body, right: x + body, top: y - 78 * height, bottom: y - 34 * height },
+      { part: 'legs', left: x - stance - 10, right: x + stance + 8, top: y - 34 * height, bottom: y }
     ] };
   }
 
-  function aimFor(target, weapon, time) {
-    const vx = (target.x - ORIGIN.x) / (SCALE * time);
-    const vy = (ORIGIN.y - target.y) / (SCALE * time) + weapon.gravity * (time + STEP) / 2;
+  function aimFor(target, weapon, time, origin = ORIGIN) {
+    const vx = (target.x - origin.x) / (SCALE * time);
+    const vy = (origin.y - target.y) / (SCALE * time) + weapon.gravity * (time + STEP) / 2;
     const strength = 40 * Math.pow(Math.hypot(vx, vy) / (18 * weapon.speed), 1 / 1.1);
     const angle = Math.atan2(vy, vx);
     return limitPull(Math.cos(angle) * strength, -Math.sin(angle) * strength);
   }
 
-  function preview(pull, weapon) {
+  function preview(pull, weapon, field) {
     if (!pull || Math.hypot(...pull) < 6) return [];
     const v = velocity(pull, weapon);
     const points = [];
-    for (let step = 5; step <= 50; step += 5) {
+    const origin = field?.origin || ORIGIN;
+    let before = origin;
+    for (let step = 1; step <= 50; step++) {
       const t = step * STEP;
-      const x = ORIGIN.x + v.x * SCALE * t;
+      const x = origin.x + v.x * SCALE * t;
       // Planck advances with semi-implicit Euler at a fixed step.
-      const y = ORIGIN.y - (v.y * t - 0.5 * weapon.gravity * t * (t + STEP)) * SCALE;
-      if (x < 0 || x > WIDTH || y > GROUND) break;
-      points.push({ x, y });
+      const y = origin.y - (v.y * t - 0.5 * weapon.gravity * t * (t + STEP)) * SCALE;
+      const point = { x, y };
+      if (x < 0 || x > WIDTH || surfaceContact(before, point, field) != null) break;
+      if (step % 5 === 0) points.push(point);
+      before = point;
     }
     return points;
   }
 
-  function contact(from, to, zones) {
-    const radius = 4;
-    if (Math.max(from.x, to.x) < zones[1].left - radius || Math.min(from.x, to.x) > zones[1].right + radius) return null;
+  function contact(from, to, zones, radius = 4) {
     let first = null;
     for (const zone of zones) {
+      if (Math.max(from.x, to.x) < zone.left - radius || Math.min(from.x, to.x) > zone.right + radius) continue;
       let enter = 0;
       let exit = 1;
       for (const [axis, min, max] of [['x', zone.left, zone.right], ['y', zone.top, zone.bottom]]) {
@@ -499,52 +598,71 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         enter = Math.max(enter, Math.min(low / delta, high / delta));
         exit = Math.min(exit, Math.max(low / delta, high / delta));
       }
-      if (enter <= exit && (!first || enter < first.at)) first = { part: zone.part, at: enter };
+      if (enter <= exit && (!first || enter < first.at)) first = { zone, at: enter };
     }
     return first;
   }
 
-  function flight(pull, target, weapon, planck) {
+  function surfaceContact(from, to, field) {
+    const ground = point => field ? arenas.groundAt(field.level, mirrorX(point.x, field.mirrored)) : GROUND;
+    const end = ground(to) - to.y;
+    const start = ground(from) - from.y;
+    const landing = end < 0 ? Math.max(0, start / (start - end)) : Infinity;
+    const cover = field ? contact(from, to, field.cover, 2)?.at ?? Infinity : Infinity;
+    if (cover < landing) return { at: cover, kind: 'cover' };
+    return landing < Infinity ? { at: landing, kind: 'ground' } : null;
+  }
+
+  function flight(pull, target, weapon, planck, field) {
+    const origin = field?.origin || ORIGIN;
     const world = planck.World(planck.Vec2(0, -weapon.gravity));
     const body = world.createDynamicBody({
-      position: planck.Vec2(ORIGIN.x / SCALE, -ORIGIN.y / SCALE),
+      position: planck.Vec2(origin.x / SCALE, -origin.y / SCALE),
       bullet: true,
       linearDamping: 0
     });
     body.createFixture(planck.Circle(0.18), { density: 2.5 });
     const v = velocity(pull, weapon);
     body.setLinearVelocity(planck.Vec2(v.x, v.y));
-    const points = [{ ...ORIGIN }];
+    const points = [{ ...origin }];
     let part = null;
+    let location = null;
     let landed = false;
+    let surfaceKind = null;
     for (let step = 0; step < 240; step++) {
       world.step(STEP);
       const pos = body.getPosition();
       const point = { x: pos.x * SCALE, y: -pos.y * SCALE };
       if (point.y < -1300 || point.x < -20 || point.x > WIDTH + 20) break;
       const previous = points.at(-1);
-      const groundAt = point.y > GROUND ? (GROUND - previous.y) / (point.y - previous.y) : 1;
+      const surface = surfaceContact(previous, point, field);
       const hit = contact(previous, point, target.zones);
-      if (hit && hit.at <= groundAt) {
-        points.push({ x: previous.x + (point.x - previous.x) * hit.at, y: previous.y + (point.y - previous.y) * hit.at });
-        part = hit.part;
+      if (hit && (surface == null || hit.at < surface.at)) {
+        const impact = { x: previous.x + (point.x - previous.x) * hit.at, y: previous.y + (point.y - previous.y) * hit.at };
+        points.push(impact);
+        const { top, bottom } = hit.zone;
+        part = hit.zone.part;
+        location = part === 'body' && impact.y <= top + .3 * (bottom - top) ? 'shoulder' : part;
         break;
       }
-      if (point.y > GROUND) {
-        points.push({ x: previous.x + (point.x - previous.x) * groundAt, y: GROUND });
+      if (surface != null) {
+        points.push({ x: previous.x + (point.x - previous.x) * surface.at, y: previous.y + (point.y - previous.y) * surface.at });
+        surfaceKind = surface.kind;
         landed = true;
         break;
       }
       points.push(point);
     }
-    return { part, landed, points };
+    return { part, location, landed, points, surfaceKind };
   }
 
-  const mirrorX = (x, mirrored) => mirrored ? WIDTH - x : x;
+  function cameraAt(x, mirrored, viewWidth = VIEW_WIDTH) {
+    const center = viewWidth * (mirrored ? 0.62 : 0.38);
+    return Math.max(0, Math.min(WIDTH - viewWidth, mirrorX(x, mirrored) - center));
+  }
 
-  function cameraAt(x, mirrored) {
-    const center = VIEW_WIDTH * (mirrored ? 0.62 : 0.38);
-    return Math.max(0, Math.min(WIDTH - VIEW_WIDTH, mirrorX(x, mirrored) - center));
+  function playbackMs(points, weapon) {
+    return weapon.releaseMs + Math.min(2850, Math.max(580, (points.length - 1) * 27));
   }
 
   function pointAt(points, progress) {
@@ -567,8 +685,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   const api = {
-    WIDTH, VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
-    weaponFor, limitPull, targetFor, aimFor, preview, flight, mirrorX, cameraAt, pointAt, aimReadout
+    WIDTH, VIEW_WIDTH, MAX_VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
+    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, cameraAt, playbackMs, pointAt, aimReadout
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchPhysics = api;
@@ -928,12 +1046,21 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const AIM_MS = 15000;
   const ANSWER_MS = 20000;
   const BOT_MS = 1200;
-  const FLIGHT_MS = 1450;
+  const IMPACT_MS = 780;
   const LAUNCH_DELAY_MS = 140;
   const MAX_HEALTH = 100;
   const DAMAGE = { head: 50, body: 30, legs: 20 };
+  const PUSH = { head: 32, body: 25, legs: 19 };
+  const MAX_SETBACK = 54;
 
   const healthOf = (match, id) => match.health?.[id] ?? MAX_HEALTH;
+  const setbackOf = (match, id) => match.setbacks?.[id] ?? 0;
+
+  function injuriesOf(match, id, pendingLocation) {
+    const injuries = match.injuries?.[id];
+    if (!injuries?.[pendingLocation]) return injuries;
+    return { ...injuries, [pendingLocation]: injuries[pendingLocation].slice(0, -1) };
+  }
 
   function opponentFor(match, shooter) {
     const shootsLeft = match.left.includes(shooter);
@@ -1122,19 +1249,29 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         Math.hypot(...request.pull) > 109 || request.weapon !== rules.weaponForPlayer(request.player, state.seed)) return state;
 
     const victim = opponentFor(match, request.player);
-    const part = rules.hitPart(request.pull, request.weapon);
+    const mirrored = match.right.includes(request.player);
+    const from = setbackOf(match, victim);
+    const field = { victim, mirrored, from, shooterBack: setbackOf(match, request.player), round: state.round, seed: state.seed };
+    const { part, location, flightMs } = rules.resolveShot(request.pull, request.weapon, field);
     const hit = !!part;
     const before = healthOf(match, victim);
     const after = Math.max(0, before - (DAMAGE[part] || 0));
     const health = hit ? { ...match.health, [victim]: after } : match.health;
+    const previous = injuriesOf(match, victim);
+    const injuries = hit ? { ...match.injuries, [victim]: {
+      ...previous, [location]: [...(previous?.[location] || []), request.weapon]
+    } } : match.injuries;
+    const knockback = Math.min(MAX_SETBACK - from, PUSH[part] || 0);
+    const setbacks = knockback ? { ...match.setbacks, [victim]: from + knockback } : match.setbacks;
     const side = match.left.includes(request.player) ? 'leftPoints' : 'rightPoints';
     const points = { ...state.points };
     const launchAt = now + LAUNCH_DELAY_MS;
     if (hit && !isBot(request.player)) points[request.player] = (points[request.player] || 0) + 1;
     return step(state, index, {
-      ...match, ...(health ? { health } : {}), [side]: match[side] + Number(hit),
-      shot: { pull: request.pull, weapon: request.weapon, part, at: launchAt, player: request.player, victim, damage: before - after },
-      stage: 'flight', deadline: launchAt + FLIGHT_MS, since: now
+      ...match, ...(health ? { health } : {}), ...(setbacks ? { setbacks } : {}), ...(injuries ? { injuries } : {}),
+      [side]: match[side] + Number(hit),
+      shot: { pull: request.pull, weapon: request.weapon, part, location, flightMs, at: launchAt, player: request.player, victim, damage: before - after, knockback },
+      stage: 'flight', deadline: launchAt + flightMs + IMPACT_MS, since: now
     }, { points });
   }
 
@@ -1157,7 +1294,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       } else if (now >= match.since + BOT_MS && isBot(player)) {
         const request = { round: state.round, match: index, turn: match.turn, stage: match.stage, player };
         if (match.stage === 'aim') {
-          current = action(current, { ...request, ...rules.botShot(state.seed, player) }, now, rules);
+          current = action(current, { ...request, ...rules.botShot(state.seed, player, match, state.round) }, now, rules);
         } else if (match.stage === 'answer') {
           const questionSeed = state.seed;
           const questionNumber = state.round - 1;
@@ -1171,7 +1308,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, FLIGHT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, draw, start, currentTurn, action, tick, healthOf, opponentFor };
+  const api = { ROUNDS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, draw, start, currentTurn, action, tick, healthOf, setbackOf, injuriesOf, opponentFor };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -1239,15 +1376,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 (function (root) {
   'use strict';
 
-  const zones = [
-    { name: 'Circuit Garden', sky: '#c9ecdf', far: '#a1c9a2', near: '#6ca88b', floor: '#25453d', line: '#91b454', sun: '#fff2b1', accent: '#f9c432' },
-    { name: 'Switchyard', sky: '#ffe6bd', far: '#f0ad83', near: '#ac6980', floor: '#453449', line: '#f6a45f', sun: '#fff7dc', accent: '#e8644c' },
-    { name: 'Polar Relay', sky: '#d8e5fc', far: '#a8b9dd', near: '#738cb9', floor: '#243955', line: '#a4c4f1', sun: '#fff0ba', accent: '#aa8ef8' }
-  ];
-
-  function zone(round) {
-    return zones[round <= 5 ? 0 : round <= 10 ? 1 : 2];
-  }
+  const Arenas = root.LaunchArenas;
+  const zone = Arenas.byRound;
 
   function box(ctx, x, y, w, h, fill, radius = 0) {
     ctx.fillStyle = fill;
@@ -1263,70 +1393,165 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.fill();
   }
 
+  function path(ctx, color, points) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    for (const point of points.slice(1)) ctx.lineTo(...point);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function hills(ctx, y, height, color, angular) {
+    const points = [[0,360]];
+    for (let x = -60; x < Arenas.WIDTH + 150; x += angular ? 75 : 20) {
+      const rise = Math.sin(x / 102 + y) * .56 + Math.cos(x / 57 + height) * .32 + Math.sin(x / 203) * .42;
+      points.push([x, y + height * rise]);
+    }
+    points.push([Arenas.WIDTH,360]);
+    path(ctx, color, points);
+  }
+
+  function coverBlock(ctx, level, block) {
+    const { left, right, top, bottom } = block;
+    const w = right - left;
+    const h = bottom - top;
+    const light = ctx.createLinearGradient(left, top, right, bottom);
+    light.addColorStop(0, level.near);
+    light.addColorStop(.64, level.far);
+    light.addColorStop(1, level.floor);
+    box(ctx, left - 1, top - 1, w + 2, h + 3, level.floor, 5);
+    box(ctx, left, top, w, h, light, 4);
+    box(ctx, left + 2, top + 2, Math.max(5, w - 4), 4, level.line, 2);
+    if (['rail','moon','dune'].includes(level.theme)) {
+      box(ctx, left + 4, top + 10, w - 8, h - 14, '#352b4a5e', 3);
+      for (let x = left + 7; x < right - 3; x += 9) box(ctx, x, top + 13, 2, h - 19, level.line, 1);
+    } else {
+      box(ctx, left + 5, top + h * .48, w - 10, 2, '#3a354967', 1);
+      box(ctx, left + w * .47, top + h * .28, 3, h * .2, '#3a354967', 1);
+    }
+  }
+
+  function scenery(ctx, level) {
+    for (let i = 0; i < 15; i++) {
+      const x = 38 + i * 122 + (i * 17 % 37);
+      const ground = Arenas.groundAt(level, x) + 3;
+      const height = 25 + (i * 31 % 61);
+      switch (level.theme) {
+        case 'rail':
+          box(ctx, x, ground - height - 4, 78, height, '#794d66', 2);
+          box(ctx, x + 3, ground - height, 72, 5, '#fac18d', 2);
+          for (const lane of [x + 12, x + 36, x + 60]) box(ctx, lane, ground - height + 14, 4, height - 21, '#a76072', 2);
+          break;
+        case 'snow':
+          path(ctx, level.near, [[x-25,ground],[x+4,ground-height-23],[x+34,ground]]);
+          path(ctx, '#eaf7fb', [[x-8,ground-height*.65],[x+4,ground-height-23],[x+19,ground-height*.57],[x+6,ground-height*.73],[x,ground-height*.51]]);
+          break;
+        case 'lagoon':
+          box(ctx, x, ground - height, 8, height, '#658070', 4);
+          path(ctx, '#3f9b8c', [[x-40,ground-height+1],[x-10,ground-height-15],[x+6,ground-height-13],[x+25,ground-height-5],[x+7,ground-height],[x+39,ground-height+14]]);
+          dot(ctx, x+4, ground-height+4, 7, '#e1bd69');
+          break;
+        case 'lava':
+          path(ctx, '#784b64', [[x-27,ground],[x-13,ground-height*.57],[x+3,ground-height],[x+18,ground-height-12],[x+31,ground]]);
+          path(ctx, '#ffc37a', [[x-14,ground-height*.57],[x-7,ground-height*.31],[x-16,ground-height*.43]]);
+          dot(ctx, x + 11, ground - height - 18, 3, '#f9b978');
+          break;
+        case 'grove':
+          box(ctx,x,ground-height,10,height,'#665472',4);
+          dot(ctx,x+4,ground-height+1,height*.41,'#8d6ea3');
+          dot(ctx,x-9,ground-height*.69,5,'#ffc781');
+          dot(ctx,x+22,ground-height*.68,3,'#fce6a0');
+          break;
+        case 'dune':
+          box(ctx,x,ground-height,54,height,'#a67557',4);
+          path(ctx,'#deb089',[[x-7,ground-height+6],[x+26,ground-height-13],[x+61,ground-height+6]]);
+          box(ctx,x+21,ground-37,13,37,'#77584e',5);
+          break;
+        case 'moon':
+          dot(ctx,x+19,ground-height*.6, height*.27,'#7976a0');
+          dot(ctx,x+16,ground-height*.62, height*.115,'#afafd1');
+          if(i%2===0) {
+            box(ctx,x,ground-height,6,height,'#625e8b',3);
+            box(ctx,x-16,ground-height,36,7,'#948fc9',3);
+          }
+          break;
+        case 'wind': {
+          const apex = ground - height - 16;
+          path(ctx,'#b28c82',[[x-16,ground],[x-7,apex],[x+9,apex],[x+18,ground]]);
+          for(const [dx,dy] of [[-27,-23],[23,-25],[-22,25],[25,21]]) path(ctx,'#f5eed5',[[x,apex],[x+dx,apex+dy],[x+dx+7,apex+dy-2],[x+7,apex]]);
+          dot(ctx,x+3,apex,6,'#875f66');
+          break;
+        }
+        case 'crystal':
+          path(ctx,'#8685ce',[[x-23,ground],[x-28,ground-height*.58],[x-15,ground-height*.66],[x,ground],[x+3,ground-height],[x+23,ground-height+8],[x+32,ground]]);
+          path(ctx,'#b8e3ec',[[x+2,ground],[x+4,ground-height],[x+15,ground-height+15],[x+17,ground]]);
+          break;
+        default:
+          if(i%3===0) {
+            box(ctx,x,ground-height,22,height,level.near,4);
+            box(ctx,x-5,ground-height,32,6,level.far,3);
+            box(ctx,x+4,ground-height+16,20,3,level.far,1);
+          } else {
+            box(ctx,x,ground-height,9,height,'#587f68',3);
+            dot(ctx,x+5,ground-height+6,height*.49,'#85b37a');
+            dot(ctx,x-8,ground-height+8,height*.3,'#9fc68b');
+          }
+      }
+    }
+  }
+
   function terrain(ctx, round, width, height, ground) {
-    const colors = zone(round);
+    const level = zone(round);
     ctx.save();
-    ctx.scale(1, ground / 307);
-    const sky = ctx.createLinearGradient(0, 0, 0, 307);
-    sky.addColorStop(0, colors.far);
-    sky.addColorStop(0.62, colors.sky);
-    sky.addColorStop(1, '#fff2d9');
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, width, height * 307 / ground);
-    ctx.globalAlpha = 0.32;
-    dot(ctx, width * .76, 105, 73, colors.sun);
-    ctx.globalAlpha = 1;
-    dot(ctx, width * .76, 105, 54, colors.sun);
-
-    ctx.globalAlpha = .5;
-    for (let x = 125; x < width; x += 245) {
-      const y = 65 + (x % 89);
-      box(ctx, x - 32, y, 90, 10, '#fff9e5', 5);
-      box(ctx, x - 12, y - 10, 48, 13, '#fff9e5', 7);
+    ctx.scale(width / Arenas.WIDTH, ground / 307);
+    const bottom = height * 307 / ground;
+    const sky = ctx.createLinearGradient(0, 0, 0, bottom);
+    sky.addColorStop(0, level.far);
+    sky.addColorStop(.65, level.sky);
+    sky.addColorStop(1, level.sun);
+    box(ctx,0,0,Arenas.WIDTH,bottom,sky);
+    const sunX = level.theme === 'moon' ? 1130 : 1340;
+    const halo = ctx.createRadialGradient(sunX,108,12,sunX,108,105);
+    halo.addColorStop(0,level.sun);
+    halo.addColorStop(1,'#fff5c000');
+    dot(ctx,sunX,108,105,halo);
+    dot(ctx,sunX,108,level.theme === 'moon' ? 44 : 38,level.sun);
+    ctx.globalAlpha = .44;
+    for (let i = 0; i < 45; i++) {
+      const x = (i * 97 + 56) % Arenas.WIDTH;
+      const y = 22 + (i * 53) % 157;
+      if (i%6===0) box(ctx,x,y,46 + i,5,'#fff8df',3);
+      else dot(ctx,x,y,i%3+1,'#fff8df');
     }
     ctx.globalAlpha = 1;
-
-    for (let i = 0; i < Math.ceil(width / 34); i++) {
-      const x = (i * 89 + 36) % width;
-      const y = 18 + (i * 53) % 185;
-      box(ctx, x, y, i % 4 === 0 ? 14 : 3, 3, '#fff9e5', 1);
-    }
-
-    for (let row = 0; row < 2; row++) {
-      ctx.fillStyle = row === 0 ? colors.far : colors.near;
+    hills(ctx,198,level.theme === 'snow' ? 68 : 47,level.far,['snow','crystal','lava'].includes(level.theme));
+    hills(ctx,258,26,level.near,level.theme === 'moon');
+    scenery(ctx,level);
+    path(ctx,level.floor,[[0,bottom],...level.ground,[Arenas.WIDTH,bottom]]);
+    for (const [depth,color,width] of [[0,level.line,5],[11,level.near,2],[23,'#ffffff26',1.5]]) {
       ctx.beginPath();
-      ctx.moveTo(0, 307);
-      for (let x = 0; x <= width + 24; x += 24) {
-        const height = 13 * Math.sin(x / (57 - row * 13)) + (round > 10 ? (x % 72) / 2 : 8 * Math.cos(x / 31));
-        ctx.lineTo(x, 224 + row * 32 + height);
-      }
-      ctx.lineTo(width, 307);
-      ctx.fill();
+      for (const [i,[x,y]] of level.ground.entries()) i ? ctx.lineTo(x,y+depth) : ctx.moveTo(x,y+depth);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.stroke();
     }
-
-    for (let i = 0; i < Math.ceil((width - 180) / 128); i++) {
-      const x = 188 + i * 128;
-      if (round <= 5) {
-        box(ctx, x, 250, 13, 65, colors.floor, 5);
-        dot(ctx, x + 8, 248 - (i % 2) * 9, 32, i % 2 ? '#8db951' : '#b1cc6c');
-        dot(ctx, x - 12, 252, 14, '#d4dc8c');
-      } else if (round <= 10) {
-        box(ctx, x, 243, 52, 65, '#82586a', 6);
-        box(ctx, x + 8, 254, 36, 7, '#ffd183', 3);
-        box(ctx, x + 8, 268, 29, 5, '#bb8492', 2);
-      } else {
-        box(ctx, x, 256, 41, 53, '#586f9d', 4);
-        box(ctx, x + 15, 225, 5, 40, '#586f9d', 2);
-        dot(ctx, x + 17, 224, 6, '#f8cc78');
-      }
+    for (let i=0; i<58; i++) {
+      const x = i*31;
+      const y = Arenas.groundAt(level,x);
+      box(ctx,x,y+17+(i*13%11),10+(i%4)*5,2,level.near,1);
     }
+    for(const block of level.cover) coverBlock(ctx,level,block);
+    ctx.restore();
+  }
 
-    box(ctx, 0, 307, width, Math.max(height * 307 / ground - 307, 8), colors.floor);
-    box(ctx, 0, 307, width, 5, colors.line);
-    for (let i = 0; i < Math.ceil(width / 38); i++) {
-      box(ctx, i * 38, 323, 18 + i % 4 * 6, 3, colors.near, 2);
+  function frontCover(ctx, level, mirrored) {
+    ctx.save();
+    if (mirrored) {
+      ctx.translate(Arenas.WIDTH,0);
+      ctx.scale(-1,1);
     }
-
+    for (const block of level.cover) if (block.right < 86 || block.left > Arenas.WIDTH - 86) coverBlock(ctx,level,block);
     ctx.restore();
   }
 
@@ -1347,7 +1572,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       case 'axe':
       case 'hammer': {
         const hammer = weapon.id === 'hammer';
-        ctx.rotate(angle + elapsed / (hammer ? 76 : 49));
+        ctx.rotate(angle + elapsed / (hammer ? 130 : 96));
         box(ctx, -3, -15, 6, 31, ink, 3);
         box(ctx, -1, -8, 3, 21, '#eea65d', 1);
         box(ctx, hammer ? -15 : -4, -18, hammer ? 30 : 20, 15, ink, 4);
@@ -1361,8 +1586,39 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         box(ctx, -10, -4, 19, 8, color, 4);
         dot(ctx, 4, -2, 2.8, '#ecfff0');
         break;
+      case 'cork':
+        ctx.rotate(angle + elapsed / 140);
+        box(ctx, -10, -7, 20, 14, '#483043', 5);
+        box(ctx, -8, -5, 16, 10, '#d69559', 4);
+        box(ctx, -1, -5, 8, 10, color, 3);
+        dot(ctx, 3, -2, 2, '#fff0a9');
+        break;
+      case 'sword': {
+        ctx.rotate(angle + elapsed / 390);
+        const steel = ctx.createLinearGradient(0, -7, 0, 7);
+        steel.addColorStop(0, '#fffdf1');
+        steel.addColorStop(.43, '#ddebf1');
+        steel.addColorStop(.49, '#7b9bae');
+        steel.addColorStop(1, '#b5cedc');
+        ctx.beginPath();
+        ctx.moveTo(-5, -5.5);
+        ctx.lineTo(26, -5.5);
+        ctx.quadraticCurveTo(31, -4, 35, 0);
+        ctx.quadraticCurveTo(31, 4, 26, 5.5);
+        ctx.lineTo(-5, 5.5);
+        ctx.closePath();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#302b49';
+        ctx.fillStyle = steel;
+        ctx.fill();
+        ctx.stroke();
+        box(ctx, -24, -3.5, 21, 7, '#553849', 3.5);
+        box(ctx, -9, -10, 5, 20, color, 2);
+        box(ctx, -24, -5, 5, 10, '#d99159', 2.5);
+        break;
+      }
       case 'bomb':
-        ctx.rotate(elapsed / 125);
+        ctx.rotate(elapsed / 215);
         dot(ctx, 0, 0, 11, ink);
         dot(ctx, 0, 0, 9, '#6a456f');
         box(ctx, -8, -3, 16, 6, color, 2);
@@ -1392,7 +1648,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         sparkle(ctx, '#fff5a5', 0, 0, 7);
         break;
       case 'boom':
-        ctx.rotate(angle + elapsed / 41);
+        ctx.rotate(angle + elapsed / 83);
         ctx.beginPath();
         ctx.moveTo(-11, 8);
         ctx.quadraticCurveTo(-9, -18, 13, -8);
@@ -1410,7 +1666,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function held(ctx, x, y, angle, weapon, motion) {
     const id = weapon.id;
-    if (id !== 'bow' && id !== 'blaster' && id !== 'bubble') {
+    if (id !== 'bow' && id !== 'blaster' && id !== 'bubble' && id !== 'cork') {
       if (motion.after == null) projectile(ctx, x + 5, y - 6, angle, 0, weapon);
       return;
     }
@@ -1437,6 +1693,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.lineWidth = 1.6;
       ctx.stroke();
       if (motion.after == null) projectile(ctx, 3 - 13 * flex, 0, 0, 0, weapon);
+    } else if (id === 'cork') {
+      box(ctx, -16, -8, 39, 15, '#362c3f', 6);
+      box(ctx, -13, -5, 31, 8, '#ba905e', 4);
+      box(ctx, 12, -7, 10, 12, weapon.color, 4);
+      box(ctx, -10, 3, 12, 9, '#694d4a', 3);
     } else if (id === 'blaster') {
       box(ctx, -12, -8, 35, 14, '#262239', 7);
       box(ctx, -10, -6, 24, 9, weapon.color, 4);
@@ -1492,7 +1753,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.globalAlpha = (6 - lag) / 9;
     const { x, y } = point;
     const size = 6 - lag * .6;
-    if (weapon.id === 'orb' || weapon.id === 'hammer') sparkle(ctx, weapon.color, x, y, size * 1.4);
+    if (weapon.id === 'orb' || weapon.id === 'hammer' || weapon.id === 'sword') sparkle(ctx, weapon.color, x, y, size * 1.4);
     else if (weapon.id === 'disc' || weapon.id === 'boom') box(ctx, x - size * 2, y - 1, size * 4, 3, weapon.color, 1.5);
     else if (weapon.id === 'bubble') {
       ctx.beginPath();
@@ -1540,7 +1801,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const critical = part === 'head';
       const confetti = weapon.id === 'bomb';
       const paint = weapon.id === 'blaster' || weapon.id === 'pie';
-      const magic = ['orb', 'hammer', 'disc'].includes(weapon.id);
+      const magic = ['orb', 'hammer', 'disc', 'sword'].includes(weapon.id);
       const bubbles = weapon.id === 'bubble';
       if (!paint) {
         ctx.strokeStyle = critical ? '#fff1a2' : weapon.color;
@@ -1578,6 +1839,53 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         dot(ctx, (i - 2.5) * 9 * eased, -5 - (i % 3 + 1) * 9 * eased, 5 + p * 2, '#e9cdae');
       }
     }
+    if (part) {
+      const count = reduced ? 4 : part === 'head' ? 12 : 8;
+      for (let i = 0; i < count; i++) {
+        const angle = i * 2.39996;
+        const spread = 5 + eased * (19 + (i % 4) * 9);
+        const x = Math.cos(angle) * spread;
+        const y = Math.sin(angle) * spread + 26 * p * p;
+        const size = (3.8 - .48 * (i % 3)) * (1 - .45 * p);
+        dot(ctx, x, y, size + .9, '#244738');
+        dot(ctx, x, y, size, i % 2 ? '#7de25b' : '#b6f67a');
+      }
+    }
+    ctx.restore();
+  }
+
+  const embedded = {
+    axe: [12, -1.35, .94], sword: [22, Math.PI, .75], bow: [10, Math.PI, .88],
+    hammer: [10, -1.25, .85], boom: [6, 1.1, .85], disc: [5, 1.2, .75], cork: [5, Math.PI, .7]
+  };
+
+  function injury(ctx, x, y, weapons) {
+    if (!weapons?.length) return;
+    ctx.save();
+    ctx.translate(x, y);
+    const radius = 4 + Math.min(weapons.length, 3);
+    dot(ctx, 0, 0, radius, '#263d35');
+    dot(ctx, 1, 1, radius - 1.5, '#77db56');
+    dot(ctx, -3, 3, 2.3, '#477b3a');
+    dot(ctx, 2, -2, 1.45, '#c1f58d');
+    box(ctx, -4, 2, 2.5, 6, '#64ae46', 1.25);
+    for (const [index, id] of weapons.entries()) {
+      const weapon = root.LaunchPhysics.weaponFor(id);
+      if (!weapon) continue;
+      const mount = embedded[id];
+      const drift = index === 0 ? 0 : (index % 2 ? -1 : 1) * (3 + index * 1.5);
+      if (mount) {
+        const [offset, angle, scale] = mount;
+        ctx.save();
+        ctx.translate(offset, drift);
+        ctx.scale(scale, scale);
+        projectile(ctx, 0, 0, angle + drift * .045, 0, weapon);
+        ctx.restore();
+      } else {
+        dot(ctx, -4 + drift, -3, 2.7, weapon.color);
+        dot(ctx, 3 + drift, 4, 1.9, weapon.color);
+      }
+    }
     ctx.restore();
   }
 
@@ -1592,7 +1900,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  root.LaunchArt = { zone, terrain, projectile, held, aimGrip, aimDot, trail, release, airborne, impact, skid };
+  root.LaunchArt = { zone, terrain, frontCover, projectile, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
 })(globalThis);
 
 </script>
@@ -1611,12 +1919,34 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     bubble:  { ready: [16, -83, -.48, -.08, 2, 0], fire: [33, -74, -.20, .17, 1, 0], finish: [36, -56, .50, .11, 0, 0] },
     orb:     { ready: [11, -44, -.42, -.20, 10, 0], fire: [34, -81, -.50, .24, 0, 9], finish: [32, -83, -.68, -.10, 0, 3] },
     boom:    { ready: [-13, -91, -1.30, -.30, 4, 0], fire: [40, -74, -.30, .24, 1, 4], finish: [43, -53, .60, .29, 4, 0] },
-    hammer:  { ready: [-12, -105, -1.80, -.19, 13, 0], fire: [42, -69, -.05, .37, 0, 10], finish: [32, -37, 1.02, .28, 10, 0] }
+    hammer:  { ready: [-12, -105, -1.80, -.19, 13, 0], fire: [42, -69, -.05, .37, 0, 10], finish: [32, -37, 1.02, .28, 10, 0] },
+    sword:   { ready: [-17, -86, -2.36, -.23, 10, 0], fire: [43, -75, -.34, .32, 0, 8], finish: [38, -49, .95, .27, 6, 0] },
+    cork:    { ready: [24, -66, -.02, -.09, 9, 0], fire: [37, -66, -.02, .07, 4, 0], finish: [27, -75, -.32, -.20, 2, 0] }
   };
   const idle = [25, -44, .36, 0, 0, 0];
   const unit = value => Math.max(0, Math.min(1, value));
   const smooth = value => { const t = unit(value); return t * t * (3 - 2 * t); };
   const between = (a, b, t) => a.map((value, i) => value + (b[i] - value) * t);
+  const colors = new Map();
+
+  function tint(hex, amount) {
+    const key = hex + amount;
+    if (!colors.has(key)) {
+      const value = parseInt(hex.slice(1), 16);
+      const rgb = [value >> 16, (value >> 8) & 255, value & 255].map(channel =>
+        Math.round(amount > 0 ? channel + (255 - channel) * amount : channel * (1 + amount)));
+      colors.set(key, `rgb(${rgb.join(',')})`);
+    }
+    return colors.get(key);
+  }
+
+  function volume(ctx, color, x1, y1, x2, y2, shine = .28) {
+    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    gradient.addColorStop(0, tint(color, shine));
+    gradient.addColorStop(.48, color);
+    gradient.addColorStop(1, tint(color, -.31));
+    return gradient;
+  }
 
   function shape(ctx, fill, draw, edge = false) {
     ctx.beginPath();
@@ -1624,7 +1954,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.fillStyle = fill;
     ctx.fill();
     if (edge) {
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 1.55;
       ctx.strokeStyle = ink;
       ctx.stroke();
     }
@@ -1658,8 +1988,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function poseFor(fighter, motion) {
     const form = stance[fighter.weapon.id];
     const charge = motion.charge || 0;
-    let pose = between(idle, form.ready, charge);
-    if (motion.snap != null) pose = between(form.ready, form.fire, motion.snap ** 1.9);
+    let pose = between(idle, form.ready, smooth(charge));
+    if (motion.snap != null) pose = between(pose, form.fire, smooth(motion.snap));
     if (motion.after != null) {
       const t = motion.after;
       pose = t < .42 ? between(form.fire, form.finish, smooth(t / .42)) : between(form.finish, idle, smooth((t - .42) / .58));
@@ -1670,7 +2000,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const folded = motion.part === 'body' ? smooth(impact / .27) * (1 - smooth((impact - .34) / .66)) : 0;
     const fall = motion.part === 'legs' ? smooth(impact / .33) * (1 - smooth((impact - .60) / .40)) : 0;
     const reaction = Math.max(head, folded, fall);
-    const breath = motion.reduced || motion.part || motion.snap != null || motion.after != null ? 0 : Math.sin((motion.time || 0) / 320) * 1.25;
+    const time = motion.time || 0;
+    const breath = motion.reduced || motion.part ? 0 : Math.sin(time / 430) * .85 * (1 - charge);
     return {
       x: -18 * head - 12 * folded - 10 * fall,
       hips: -37 + crouch + breath + 26 * fall + 10 * folded,
@@ -1680,37 +2011,69 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       propAngle: propAngle + (motion.angle || 0) * .85,
       rear: fighter.weapon.id === 'bow' && (charge || motion.snap != null)
         ? [-7 - (motion.snap != null ? 1 - motion.snap : charge) * 11, -66] : [-19 - 20 * head, -43 - 24 * reaction],
-      fall, reaction, lift: motion.reduced ? 0 : lift + 4 * head, breath
+      fall, reaction, lift: motion.reduced ? 0 : lift + 4 * head, breath,
+      cloth: motion.reduced ? 0 : Math.sin(time / 260) * (1 + reaction * 3) + lean * 25
     };
   }
 
-  function leg(ctx, fighter, hip, knee, foot, rear) {
-    stroke(ctx, ink, 15, [hip, knee, [foot[0], foot[1] - 4]]);
-    stroke(ctx, rear ? fighter.shade : fighter.coat, 10, [hip, knee, [foot[0], foot[1] - 4]]);
-    rect(ctx, knee[0] - 5, knee[1] - 4, 10, 8, 3, rear ? fighter.hair : fighter.trim);
-    rect(ctx, foot[0] - 7, foot[1] - 12, 15, 11, 3, fighter.shade, true);
-    rect(ctx, foot[0] - 7, foot[1] - 8, 21, 8, [3, 6, 3, 2], rear ? fighter.shade : fighter.hair, true);
-    stroke(ctx, fighter.trim, 2, [[foot[0] - 2, foot[1] - 6], [foot[0] + 7, foot[1] - 6]]);
+  function leg(ctx, fighter, hip, knee, foot, rear, injuries) {
+    const [x, y] = foot;
+    const thick = fighter.look === 'chef' ? 19 : fighter.build.waist > 19 ? 16 : 13;
+    const pants = rear || fighter.look === 'elf' ? fighter.shade : fighter.coat;
+    limb(ctx, hip, knee, [x, y - 6], thick, volume(ctx, pants, knee[0] - 8, knee[1] - 8, knee[0] + 8, knee[1] + 8));
+    if (['skater', 'knight', 'warden', 'soldier'].includes(fighter.look)) {
+      oval(ctx, knee[0], knee[1], 6, 5, volume(ctx, rear ? fighter.shade : fighter.trim, knee[0] - 5, knee[1] - 4, knee[0] + 5, knee[1] + 5), true);
+    }
+    shape(ctx, volume(ctx, fighter.shade, x - 7, y - 14, x + 12, y), () => {
+      ctx.moveTo(x - 7, y - 15);
+      ctx.quadraticCurveTo(x + 1, y - 12, x + 7, y - 14);
+      ctx.lineTo(x + 7, y - 8);
+      ctx.quadraticCurveTo(x + 17, y - 8, x + 16, y - 2);
+      ctx.quadraticCurveTo(x + 5, y + 1, x - 8, y - 1);
+      ctx.closePath();
+    }, true);
+    stroke(ctx, tint(fighter.trim, -.15), 1.4, [[x - 3, y - 10], [x + 5, y - 10]]);
+    root.LaunchArt.injury(ctx, knee[0] + 2, knee[1], injuries);
   }
 
   function arm(ctx, fighter, from, hand, rear) {
-    const elbow = [(from[0] + hand[0]) * .5 - 4, (from[1] + hand[1]) * .5 + 8];
-    stroke(ctx, ink, 13, [from, elbow, hand]);
-    stroke(ctx, rear ? fighter.shade : fighter.coat, 8.5, [from, elbow, hand]);
-    oval(ctx, elbow[0], elbow[1], 4, 4, fighter.trim);
-    oval(ctx, hand[0], hand[1], 5.4, 5, fighter.skin, true);
+    const dx = hand[0] - from[0], dy = hand[1] - from[1];
+    const reach = Math.hypot(dx, dy) || 1;
+    const bend = Math.max(4, 16 - reach * .24);
+    const elbow = [from[0] + dx * .46 - dy * bend / reach, from[1] + dy * .46 + dx * bend / reach];
+    const fabric = rear ? fighter.shade : fighter.coat;
+    const width = ['knight', 'warden', 'chef', 'mage'].includes(fighter.look) ? 15 : 12;
+    limb(ctx, from, elbow, hand, width, volume(ctx, fabric, from[0], from[1] - 9, elbow[0], elbow[1] + 10));
+    const [x, y] = hand;
+    if (fighter.look === 'mage' || fighter.look === 'knight') oval(ctx, x - 5, y, 7.3, 7, fighter.trim, true);
+    oval(ctx, x, y, 5.4, 5, volume(ctx, fighter.skin, x - 3, y - 4, x + 4, y + 5), true);
+  }
+
+  function limb(ctx, from, joint, end, width, color) {
+    ctx.beginPath();
+    ctx.moveTo(...from);
+    ctx.lineTo((from[0] + joint[0]) / 2, (from[1] + joint[1]) / 2);
+    ctx.quadraticCurveTo(...joint, (joint[0] + end[0]) / 2, (joint[1] + end[1]) / 2);
+    ctx.lineTo(...end);
+    ctx.lineWidth = width + 2.6;
+    ctx.strokeStyle = ink;
+    ctx.stroke();
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
   }
 
   function hat(ctx, f, startled) {
+    const shell = volume(ctx, f.coat, -20, -27, 18, 6, .45);
     switch (f.look) {
       case 'elf':
-        poly(ctx, f.shade, [[-16, -3], [-20, -21], [2, -29], [19, -15], [18, -7]], true);
+        poly(ctx, volume(ctx, f.shade, -15, -25, 17, -6), [[-16, -3], [-20, -21], [2, -29], [19, -15], [18, -7]], true);
         poly(ctx, f.trim, [[-13, -18], [14, -30], [8, -18], [-9, -12]], true);
         poly(ctx, f.skin, [[-9, 6], [-24, -6], [-23, 5], [-14, 12]], true);
         stroke(ctx, f.coat, 3, [[-17, -7], [14, -12]]);
         break;
       case 'logger':
-        rect(ctx, -17, -23, 33, 17, [9, 9, 2, 2], f.coat, true);
+        rect(ctx, -17, -23, 33, 17, [9, 9, 2, 2], shell, true);
         rect(ctx, -20, -11, 45, 7, 3, f.shade, true);
         rect(ctx, -9, -20, 6, 10, 3, f.trim);
         rect(ctx, -6, 9, 19, 11, [3, 4, 8, 7], f.hair);
@@ -1734,28 +2097,76 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         stroke(ctx, '#f9e6ff', 3, [[-10, -17], [2, -17]]);
         break;
       case 'chef':
-        rect(ctx, -14, -22, 29, 15, 4, '#fff1d9', true);
-        oval(ctx, -13, -23, 9, 8, '#ffe5cd', true);
-        oval(ctx, 3, -26, 12, 9, '#fff6e0', true);
-        oval(ctx, 15, -22, 8, 7, '#fff1d9', true);
-        rect(ctx, -15, -15, 32, 7, 3, f.trim, true);
+        shape(ctx, volume(ctx, '#fff1de', -20, -38, 20, -6), () => {
+          ctx.moveTo(-17, -11);
+          ctx.lineTo(-19, -20);
+          ctx.bezierCurveTo(-34, -31, -19, -41, -8, -34);
+          ctx.bezierCurveTo(-2, -48, 13, -43, 14, -34);
+          ctx.bezierCurveTo(32, -37, 34, -19, 19, -17);
+          ctx.lineTo(17, -11);
+          ctx.closePath();
+        }, true);
+        rect(ctx, -17, -16, 35, 8, 4, f.trim, true);
         break;
       case 'diver':
-        rect(ctx, -18, -18, 33, 20, [12, 12, 2, 4], f.coat, true);
-        stroke(ctx, f.trim, 4, [[-13, -9], [-19, -9], [-19, -25]]);
-        rect(ctx, -9, -5, 34, 11, 5, f.shade, true);
-        rect(ctx, 3, -3, 19, 6, 3, '#b8f5e8');
+        oval(ctx, 0, -2, 22, 23, volume(ctx, '#c99a65', -17, -24, 17, 12), true);
+        oval(ctx, 3, -2, 17, 15, volume(ctx, '#6bb6c5', -9, -11, 15, 10, .67), true);
+        oval(ctx, -3, -8, 5, 2.2, '#d2f8ef');
+        stroke(ctx, f.trim, 4, [[-15, -10], [-23, -11], [-23, -26]]);
         break;
       case 'mage':
-        poly(ctx, f.coat, [[-15, -9], [-8, -32], [10, -43], [10, -29], [17, -11]], true);
+        shape(ctx, shell, () => {
+          ctx.moveTo(-18, -9);
+          ctx.bezierCurveTo(-11, -18, -16, -40, 17, -43);
+          ctx.quadraticCurveTo(5, -30, 20, -11);
+          ctx.closePath();
+        }, true);
         oval(ctx, 0, -12, 27, 5, f.shade, true);
         rect(ctx, -11, -20, 23, 6, 2, f.trim);
-        oval(ctx, 10, -42, 4, 4, '#fff4a4', true);
+        oval(ctx, 17, -43, 3.5, 3.5, '#fff4a4', true);
+        shape(ctx, volume(ctx, '#e4cbd4', -8, 5, 17, 26), () => {
+          ctx.moveTo(-4, 6);
+          ctx.quadraticCurveTo(6, 12, 15, 7);
+          ctx.quadraticCurveTo(15, 25, 2, 26);
+          ctx.closePath();
+        }, true);
         break;
       case 'scout':
         rect(ctx, -17, -20, 32, 14, [10, 10, 3, 3], f.coat, true);
         oval(ctx, 3, -9, 27, 5, f.shade, true);
         rect(ctx, -15, -13, 29, 5, 2, f.trim);
+        break;
+      case 'knight':
+        shape(ctx, volume(ctx, '#929bb6', -18, -23, 17, 14, .64), () => {
+          ctx.moveTo(-19, 9);
+          ctx.quadraticCurveTo(-27, -23, -2, -23);
+          ctx.quadraticCurveTo(25, -23, 21, 4);
+          ctx.lineTo(14, 18);
+          ctx.quadraticCurveTo(-1, 24, -19, 9);
+          ctx.closePath();
+        }, true);
+        rect(ctx, -1, -7, 25, 10, [3, 5, 6, 2], f.shade, true);
+        stroke(ctx, f.trim, 2, [[1, -4], [19, -4]]);
+        for (const x of [8, 13, 18]) oval(ctx, x, 10, 1, 1.3, f.shade);
+        shape(ctx, volume(ctx, '#c35362', -22, -38, 3, -20), () => {
+          ctx.moveTo(-4, -24);
+          ctx.quadraticCurveTo(-7, -39, 14, -36);
+          ctx.quadraticCurveTo(-6, -31, -21, -17);
+          ctx.closePath();
+        }, true);
+        break;
+      case 'soldier':
+        shape(ctx, shell, () => {
+          ctx.moveTo(-21, -3);
+          ctx.bezierCurveTo(-26, -27, 12, -30, 22, -13);
+          ctx.quadraticCurveTo(28, -6, 20, -4);
+          ctx.lineTo(-21, -3);
+          ctx.closePath();
+        }, true);
+        stroke(ctx, '#d9cb98', 3, [[-20, -7], [20, -7]]);
+        stroke(ctx, f.shade, 3.5, [[-14, -4], [-11, 11], [-3, 14]]);
+        oval(ctx, -12, -16, 5, 2.6, f.shade);
+        oval(ctx, 3, -17, 6, 2.6, tint(f.trim, -.19));
         break;
       default:
         rect(ctx, -18, -22, 36, 26, [12, 12, 5, 5], f.shade, true);
@@ -1767,70 +2178,157 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (startled && (f.look === 'skater' || f.look === 'diver')) stroke(ctx, '#fff9cf', 2, [[7, -3], [11, 1], [15, -3]]);
   }
 
-  function face(ctx, fighter, tilt, startled) {
+  function face(ctx, fighter, tilt, startled, injuries) {
     ctx.save();
     ctx.translate(3, -90);
     ctx.rotate(tilt);
-    rect(ctx, -18, -13, 32, 31, [12, 11, 12, 9], fighter.hair, true);
-    rect(ctx, -12, -10, 28, 25, [8, 9, 11, 9], fighter.skin, true);
-    oval(ctx, 15, 3, 4.5, 3, fighter.skin, true);
+    ctx.scale(fighter.build.head, fighter.build.head);
+    oval(ctx, -1, 0, 18, 18, volume(ctx, fighter.hair, -13, -14, 10, 14), true);
+    shape(ctx, volume(ctx, fighter.skin, 12, -12, -8, 19, .37), () => {
+      ctx.moveTo(-9, -8);
+      ctx.bezierCurveTo(1, -16, 16, -11, 15, -2);
+      ctx.quadraticCurveTo(23, 3, 16, 5);
+      ctx.bezierCurveTo(16, 19, -4, 21, -8, 11);
+      ctx.quadraticCurveTo(-15, 1, -9, -8);
+      ctx.closePath();
+    }, true);
+    oval(ctx, -7, 3, 4.1, 5.2, fighter.skin, true);
     oval(ctx, 9, -1, 2.4, startled ? 3.8 : 2.4, ink);
+    oval(ctx, 9.8, -2, .8, .8, '#fffaf0');
     if (startled) oval(ctx, 7, 9, 4, 3, fighter.hair);
     else stroke(ctx, fighter.hair, 1.7, [[5, 8], [9, 10], [13, 8]]);
     hat(ctx, fighter, startled);
+    root.LaunchArt.injury(ctx, 11, 3, injuries);
     ctx.restore();
+  }
+
+  function outerwear(ctx, f, pose) {
+    if (['elf', 'mage', 'knight', 'warden'].includes(f.look)) {
+      const length = f.look === 'elf' ? -36 : -16;
+      const color = f.look === 'knight' ? '#bf505c' : f.shade;
+      const edge = -35 - pose.cloth - pose.reaction * 10;
+      shape(ctx, volume(ctx, color, edge, -65, 13, -12), () => {
+        ctx.moveTo(-12, -76);
+        ctx.quadraticCurveTo(3, -74, 13, -67);
+        ctx.bezierCurveTo(-8, -63, -12, length - 9, -13, length);
+        ctx.quadraticCurveTo(edge + 14, length - 7, edge, length + 2);
+        ctx.bezierCurveTo(edge + 7, -35, -21, -55, -12, -76);
+        ctx.closePath();
+      }, true);
+    }
+    if (f.look === 'diver' || f.look === 'soldier') {
+      const width = f.look === 'diver' ? 16 : 20;
+      rect(ctx, -f.build.shoulders - 7, -70, width, 35, 6, volume(ctx, f.trim, -32, -70, -18, -35), true);
+      stroke(ctx, f.shade, 3, [[-f.build.shoulders - 6, -58], [-f.build.shoulders + 5, -58]]);
+    }
+  }
+
+  function costume(ctx, f, pose) {
+    const { shoulders, waist } = f.build;
+    const color = volume(ctx, f.coat, 10, -79, -23, -32, .42);
+    if (f.look === 'chef') {
+      oval(ctx, 0, -51, waist, 27, color, true);
+      shape(ctx, volume(ctx, '#fff1d7', 15, -68, -14, -23), () => {
+        ctx.moveTo(-11, -72);
+        ctx.quadraticCurveTo(11, -77, 17, -62);
+        ctx.quadraticCurveTo(29, -37, 22, -26);
+        ctx.quadraticCurveTo(3, -21, -17, -27);
+        ctx.quadraticCurveTo(-24, -38, -11, -72);
+        ctx.closePath();
+      }, true);
+      rect(ctx, -2, -48, 17, 13, [4, 4, 8, 8], '#d9b2ab', true);
+      for (const y of [-65, -58, -51]) oval(ctx, -10, y, 1.7, 1.7, f.shade);
+      return;
+    }
+
+    const robe = f.look === 'mage';
+    const hem = robe ? -10 : -35;
+    const hemWidth = robe ? waist + 9 : waist;
+    shape(ctx, color, () => {
+      ctx.moveTo(-shoulders, -61);
+      ctx.bezierCurveTo(-shoulders, -78, shoulders, -83, shoulders, -61);
+      ctx.bezierCurveTo(shoulders, -51, hemWidth - 3, hem - 10, hemWidth + (robe ? pose.cloth * .3 : 0), hem);
+      ctx.quadraticCurveTo(0, hem + 6, -hemWidth, hem - 1);
+      ctx.quadraticCurveTo(-waist + 2, -47, -shoulders, -61);
+      ctx.closePath();
+    }, true);
+
+    if (f.look === 'knight' || f.look === 'warden') {
+      const plate = volume(ctx, f.trim, 11, -81, -4, -60, .54);
+      oval(ctx, shoulders - 6, -68, 12, 9, plate, true);
+      oval(ctx, -shoulders + 8, -68, 10, 7, plate, true);
+      shape(ctx, volume(ctx, f.coat, -7, -70, 9, -44, .62), () => {
+        ctx.moveTo(-12, -63);
+        ctx.quadraticCurveTo(0, -73, 16, -65);
+        ctx.lineTo(12, -55);
+        ctx.quadraticCurveTo(8, -44, 0, -43);
+        ctx.quadraticCurveTo(-11, -46, -12, -63);
+        ctx.closePath();
+      }, true);
+      poly(ctx, f.trim, [[2, -64], [8, -57], [2, -50], [-3, -57]]);
+    } else if (f.look === 'soldier' || f.look === 'diver') {
+      rect(ctx, -15, -70, 31, 28, [8, 8, 3, 4], volume(ctx, f.shade, 9, -75, -11, -43), true);
+      stroke(ctx, f.trim, 2.5, [[-10, -69], [-10, -45]]);
+      stroke(ctx, f.trim, 2.5, [[10, -69], [10, -45]]);
+      for (const x of [-11, 3]) rect(ctx, x, -57, 9, 9, 2, f.coat, true);
+    } else if (f.look === 'logger' || f.look === 'artist') {
+      for (const y of [-67, -59, -51]) stroke(ctx, tint(f.shade, .19), 2.1, [[-shoulders + 4, y], [shoulders - 4, y]]);
+      for (const x of [-9, 2, 13]) stroke(ctx, tint(f.shade, .17), 2.1, [[x, -72], [x, -45]]);
+    } else if (f.look === 'elf' || f.look === 'scout') {
+      stroke(ctx, f.shade, 7, [[-shoulders + 3, -68], [waist - 5, -43]]);
+      stroke(ctx, f.trim, 2.5, [[-shoulders + 3, -69], [waist - 5, -44]]);
+      oval(ctx, -4, -63, 4, 5.5, f.trim, true);
+    } else {
+      poly(ctx, volume(ctx, f.trim, 3, -75, -4, -62), [[-12, -72], [5, -76], [14, -68], [7, -61], [-6, -61]], true);
+      oval(ctx, 6, -56, 4, 5, f.trim, true);
+    }
+    if (robe) stroke(ctx, f.trim, 2.5, [[-5, -62], [-9, -30], [-12 - pose.cloth * .18, -13]]);
+    rect(ctx, -waist, -44, waist * 2, 7.5, 3.3, volume(ctx, f.shade, -8, -45, 7, -36), true);
+    rect(ctx, 1, -45, 9, 9, 2, volume(ctx, f.trim, 1, -44, 10, -35), true);
   }
 
   function draw(ctx, x, y, scale, fighter, facesLeft = false, motion = {}) {
     const p = poseFor(fighter, motion);
+    const { injuries } = motion;
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(facesLeft ? -scale : scale, scale);
+    ctx.scale(facesLeft ? -scale : scale, scale * fighter.build.height);
     ctx.lineJoin = ctx.lineCap = 'round';
-    oval(ctx, 0, 0, 28 + 2 * p.fall, 4.5, '#21162f4a');
+    const { shoulders, waist, stance: feet } = fighter.build;
+    const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, feet + 21);
+    shadow.addColorStop(0, '#1f203b66');
+    shadow.addColorStop(1, '#1f203b00');
+    oval(ctx, 0, 0, feet + 23, 6, shadow);
     ctx.translate(p.x, -p.lift);
-    leg(ctx, fighter, [-9, p.hips], [-17 + 27 * p.fall, -20 + 14 * p.fall], [-14 - 6 * p.fall, 0], true);
-    leg(ctx, fighter, [9, p.hips], [13 + 20 * p.fall, -20 + 17 * p.fall], [11 + 5 * p.fall, 0], false);
+    leg(ctx, fighter, [-feet * .62, p.hips], [-feet - 3 + 27 * p.fall, -20 + 14 * p.fall], [-feet - 6 * p.fall, 0], true);
+    leg(ctx, fighter, [feet * .62, p.hips], [feet + 1 + 20 * p.fall, -20 + 17 * p.fall], [feet - 3 + 5 * p.fall, 0], false, injuries?.legs);
     ctx.translate(0, p.hips + 37);
     ctx.translate(0, -37);
     ctx.rotate(p.lean);
     ctx.translate(0, 37);
 
-    if (['elf', 'mage', 'warden'].includes(fighter.look)) {
-      const swing = p.breath * 2 - p.reaction * 16 - (motion.after || 0) * 7;
-      poly(ctx, fighter.shade, [[-13, -72], [7, -66], [-17, -29], [-35 + swing, -30], [-23 + swing, -52]], true);
-      stroke(ctx, fighter.trim, 2.5, [[-35 + swing, -30], [-17, -29]]);
-    }
-    arm(ctx, fighter, [-12, -68], p.rear, true);
-    rect(ctx, -19, -76, 37, 40, [12, 12, 7, 6], fighter.coat, true);
-    poly(ctx, fighter.shade, [[-18, -64], [-10, -74], [-8, -41], [-15, -38], [-18, -44]]);
-    if (fighter.look === 'logger' || fighter.look === 'chef') {
-      stroke(ctx, fighter.shade, 3, [[1, -65], [1, -45]]);
-      for (const top of [-62, -54, -46]) oval(ctx, 5, top, 1.7, 1.7, fighter.trim);
-    } else {
-      poly(ctx, fighter.trim, [[-10, -68], [2, -73], [14, -70], [7, -61], [-6, -61]]);
-      rect(ctx, 1, -60, 10, 7, 2, fighter.shade);
-      oval(ctx, 7, -57, 2.5, 2.5, fighter.trim);
-    }
-    rect(ctx, -16, -43, 34, 7, 3, fighter.shade, true);
-    rect(ctx, -1, -44, 9, 8, 2, fighter.trim, true);
-    face(ctx, fighter, p.head, !!motion.part);
-    arm(ctx, fighter, [13, -67], p.hand, false);
+    outerwear(ctx, fighter, p);
+    arm(ctx, fighter, [-shoulders * .73, -68], p.rear, true);
+    costume(ctx, fighter, p);
+    face(ctx, fighter, p.head, !!motion.part, injuries?.head);
+    arm(ctx, fighter, [shoulders * .72, -67], p.hand, false);
+    root.LaunchArt.injury(ctx, shoulders * .82, -68, injuries?.shoulder);
+    root.LaunchArt.injury(ctx, waist * .62, -49, injuries?.body);
     if (!motion.part) {
       root.LaunchArt.held(ctx, ...p.hand, p.propAngle, fighter.weapon, motion);
-      oval(ctx, p.hand[0] - 2, p.hand[1] + 1, 4, 4, fighter.skin, true);
+      oval(ctx, p.hand[0] - 2, p.hand[1] + 1, 4, 4, volume(ctx, fighter.skin, p.hand[0] - 5, p.hand[1] - 3, p.hand[0] + 4, p.hand[1] + 4), true);
     }
     ctx.restore();
   }
 
   function releasePoint(fighter, angle) {
     const pose = poseFor(fighter, { snap: 1, angle });
-    const nozzle = { bow: 3, blaster: 23, bubble: 16 }[fighter.weapon.id];
+    const nozzle = { bow: 3, blaster: 23, bubble: 16, cork: 23 }[fighter.weapon.id];
     const x = pose.hand[0] + (nozzle == null ? 5 : nozzle * Math.cos(pose.propAngle));
     const y = pose.hand[1] + 37 + (nozzle == null ? -6 : nozzle * Math.sin(pose.propAngle));
     const cos = Math.cos(pose.lean);
     const sin = Math.sin(pose.lean);
-    return { x: pose.x + x * cos - y * sin, y: pose.hips - pose.lift + x * sin + y * cos };
+    return { x: pose.x + x * cos - y * sin, y: (pose.hips - pose.lift + x * sin + y * cos) * fighter.build.height };
   }
 
   root.LaunchFighterArt = { draw, releasePoint };
@@ -1860,7 +2358,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!config || !config.databaseURL || !root.firebase) throw new Error('Class rooms are unavailable. Offline practice is available.');
     const app = root.firebase.initializeApp(config, 'launch-tournament-' + Date.now());
     const db = app.database();
-    const room = db.ref('rooms/' + code + '/launchTournamentV6');
+    const room = db.ref('rooms/' + code + '/launchTournamentV8');
     const status = db.ref('.info/connected');
     const offset = db.ref('.info/serverTimeOffset');
     const subscriptions = [];
@@ -1944,6 +2442,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const P = LaunchPhysics;
   const Art = LaunchArt;
   const Fighters = LaunchFighters;
+  const Arenas = LaunchArenas;
   const Actor = LaunchFighterArt;
   const $ = id => document.getElementById(id);
   const canvas = $('range');
@@ -1952,7 +2451,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const aimReadout = $('aim-readout');
   const shotResult = $('shot-result');
   const targetRange = $('target-range');
-  const SESSION = 'efi-launch-room-v6';
+  const PROTOCOL = 8;
+  const SESSION = 'efi-launch-room-v' + PROTOCOL;
   const PRACTICE = 'efi-launch-practice-v3';
   const FAVORITE = 'efi-launch-fighter';
   const idForRoom = () => Array.from(crypto.getRandomValues(new Uint8Array(10)), n => n.toString(16).padStart(2, '0')).join('');
@@ -1966,6 +2466,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   let pointer = null, pull, pending = '', pendingAim, fieldIndex = -1, trace, scene, shownQuestion = '';
   let lastStatus = '', popupKey = '';
   let camera = 0, cameraTurn = '', lastFrame = 0;
+  let viewWidth = P.VIEW_WIDTH, viewportDirty = true;
   let launchReport = '';
   const menuArt = $('menu-art');
   const menuContext = menuArt.getContext('2d');
@@ -1974,6 +2475,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   menuBackground.width = menuArt.width;
   menuBackground.height = menuArt.height;
   Art.terrain(menuBackground.getContext('2d'), 2, menuArt.width, menuArt.height, 213);
+  new ResizeObserver(() => { viewportDirty = true; }).observe(canvas);
 
   function storage(store, name, value) {
     try {
@@ -2001,10 +2503,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         storage('localStorage', FAVORITE, fighter.id);
       });
       const art = document.createElement('canvas');
-      art.width = 104;
-      art.height = 90;
+      art.width = 112;
+      art.height = 111;
       art.setAttribute('aria-hidden', 'true');
-      Actor.draw(art.getContext('2d'), 40, 83, .59, fighter);
+      Actor.draw(art.getContext('2d'), 48, 103, .65, fighter);
       const name = document.createElement('strong');
       name.textContent = fighter.name;
       const label = document.createElement('span');
@@ -2020,14 +2522,24 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const rules = {
     weaponForPlayer: (id, seed) => fighterFor(id, seed).weapon.id,
-    hitPart: (pull, weapon) => P.flight(pull, P.targetFor(), P.weaponFor(weapon), planck).part,
+    resolveShot(pull, weaponId, shot) {
+      const weapon = P.weaponFor(weaponId);
+      const field = P.fieldFor(Arenas.byRound(shot.round), shot.mirrored, shot.shooterBack);
+      const target = P.targetFor(fighterFor(shot.victim, shot.seed), field, shot.from);
+      const { part, location, points } = P.flight(pull, target, weapon, planck, field);
+      return { part, location, flightMs: P.playbackMs(points, weapon) };
+    },
     correct: (grade, number, seed) => launchQuestion(grade, number, seed).answer,
-    botShot(seed, id) {
-      const target = P.targetFor();
+    botShot(seed, id, match, round) {
+      const victim = T.opponentFor(match, id);
+      const field = P.fieldFor(Arenas.byRound(round), match.right.includes(id), T.setbackOf(match, id));
+      const target = P.targetFor(fighterFor(victim, seed), field, T.setbackOf(match, victim));
       const random = T.randomFor(seed);
       const { weapon } = fighterFor(id, seed);
-      const aim = { x: target.x, y: target.y + (random() - .5) * 116 };
-      return { weapon: weapon.id, pull: P.aimFor(aim, weapon, 1.38 + random() * .26) };
+      const aim = { x: target.x, y: target.y + (random() - .5) * 110 };
+      const candidates = [1.63, 1.84, 2.07, 2.3].map(time => P.aimFor(aim, weapon, time + random() * .12, field.origin));
+      const pull = candidates.find(candidate => P.flight(candidate, target, weapon, planck, field).part) || candidates[0];
+      return { weapon: weapon.id, pull };
     }
   };
 
@@ -2037,13 +2549,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function newState(grade) {
-    return { host: player, grade, protocol: 6, phase: 'lobby', round: 0, version: 0, points: {} };
+    return { host: player, grade, protocol: PROTOCOL, phase: 'lobby', round: 0, version: 0, points: {} };
   }
 
   function showGame() {
     $('entry').hidden = true;
     $('game').hidden = false;
     render();
+    window.scrollTo(0, 0);
   }
 
   function savedPractice() {
@@ -2067,12 +2580,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     members = saved?.members || { practice: { name }, 'bot-1': { name: 'Practice bot' } };
     if (!Fighters.byId(members.practice.fighter)) members.practice.fighter = selection.id;
     state = saved?.state || T.start(newState(Number($('grade').value)), Object.keys(members), freshSeed(), Date.now());
-    if (state.protocol !== 6) {
+    if (state.protocol !== PROTOCOL) {
       const matches = state.matches?.map(match => {
         const { shot, ...rest } = match;
         return rest;
       });
-      state = { ...state, protocol: 6, matches };
+      state = { ...state, protocol: PROTOCOL, matches };
     }
     savePractice();
     showGame();
@@ -2120,7 +2633,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         answerPrivateKey = await LaunchAnswers.importPrivate(savedPrivateKey);
       } else {
         if (!remote.initial?.state) throw new Error('Class room not found. Check the code with your teacher.');
-        if (remote.initial.state.protocol !== 6) throw new Error('Ask your teacher for a room code from the updated game.');
+        if (remote.initial.state.protocol !== PROTOCOL) throw new Error('Ask your teacher for a room code from the updated game.');
         answerPublicKey = await LaunchAnswers.importPublic(remote.initial.state.answerPublicKey);
         const result = await remote.join(name, fighter);
         if (!result.committed) throw new Error('The tournament is full or has already started.');
@@ -2174,6 +2687,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     $('challenge').hidden = true;
     $('game').hidden = true;
     $('entry').hidden = false;
+    document.body.classList.remove('playing');
     notice();
     rememberOption();
   }
@@ -2343,6 +2857,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const assigned = state.matches?.findIndex(match => match.order.includes(player)) ?? -1;
     fieldIndex = assigned >= 0 ? assigned : host && state.matches?.length ? 0 : -1;
     const match = myMatch();
+    document.body.classList.toggle('playing', !!match);
     const token = turnToken(match);
     if (pending && token !== pending) {
       pending = '';
@@ -2369,6 +2884,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     const shooter = match.order[match.turn];
     const mine = shooter === player;
+    const answering = match.stage === 'answer';
+    const answeringLabel = $('answering-player');
+    const answerStatus = answering ? mine ? 'Your question' : getName(shooter) + ' is answering' : '';
+    if (answeringLabel.textContent !== answerStatus) answeringLabel.textContent = answerStatus;
+    answeringLabel.hidden = !answering;
+    $('turn-bar').hidden = answering;
     const leftRate = match.leftPoints / match.left.length;
     const rightRate = match.rightPoints / match.right.length;
     const winner = leftRate === rightRate ? 'Draw' : (leftRate > rightRate ? teamName(match.left, 'Lime') : teamName(match.right, 'Blue')) + ' wins';
@@ -2424,17 +2945,22 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       background.width = P.WIDTH;
       background.height = P.HEIGHT;
       Art.terrain(background.getContext('2d'), round, P.WIDTH, P.HEIGHT, P.GROUND);
-      scene = { round, seed: state.seed, background };
+      scene = { round, seed: state.seed, level: Arenas.byRound(round), background };
       trace = null;
     }
-    if (match.shot && (trace?.at !== match.shot.at || trace?.player !== match.shot.player)) {
+    if (match.stage === 'flight' && match.shot && (trace?.at !== match.shot.at || trace?.player !== match.shot.player)) {
       const shot = match.shot;
       const weapon = P.weaponFor(shot.weapon);
-      const flight = P.flight(shot.pull, P.targetFor(), weapon, planck);
+      const mirrored = match.right.includes(shot.player);
+      const setback = T.setbackOf(match, shot.player);
+      const field = P.fieldFor(scene.level, mirrored, setback);
+      const target = P.targetFor(fighterFor(shot.victim), field, T.setbackOf(match, shot.victim) - shot.knockback);
+      const flight = P.flight(shot.pull, target, weapon, planck, field);
       const angle = Math.atan2(shot.pull[1], shot.pull[0]);
       const launch = Actor.releasePoint(fighterFor(shot.player), angle);
-      trace = { ...flight, ...shot, weapon, angle, offsetX: P.FIGHTER_X + launch.x - P.ORIGIN.x, offsetY: P.FIGHTER_Y + launch.y - P.ORIGIN.y };
-      trace.duration = Math.min(1110, Math.max(490, (flight.points.length - 1) * 10 + 35));
+      const shooterPosition = P.fighterPosition(scene.level, mirrored, setback);
+      const release = { x: shooterPosition.x + launch.x, y: shooterPosition.y + launch.y };
+      trace = { ...flight, ...shot, weapon, angle, release, offsetX: release.x - field.origin.x, offsetY: release.y - field.origin.y };
       launchReport = '';
       shotResult.hidden = true;
     }
@@ -2445,10 +2971,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const reduced = reduceMotion.matches;
     const opponent = Fighters.byId(selection.id === 'rook' ? 'nova' : 'rook');
     const angle = -.36;
-    const demo = reduced ? 1300 : time % 3350;
+    const demo = reduced ? 1560 : time % 4020;
     const release = selection.weapon.releaseMs;
     const flightStart = 610 + release;
-    const flightEnd = flightStart + 1230;
+    const flightEnd = flightStart + 1780;
     const hand = Actor.releasePoint(selection, angle);
     const start = { x: 149 + hand.x * 1.47, y: 212 + hand.y * 1.47 };
     const end = { x: 657, y: 127 };
@@ -2470,11 +2996,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     menuContext.stroke();
     menuContext.restore();
     if (demo >= flightStart && demo < flightEnd) {
-      const t = (demo - flightStart) / 1230;
+      const t = (demo - flightStart) / (flightEnd - flightStart);
       const x = start.x + (end.x - start.x) * t;
       const y = start.y + (end.y - start.y) * t - 256 * t * (1 - t);
       const direction = Math.atan2(end.y - start.y + 512 * t - 256, end.x - start.x);
-      Art.projectile(menuContext, x, y, direction, reduced ? 0 : t * 1230, selection.weapon);
+      Art.projectile(menuContext, x, y, direction, reduced ? 0 : demo - flightStart, selection.weapon);
     } else if (hit != null) {
       Art.impact(menuContext, end, hit, 'body', selection.weapon, reduced);
     }
@@ -2496,12 +3022,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
   }
 
-  function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed) {
-    const victimX = P.WIDTH - P.FIGHTER_X;
+  function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed, origin, victimX) {
     const inView = P.mirrorX(victimX, mirrored) - camera;
-    targetRange.hidden = match.stage !== 'aim' || (inView >= 0 && inView <= P.VIEW_WIDTH);
+    targetRange.hidden = match.stage !== 'aim' || (inView >= 0 && inView <= viewWidth);
     if (!targetRange.hidden) {
-      const distance = Math.round((victimX - P.ORIGIN.x) / P.SCALE);
+      const distance = Math.round((victimX - origin.x) / P.SCALE);
       const label = getName(victim) + ' · ' + distance + ' m';
       const text = mirrored ? '← ' + label : label + ' →';
       if (targetRange.textContent !== text) targetRange.textContent = text;
@@ -2516,8 +3041,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
 
     const part = trace?.part;
-    const showImpact = elapsed >= trace?.duration && elapsed < T.FLIGHT_MS;
-    const impactPending = match.stage === 'flight' && !showImpact && elapsed < T.FLIGHT_MS && !!part;
+    const shotEnd = trace?.flightMs + T.IMPACT_MS;
+    const showImpact = elapsed >= trace?.flightMs && elapsed < shotEnd;
+    const impactPending = match.stage === 'flight' && !showImpact && elapsed < shotEnd && !!part;
     const health = T.healthOf(match, victim) + (impactPending ? trace.damage : 0);
     updateHealth(mirrored ? 'right' : 'left', active, T.healthOf(match, active));
     updateHealth(mirrored ? 'left' : 'right', victim, health);
@@ -2530,8 +3056,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const rightScore = (match.rightPoints - Number(impactPending && mirrored)) + ' · ' + teamName(match.right, 'Blue');
     if ($('left-score').textContent !== leftScore) $('left-score').textContent = leftScore;
     if ($('right-score').textContent !== rightScore) $('right-score').textContent = rightScore;
-    const labels = { head: 'Critical headshot', body: 'Body hit', legs: 'Leg hit' };
-    const outcome = showImpact ? part ? labels[part] + ' · −' + trace.damage + ' HP' : 'Miss' : '';
+    const labels = { head: 'Critical headshot', shoulder: 'Shoulder hit', body: 'Body hit', legs: 'Leg hit' };
+    const outcome = showImpact ? part ? labels[trace.location] + ' · −' + trace.damage + ' HP' : trace.surfaceKind === 'cover' ? 'Blocked by cover' : 'Miss' : '';
     if (outcome !== launchReport) {
       launchReport = outcome;
       shotResult.hidden = !outcome;
@@ -2549,7 +3075,31 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function onScreen(x, mirrored) {
     const screenX = P.mirrorX(x, mirrored) - camera;
-    return screenX >= -95 && screenX < P.VIEW_WIDTH + 95;
+    return screenX >= -120 && screenX < viewWidth + 120;
+  }
+
+  function aimField(match, shooter, mirrored) {
+    const back = T.setbackOf(match, shooter);
+    const key = (mirrored ? 'right' : 'left') + ':' + back;
+    if (scene.fieldKey !== key) {
+      scene.fieldKey = key;
+      scene.field = P.fieldFor(scene.level, mirrored, back);
+    }
+    return scene.field;
+  }
+
+  function fitArena() {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (!width || !height) return;
+    viewportDirty = false;
+    const pixels = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2000000 / (width * height)));
+    const previous = viewWidth;
+    viewWidth = Math.min(P.MAX_VIEW_WIDTH, P.HEIGHT * width / height);
+    camera *= (P.WIDTH - viewWidth) / (P.WIDTH - previous);
+    canvas.width = Math.round(width * pixels);
+    canvas.height = Math.round(height * pixels);
+    ctx.setTransform(canvas.width / viewWidth, 0, 0, canvas.height / P.HEIGHT, 0, 0);
   }
 
   function frame(time) {
@@ -2563,6 +3113,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if ($('field').hidden || !scene) return;
     const match = myMatch();
     if (!match) return;
+    if (viewportDirty) fitArena();
 
     const now = currentTime();
     const seconds = ['aim', 'answer'].includes(match.stage) ? Math.max(0, Math.ceil((match.deadline - now) / 1000)) + ' s' : '';
@@ -2571,24 +3122,24 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     const mirrored = mirrorTurn(match);
     const turn = [state.round, fieldIndex, match.turn].join('/');
-    const atLauncher = mirrored ? P.WIDTH - P.VIEW_WIDTH : 0;
+    const atLauncher = mirrored ? P.WIDTH - viewWidth : 0;
     if (turn !== cameraTurn) {
       cameraTurn = turn;
       camera = atLauncher;
     }
 
     const elapsed = match.stage === 'flight' && trace ? now - trace.at : -1;
-    const inFlight = elapsed >= 0 && elapsed < T.FLIGHT_MS;
+    const inFlight = elapsed >= 0 && elapsed < trace.flightMs + T.IMPACT_MS;
     const queued = match.stage === 'flight' && trace && elapsed < 0;
     const reduced = reduceMotion.matches;
     const release = reduced ? 0 : trace?.weapon.releaseMs ?? 0;
     const afterRelease = elapsed - release;
-    const travelling = inFlight && afterRelease >= 0 && elapsed < trace.duration;
+    const travelling = inFlight && afterRelease >= 0 && elapsed < trace.flightMs;
     const snapping = inFlight && afterRelease < 0;
-    const travelTime = inFlight ? trace.duration - release : 1;
+    const travelTime = inFlight ? trace.flightMs - release : 1;
     const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime, reduced) : null;
     if (position) {
-      const follow = P.cameraAt(position.x, mirrored);
+      const follow = P.cameraAt(position.x, mirrored, viewWidth);
       camera += (follow - camera) * (reduced ? 1 : 1 - Math.exp(-delta / 72));
     } else {
       camera = atLauncher;
@@ -2598,9 +3149,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const active = match.order[Math.min(match.turn, match.order.length - 1)];
     const victim = match.stage === 'flight' && trace ? trace.victim : T.opponentFor(match, active);
     const fighter = fighterFor(active);
-    updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed);
+    const field = aimField(match, active, mirrored);
+    const activeAt = P.fighterPosition(scene.level, mirrored, T.setbackOf(match, active));
+    const impact = inFlight ? Math.max(0, (elapsed - trace.flightMs) / T.IMPACT_MS) : 0;
+    const remainingPush = match.stage === 'flight' && trace
+      ? trace.knockback * Math.max(0, 1 - impact / .7) ** 2 : 0;
+    const victimAt = P.fighterPosition(scene.level, mirrored, T.setbackOf(match, victim) - remainingPush, true);
+    updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed, field.origin, victimAt.x);
 
-    ctx.drawImage(scene.background, camera, 0, P.VIEW_WIDTH, P.HEIGHT, 0, 0, P.VIEW_WIDTH, P.HEIGHT);
+    ctx.drawImage(scene.background, camera, 0, viewWidth, P.HEIGHT, 0, 0, viewWidth, P.HEIGHT);
     ctx.save();
     ctx.translate(-camera, 0);
     if (mirrored) {
@@ -2608,40 +3165,42 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.scale(-1, 1);
     }
 
-    const impact = inFlight ? Math.max(0, (elapsed - trace.duration) / (T.FLIGHT_MS - trace.duration)) : 0;
-    const tookHit = !!trace?.part && inFlight && elapsed >= trace.duration;
-    const aimedPull = pendingAim?.pull || drawPull;
-    const charge = queued ? 1 : aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
+    const tookHit = !!trace?.part && inFlight && elapsed >= trace.flightMs;
+    const pendingLocation = match.stage === 'flight' && trace && elapsed < trace.flightMs ? trace.location : null;
+    const aimedPull = queued || inFlight ? trace.pull : pendingAim?.pull || drawPull;
+    const charge = aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
     const angle = inFlight || queued ? trace.angle : aimedPull ? Math.atan2(aimedPull[1], aimedPull[0]) : 0;
-    if (onScreen(P.FIGHTER_X, mirrored)) {
-      Actor.draw(ctx, P.FIGHTER_X, P.FIGHTER_Y, 1, fighter, false, {
+    if (onScreen(activeAt.x, mirrored)) {
+      Actor.draw(ctx, activeAt.x, activeAt.y, 1, fighter, false, {
         time, reduced, charge: Math.min(1, charge), angle,
+        injuries: T.injuriesOf(match, active),
         snap: snapping ? elapsed / release : null,
-        after: inFlight && !snapping ? Math.min(1, afterRelease / 390) : null
+        after: inFlight && !snapping ? Math.min(1, afterRelease / 540) : null
       });
     }
-    const targetX = P.WIDTH - P.FIGHTER_X;
-    if (onScreen(targetX, mirrored)) {
-      if (tookHit && trace.part === 'legs' && !reduced) Art.skid(ctx, targetX, P.GROUND, impact);
-      Actor.draw(ctx, targetX, P.FIGHTER_Y, 1, fighterFor(victim), true, {
-        time: time + 430, reduced, part: tookHit ? trace.part : null, impact: reduced ? .32 : impact
+    if (onScreen(victimAt.x, mirrored)) {
+      if (tookHit && trace.knockback && !reduced) Art.skid(ctx, victimAt.x, victimAt.y + 2, impact);
+      Actor.draw(ctx, victimAt.x, victimAt.y, 1, fighterFor(victim), true, {
+        time: time + 430, reduced, part: tookHit ? trace.part : null, impact: reduced ? .32 : impact,
+        injuries: T.injuriesOf(match, victim, pendingLocation)
       });
     }
+    Art.frontCover(ctx, scene.level, mirrored);
 
-    if (canAct('aim') && !drawPull) Art.aimGrip(ctx, P.ORIGIN, fighter.weapon.color, reduced ? 0 : time);
+    if (canAct('aim') && !drawPull) Art.aimGrip(ctx, field.origin, fighter.weapon.color, reduced ? 0 : time);
 
     if (drawPull) {
-      for (const [index, point] of P.preview(drawPull, fighter.weapon).entries()) {
+      for (const [index, point] of P.preview(drawPull, fighter.weapon, field).entries()) {
         Art.aimDot(ctx, point, index, fighter.weapon.color);
       }
     }
 
     if (travelling) {
       if (!reduced && afterRelease < 145) {
-        Art.release(ctx, { x: P.ORIGIN.x + trace.offsetX, y: P.ORIGIN.y + trace.offsetY }, trace.pull, afterRelease / 145, trace.weapon.color);
+        Art.release(ctx, trace.release, trace.pull, afterRelease / 145, trace.weapon.color);
       }
       for (let lag = 5; lag >= 1; lag--) {
-        if (afterRelease > lag * 16) Art.trail(ctx, projectileAt(afterRelease - lag * 16, travelTime, reduced), lag, trace.weapon);
+        if (afterRelease > lag * 38) Art.trail(ctx, projectileAt(afterRelease - lag * 38, travelTime, reduced), lag, trace.weapon);
       }
       if (position.y < 12) Art.airborne(ctx, position.x, 19);
       else {
@@ -2658,27 +3217,30 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function canvasPoint(event) {
     const rect = canvas.getBoundingClientRect();
-    const x = camera + (event.clientX - rect.left) * P.VIEW_WIDTH / rect.width;
+    const x = camera + (event.clientX - rect.left) * viewWidth / rect.width;
     return { x: P.mirrorX(x, mirrorTurn(myMatch())), y: (event.clientY - rect.top) * P.HEIGHT / rect.height };
   }
 
   function drag(event) {
     const pos = canvasPoint(event);
-    pull = P.limitPull(P.ORIGIN.x - pos.x, P.ORIGIN.y - pos.y);
+    pull = P.limitPull((pointer.start.x - pos.x) * pointer.gain, (pointer.start.y - pos.y) * pointer.gain);
   }
 
   canvas.addEventListener('pointerdown', event => {
     if (!canAct('aim') || pointer !== null) return;
     const pos = canvasPoint(event);
-    if (Math.hypot(pos.x - P.ORIGIN.x, pos.y - P.ORIGIN.y) > 60) return;
+    const match = myMatch();
+    const { origin } = aimField(match, player, mirrorTurn(match));
+    if (Math.hypot(pos.x - origin.x, pos.y - origin.y) > 66) return;
     canvas.setPointerCapture(event.pointerId);
-    pointer = event.pointerId;
+    const available = Math.max(18, pos.x - 8);
+    pointer = { id: event.pointerId, start: pos, gain: Math.max(1, P.MAX_PULL / available) };
     $('aim-controls').hidden = true;
     drag(event);
   });
-  canvas.addEventListener('pointermove', event => { if (pointer === event.pointerId) drag(event); });
+  canvas.addEventListener('pointermove', event => { if (pointer?.id === event.pointerId) drag(event); });
   canvas.addEventListener('pointerup', event => {
-    if (pointer !== event.pointerId) return;
+    if (pointer?.id !== event.pointerId) return;
     drag(event);
     pointer = null;
     const shot = pull;
