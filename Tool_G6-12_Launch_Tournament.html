@@ -339,10 +339,22 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
   background: linear-gradient(#ffffff50, transparent 52%, #15132642 53%), linear-gradient(90deg, var(--health-start), var(--health-end));
 }
 .health[data-status="low"] { --health-start: #e16d68; --health-end: #ffd196; }
-.round-clock { display: flex; align-items: center; gap: 8px; text-align: center; }
+.round-clock { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; }
 #answering-player { font-size: .83rem; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
 #clock { font-variant-numeric: tabular-nums; white-space: nowrap; }
-#clock:not(:empty) { color: #2b243e; background: var(--gold); padding: 4px 9px; border-radius: 6px; font-weight: 850; }
+#clock:not(:empty) {
+  min-width: 2.65em;
+  padding: .19em .32em;
+  border: 1px solid #ffebbb;
+  border-radius: 9px;
+  color: #2b243e;
+  background: var(--gold);
+  box-shadow: 0 3px 0 #a96642, 0 4px 12px #15122280;
+  font-size: clamp(1.4rem, 2.4vw, 2.35rem);
+  font-weight: 900;
+  line-height: 1;
+}
+#clock.urgent:not(:empty) { background: #ffbfaa; border-color: #ffe4d9; box-shadow: 0 3px 0 #a95356; }
 
 .arena { position: relative; height: clamp(340px, 69svh, 970px); }
 .duo .arena { height: clamp(340px, 62svh, 800px); }
@@ -375,6 +387,27 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
 .shot-result[data-hit="true"] { background: #ffd68d; color: #2c243b; border-color: #3e2a44; }
 .shot-result[data-part="head"] { background: #ffc18a; }
 .shot-result[data-knockout="true"] { background: #ffe29a; box-shadow: 0 0 0 2px #fff1c5, 0 6px 22px #20162a58; }
+.answer-popup {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: calc(100% - 28px);
+  padding: .5em .9em;
+  border: 2px solid currentColor;
+  border-radius: 14px;
+  background: #282037f5;
+  box-shadow: 0 5px 0 #24182990, 0 10px 32px #21172880;
+  color: #ffd392;
+  font-size: clamp(1.3rem, 3.4vw, 2.45rem);
+  font-weight: 900;
+  text-align: center;
+  pointer-events: none;
+}
+.answer-popup[data-outcome="correct"] { color: #c6f7ad; }
+.answer-popup[data-outcome="wrong"] { color: #ffd0d9; }
 
 .arena:has(.challenge:not([hidden])) #range { filter: blur(3px) brightness(.83); }
 .challenge {
@@ -417,6 +450,11 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   #range { transition: filter .2s ease; }
   .fighter-card, button { transition: background .16s ease, border-color .16s ease; }
   .challenge:not([hidden]), .shot-result:not([hidden]) { animation: pop-in .22s ease-out both; }
+  .answer-popup:not([hidden]) { animation: answer-in .24s ease-out both; }
+  @keyframes answer-in {
+    from { opacity: 0; transform: translate(-50%, -42%) scale(.88); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
   .review-note[open] > p { animation: review-in .18s ease-out both; }
   @keyframes pop-in { from { opacity: 0; transform: translate(-50%, 8px) scale(.98); } to { opacity: 1; transform: translateX(-50%); } }
   @keyframes review-in { from { opacity: .35; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
@@ -460,7 +498,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .health { padding-inline: 6px; }
   .hp-value { font-size: .73rem; }
   .scoreboard { grid-template-columns: minmax(0, 1fr) minmax(3.5rem, 22%) minmax(0, 1fr); }
-  .round-clock { flex-direction: column; gap: 4px; }
+  .round-clock { gap: 4px; }
   #choices button { font-size: .94rem; }
   .opponent-side { top: auto; right: 8px; bottom: 8px; padding: 3px 7px; font-size: .73rem; }
   .opponent-side[data-side="left"] { left: 8px; }
@@ -472,7 +510,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261829',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261838',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -529,7 +567,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
       <div class="game-header">
         <div><p id="room-label" class="eyebrow"></p><h1 id="heading">Class lobby</h1><p id="arena-name" hidden></p></div>
         <div class="game-buttons">
-          <span id="network"></span><button id="advance" class="primary" hidden>Start round</button>
+          <span id="network"></span><button id="advance" class="primary" hidden>Start round 1</button>
           <button id="leave" class="quiet">Leave</button>
         </div>
       </div>
@@ -560,6 +598,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
               <span>Power <strong id="power-value">—</strong></span>
             </div>
             <div id="shot-result" class="shot-result" role="status" hidden></div>
+            <div id="answer-popup" class="answer-popup" role="status" hidden></div>
             <div id="challenge" class="challenge" hidden>
               <p class="eyebrow">LESSON CHALLENGE</p>
               <h2 id="question"></h2>
@@ -1334,6 +1373,53 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ]
   };
 
+  // Match the topic from the prompt alone. The explanation is reserved for after answering.
+  const reviewNotes = [
+    [/\b(?:ipconfig|adapter|ipv4|ip address|ip configuration|169\.254)\b/i,
+      'A PC can have several network interfaces, including unused ones. Separate its own address, the router’s address, and the tool that reports those settings.'],
+    [/\b(?:ping|gateway|outage|internet|reach(?:es|ing)? the network|responds over the network)\b/i,
+      'Work outward from the PC to the local network and then to the internet. A failed check narrows the search, but one result rarely proves what broke.'],
+    [/\b(?:dir|command line|command lists files|wide-format|command shows.*(?:files|folder))\b/i,
+      'Think about which folder the command is working in. Some commands only show information, and optional switches can change how that information is displayed.'],
+    [/\b(?:firewall|antivirus|virus|protection|security definitions|quick scan|suspicious file)\b/i,
+      'Separate network traffic, files already on the PC, and requests to make changes. Each security feature protects against a different kind of problem.'],
+    [/\b(?:permissions?|administrator|standard account|standard user|account type|folder access)\b/i,
+      'Separate everyday work from changes that affect the whole lab PC. Consider exactly what the person needs to do and how much access that task requires.'],
+    [/\b(?:driver|device status|device manager|warning icon)\b/i,
+      'Windows uses software to communicate with connected hardware. Compare what the system detects with what the device actually does, especially if the problem began after a change.'],
+    [/\b(?:update|updates)\b/i,
+      'An update can be available, downloading, installed, or waiting for a restart. Look for the stage in the question and consider how the next action could affect class work.'],
+    [/\b(?:ram|cpu|processor|disk|storage|drive|64-bit|operating system (?:edition|release)|windows version)\b/i,
+      'Different readings describe different things, such as work happening now, space for files, and the system’s specifications. Check which reading and units match the question.'],
+    [/\b(?:task manager|startup|slowdown|frozen|freezes|stopped responding|end task|process)\b/i,
+      'Check whether the issue affects one app or the whole PC and whether it lasts. Think about what evidence you can collect and what work might be lost if you stop an app.'],
+    [/\b(?:usb|printer|bluetooth|pairing|device)\b/i,
+      'A device can be connected, recognized, and selected at different stages. Identify the stage that is failing before deciding which setting to check.'],
+    [/\b(?:installer|installing|uninstall\w*|shortcut|software download|install an app)\b/i,
+      'Separate the app, the file that installs it, and the icon used to open it. On a shared PC, consider which change would affect other users.'],
+    [/\b(?:window|windows open|side by side|maximi\w*|minimi\w*|snap|bring it forward)\b/i,
+      'An app can stay open while its window is hidden, resized, or moved. Decide which change to the window would help you keep working.'],
+    [/\b(?:shutdown|shut\w* down|power|reboot|restart|sleep\w*|wake\w*|stepping away)\b/i,
+      'Different power actions affect open apps and the current session in different ways. Decide what needs to stay ready and whether any work still needs to be saved.'],
+    [/\b(?:account|sign-in|sign in|sign out|locked|lock the screen|leave your desk)\b/i,
+      'Think about whose files are open and whether that session needs to continue. Different actions can protect a session, switch users, or close it completely.'],
+    [/\b(?:sound|speakers?|audio|mute\w*|headphones|too loud)\b/i,
+      'A video can be playing while the sound is quiet, muted, or sent to another device. Check which part of that path matches what you observe.'],
+    [/\b(?:display|monitor|brightness|glare|dim|resolution|text too small)\b/i,
+      'Separate the screen being on from how Windows draws the picture. Think about whether the problem is visibility, sharpness, or the size of items on screen.'],
+    [/\b(?:taskbar|desktop|wallpaper|start logo|pinned|power options|calculator)\b/i,
+      'Different areas of Windows are used to find an app, keep it handy, or change how the desktop looks. Start by identifying which action you need to take.'],
+    [/\b(?:macos|linux|operating systems)\b/i,
+      'Operating systems share some basic jobs, but the available software, hardware support, and menus can differ. Compare them using what the lab actually needs.'],
+    [/\b(?:maintenance|troubleshoot\w*|checklist|report|fault|record|verify|baseline|repair)\b/i,
+      'Start with the exact symptom and when it happens. Think about what one safe change or a repeatable test would tell you, and what someone else would need to know.']
+  ];
+
+  function reviewFor(prompt) {
+    return reviewNotes.find(([topic]) => topic.test(prompt))?.[1] ||
+      'Look at what already works and what the question asks you to change. Compare the options by what each action would actually do on a lab PC.';
+  }
+
   function randomFor(seed) {
     return () => {
       seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -1360,7 +1446,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const [prompt, right, first, second, explanation] = order[number % group.length];
     const choiceRandom = randomFor((seed ^ Math.imul(number + 1, 0x45d9f3b)) >>> 0);
     const choices = shuffle([right, first, second], choiceRandom);
-    return { prompt, choices, answer: choices.indexOf(right), explanation };
+    return { prompt, choices, answer: choices.indexOf(right), explanation, review: reviewFor(prompt) };
   }
 
   function draw(deck, turnKey, seed) {
@@ -1384,6 +1470,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const ROUNDS = 13;
   const AIM_MS = 15000;
   const ANSWER_MS = 30000;
+  const RESULTS_MS = 3000;
   const BOT_MS = 1200;
   const IMPACT_MS = 780;
   const LAUNCH_DELAY_MS = 140;
@@ -1673,7 +1760,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }, { points });
   }
 
+  function nextRoundAt(state) {
+    return state.phase === 'results' ? Math.max(...state.matches.map(match => match.deadline)) + RESULTS_MS : null;
+  }
+
   function tick(state, now, rules) {
+    if (state.phase === 'results' && now >= nextRoundAt(state)) {
+      return start(state, state.roster, rules.nextSeed(), now);
+    }
     if (state.phase !== 'active') return state;
     let current = state;
     for (let index = 0; index < state.matches.length; index++) {
@@ -1711,7 +1805,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, healthOf, setbackOf, injuriesOf, opponentFor };
+  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, nextRoundAt, healthOf, setbackOf, injuriesOf, opponentFor };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -3470,6 +3564,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const aimReadout = $('aim-readout');
   const shotResult = $('shot-result');
+  const answerPopup = $('answer-popup');
+  const answerMessages = { correct: 'Correct answer!', wrong: 'Incorrect answer', timeout: 'Time’s up' };
   const opponentSide = $('opponent-side');
   const PROTOCOL = 11;
   const SESSION = 'efi-launch-room-v' + PROTOCOL;
@@ -3485,6 +3581,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   let answerPublicKey, answerPrivateKey, openingAnswers = false;
   let pointer = null, pull, pending = '', pendingAim, fieldIndex = -1, trace, scene, shownQuestion = '';
   let lastStatus = '', popupKey = '';
+  let answerPopupKey = '', answerPopupUntil = 0;
   let camera = 0, cameraLift = 0, trackedShot = null, lastFrame = 0;
   let viewWidth = P.VIEW_WIDTH, worldHeight = 0, skyHeight = 0, viewportDirty = true;
   let questionFrame = '';
@@ -3566,6 +3663,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   const rules = {
+    nextSeed: freshSeed,
     weaponForPlayer: (id, seed) => fighterFor(id, seed).weapon.id,
     resolveShot(pull, weaponId, shot) {
       const weapon = P.weaponFor(weaponId);
@@ -3734,6 +3832,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     code = null;
     pointer = pull = pendingAim = trace = scene = null;
     pending = shownQuestion = popupKey = lastStatus = '';
+    answerPopupKey = '';
+    answerPopupUntil = 0;
+    answerPopup.hidden = true;
     fieldIndex = -1;
     launchReport = questionFrame = '';
     shotResult.hidden = true;
@@ -3803,7 +3904,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function advance() {
-    if (!isHost()) return;
+    if (state?.phase !== 'lobby' || !isHost()) return;
     const roster = state.roster || Object.keys(members).sort();
     publish(T.start(state, roster, freshSeed(), currentTime()));
   }
@@ -3921,9 +4022,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
     $('room-label').textContent = practice ? 'OFFLINE PRACTICE  ·  GRADE ' + grade : code + '  ·  GRADE ' + grade;
     $('heading').textContent = phase === 'lobby' ? 'Class lobby' : phase === 'ended' ? 'Tournament complete' : 'Round ' + round + ' / ' + T.ROUNDS + ' · ' + T.mode(round);
-    $('advance').hidden = !host || !['lobby', 'results'].includes(phase);
-    $('advance').disabled = (phase === 'lobby' && Object.keys(members).length < 2) || (!practice && !remote?.connected);
-    $('advance').textContent = phase === 'lobby' ? 'Start round 1' : 'Start round ' + (round + 1);
+    $('advance').hidden = !host || phase !== 'lobby';
+    $('advance').disabled = Object.keys(members).length < 2 || (!practice && !remote?.connected);
     $('network').hidden = practice;
     $('field').hidden = !match;
     $('arena-name').hidden = !match;
@@ -3931,7 +4031,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     let details = '';
     if (phase === 'lobby') details = host ? 'Share the room code. Start when at least two students have joined.' : 'Waiting for your teacher to start.';
     else if (phase === 'ended') details = 'Every hit earned one tournament point.';
-    else if (phase === 'results') details = 'Round complete. The next round draws new matchups.';
+    else if (phase === 'results') details = 'Round complete. New matchups start automatically.';
     else if (match?.stage === 'done') details = 'Your match is complete. Waiting for the other matches.';
     else if (assigned >= 0 && match.stage !== 'flight' && T.healthOf(match, player) === 0) details = 'Knocked out. Watch the rest of your match.';
     else if (host && state.matches?.length > 1) details = state.matches.filter(m => m.stage === 'done').length + ' of ' + state.matches.length + ' matches complete';
@@ -3950,8 +4050,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       respondents.length === 1 ? getName(respondents[0]) + ' is answering' : '';
     const answerStatus = myQuestion ? 'Your question' : answering && myAnswer
       ? (myAnswer.outcome === 'correct' ? 'Shot queued' : 'Shot missed') + ' · ' + waiting : waiting;
-    if (answeringLabel.textContent !== answerStatus) answeringLabel.textContent = answerStatus;
-    answeringLabel.hidden = !answering;
+    const clockLabel = phase === 'results' ? 'Next round' : answerStatus;
+    if (answeringLabel.textContent !== clockLabel) answeringLabel.textContent = clockLabel;
+    answeringLabel.hidden = !answering && phase !== 'results';
     $('turn-bar').hidden = answering;
     const leftRate = match.leftPoints / match.left.length;
     const rightRate = match.rightPoints / match.right.length;
@@ -3977,10 +4078,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       $('review-text').textContent = '';
       $('choices').replaceChildren();
       if (qKey) {
+        answerPopup.hidden = true;
         activeCard = drawCard(match);
         const question = launchQuestion(grade, activeCard.number, activeCard.seed);
         $('question').textContent = question.prompt;
-        $('review-text').textContent = question.explanation;
+        $('review-text').textContent = question.review;
         $('choices').replaceChildren(...question.choices.map((choice, index) => {
           const button = document.createElement('button');
           button.textContent = choice;
@@ -3993,6 +4095,16 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     const feedback = myAnswer || match.feedback;
     const showingFeedback = match.stage === 'aim' || match.stage === 'feedback';
+    if ((myAnswer || showingFeedback) && feedback?.player === player) {
+      const key = [round, match.turn, feedback.at].join('/');
+      if (key !== answerPopupKey) {
+        answerPopupKey = key;
+        answerPopupUntil = performance.now() + 1600;
+        answerPopup.dataset.outcome = feedback.outcome;
+        answerPopup.textContent = answerMessages[feedback.outcome];
+        answerPopup.hidden = false;
+      }
+    }
     const newFeedback = showingFeedback && feedback?.player === player ? round + '/' + feedback.at : '';
     if (newFeedback && newFeedback !== popupKey) {
       popupKey = newFeedback;
@@ -4243,8 +4355,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (viewportDirty) fitArena(duo);
 
     const now = currentTime();
-    const seconds = ['aim', 'answer'].includes(match.stage) ? Math.max(0, Math.ceil((match.deadline - now) / 1000)) + ' s' : '';
-    if ($('clock').textContent !== seconds) $('clock').textContent = seconds;
+    const deadline = T.nextRoundAt(state) ?? (['aim', 'answer'].includes(match.stage) ? match.deadline : null);
+    const remaining = deadline === null ? null : Math.max(0, Math.ceil((deadline - now) / 1000));
+    const clock = $('clock');
+    const seconds = remaining === null ? '' : remaining + ' s';
+    if (clock.textContent !== seconds) {
+      clock.textContent = seconds;
+      clock.classList.toggle('urgent', match.stage === 'answer' && remaining <= 5);
+    }
+    if (!answerPopup.hidden && time >= answerPopupUntil) answerPopup.hidden = true;
     if (match.stage === 'answer' && now >= match.deadline) $('challenge').hidden = true;
     const reduced = reduceMotion.matches;
     const focusedFrame = $('challenge').hidden ? '' : turnKey(match);
