@@ -45,8 +45,6 @@ aside h2 { margin: 0 0 8px; font-size: 1.05rem; }
 #players { margin: 0; padding-left: 25px; }
 #players li { padding: 4px 0; overflow-wrap: anywhere; }
 .scoreboard, .turn-bar { padding: 10px 14px; }
-.scoreboard strong:first-child { color: #c7f78b; }
-.scoreboard strong:last-child { color: #a5d9ff; text-align: right; }
 #clock { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .arena { position: relative; }
 canvas { width: 100%; height: auto; display: block; background: #1d4240; touch-action: none; }
@@ -96,8 +94,38 @@ button:hover:not(:disabled) { background: #e5ead8; }
 #field { background: #fff8e7; border: 2px solid #314f50; box-shadow: 0 5px 0 #31464826; }
 #arena-name { color: #526868; font-weight: 750; margin: 4px 0 0; }
 .scoreboard { background: #223d44; color: #fff7e3; border-bottom: 2px solid #142e33; }
-.scoreboard strong:first-child { color: #d9ed9d; }
-.scoreboard strong:last-child { color: #bbdef4; }
+.side-score { display: grid; gap: 2px; flex: 1; min-width: 0; max-width: 230px; color: #d9ed9d; }
+.side-score:last-child { color: #bbdef4; text-align: right; }
+.side-score span { color: #fff7e3; font-size: .77rem; overflow-wrap: anywhere; }
+.side-score progress { appearance: none; width: 100%; height: 8px; border: 0; border-radius: 8px; background: #142e33; overflow: hidden; }
+.side-score progress::-webkit-progress-bar { background: #142e33; }
+.side-score progress::-webkit-progress-value { background: #b8de7c; }
+.side-score progress::-moz-progress-bar { background: #b8de7c; }
+.side-score progress[data-low="true"]::-webkit-progress-value { background: #f2937d; }
+.side-score progress[data-low="true"]::-moz-progress-bar { background: #f2937d; }
+.turn-bar { flex-wrap: wrap; }
+#fighter-kit { color: var(--ink); font-size: .84rem; font-weight: 750; }
+.roster-field { margin: 20px 0 0; padding: 0; border: 0; min-inline-size: 0; }
+.roster-field legend { padding: 0; margin-bottom: 8px; color: var(--ink); font-size: .96rem; font-weight: 800; }
+.fighter-roster { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+.fighter-card {
+  position: relative; min-width: 0; display: grid; grid-template-rows: auto auto 1fr; justify-items: center;
+  padding: 3px 3px 6px; color: var(--ink); background: #fff8e8; border: 1px solid #858779;
+  border-radius: 11px; text-align: center; cursor: pointer; box-shadow: 0 2px #383b3530;
+}
+.fighter-card:hover { border-color: var(--fighter-color); background: #fff1cb; }
+.fighter-card:has(:checked) { background: #ffde93; border-color: #243b3d; box-shadow: 0 0 0 2px #243b3d, 0 4px #243b3d60; }
+.fighter-card:has(:focus-visible) { outline: 3px solid #247179; outline-offset: 3px; }
+.fighter-card input[type="radio"] { position: absolute; opacity: 0; inset: 0; cursor: pointer; width: 100%; height: 100%; margin: 0; }
+.fighter-card canvas { max-width: 100%; height: auto; max-height: 72px; }
+.fighter-card strong { font-size: .91rem; line-height: 1.2; }
+.fighter-card span { font-size: .7rem; color: #3d5250; line-height: 1.1; }
+@media (max-width: 470px) {
+  .fighter-roster { gap: 5px; }
+  .fighter-card { padding: 2px 1px 5px; border-radius: 8px; }
+  .fighter-card strong { font-size: .82rem; }
+  .fighter-card span { font-size: .61rem; }
+}
 #clock:not(:empty) { color: #203637; background: #ffdb74; padding: 4px 9px; border-radius: 6px; font-weight: 850; }
 .challenge { background: #fff7e7f5; color: var(--ink); }
 #choices button { background: #e4efe3; border-color: #8ea79e; }
@@ -112,9 +140,40 @@ dialog { color: var(--ink); background: #fff9e9; }
   #menu-art { max-height: 170px; object-fit: cover; }
 }
 
+.target-range, .aim-readout, .shot-result {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  background: #163139;
+  color: #fff5dc;
+  border: 1px solid #fff0c670;
+  font-weight: 750;
+  box-shadow: 0 3px 0 #152d3c47;
+}
+.target-range { top: 11px; right: 11px; padding: 6px 10px; border-radius: 8px; font-size: .85rem; }
+.target-range[data-side="left"] { left: 11px; right: auto; }
+.aim-readout { top: 11px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; padding: 6px 11px; border-radius: 9px; white-space: nowrap; font-size: .8rem; }
+.aim-readout strong { color: #ffdc80; font-variant-numeric: tabular-nums; }
+.shot-result { top: 14%; left: 50%; transform: translateX(-50%); padding: 8px 17px; border-radius: 9px; font-size: clamp(.95rem, 2.5vw, 1.4rem); white-space: nowrap; }
+.shot-result[data-hit="true"] { background: #ffd474; color: #173236; border-color: #173236; }
+.shot-result[data-part="head"] { background: #ffc18a; }
+@media (prefers-reduced-motion: no-preference) {
+  .shot-result:not([hidden]) { animation: show-impact .18s ease-out both; }
+  @keyframes show-impact {
+    from { opacity: .25; transform: translate(-50%, 7px) scale(.94); }
+    to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+}
+.challenge { z-index: 2; }
+@media (max-width: 600px) {
+  .target-range { top: auto; right: 8px; bottom: 8px; padding: 3px 7px; font-size: .7rem; }
+  .target-range[data-side="left"] { left: 8px; }
+  .aim-readout { top: 6px; gap: 8px; padding: 3px 7px; font-size: .7rem; }
+}
+
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611260712',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611260822',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -135,8 +194,12 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
         <p class="eyebrow">COMPUTER · TERM 2</p>
         <h1>Launch<br>Tournament</h1>
         <p>Answer a question, unlock your shot, score for your team.</p>
-        <canvas id="menu-art" width="820" height="250" aria-label="Two relay robots in an illustrated tournament arena"></canvas>
+        <canvas id="menu-art" width="820" height="250" aria-label="Tournament fighters in the arena"></canvas>
         <div class="phases"><span>5 solo rounds</span><span>5 duo rounds</span><span>3 class rounds</span></div>
+        <fieldset class="roster-field">
+          <legend>Pick a fighter</legend>
+          <div id="fighter-roster" class="fighter-roster"></div>
+        </fieldset>
       </div>
       <section class="join-card" aria-label="Game setup">
         <label for="name">Nickname</label>
@@ -164,19 +227,33 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
       </div>
       <div id="game-grid">
         <section id="field" aria-label="Launch arena" hidden>
-          <div class="scoreboard"><strong id="left-score"></strong><span id="clock"></span><strong id="right-score"></strong></div>
+          <div class="scoreboard">
+            <div class="side-score"><strong id="left-score"></strong><span id="left-health-label"></span><progress id="left-health" max="100" aria-labelledby="left-health-label"></progress></div>
+            <span id="clock"></span>
+            <div class="side-score"><strong id="right-score"></strong><span id="right-health-label"></span><progress id="right-health" max="100" aria-labelledby="right-health-label"></progress></div>
+          </div>
           <div class="arena">
-            <canvas id="range" width="820" height="340" aria-label="Drag back from the launcher and release to send a pod toward the target"></canvas>
+            <canvas id="range" width="820" height="340" aria-label="Drag back from your fighter to aim, then release to shoot"></canvas>
+            <div id="target-range" class="target-range" hidden></div>
+            <div id="aim-readout" class="aim-readout" hidden>
+              <span>Angle <strong id="angle-value">—</strong></span>
+              <span>Power <strong id="power-value">—</strong></span>
+            </div>
+            <div id="shot-result" class="shot-result" role="status" hidden></div>
             <div id="challenge" class="challenge" hidden>
               <p class="eyebrow">LESSON CHALLENGE</p>
               <h2 id="question"></h2>
               <div id="choices"></div>
             </div>
           </div>
-          <div class="turn-bar"><p id="turn" role="status"></p><button id="keyboard" class="quiet" hidden>Aim with buttons</button></div>
+          <div class="turn-bar">
+            <p id="turn" role="status"></p>
+            <span id="fighter-kit" hidden></span>
+            <button id="keyboard" class="quiet" hidden>Aim with buttons</button>
+          </div>
           <div id="aim-controls" hidden>
-            <label>Angle <input id="angle" type="range" min="12" max="86" value="28"></label>
-            <label>Power <input id="power" type="range" min="12" max="107" value="43"></label>
+            <label>Angle <input id="angle" type="range" min="0" max="86" step=".5" value="9"></label>
+            <label>Power <input id="power" type="range" min="12" max="108" value="100"></label>
             <button id="shoot" class="primary">Launch</button>
           </div>
           <p id="feedback" role="status" hidden></p>
@@ -192,7 +269,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
   <dialog id="credit-dialog">
     <form method="dialog"><button class="quiet" aria-label="Close credits">Close</button></form>
     <h2>Credits</h2>
-    <p>Aiming and projectile physics adapted from <a href="https://github.com/pemmyz/js_slingshot">JS Slingshot</a> (MIT). Physics powered by Planck.js 0.3.3 (zlib). Classroom rooms use the EFI Game Kit’s Firebase client (Apache-2.0). Arena art, tournament design, and lesson challenges created for EFI Computer Lab.</p>
+    <p>Aiming and projectile physics adapted from <a href="https://github.com/pemmyz/js_slingshot">JS Slingshot</a> (MIT). Physics powered by Planck.js 0.3.3 (zlib). Classroom rooms use the EFI Game Kit’s Firebase client (Apache-2.0). Original fighters, arena art, and lessons created for EFI Computer Lab.</p>
     <details><summary>License notices</summary><pre id="licenses">MIT License
 
 Copyright (c) 2025 pemmyz
@@ -296,77 +373,203 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 //# sourceMappingURL=planck.min.js.map
 </script>
   <script>
+(function (root) {
+  'use strict';
+
+  const roster = [
+    ['fern', 'Fern', 'Woodland archer', 'elf', '#258064', '#17463f', '#d4ef8c', '#f2bb87', '#693d2d',
+      'bow', 'Acorn Bow', '#d9f373', 10, 1, 135],
+    ['bryn', 'Bryn', 'Timber scout', 'logger', '#d54c46', '#423750', '#ffc168', '#a86649', '#392639',
+      'axe', 'Timber Axe', '#ffc377', 14, 1, 115],
+    ['pip', 'Pip', 'Street artist', 'artist', '#a853bb', '#442978', '#88f5b3', '#d99261', '#31244e',
+      'blaster', 'Paint Popper', '#70f5b0', 7, 1.09, 88],
+    ['tavi', 'Tavi', 'Festival maker', 'festival', '#e86640', '#772d5d', '#ffe16d', '#f3b179', '#4e2e51',
+      'bomb', 'Confetti Charge', '#ff94ac', 17, .97, 145],
+    ['nova', 'Nova', 'Star skater', 'skater', '#5276d6', '#292657', '#f0baff', '#986148', '#23284e',
+      'disc', 'Comet Disc', '#9ef1ff', 8.5, .98, 105],
+    ['nori', 'Nori', 'Pastry chef', 'chef', '#e9b5bf', '#8c436f', '#fff1ba', '#efba8f', '#674245',
+      'pie', 'Custard Pie', '#ffd577', 12.5, .99, 125],
+    ['coral', 'Coral', 'Lagoon diver', 'diver', '#2ba5a4', '#205679', '#ffb378', '#cb8663', '#514050',
+      'bubble', 'Bubble Wand', '#9bffe9', 6.5, .96, 128],
+    ['saff', 'Saff', 'Storm mage', 'mage', '#7852ad', '#392855', '#f8d880', '#b67451', '#3a2654',
+      'orb', 'Storm Orb', '#e7b9ff', 9.5, 1.01, 160],
+    ['koa', 'Koa', 'Trail explorer', 'scout', '#7c9b3d', '#334b38', '#ffc879', '#9a573d', '#392b33',
+      'boom', 'Leaf Boomerang', '#e1f787', 8, 1.01, 100],
+    ['rook', 'Rook', 'Ice warden', 'warden', '#478ab4', '#274667', '#caecfa', '#d8a382', '#514350',
+      'hammer', 'Frost Hammer', '#a7e9ff', 15, .98, 154]
+  ].map(([id, name, role, look, coat, shade, trim, skin, hair, weapon, label, color, gravity, speed, releaseMs]) => ({
+    id, name, role, look, coat, shade, trim, skin, hair,
+    weapon: { id: weapon, name: label, color, gravity, speed, releaseMs }
+  }));
+
+  const byId = id => roster.find(fighter => fighter.id === id);
+
+  function assignedTo(player, choice, seed = 0) {
+    const picked = byId(choice);
+    if (picked) return picked;
+    const index = Array.from(player).reduce((hash, char) => (Math.imul(hash, 33) ^ char.charCodeAt(0)) >>> 0, seed);
+    return roster[index % roster.length];
+  }
+
+  const api = { roster, byId, assignedTo };
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.LaunchFighters = api;
+})(globalThis);
+
+</script>
+  <script>
 /* Aim, launch scaling and Planck body setup adapted from pemmyz/js_slingshot (MIT). */
 (function (root) {
   'use strict';
 
-  const WIDTH = 820;
+  const WIDTH = 1740;
+  const VIEW_WIDTH = 820;
   const HEIGHT = 340;
   const SCALE = 24;
   const ORIGIN = { x: 108, y: 254 };
   const GROUND = 307;
   const MAX_PULL = 108;
-  const GRAVITY = 10;
+  const FIGHTER_X = 86;
+  const FIGHTER_Y = GROUND - 2;
+  const STEP = 1 / 60;
+  const fighters = typeof module === 'object' && module.exports ? require('./fighters.js') : root.LaunchFighters;
+  const WEAPONS = fighters.roster.map(fighter => fighter.weapon);
+  const weaponFor = id => WEAPONS.find(weapon => weapon.id === id);
 
   function limitPull(x, y) {
     const scale = Math.min(1, MAX_PULL / (Math.hypot(x, y) || 1));
     return [Math.round(x * scale), Math.round(y * scale)];
   }
 
-  function velocity(pull) {
+  function velocity(pull, weapon) {
     const distance = Math.hypot(...pull);
-    const speed = 18 * Math.pow(distance / 40, 1.1);
+    const speed = 18 * weapon.speed * Math.pow(distance / 40, 1.1);
     return { x: pull[0] / distance * speed, y: -pull[1] / distance * speed };
   }
 
-  function targetFor(seed, round) {
-    return {
-      x: 525 + ((seed + round * 137) % 211),
-      y: 95 + ((seed + round * 61) % 151),
-      radius: 39 - Math.floor((round - 1) / 5) * 3
-    };
+  function targetFor() {
+    const x = WIDTH - FIGHTER_X;
+    const y = FIGHTER_Y;
+    // Costumes share the same neutral silhouette so character choice does not change the hit area.
+    return { x, y: y - 55, zones: [
+      { part: 'head', left: x - 20, right: x + 14, top: y - 107, bottom: y - 77 },
+      { part: 'body', left: x - 24, right: x + 24, top: y - 78, bottom: y - 34 },
+      { part: 'legs', left: x - 22, right: x + 22, top: y - 34, bottom: y }
+    ] };
   }
 
-  function preview(pull) {
+  function aimFor(target, weapon, time) {
+    const vx = (target.x - ORIGIN.x) / (SCALE * time);
+    const vy = (ORIGIN.y - target.y) / (SCALE * time) + weapon.gravity * (time + STEP) / 2;
+    const strength = 40 * Math.pow(Math.hypot(vx, vy) / (18 * weapon.speed), 1 / 1.1);
+    const angle = Math.atan2(vy, vx);
+    return limitPull(Math.cos(angle) * strength, -Math.sin(angle) * strength);
+  }
+
+  function preview(pull, weapon) {
     if (!pull || Math.hypot(...pull) < 6) return [];
-    const v = velocity(pull);
+    const v = velocity(pull, weapon);
     const points = [];
-    for (let t = 0.09; t <= 0.72; t += 0.09) {
+    for (let step = 5; step <= 50; step += 5) {
+      const t = step * STEP;
       const x = ORIGIN.x + v.x * SCALE * t;
-      const y = ORIGIN.y - (v.y * t - 0.5 * GRAVITY * t * t) * SCALE;
+      // Planck advances with semi-implicit Euler at a fixed step.
+      const y = ORIGIN.y - (v.y * t - 0.5 * weapon.gravity * t * (t + STEP)) * SCALE;
       if (x < 0 || x > WIDTH || y > GROUND) break;
       points.push({ x, y });
     }
     return points;
   }
 
-  function flight(pull, target, planck) {
-    const world = planck.World(planck.Vec2(0, -GRAVITY));
+  function contact(from, to, zones) {
+    const radius = 4;
+    if (Math.max(from.x, to.x) < zones[1].left - radius || Math.min(from.x, to.x) > zones[1].right + radius) return null;
+    let first = null;
+    for (const zone of zones) {
+      let enter = 0;
+      let exit = 1;
+      for (const [axis, min, max] of [['x', zone.left, zone.right], ['y', zone.top, zone.bottom]]) {
+        const delta = to[axis] - from[axis];
+        const low = min - radius - from[axis];
+        const high = max + radius - from[axis];
+        if (!delta) {
+          if (low > 0 || high < 0) enter = Infinity;
+          continue;
+        }
+        enter = Math.max(enter, Math.min(low / delta, high / delta));
+        exit = Math.min(exit, Math.max(low / delta, high / delta));
+      }
+      if (enter <= exit && (!first || enter < first.at)) first = { part: zone.part, at: enter };
+    }
+    return first;
+  }
+
+  function flight(pull, target, weapon, planck) {
+    const world = planck.World(planck.Vec2(0, -weapon.gravity));
     const body = world.createDynamicBody({
       position: planck.Vec2(ORIGIN.x / SCALE, -ORIGIN.y / SCALE),
       bullet: true,
       linearDamping: 0
     });
     body.createFixture(planck.Circle(0.18), { density: 2.5 });
-    const v = velocity(pull);
+    const v = velocity(pull, weapon);
     body.setLinearVelocity(planck.Vec2(v.x, v.y));
     const points = [{ ...ORIGIN }];
-    let hit = false;
+    let part = null;
+    let landed = false;
     for (let step = 0; step < 240; step++) {
-      world.step(1 / 60);
+      world.step(STEP);
       const pos = body.getPosition();
       const point = { x: pos.x * SCALE, y: -pos.y * SCALE };
-      if (point.y < -1300 || point.y > GROUND || point.x < -20 || point.x > WIDTH + 20) break;
-      points.push(point);
-      if (Math.hypot(point.x - target.x, point.y - target.y) <= target.radius + 4) {
-        hit = true;
+      if (point.y < -1300 || point.x < -20 || point.x > WIDTH + 20) break;
+      const previous = points.at(-1);
+      const groundAt = point.y > GROUND ? (GROUND - previous.y) / (point.y - previous.y) : 1;
+      const hit = contact(previous, point, target.zones);
+      if (hit && hit.at <= groundAt) {
+        points.push({ x: previous.x + (point.x - previous.x) * hit.at, y: previous.y + (point.y - previous.y) * hit.at });
+        part = hit.part;
         break;
       }
+      if (point.y > GROUND) {
+        points.push({ x: previous.x + (point.x - previous.x) * groundAt, y: GROUND });
+        landed = true;
+        break;
+      }
+      points.push(point);
     }
-    return { hit, points };
+    return { part, landed, points };
   }
 
-  const api = { WIDTH, HEIGHT, ORIGIN, GROUND, MAX_PULL, limitPull, targetFor, preview, flight };
+  const mirrorX = (x, mirrored) => mirrored ? WIDTH - x : x;
+
+  function cameraAt(x, mirrored) {
+    const center = VIEW_WIDTH * (mirrored ? 0.62 : 0.38);
+    return Math.max(0, Math.min(WIDTH - VIEW_WIDTH, mirrorX(x, mirrored) - center));
+  }
+
+  function pointAt(points, progress) {
+    const index = Math.max(0, Math.min(1, progress)) * (points.length - 1);
+    const position = Math.floor(index);
+    const fraction = index - position;
+    const first = points[position];
+    const next = points[position + 1] || first;
+    return {
+      x: first.x + (next.x - first.x) * fraction,
+      y: first.y + (next.y - first.y) * fraction
+    };
+  }
+
+  function aimReadout(pull) {
+    return {
+      angle: Math.round(Math.atan2(-pull[1], pull[0]) * 180 / Math.PI),
+      power: Math.min(100, Math.round(Math.hypot(...pull) / MAX_PULL * 100))
+    };
+  }
+
+  const api = {
+    WIDTH, VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
+    weaponFor, limitPull, targetFor, aimFor, preview, flight, mirrorX, cameraAt, pointAt, aimReadout
+  };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchPhysics = api;
 })(globalThis);
@@ -726,6 +929,23 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const ANSWER_MS = 20000;
   const BOT_MS = 1200;
   const FLIGHT_MS = 1450;
+  const LAUNCH_DELAY_MS = 140;
+  const MAX_HEALTH = 100;
+  const DAMAGE = { head: 50, body: 30, legs: 20 };
+
+  const healthOf = (match, id) => match.health?.[id] ?? MAX_HEALTH;
+
+  function opponentFor(match, shooter) {
+    const shootsLeft = match.left.includes(shooter);
+    const team = shootsLeft ? match.left : match.right;
+    const opponents = shootsLeft ? match.right : match.left;
+    const first = team.indexOf(shooter) % opponents.length;
+    for (let offset = 0; offset < opponents.length; offset++) {
+      const id = opponents[(first + offset) % opponents.length];
+      if (healthOf(match, id) > 0) return id;
+    }
+    return opponents[first];
+  }
 
   function randomFor(seed) {
     return () => {
@@ -899,16 +1119,22 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     if (match.stage !== 'aim' || !Array.isArray(request.pull) || request.pull.length !== 2 ||
         !request.pull.every(Number.isInteger) || Math.hypot(...request.pull) < 6 ||
-        Math.hypot(...request.pull) > 109) return state;
+        Math.hypot(...request.pull) > 109 || request.weapon !== rules.weaponForPlayer(request.player, state.seed)) return state;
 
-    const hit = rules.hit(request.pull, state.seed, state.round);
+    const victim = opponentFor(match, request.player);
+    const part = rules.hitPart(request.pull, request.weapon);
+    const hit = !!part;
+    const before = healthOf(match, victim);
+    const after = Math.max(0, before - (DAMAGE[part] || 0));
+    const health = hit ? { ...match.health, [victim]: after } : match.health;
     const side = match.left.includes(request.player) ? 'leftPoints' : 'rightPoints';
     const points = { ...state.points };
+    const launchAt = now + LAUNCH_DELAY_MS;
     if (hit && !isBot(request.player)) points[request.player] = (points[request.player] || 0) + 1;
     return step(state, index, {
-      ...match, [side]: match[side] + Number(hit),
-      shot: { pull: request.pull, hit, at: now, player: request.player },
-      stage: 'flight', deadline: now + FLIGHT_MS, since: now
+      ...match, ...(health ? { health } : {}), [side]: match[side] + Number(hit),
+      shot: { pull: request.pull, weapon: request.weapon, part, at: launchAt, player: request.player, victim, damage: before - after },
+      stage: 'flight', deadline: launchAt + FLIGHT_MS, since: now
     }, { points });
   }
 
@@ -931,7 +1157,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       } else if (now >= match.since + BOT_MS && isBot(player)) {
         const request = { round: state.round, match: index, turn: match.turn, stage: match.stage, player };
         if (match.stage === 'aim') {
-          current = action(current, { ...request, pull: rules.botPull(state.seed, state.round) }, now, rules);
+          current = action(current, { ...request, ...rules.botShot(state.seed, player) }, now, rules);
         } else if (match.stage === 'answer') {
           const questionSeed = state.seed;
           const questionNumber = state.round - 1;
@@ -945,7 +1171,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, FLIGHT_MS, randomFor, mode, isBot, draw, start, currentTurn, action, tick };
+  const api = { ROUNDS, FLIGHT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, draw, start, currentTurn, action, tick, healthOf, opponentFor };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -1039,15 +1265,29 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function terrain(ctx, round, width, height, ground) {
     const colors = zone(round);
-    const unit = width / 820;
     ctx.save();
-    ctx.scale(unit, ground / 307);
-    ctx.fillStyle = colors.sky;
-    ctx.fillRect(0, 0, 820, height * 307 / ground);
-    dot(ctx, 637, 92, 52, colors.sun);
+    ctx.scale(1, ground / 307);
+    const sky = ctx.createLinearGradient(0, 0, 0, 307);
+    sky.addColorStop(0, colors.far);
+    sky.addColorStop(0.62, colors.sky);
+    sky.addColorStop(1, '#fff2d9');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, width, height * 307 / ground);
+    ctx.globalAlpha = 0.32;
+    dot(ctx, width * .76, 105, 73, colors.sun);
+    ctx.globalAlpha = 1;
+    dot(ctx, width * .76, 105, 54, colors.sun);
 
-    for (let i = 0; i < 25; i++) {
-      const x = (i * 89 + 36) % 820;
+    ctx.globalAlpha = .5;
+    for (let x = 125; x < width; x += 245) {
+      const y = 65 + (x % 89);
+      box(ctx, x - 32, y, 90, 10, '#fff9e5', 5);
+      box(ctx, x - 12, y - 10, 48, 13, '#fff9e5', 7);
+    }
+    ctx.globalAlpha = 1;
+
+    for (let i = 0; i < Math.ceil(width / 34); i++) {
+      const x = (i * 89 + 36) % width;
       const y = 18 + (i * 53) % 185;
       box(ctx, x, y, i % 4 === 0 ? 14 : 3, 3, '#fff9e5', 1);
     }
@@ -1056,15 +1296,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.fillStyle = row === 0 ? colors.far : colors.near;
       ctx.beginPath();
       ctx.moveTo(0, 307);
-      for (let x = 0; x <= 840; x += 24) {
+      for (let x = 0; x <= width + 24; x += 24) {
         const height = 13 * Math.sin(x / (57 - row * 13)) + (round > 10 ? (x % 72) / 2 : 8 * Math.cos(x / 31));
         ctx.lineTo(x, 224 + row * 32 + height);
       }
-      ctx.lineTo(820, 307);
+      ctx.lineTo(width, 307);
       ctx.fill();
     }
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < Math.ceil((width - 180) / 128); i++) {
       const x = 188 + i * 128;
       if (round <= 5) {
         box(ctx, x, 250, 13, 65, colors.floor, 5);
@@ -1081,59 +1321,519 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       }
     }
 
-    box(ctx, 0, 307, 820, Math.max(height * 307 / ground - 307, 8), colors.floor);
-    box(ctx, 0, 307, 820, 5, colors.line);
-    for (let i = 0; i < 24; i++) {
+    box(ctx, 0, 307, width, Math.max(height * 307 / ground - 307, 8), colors.floor);
+    box(ctx, 0, 307, width, 5, colors.line);
+    for (let i = 0; i < Math.ceil(width / 38); i++) {
       box(ctx, i * 38, 323, 18 + i % 4 * 6, 3, colors.near, 2);
     }
 
     ctx.restore();
   }
 
-  const avatars = [
-    { body: '#ffd46a', dark: '#965638', face: '#172d33', shape: 'capsule' },
-    { body: '#9adbd5', dark: '#397894', face: '#16243d', shape: 'screen' },
-    { body: '#f89a7b', dark: '#a3455e', face: '#372840', shape: 'wheel' },
-    { body: '#c3b6f4', dark: '#6d5699', face: '#302144', shape: 'helmet' }
-  ];
-
-  function racer(ctx, x, y, scale, variant, facesLeft = false) {
-    const art = avatars[variant % avatars.length];
+  function projectile(ctx, x, y, angle, elapsed, weapon) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(facesLeft ? -scale : scale, scale);
-    ctx.fillStyle = '#21343430';
-    ctx.beginPath();
-    ctx.ellipse(0, 1, 31, 7, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (art.shape === 'wheel') {
-      dot(ctx, -15, -11, 11, art.dark);
-      dot(ctx, 17, -11, 11, art.dark);
-    } else {
-      box(ctx, -23, -22, 17, 23, art.dark, 5);
-      box(ctx, 6, -22, 17, 23, art.dark, 5);
+    const ink = '#27243c';
+    const color = weapon.color;
+    switch (weapon.id) {
+      case 'bow':
+        ctx.rotate(angle);
+        box(ctx, -21, -2, 37, 4, ink, 2);
+        box(ctx, -16, -1, 26, 2, '#f3dfb0', 1);
+        box(ctx, -20, -6, 10, 12, color, 4);
+        dot(ctx, 12, 0, 6, ink);
+        dot(ctx, 12, 0, 4.5, '#ffc475');
+        break;
+      case 'axe':
+      case 'hammer': {
+        const hammer = weapon.id === 'hammer';
+        ctx.rotate(angle + elapsed / (hammer ? 76 : 49));
+        box(ctx, -3, -15, 6, 31, ink, 3);
+        box(ctx, -1, -8, 3, 21, '#eea65d', 1);
+        box(ctx, hammer ? -15 : -4, -18, hammer ? 30 : 20, 15, ink, 4);
+        box(ctx, hammer ? -13 : 0, -16, hammer ? 26 : 14, 11, color, 3);
+        box(ctx, hammer ? -10 : 5, -15, 8, 2, '#fff4d4', 1);
+        break;
+      }
+      case 'blaster':
+        ctx.rotate(angle);
+        box(ctx, -12, -6, 23, 12, ink, 6);
+        box(ctx, -10, -4, 19, 8, color, 4);
+        dot(ctx, 4, -2, 2.8, '#ecfff0');
+        break;
+      case 'bomb':
+        ctx.rotate(elapsed / 125);
+        dot(ctx, 0, 0, 11, ink);
+        dot(ctx, 0, 0, 9, '#6a456f');
+        box(ctx, -8, -3, 16, 6, color, 2);
+        box(ctx, -3, -14, 6, 6, ink, 2);
+        dot(ctx, 1, -14, 2.8, '#ffd56b');
+        break;
+      case 'disc':
+      case 'pie': {
+        const pie = weapon.id === 'pie';
+        ctx.rotate(angle * .56 + (pie ? Math.sin(elapsed / 75) * .43 : 0));
+        box(ctx, -15, -7, 30, 14, ink, 7);
+        box(ctx, -13, -5, 26, 10, pie ? '#b06b4d' : color, 5);
+        box(ctx, -12, -6, 24, 7, pie ? color : '#bfc7ff', 5);
+        dot(ctx, 8 * Math.cos(elapsed / 45), -2, 2.5, pie ? '#ff9b82' : '#f8ffff');
+        break;
+      }
+      case 'bubble':
+        dot(ctx, 0, 0, 11, '#225d73');
+        dot(ctx, 0, 0, 9.5, color);
+        dot(ctx, 2, 1, 7, '#8bd9f4');
+        dot(ctx, -3, -3, 2.4, '#f0fff3');
+        break;
+      case 'orb':
+        ctx.rotate(elapsed / 70);
+        dot(ctx, 0, 0, 11, '#533280');
+        dot(ctx, 0, 0, 9, color);
+        sparkle(ctx, '#fff5a5', 0, 0, 7);
+        break;
+      case 'boom':
+        ctx.rotate(angle + elapsed / 41);
+        ctx.beginPath();
+        ctx.moveTo(-11, 8);
+        ctx.quadraticCurveTo(-9, -18, 13, -8);
+        ctx.quadraticCurveTo(-2, -2, -3, 10);
+        ctx.closePath();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = ink;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+        break;
     }
-    box(ctx, -25, -58, 51, 43, art.body, art.shape === 'capsule' ? 20 : 12);
-    box(ctx, -19, -52, 39, 18, art.face, art.shape === 'screen' ? 4 : 9);
-    dot(ctx, -7, -43, 3, '#fdedd1');
-    dot(ctx, 10, -43, 3, '#fdedd1');
-    box(ctx, -8, -26, 17, 4, art.dark, 2);
-
-    if (art.shape === 'screen' || art.shape === 'helmet') {
-      box(ctx, 0, -71, 4, 16, art.dark, 2);
-      dot(ctx, 2, -72, 5, art.body);
-    }
-    box(ctx, 24, -33, 11, 13, art.dark, 5);
     ctx.restore();
   }
 
-  function indexFor(id) {
-    if (!id) return 0;
-    return Array.from(id).reduce((total, char) => total + char.charCodeAt(0), 0) % avatars.length;
+  function held(ctx, x, y, angle, weapon, motion) {
+    const id = weapon.id;
+    if (id !== 'bow' && id !== 'blaster' && id !== 'bubble') {
+      if (motion.after == null) projectile(ctx, x + 5, y - 6, angle, 0, weapon);
+      return;
+    }
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    if (id === 'bow') {
+      const flex = motion.snap != null ? 1 - motion.snap : (motion.charge || 0);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-5, -21);
+      ctx.quadraticCurveTo(18 + 4 * flex, 0, -5, 21);
+      ctx.strokeStyle = '#263b3e';
+      ctx.lineWidth = 7;
+      ctx.stroke();
+      ctx.strokeStyle = '#d6a05a';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-5, -21);
+      ctx.lineTo(-5 - 23 * flex, 0);
+      ctx.lineTo(-5, 21);
+      ctx.strokeStyle = '#f7ebac';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      if (motion.after == null) projectile(ctx, 3 - 13 * flex, 0, 0, 0, weapon);
+    } else if (id === 'blaster') {
+      box(ctx, -12, -8, 35, 14, '#262239', 7);
+      box(ctx, -10, -6, 24, 9, weapon.color, 4);
+      box(ctx, -8, 2, 12, 8, '#59658a', 4);
+      box(ctx, 15, -7, 6, 11, '#ffd58a', 3);
+    } else {
+      box(ctx, -4, -2, 19, 4, '#294760', 2);
+      dot(ctx, 16, 0, 8, '#294760');
+      dot(ctx, 16, 0, 6, weapon.color);
+      dot(ctx, 16, 0, 3.5, '#46a7aa');
+    }
+    ctx.restore();
   }
 
-  root.LaunchArt = { zone, terrain, racer, indexFor };
+  function aimGrip(ctx, origin, color, time) {
+    ctx.save();
+    ctx.globalAlpha = .58 + .21 * Math.sin(time / 300);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.arc(origin.x, origin.y, 19, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function sparkle(ctx, fill, x, y, size) {
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      const r = i % 2 ? size * .29 : size;
+      const px = x + Math.cos(a) * r;
+      const py = y + Math.sin(a) * r;
+      if (i) ctx.lineTo(px, py);
+      else ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function aimDot(ctx, point, index, color) {
+    ctx.save();
+    ctx.globalAlpha = 1 - index * .052;
+    dot(ctx, point.x, point.y, 4, '#213940');
+    dot(ctx, point.x, point.y, 2.65, color);
+    ctx.restore();
+  }
+
+  function trail(ctx, point, lag, weapon) {
+    if (point.y < 0) return;
+    ctx.save();
+    ctx.globalAlpha = (6 - lag) / 9;
+    const { x, y } = point;
+    const size = 6 - lag * .6;
+    if (weapon.id === 'orb' || weapon.id === 'hammer') sparkle(ctx, weapon.color, x, y, size * 1.4);
+    else if (weapon.id === 'disc' || weapon.id === 'boom') box(ctx, x - size * 2, y - 1, size * 4, 3, weapon.color, 1.5);
+    else if (weapon.id === 'bubble') {
+      ctx.beginPath();
+      ctx.arc(x, y - lag * 1.5, size, 0, 2 * Math.PI);
+      ctx.strokeStyle = weapon.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else dot(ctx, x, y, size, weapon.color);
+    ctx.restore();
+  }
+
+  function release(ctx, origin, pull, progress, color) {
+    ctx.save();
+    ctx.translate(origin.x, origin.y);
+    ctx.rotate(Math.atan2(pull[1], pull[0]));
+    ctx.globalAlpha = 1 - progress;
+    for (const offset of [-9, 0, 9]) {
+      const x = 7 + progress * (offset ? 28 : 42);
+      const y = offset * (1 + progress);
+      box(ctx, x - (offset ? 9 : 16), y - 1, offset ? 9 : 16, 3, color, 1.5);
+    }
+    ctx.restore();
+  }
+
+  function airborne(ctx, x, y) {
+    ctx.save();
+    ctx.fillStyle = '#243c4b';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 8);
+    ctx.lineTo(x + 7, y + 4);
+    ctx.lineTo(x - 7, y + 4);
+    ctx.closePath();
+    ctx.fill();
+    dot(ctx, x, y + 10, 3, '#ffcb58');
+    ctx.restore();
+  }
+
+  function impact(ctx, point, progress, part, weapon, reduced) {
+    const p = reduced ? .24 : Math.min(1, progress);
+    const eased = 1 - (1 - p) ** 2;
+    ctx.save();
+    ctx.translate(point.x, point.y);
+    ctx.globalAlpha = 1 - p ** .8;
+    if (part || ['bomb', 'bubble', 'orb', 'pie', 'hammer'].includes(weapon.id)) {
+      const critical = part === 'head';
+      const confetti = weapon.id === 'bomb';
+      const paint = weapon.id === 'blaster' || weapon.id === 'pie';
+      const magic = ['orb', 'hammer', 'disc'].includes(weapon.id);
+      const bubbles = weapon.id === 'bubble';
+      if (!paint) {
+        ctx.strokeStyle = critical ? '#fff1a2' : weapon.color;
+        ctx.lineWidth = (critical ? 6 : 4) - 2 * p;
+        ctx.beginPath();
+        ctx.arc(0, 0, 10 + (critical ? 53 : 34) * eased, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+      if (p < .22) dot(ctx, 0, 0, 12 * (1 - p / .22), '#fffbe7');
+      const count = critical || confetti ? 16 : 10;
+      for (let i = 0; i < count; i++) {
+        const angle = i * Math.PI * 2 / count + .15 * (i % 3);
+        const distance = 5 + (30 + i % 3 * 10 + (critical ? 12 : 0)) * eased;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance + 18 * p ** 2;
+        const color = confetti ? [weapon.color, '#95edb4', '#ffc75c'][i % 3] : i % 2 ? weapon.color : '#fff5c3';
+        if (paint) dot(ctx, x, y, (5 + i % 3) * (1 - p * .6), color);
+        else if (magic || critical) sparkle(ctx, color, x, y, (6 + i % 3) * (1 - p * .5));
+        else if (bubbles) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, y - 18 * p, 3 + i % 3 + p * 3, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle + (confetti ? p * 6 : 0));
+          box(ctx, -4, -1.5, critical ? 10 : 7, 3, color, 1.5);
+          ctx.restore();
+        }
+      }
+    } else {
+      for (let i = 0; i < 6; i++) {
+        dot(ctx, (i - 2.5) * 9 * eased, -5 - (i % 3 + 1) * 9 * eased, 5 + p * 2, '#e9cdae');
+      }
+    }
+    ctx.restore();
+  }
+
+  function skid(ctx, x, ground, progress) {
+    ctx.save();
+    ctx.globalAlpha = Math.sin(Math.PI * Math.min(1, progress * 1.7)) * .72;
+    for (let i = 0; i < 6; i++) {
+      const drift = i % 2 ? 1 : -1;
+      const distance = 13 + (11 + i % 3 * 7) * progress;
+      dot(ctx, x + drift * distance, ground - 5 - (i % 3 + 1) * 11 * progress, 3 + progress * 5, i % 2 ? '#f3ddad' : '#fff0cd');
+    }
+    ctx.restore();
+  }
+
+  root.LaunchArt = { zone, terrain, projectile, held, aimGrip, aimDot, trail, release, airborne, impact, skid };
+})(globalThis);
+
+</script>
+  <script>
+(function (root) {
+  'use strict';
+
+  const ink = '#262239';
+  const stance = {
+    bow:     { ready: [25, -65, 0, -.10, 1, 0], fire: [36, -66, 0, .10, 0, 0], finish: [28, -58, .12, -.06, 0, 0] },
+    axe:     { ready: [-23, -89, -2.05, -.28, 8, 0], fire: [38, -70, -.25, .26, 2, 6], finish: [36, -40, .82, .22, 7, 0] },
+    blaster: { ready: [25, -61, 0, -.10, 5, 0], fire: [31, -61, 0, .04, 2, 0], finish: [23, -68, -.25, -.18, 3, 0] },
+    bomb:    { ready: [-23, -79, -.55, -.30, 8, 0], fire: [38, -67, -.17, .30, 0, 4], finish: [34, -48, .62, .22, 6, 0] },
+    disc:    { ready: [-14, -53, -.45, -.24, 8, 0], fire: [43, -62, .02, .28, 0, 5], finish: [29, -72, -.68, .29, 2, 0] },
+    pie:     { ready: [3, -53, 0, -.13, 13, 0], fire: [40, -65, -.20, .24, 2, 4], finish: [35, -69, -.50, .24, 2, 0] },
+    bubble:  { ready: [16, -83, -.48, -.08, 2, 0], fire: [33, -74, -.20, .17, 1, 0], finish: [36, -56, .50, .11, 0, 0] },
+    orb:     { ready: [11, -44, -.42, -.20, 10, 0], fire: [34, -81, -.50, .24, 0, 9], finish: [32, -83, -.68, -.10, 0, 3] },
+    boom:    { ready: [-13, -91, -1.30, -.30, 4, 0], fire: [40, -74, -.30, .24, 1, 4], finish: [43, -53, .60, .29, 4, 0] },
+    hammer:  { ready: [-12, -105, -1.80, -.19, 13, 0], fire: [42, -69, -.05, .37, 0, 10], finish: [32, -37, 1.02, .28, 10, 0] }
+  };
+  const idle = [25, -44, .36, 0, 0, 0];
+  const unit = value => Math.max(0, Math.min(1, value));
+  const smooth = value => { const t = unit(value); return t * t * (3 - 2 * t); };
+  const between = (a, b, t) => a.map((value, i) => value + (b[i] - value) * t);
+
+  function shape(ctx, fill, draw, edge = false) {
+    ctx.beginPath();
+    draw();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    if (edge) {
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = ink;
+      ctx.stroke();
+    }
+  }
+
+  function rect(ctx, x, y, w, h, r, fill, edge) {
+    shape(ctx, fill, () => ctx.roundRect(x, y, w, h, r), edge);
+  }
+
+  function oval(ctx, x, y, rx, ry, fill, edge) {
+    shape(ctx, fill, () => ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI), edge);
+  }
+
+  function poly(ctx, fill, points, edge) {
+    shape(ctx, fill, () => {
+      ctx.moveTo(...points[0]);
+      for (const point of points.slice(1)) ctx.lineTo(...point);
+      ctx.closePath();
+    }, edge);
+  }
+
+  function stroke(ctx, color, width, points) {
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    for (const point of points.slice(1)) ctx.lineTo(...point);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke();
+  }
+
+  function poseFor(fighter, motion) {
+    const form = stance[fighter.weapon.id];
+    const charge = motion.charge || 0;
+    let pose = between(idle, form.ready, charge);
+    if (motion.snap != null) pose = between(form.ready, form.fire, motion.snap ** 1.9);
+    if (motion.after != null) {
+      const t = motion.after;
+      pose = t < .42 ? between(form.fire, form.finish, smooth(t / .42)) : between(form.finish, idle, smooth((t - .42) / .58));
+    }
+    const [handX, handY, propAngle, lean, crouch, lift] = pose;
+    const impact = motion.impact || 0;
+    const head = motion.part === 'head' ? smooth(impact / .15) * (1 - smooth((impact - .20) / .80)) : 0;
+    const folded = motion.part === 'body' ? smooth(impact / .27) * (1 - smooth((impact - .34) / .66)) : 0;
+    const fall = motion.part === 'legs' ? smooth(impact / .33) * (1 - smooth((impact - .60) / .40)) : 0;
+    const reaction = Math.max(head, folded, fall);
+    const breath = motion.reduced || motion.part || motion.snap != null || motion.after != null ? 0 : Math.sin((motion.time || 0) / 320) * 1.25;
+    return {
+      x: -18 * head - 12 * folded - 10 * fall,
+      hips: -37 + crouch + breath + 26 * fall + 10 * folded,
+      lean: lean - .54 * head - .16 * fall + .48 * folded,
+      head: -.63 * head + .23 * folded,
+      hand: [handX + 7 * reaction, handY + 12 * fall - 16 * head + 10 * folded],
+      propAngle: propAngle + (motion.angle || 0) * .85,
+      rear: fighter.weapon.id === 'bow' && (charge || motion.snap != null)
+        ? [-7 - (motion.snap != null ? 1 - motion.snap : charge) * 11, -66] : [-19 - 20 * head, -43 - 24 * reaction],
+      fall, reaction, lift: motion.reduced ? 0 : lift + 4 * head, breath
+    };
+  }
+
+  function leg(ctx, fighter, hip, knee, foot, rear) {
+    stroke(ctx, ink, 15, [hip, knee, [foot[0], foot[1] - 4]]);
+    stroke(ctx, rear ? fighter.shade : fighter.coat, 10, [hip, knee, [foot[0], foot[1] - 4]]);
+    rect(ctx, knee[0] - 5, knee[1] - 4, 10, 8, 3, rear ? fighter.hair : fighter.trim);
+    rect(ctx, foot[0] - 7, foot[1] - 12, 15, 11, 3, fighter.shade, true);
+    rect(ctx, foot[0] - 7, foot[1] - 8, 21, 8, [3, 6, 3, 2], rear ? fighter.shade : fighter.hair, true);
+    stroke(ctx, fighter.trim, 2, [[foot[0] - 2, foot[1] - 6], [foot[0] + 7, foot[1] - 6]]);
+  }
+
+  function arm(ctx, fighter, from, hand, rear) {
+    const elbow = [(from[0] + hand[0]) * .5 - 4, (from[1] + hand[1]) * .5 + 8];
+    stroke(ctx, ink, 13, [from, elbow, hand]);
+    stroke(ctx, rear ? fighter.shade : fighter.coat, 8.5, [from, elbow, hand]);
+    oval(ctx, elbow[0], elbow[1], 4, 4, fighter.trim);
+    oval(ctx, hand[0], hand[1], 5.4, 5, fighter.skin, true);
+  }
+
+  function hat(ctx, f, startled) {
+    switch (f.look) {
+      case 'elf':
+        poly(ctx, f.shade, [[-16, -3], [-20, -21], [2, -29], [19, -15], [18, -7]], true);
+        poly(ctx, f.trim, [[-13, -18], [14, -30], [8, -18], [-9, -12]], true);
+        poly(ctx, f.skin, [[-9, 6], [-24, -6], [-23, 5], [-14, 12]], true);
+        stroke(ctx, f.coat, 3, [[-17, -7], [14, -12]]);
+        break;
+      case 'logger':
+        rect(ctx, -17, -23, 33, 17, [9, 9, 2, 2], f.coat, true);
+        rect(ctx, -20, -11, 45, 7, 3, f.shade, true);
+        rect(ctx, -9, -20, 6, 10, 3, f.trim);
+        rect(ctx, -6, 9, 19, 11, [3, 4, 8, 7], f.hair);
+        break;
+      case 'artist':
+        oval(ctx, -6, -16, 22, 9, f.coat, true);
+        oval(ctx, -15, -19, 5, 3, f.trim);
+        oval(ctx, -1, -18, 4, 2, '#ffd88c');
+        rect(ctx, -13, 11, 26, 5, 3, f.shade);
+        break;
+      case 'festival':
+        rect(ctx, -18, -15, 38, 9, 4, f.trim, true);
+        poly(ctx, f.coat, [[-12, -15], [-7, -34], [8, -22], [16, -15]], true);
+        oval(ctx, -7, -34, 3.5, 3.5, '#fff1ac', true);
+        oval(ctx, -13, 6, 4, 2.5, '#ff9277');
+        break;
+      case 'skater':
+        rect(ctx, -20, -21, 38, 21, [16, 15, 4, 5], f.coat, true);
+        rect(ctx, 4, -7, 21, 11, [3, 8, 3, 2], f.shade, true);
+        stroke(ctx, f.trim, 2.5, [[7, -3], [19, -3]]);
+        stroke(ctx, '#f9e6ff', 3, [[-10, -17], [2, -17]]);
+        break;
+      case 'chef':
+        rect(ctx, -14, -22, 29, 15, 4, '#fff1d9', true);
+        oval(ctx, -13, -23, 9, 8, '#ffe5cd', true);
+        oval(ctx, 3, -26, 12, 9, '#fff6e0', true);
+        oval(ctx, 15, -22, 8, 7, '#fff1d9', true);
+        rect(ctx, -15, -15, 32, 7, 3, f.trim, true);
+        break;
+      case 'diver':
+        rect(ctx, -18, -18, 33, 20, [12, 12, 2, 4], f.coat, true);
+        stroke(ctx, f.trim, 4, [[-13, -9], [-19, -9], [-19, -25]]);
+        rect(ctx, -9, -5, 34, 11, 5, f.shade, true);
+        rect(ctx, 3, -3, 19, 6, 3, '#b8f5e8');
+        break;
+      case 'mage':
+        poly(ctx, f.coat, [[-15, -9], [-8, -32], [10, -43], [10, -29], [17, -11]], true);
+        oval(ctx, 0, -12, 27, 5, f.shade, true);
+        rect(ctx, -11, -20, 23, 6, 2, f.trim);
+        oval(ctx, 10, -42, 4, 4, '#fff4a4', true);
+        break;
+      case 'scout':
+        rect(ctx, -17, -20, 32, 14, [10, 10, 3, 3], f.coat, true);
+        oval(ctx, 3, -9, 27, 5, f.shade, true);
+        rect(ctx, -15, -13, 29, 5, 2, f.trim);
+        break;
+      default:
+        rect(ctx, -18, -22, 36, 26, [12, 12, 5, 5], f.shade, true);
+        poly(ctx, f.trim, [[-18, -7], [-8, -23], [5, -19], [16, -22], [20, -6]], true);
+        rect(ctx, -20, -9, 31, 6, 3, '#f4f9f3');
+        rect(ctx, -17, 6, 29, 14, [4, 4, 11, 12], f.trim, true);
+        break;
+    }
+    if (startled && (f.look === 'skater' || f.look === 'diver')) stroke(ctx, '#fff9cf', 2, [[7, -3], [11, 1], [15, -3]]);
+  }
+
+  function face(ctx, fighter, tilt, startled) {
+    ctx.save();
+    ctx.translate(3, -90);
+    ctx.rotate(tilt);
+    rect(ctx, -18, -13, 32, 31, [12, 11, 12, 9], fighter.hair, true);
+    rect(ctx, -12, -10, 28, 25, [8, 9, 11, 9], fighter.skin, true);
+    oval(ctx, 15, 3, 4.5, 3, fighter.skin, true);
+    oval(ctx, 9, -1, 2.4, startled ? 3.8 : 2.4, ink);
+    if (startled) oval(ctx, 7, 9, 4, 3, fighter.hair);
+    else stroke(ctx, fighter.hair, 1.7, [[5, 8], [9, 10], [13, 8]]);
+    hat(ctx, fighter, startled);
+    ctx.restore();
+  }
+
+  function draw(ctx, x, y, scale, fighter, facesLeft = false, motion = {}) {
+    const p = poseFor(fighter, motion);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(facesLeft ? -scale : scale, scale);
+    ctx.lineJoin = ctx.lineCap = 'round';
+    oval(ctx, 0, 0, 28 + 2 * p.fall, 4.5, '#21162f4a');
+    ctx.translate(p.x, -p.lift);
+    leg(ctx, fighter, [-9, p.hips], [-17 + 27 * p.fall, -20 + 14 * p.fall], [-14 - 6 * p.fall, 0], true);
+    leg(ctx, fighter, [9, p.hips], [13 + 20 * p.fall, -20 + 17 * p.fall], [11 + 5 * p.fall, 0], false);
+    ctx.translate(0, p.hips + 37);
+    ctx.translate(0, -37);
+    ctx.rotate(p.lean);
+    ctx.translate(0, 37);
+
+    if (['elf', 'mage', 'warden'].includes(fighter.look)) {
+      const swing = p.breath * 2 - p.reaction * 16 - (motion.after || 0) * 7;
+      poly(ctx, fighter.shade, [[-13, -72], [7, -66], [-17, -29], [-35 + swing, -30], [-23 + swing, -52]], true);
+      stroke(ctx, fighter.trim, 2.5, [[-35 + swing, -30], [-17, -29]]);
+    }
+    arm(ctx, fighter, [-12, -68], p.rear, true);
+    rect(ctx, -19, -76, 37, 40, [12, 12, 7, 6], fighter.coat, true);
+    poly(ctx, fighter.shade, [[-18, -64], [-10, -74], [-8, -41], [-15, -38], [-18, -44]]);
+    if (fighter.look === 'logger' || fighter.look === 'chef') {
+      stroke(ctx, fighter.shade, 3, [[1, -65], [1, -45]]);
+      for (const top of [-62, -54, -46]) oval(ctx, 5, top, 1.7, 1.7, fighter.trim);
+    } else {
+      poly(ctx, fighter.trim, [[-10, -68], [2, -73], [14, -70], [7, -61], [-6, -61]]);
+      rect(ctx, 1, -60, 10, 7, 2, fighter.shade);
+      oval(ctx, 7, -57, 2.5, 2.5, fighter.trim);
+    }
+    rect(ctx, -16, -43, 34, 7, 3, fighter.shade, true);
+    rect(ctx, -1, -44, 9, 8, 2, fighter.trim, true);
+    face(ctx, fighter, p.head, !!motion.part);
+    arm(ctx, fighter, [13, -67], p.hand, false);
+    if (!motion.part) {
+      root.LaunchArt.held(ctx, ...p.hand, p.propAngle, fighter.weapon, motion);
+      oval(ctx, p.hand[0] - 2, p.hand[1] + 1, 4, 4, fighter.skin, true);
+    }
+    ctx.restore();
+  }
+
+  function releasePoint(fighter, angle) {
+    const pose = poseFor(fighter, { snap: 1, angle });
+    const nozzle = { bow: 3, blaster: 23, bubble: 16 }[fighter.weapon.id];
+    const x = pose.hand[0] + (nozzle == null ? 5 : nozzle * Math.cos(pose.propAngle));
+    const y = pose.hand[1] + 37 + (nozzle == null ? -6 : nozzle * Math.sin(pose.propAngle));
+    const cos = Math.cos(pose.lean);
+    const sin = Math.sin(pose.lean);
+    return { x: pose.x + x * cos - y * sin, y: pose.hips - pose.lift + x * sin + y * cos };
+  }
+
+  root.LaunchFighterArt = { draw, releasePoint };
 })(globalThis);
 
 </script>
@@ -1160,7 +1860,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!config || !config.databaseURL || !root.firebase) throw new Error('Class rooms are unavailable. Offline practice is available.');
     const app = root.firebase.initializeApp(config, 'launch-tournament-' + Date.now());
     const db = app.database();
-    const room = db.ref('rooms/' + code + '/launchTournamentV3');
+    const room = db.ref('rooms/' + code + '/launchTournamentV6');
     const status = db.ref('.info/connected');
     const offset = db.ref('.info/serverTimeOffset');
     const subscriptions = [];
@@ -1203,13 +1903,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       create(state) {
         return room.child('state').transaction(current => current ? undefined : state);
       },
-      join(name) {
+      join(name, fighter) {
         return room.transaction(current => {
           const state = current?.state;
           if (!state || (state.phase !== 'lobby' && !state.roster?.includes(id))) return;
           const members = current.members || {};
-          if (!members[id] && Object.keys(members).length >= 40) return;
-          return { ...current, members: { ...members, [id]: { name } } };
+          if (members[id]) return current;
+          if (Object.keys(members).length >= 40) return;
+          return { ...current, members: { ...members, [id]: { name, fighter } } };
         });
       },
       leave() {
@@ -1242,11 +1943,18 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const T = LaunchTournament;
   const P = LaunchPhysics;
   const Art = LaunchArt;
+  const Fighters = LaunchFighters;
+  const Actor = LaunchFighterArt;
   const $ = id => document.getElementById(id);
   const canvas = $('range');
   const ctx = canvas.getContext('2d');
-  const SESSION = 'efi-launch-room-v3';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const aimReadout = $('aim-readout');
+  const shotResult = $('shot-result');
+  const targetRange = $('target-range');
+  const SESSION = 'efi-launch-room-v6';
   const PRACTICE = 'efi-launch-practice-v3';
+  const FAVORITE = 'efi-launch-fighter';
   const idForRoom = () => Array.from(crypto.getRandomValues(new Uint8Array(10)), n => n.toString(16).padStart(2, '0')).join('');
   const freshSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
   const currentTime = () => remote ? remote.now() : Date.now();
@@ -1255,8 +1963,17 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   let player, code, practice = false, working = false, joining = false;
   let deckName, tournamentKey, questionDeck, activeCard;
   let answerPublicKey, answerPrivateKey, openingAnswers = false;
-  let pointer = null, pull, pending = '', fieldIndex = -1, trace, scene, shownQuestion = '';
+  let pointer = null, pull, pending = '', pendingAim, fieldIndex = -1, trace, scene, shownQuestion = '';
   let lastStatus = '', popupKey = '';
+  let camera = 0, cameraTurn = '', lastFrame = 0;
+  let launchReport = '';
+  const menuArt = $('menu-art');
+  const menuContext = menuArt.getContext('2d');
+  const menuBackground = document.createElement('canvas');
+  let selection = Fighters.byId(storage('localStorage', FAVORITE)) || Fighters.roster[0];
+  menuBackground.width = menuArt.width;
+  menuBackground.height = menuArt.height;
+  Art.terrain(menuBackground.getContext('2d'), 2, menuArt.width, menuArt.height, 213);
 
   function storage(store, name, value) {
     try {
@@ -1268,19 +1985,49 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
   }
 
-  const hit = (pull, seed, round) => P.flight(pull, P.targetFor(seed, round), planck).hit;
+  function buildRoster() {
+    $('fighter-roster').replaceChildren(...Fighters.roster.map(fighter => {
+      const card = document.createElement('label');
+      card.className = 'fighter-card';
+      card.style.setProperty('--fighter-color', fighter.coat);
+      const pick = document.createElement('input');
+      pick.type = 'radio';
+      pick.name = 'fighter';
+      pick.value = fighter.id;
+      pick.checked = fighter === selection;
+      pick.setAttribute('aria-label', fighter.name + ', ' + fighter.role + ', ' + fighter.weapon.name);
+      pick.addEventListener('change', () => {
+        selection = fighter;
+        storage('localStorage', FAVORITE, fighter.id);
+      });
+      const art = document.createElement('canvas');
+      art.width = 104;
+      art.height = 90;
+      art.setAttribute('aria-hidden', 'true');
+      Actor.draw(art.getContext('2d'), 40, 83, .59, fighter);
+      const name = document.createElement('strong');
+      name.textContent = fighter.name;
+      const label = document.createElement('span');
+      label.textContent = fighter.weapon.name;
+      card.append(pick, art, name, label);
+      return card;
+    }));
+  }
+
+  function fighterFor(id, seed = state?.seed) {
+    return Fighters.assignedTo(id, members[id]?.fighter, seed);
+  }
+
   const rules = {
-    hit,
+    weaponForPlayer: (id, seed) => fighterFor(id, seed).weapon.id,
+    hitPart: (pull, weapon) => P.flight(pull, P.targetFor(), P.weaponFor(weapon), planck).part,
     correct: (grade, number, seed) => launchQuestion(grade, number, seed).answer,
-    botPull(seed, round) {
-      const target = P.targetFor(seed, round);
+    botShot(seed, id) {
+      const target = P.targetFor();
       const random = T.randomFor(seed);
-      const t = 0.85 + random() * 0.6;
-      const vx = (target.x - P.ORIGIN.x + (random() - .5) * 70) / (24 * t);
-      const vy = (P.ORIGIN.y - target.y + (random() - .5) * 70) / (24 * t) + 5 * t;
-      const distance = 40 * Math.pow(Math.hypot(vx, vy) / 18, 1 / 1.1);
-      const angle = Math.atan2(vy, vx);
-      return P.limitPull(Math.cos(angle) * distance, -Math.sin(angle) * distance);
+      const { weapon } = fighterFor(id, seed);
+      const aim = { x: target.x, y: target.y + (random() - .5) * 116 };
+      return { weapon: weapon.id, pull: P.aimFor(aim, weapon, 1.38 + random() * .26) };
     }
   };
 
@@ -1290,7 +2037,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function newState(grade) {
-    return { host: player, grade, protocol: 3, phase: 'lobby', round: 0, version: 0, points: {} };
+    return { host: player, grade, protocol: 6, phase: 'lobby', round: 0, version: 0, points: {} };
   }
 
   function showGame() {
@@ -1318,7 +2065,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     deckName = saved?.members?.practice?.name ?? name;
     questionDeck = activeCard = null;
     members = saved?.members || { practice: { name }, 'bot-1': { name: 'Practice bot' } };
+    if (!Fighters.byId(members.practice.fighter)) members.practice.fighter = selection.id;
     state = saved?.state || T.start(newState(Number($('grade').value)), Object.keys(members), freshSeed(), Date.now());
+    if (state.protocol !== 6) {
+      const matches = state.matches?.map(match => {
+        const { shot, ...rest } = match;
+        return rest;
+      });
+      state = { ...state, protocol: 6, matches };
+    }
     savePractice();
     showGame();
   }
@@ -1336,6 +2091,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (joining) return;
     const name = restored?.name || $('name').value.trim().slice(0, 16);
     const selectedCode = restored?.code || (host ? LaunchRooms.createCode() : $('code').value.trim().toUpperCase());
+    const fighter = Fighters.byId(restored?.fighter)?.id || selection.id;
     if (!host && !restored && !name) return notice('Enter your nickname to join.');
     if (!/^LT-[A-Z2-9]{5}$/.test(selectedCode)) return notice('Enter the room code shown by your teacher.');
     joining = true;
@@ -1360,16 +2116,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         state = result.snapshot.val();
       } else if (restored && remote.initial?.state?.host === player) {
         state = remote.initial.state;
+        members = remote.initial.members || {};
         answerPrivateKey = await LaunchAnswers.importPrivate(savedPrivateKey);
       } else {
         if (!remote.initial?.state) throw new Error('Class room not found. Check the code with your teacher.');
-        if (remote.initial.state.protocol !== 3) throw new Error('Ask your teacher for a room code from the updated game.');
+        if (remote.initial.state.protocol !== 6) throw new Error('Ask your teacher for a room code from the updated game.');
         answerPublicKey = await LaunchAnswers.importPublic(remote.initial.state.answerPublicKey);
-        const result = await remote.join(name);
+        const result = await remote.join(name, fighter);
         if (!result.committed) throw new Error('The tournament is full or has already started.');
-        state = result.snapshot.val().state;
+        const joined = result.snapshot.val();
+        state = joined.state;
+        members = joined.members;
       }
-      storage('sessionStorage', SESSION, { code, player, name, privateKey: savedPrivateKey });
+      storage('sessionStorage', SESSION, { code, player, name, fighter: members[player]?.fighter || fighter, privateKey: savedPrivateKey });
       notice();
       showGame();
       remote.watch();
@@ -1407,9 +2166,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     members = {};
     actions = {};
     code = null;
-    pointer = pull = trace = scene = null;
+    pointer = pull = pendingAim = trace = scene = null;
     pending = shownQuestion = popupKey = lastStatus = '';
     fieldIndex = -1;
+    cameraTurn = launchReport = '';
+    shotResult.hidden = true;
     $('challenge').hidden = true;
     $('game').hidden = true;
     $('entry').hidden = false;
@@ -1519,6 +2280,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       if (activeCard?.turnKey !== turnKey(match)) return;
       request.questionSeed = activeCard.seed;
       request.questionNumber = activeCard.number;
+    } else {
+      pendingAim = payload;
     }
     pending = token;
     render();
@@ -1533,6 +2296,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     } catch (error) {
       if (remote === connection && pending === token) {
         pending = '';
+        pendingAim = null;
         render();
         notice(error.message);
       }
@@ -1580,7 +2344,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     fieldIndex = assigned >= 0 ? assigned : host && state.matches?.length ? 0 : -1;
     const match = myMatch();
     const token = turnToken(match);
-    if (pending && token !== pending) pending = '';
+    if (pending && token !== pending) {
+      pending = '';
+      pendingAim = null;
+    }
     $('room-label').textContent = practice ? 'OFFLINE PRACTICE  ·  GRADE ' + grade : code + '  ·  GRADE ' + grade;
     $('heading').textContent = phase === 'lobby' ? 'Class lobby' : phase === 'ended' ? 'Tournament complete' : 'Round ' + round + ' / ' + T.ROUNDS + ' · ' + T.mode(round);
     $('advance').hidden = !host || !['lobby', 'results'].includes(phase);
@@ -1592,7 +2359,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     $('arena-name').textContent = match ? Art.zone(round).name : '';
     let details = '';
     if (phase === 'lobby') details = host ? 'Share the room code. Start when at least two students have joined.' : 'Waiting for your teacher to start.';
-    else if (phase === 'ended') details = 'Every target hit earned one tournament point.';
+    else if (phase === 'ended') details = 'Every hit earned one tournament point.';
     else if (phase === 'results') details = 'Round complete. The next round draws new matchups.';
     else if (match?.stage === 'done') details = 'Your match is complete. Waiting for the other matches.';
     else if (host && state.matches?.length > 1) details = state.matches.filter(m => m.stage === 'done').length + ' of ' + state.matches.length + ' matches complete';
@@ -1600,8 +2367,6 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     renderBoard(match);
     if (!match) return;
 
-    $('left-score').textContent = teamName(match.left, 'Lime') + ' · ' + match.leftPoints;
-    $('right-score').textContent = match.rightPoints + ' · ' + teamName(match.right, 'Blue');
     const shooter = match.order[match.turn];
     const mine = shooter === player;
     const leftRate = match.leftPoints / match.left.length;
@@ -1609,7 +2374,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const winner = leftRate === rightRate ? 'Draw' : (leftRate > rightRate ? teamName(match.left, 'Lime') : teamName(match.right, 'Blue')) + ' wins';
     const status = match.stage === 'done' ? winner : match.stage === 'flight' ? getName(shooter) + ' launched' :
       match.stage === 'feedback' ? 'Challenge checked' : match.stage === 'answer' ? (mine ? 'Answer correctly to unlock your shot' : getName(shooter) + ' is answering') :
-      mine ? 'Your turn · Drag back from the pod, then release' : getName(shooter) + ' is aiming';
+      mine ? 'Your turn · Drag back from your fighter, then release' : getName(shooter) + ' is aiming';
     if (lastStatus !== status) {
       $('turn').textContent = status;
       lastStatus = status;
@@ -1659,105 +2424,242 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       background.width = P.WIDTH;
       background.height = P.HEIGHT;
       Art.terrain(background.getContext('2d'), round, P.WIDTH, P.HEIGHT, P.GROUND);
-      scene = { round, seed: state.seed, target: P.targetFor(state.seed, round), background };
+      scene = { round, seed: state.seed, background };
       trace = null;
     }
-    if (match.shot && trace?.at !== match.shot.at) {
-      trace = { ...P.flight(match.shot.pull, scene.target, planck), at: match.shot.at };
+    if (match.shot && (trace?.at !== match.shot.at || trace?.player !== match.shot.player)) {
+      const shot = match.shot;
+      const weapon = P.weaponFor(shot.weapon);
+      const flight = P.flight(shot.pull, P.targetFor(), weapon, planck);
+      const angle = Math.atan2(shot.pull[1], shot.pull[0]);
+      const launch = Actor.releasePoint(fighterFor(shot.player), angle);
+      trace = { ...flight, ...shot, weapon, angle, offsetX: P.FIGHTER_X + launch.x - P.ORIGIN.x, offsetY: P.FIGHTER_Y + launch.y - P.ORIGIN.y };
+      trace.duration = Math.min(1110, Math.max(490, (flight.points.length - 1) * 10 + 35));
+      launchReport = '';
+      shotResult.hidden = true;
     }
   }
 
-  function circle(x, y, radius, fill) {
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.fill();
+  function paintMenu(time) {
+    menuContext.drawImage(menuBackground, 0, 0);
+    const reduced = reduceMotion.matches;
+    const opponent = Fighters.byId(selection.id === 'rook' ? 'nova' : 'rook');
+    const angle = -.36;
+    const demo = reduced ? 1300 : time % 3350;
+    const release = selection.weapon.releaseMs;
+    const flightStart = 610 + release;
+    const flightEnd = flightStart + 1230;
+    const hand = Actor.releasePoint(selection, angle);
+    const start = { x: 149 + hand.x * 1.47, y: 212 + hand.y * 1.47 };
+    const end = { x: 657, y: 127 };
+    const hit = demo >= flightEnd && demo < flightEnd + 580 ? (demo - flightEnd) / 580 : null;
+    Actor.draw(menuContext, 149, 212, 1.47, selection, false, {
+      time, reduced, angle, charge: Math.min(1, demo / 610),
+      snap: demo >= 610 && demo < flightStart ? (demo - 610) / release : null,
+      after: demo >= flightStart ? Math.min(1, (demo - flightStart) / 390) : null
+    });
+    Actor.draw(menuContext, 665, 212, 1.47, opponent, true, { time: time + 500, reduced, part: hit == null ? null : 'body', impact: hit });
+    menuContext.save();
+    menuContext.strokeStyle = '#234943';
+    menuContext.globalAlpha = .55;
+    menuContext.lineWidth = 2.5;
+    menuContext.setLineDash([5, 10]);
+    menuContext.beginPath();
+    menuContext.moveTo(start.x, start.y);
+    menuContext.quadraticCurveTo((start.x + end.x) / 2, (start.y + end.y) / 2 - 128, end.x, end.y);
+    menuContext.stroke();
+    menuContext.restore();
+    if (demo >= flightStart && demo < flightEnd) {
+      const t = (demo - flightStart) / 1230;
+      const x = start.x + (end.x - start.x) * t;
+      const y = start.y + (end.y - start.y) * t - 256 * t * (1 - t);
+      const direction = Math.atan2(end.y - start.y + 512 * t - 256, end.x - start.x);
+      Art.projectile(menuContext, x, y, direction, reduced ? 0 : t * 1230, selection.weapon);
+    } else if (hit != null) {
+      Art.impact(menuContext, end, hit, 'body', selection.weapon, reduced);
+    }
   }
 
-  function paintMenu() {
-    const art = $('menu-art');
-    const menu = art.getContext('2d');
-    Art.terrain(menu, 2, art.width, art.height, 213);
-    Art.racer(menu, 156, 211, 2.25, 0);
-    Art.racer(menu, 668, 211, 2.25, 1, true);
-    menu.strokeStyle = '#183232';
-    menu.lineWidth = 4;
-    menu.setLineDash([8, 12]);
-    menu.beginPath();
-    menu.moveTo(224, 158);
-    menu.quadraticCurveTo(409, -12, 603, 158);
-    menu.stroke();
-    menu.setLineDash([]);
-    menu.fillStyle = '#f7c951';
-    menu.beginPath();
-    menu.arc(412, 70, 17, 0, Math.PI * 2);
-    menu.fill();
+  function mirrorTurn(match) {
+    const player = match.order[Math.min(match.turn, match.order.length - 1)];
+    return match.right.includes(player);
   }
 
-  function frame() {
+  function updateHealth(side, id, health) {
+    const label = $(side + '-health-label');
+    const text = getName(id) + ' · ' + health + ' HP';
+    if (label.textContent !== text) label.textContent = text;
+    const gauge = $(side + '-health');
+    if (!gauge.hasAttribute('value') || gauge.value !== health) {
+      gauge.value = health;
+      gauge.dataset.low = String(health <= 30);
+    }
+  }
+
+  function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed) {
+    const victimX = P.WIDTH - P.FIGHTER_X;
+    const inView = P.mirrorX(victimX, mirrored) - camera;
+    targetRange.hidden = match.stage !== 'aim' || (inView >= 0 && inView <= P.VIEW_WIDTH);
+    if (!targetRange.hidden) {
+      const distance = Math.round((victimX - P.ORIGIN.x) / P.SCALE);
+      const label = getName(victim) + ' · ' + distance + ' m';
+      const text = mirrored ? '← ' + label : label + ' →';
+      if (targetRange.textContent !== text) targetRange.textContent = text;
+      targetRange.dataset.side = mirrored ? 'left' : 'right';
+    }
+
+    aimReadout.hidden = !drawPull;
+    if (drawPull) {
+      const { angle, power } = P.aimReadout(drawPull);
+      $('angle-value').textContent = angle + '°';
+      $('power-value').textContent = power + '%';
+    }
+
+    const part = trace?.part;
+    const showImpact = elapsed >= trace?.duration && elapsed < T.FLIGHT_MS;
+    const impactPending = match.stage === 'flight' && !showImpact && elapsed < T.FLIGHT_MS && !!part;
+    const health = T.healthOf(match, victim) + (impactPending ? trace.damage : 0);
+    updateHealth(mirrored ? 'right' : 'left', active, T.healthOf(match, active));
+    updateHealth(mirrored ? 'left' : 'right', victim, health);
+    const kit = $('fighter-kit');
+    const fighter = fighterFor(active);
+    const kitLabel = fighter.name + ' · ' + fighter.weapon.name;
+    if (kit.textContent !== kitLabel) kit.textContent = kitLabel;
+    kit.hidden = match.stage !== 'aim' && match.stage !== 'flight';
+    const leftScore = teamName(match.left, 'Lime') + ' · ' + (match.leftPoints - Number(impactPending && !mirrored));
+    const rightScore = (match.rightPoints - Number(impactPending && mirrored)) + ' · ' + teamName(match.right, 'Blue');
+    if ($('left-score').textContent !== leftScore) $('left-score').textContent = leftScore;
+    if ($('right-score').textContent !== rightScore) $('right-score').textContent = rightScore;
+    const labels = { head: 'Critical headshot', body: 'Body hit', legs: 'Leg hit' };
+    const outcome = showImpact ? part ? labels[part] + ' · −' + trace.damage + ' HP' : 'Miss' : '';
+    if (outcome !== launchReport) {
+      launchReport = outcome;
+      shotResult.hidden = !outcome;
+      shotResult.textContent = outcome;
+      shotResult.dataset.hit = String(!!part);
+      shotResult.dataset.part = part || '';
+    }
+  }
+
+  function projectileAt(elapsed, travelTime, reduced) {
+    const point = P.pointAt(trace.points, elapsed / travelTime);
+    const blend = reduced ? 0 : Math.max(0, 1 - elapsed / 110) ** 2;
+    return { x: point.x + trace.offsetX * blend, y: point.y + trace.offsetY * blend };
+  }
+
+  function onScreen(x, mirrored) {
+    const screenX = P.mirrorX(x, mirrored) - camera;
+    return screenX >= -95 && screenX < P.VIEW_WIDTH + 95;
+  }
+
+  function frame(time) {
+    const delta = lastFrame ? Math.min(time - lastFrame, 100) : 16;
+    lastFrame = time;
     requestAnimationFrame(frame);
-    if ($('field').hidden || $('game').hidden || !scene) return;
+    if (!$('entry').hidden) {
+      paintMenu(time);
+      return;
+    }
+    if ($('field').hidden || !scene) return;
     const match = myMatch();
     if (!match) return;
+
     const now = currentTime();
     const seconds = ['aim', 'answer'].includes(match.stage) ? Math.max(0, Math.ceil((match.deadline - now) / 1000)) + ' s' : '';
     if ($('clock').textContent !== seconds) $('clock').textContent = seconds;
-
     if (match.stage === 'answer' && now >= match.deadline) $('challenge').hidden = true;
-    ctx.drawImage(scene.background, 0, 0);
-    const active = match.order[match.turn];
-    const waiting = match.left.includes(active) ? match.right[0] : match.left[0];
-    Art.racer(ctx, 48, P.GROUND - 4, .78, Art.indexFor(active));
-    Art.racer(ctx, 780, P.GROUND - 4, .78, Art.indexFor(waiting), true);
-    const { x, y, radius } = scene.target;
-    ctx.fillStyle = '#213d39';
-    ctx.fillRect(x - 7, y + radius - 5, 14, P.GROUND - y - radius + 5);
-    circle(x, y, radius + 5, '#243c37');
-    circle(x, y, radius, '#ffeeac');
-    circle(x, y, radius * .72, Art.zone(scene.round).accent);
-    circle(x, y, radius * .43, '#f5edbc');
-    circle(x, y, radius * .20, '#723e43');
 
-    const origin = P.ORIGIN;
-    ctx.strokeStyle = '#1c302a';
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(origin.x - 23, P.GROUND);
-    ctx.lineTo(origin.x, origin.y + 12);
-    ctx.lineTo(origin.x + 18, P.GROUND);
-    ctx.stroke();
-    const drawPull = pointer !== null || !$('aim-controls').hidden ? pull : null;
-    if (drawPull) {
-      const grab = { x: origin.x - drawPull[0], y: origin.y - drawPull[1] };
-      ctx.strokeStyle = '#eae6ad';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(origin.x, origin.y);
-      ctx.lineTo(grab.x, grab.y);
-      ctx.stroke();
-      circle(grab.x, grab.y, 9, '#c6f182');
-      for (const point of P.preview(drawPull)) circle(point.x, point.y, 2.5, '#ffedb0');
+    const mirrored = mirrorTurn(match);
+    const turn = [state.round, fieldIndex, match.turn].join('/');
+    const atLauncher = mirrored ? P.WIDTH - P.VIEW_WIDTH : 0;
+    if (turn !== cameraTurn) {
+      cameraTurn = turn;
+      camera = atLauncher;
+    }
+
+    const elapsed = match.stage === 'flight' && trace ? now - trace.at : -1;
+    const inFlight = elapsed >= 0 && elapsed < T.FLIGHT_MS;
+    const queued = match.stage === 'flight' && trace && elapsed < 0;
+    const reduced = reduceMotion.matches;
+    const release = reduced ? 0 : trace?.weapon.releaseMs ?? 0;
+    const afterRelease = elapsed - release;
+    const travelling = inFlight && afterRelease >= 0 && elapsed < trace.duration;
+    const snapping = inFlight && afterRelease < 0;
+    const travelTime = inFlight ? trace.duration - release : 1;
+    const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime, reduced) : null;
+    if (position) {
+      const follow = P.cameraAt(position.x, mirrored);
+      camera += (follow - camera) * (reduced ? 1 : 1 - Math.exp(-delta / 72));
     } else {
-      circle(origin.x, origin.y, 10, '#c6f182');
-      circle(origin.x - 3, origin.y - 3, 3, '#f9ffd4');
+      camera = atLauncher;
     }
 
-    if (trace && now >= trace.at && now - trace.at < T.FLIGHT_MS) {
-      const index = Math.min(trace.points.length - 1, Math.floor((now - trace.at) / 1100 * trace.points.length));
-      const point = trace.points[index];
-      if (point) {
-        for (let i = Math.max(0, index - 12); i < index; i += 3) {
-          circle(trace.points[i].x, trace.points[i].y, 3, '#edf6af');
-        }
-        circle(point.x, point.y, 8, '#daf78d');
-      }
-      if (trace.hit && now - trace.at > 1000) circle(x, y, radius * .7, '#fff3ab');
+    const drawPull = pointer !== null || !$('aim-controls').hidden ? pull : null;
+    const active = match.order[Math.min(match.turn, match.order.length - 1)];
+    const victim = match.stage === 'flight' && trace ? trace.victim : T.opponentFor(match, active);
+    const fighter = fighterFor(active);
+    updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed);
+
+    ctx.drawImage(scene.background, camera, 0, P.VIEW_WIDTH, P.HEIGHT, 0, 0, P.VIEW_WIDTH, P.HEIGHT);
+    ctx.save();
+    ctx.translate(-camera, 0);
+    if (mirrored) {
+      ctx.translate(P.WIDTH, 0);
+      ctx.scale(-1, 1);
     }
+
+    const impact = inFlight ? Math.max(0, (elapsed - trace.duration) / (T.FLIGHT_MS - trace.duration)) : 0;
+    const tookHit = !!trace?.part && inFlight && elapsed >= trace.duration;
+    const aimedPull = pendingAim?.pull || drawPull;
+    const charge = queued ? 1 : aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
+    const angle = inFlight || queued ? trace.angle : aimedPull ? Math.atan2(aimedPull[1], aimedPull[0]) : 0;
+    if (onScreen(P.FIGHTER_X, mirrored)) {
+      Actor.draw(ctx, P.FIGHTER_X, P.FIGHTER_Y, 1, fighter, false, {
+        time, reduced, charge: Math.min(1, charge), angle,
+        snap: snapping ? elapsed / release : null,
+        after: inFlight && !snapping ? Math.min(1, afterRelease / 390) : null
+      });
+    }
+    const targetX = P.WIDTH - P.FIGHTER_X;
+    if (onScreen(targetX, mirrored)) {
+      if (tookHit && trace.part === 'legs' && !reduced) Art.skid(ctx, targetX, P.GROUND, impact);
+      Actor.draw(ctx, targetX, P.FIGHTER_Y, 1, fighterFor(victim), true, {
+        time: time + 430, reduced, part: tookHit ? trace.part : null, impact: reduced ? .32 : impact
+      });
+    }
+
+    if (canAct('aim') && !drawPull) Art.aimGrip(ctx, P.ORIGIN, fighter.weapon.color, reduced ? 0 : time);
+
+    if (drawPull) {
+      for (const [index, point] of P.preview(drawPull, fighter.weapon).entries()) {
+        Art.aimDot(ctx, point, index, fighter.weapon.color);
+      }
+    }
+
+    if (travelling) {
+      if (!reduced && afterRelease < 145) {
+        Art.release(ctx, { x: P.ORIGIN.x + trace.offsetX, y: P.ORIGIN.y + trace.offsetY }, trace.pull, afterRelease / 145, trace.weapon.color);
+      }
+      for (let lag = 5; lag >= 1; lag--) {
+        if (afterRelease > lag * 16) Art.trail(ctx, projectileAt(afterRelease - lag * 16, travelTime, reduced), lag, trace.weapon);
+      }
+      if (position.y < 12) Art.airborne(ctx, position.x, 19);
+      else {
+        const ahead = projectileAt(afterRelease + 3, travelTime, reduced);
+        const behind = projectileAt(Math.max(0, afterRelease - 3), travelTime, reduced);
+        const angle = Math.atan2(ahead.y - behind.y, ahead.x - behind.x);
+        Art.projectile(ctx, position.x, position.y, angle, reduced ? 0 : afterRelease, trace.weapon);
+      }
+    } else if (position && !snapping && (trace.part || trace.landed)) {
+      Art.impact(ctx, position, impact, trace.part, trace.weapon, reduced);
+    }
+    ctx.restore();
   }
 
   function canvasPoint(event) {
     const rect = canvas.getBoundingClientRect();
-    return { x: (event.clientX - rect.left) * P.WIDTH / rect.width, y: (event.clientY - rect.top) * P.HEIGHT / rect.height };
+    const x = camera + (event.clientX - rect.left) * P.VIEW_WIDTH / rect.width;
+    return { x: P.mirrorX(x, mirrorTurn(myMatch())), y: (event.clientY - rect.top) * P.HEIGHT / rect.height };
   }
 
   function drag(event) {
@@ -1768,7 +2670,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   canvas.addEventListener('pointerdown', event => {
     if (!canAct('aim') || pointer !== null) return;
     const pos = canvasPoint(event);
-    if (Math.hypot(pos.x - P.ORIGIN.x, pos.y - P.ORIGIN.y) > 40) return;
+    if (Math.hypot(pos.x - P.ORIGIN.x, pos.y - P.ORIGIN.y) > 60) return;
     canvas.setPointerCapture(event.pointerId);
     pointer = event.pointerId;
     $('aim-controls').hidden = true;
@@ -1781,7 +2683,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     pointer = null;
     const shot = pull;
     pull = null;
-    if (Math.hypot(...shot) >= 6) submit('aim', { pull: shot });
+    if (Math.hypot(...shot) >= 6) submit('aim', { pull: shot, weapon: fighterFor(player).weapon.id });
   });
   canvas.addEventListener('pointercancel', () => { pointer = pull = null; });
 
@@ -1798,7 +2700,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   for (const id of ['angle', 'power']) $(id).addEventListener('input', keyboardAim);
   $('shoot').addEventListener('click', () => {
     keyboardAim();
-    submit('aim', { pull });
+    submit('aim', { pull, weapon: fighterFor(player).weapon.id });
   });
   $('host').addEventListener('click', () => enterOnline({ host: true }));
   $('join').addEventListener('click', () => enterOnline());
@@ -1813,10 +2715,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     else startPractice(savedPractice());
   });
 
-  paintMenu();
+  buildRoster();
   rememberOption();
   setInterval(drive, 250);
-  frame();
+  requestAnimationFrame(frame);
 })();
 
 </script>
