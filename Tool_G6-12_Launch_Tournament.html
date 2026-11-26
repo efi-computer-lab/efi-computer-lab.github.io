@@ -272,6 +272,12 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
   background: radial-gradient(ellipse at 0 0, #2c4e45, transparent 50%), radial-gradient(ellipse at 100% 0, #433564, transparent 50%), #181728;
   border-bottom: 2px solid #9483a9;
 }
+.survival .scoreboard {
+  background: radial-gradient(ellipse at 0 0, #23463f, transparent 55%),
+    radial-gradient(ellipse at 100% 0, #543345, transparent 54%), #211c33;
+  border-bottom-color: #8f7ea7;
+}
+.survival .turn-bar { background: #27223b; }
 .side-score {
   --team-edge: #507c69;
   --team-accent: #d6f5a5;
@@ -510,7 +516,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261838',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261859',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -559,7 +565,7 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
         <div id="fighter-roster" class="fighter-roster"></div>
       </fieldset>
       <ul class="phases" aria-label="Tournament rounds">
-        <li>5 solo rounds</li><li>5 duo rounds</li><li>3 class rounds</li>
+        <li>5 solo rounds</li><li>5 duo rounds</li><li>3 zombie waves</li>
       </ul>
     </section>
     <p id="notice" role="status" hidden></p>
@@ -745,31 +751,40 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ['bryn', 'Bryn', 'Timber scout', 'logger', '#d54c46', '#423750', '#ffc168', '#a86649', '#392639',
       'axe', 'Timber Axe', '#ffc377', 14, 1, 195, [25, 21, 16, .98, 1.02]],
     ['pip', 'Pip', 'Street artist', 'artist', '#a853bb', '#442978', '#88f5b3', '#d99261', '#31244e',
-      'blaster', 'Paint Popper', '#70f5b0', 7, 1.09, 150, [21, 16, 14, .95, 1.02]],
+      'brush', 'Paintbrush', '#70f5b0', 9, 1.04, 205, [21, 16, 14, .95, 1.02]],
     ['tavi', 'Tavi', 'Festival maker', 'festival', '#e86640', '#772d5d', '#ffe16d', '#f3b179', '#4e2e51',
       'bomb', 'Confetti Charge', '#ff94ac', 17, .97, 230, [22, 18, 15, 1, 1]],
     ['nova', 'Nova', 'Star skater', 'skater', '#5276d6', '#292657', '#f0baff', '#986148', '#23284e',
-      'disc', 'Comet Disc', '#9ef1ff', 8.5, .98, 190, [19, 12, 16, 1.03, .92]],
+      'disc', 'Flying Disc', '#9ef1ff', 8.5, .98, 190, [19, 12, 16, 1.03, .92]],
     ['nori', 'Nori', 'Pastry chef', 'chef', '#e9b5bf', '#8c436f', '#fff1ba', '#efba8f', '#674245',
-      'pie', 'Custard Pie', '#ffd577', 12.5, .99, 220, [29, 32, 16, .94, 1.09]],
+      'fork', 'Kitchen Fork', '#ffd577', 11, 1.03, 210, [29, 32, 16, .94, 1.09]],
     ['coral', 'Coral', 'Lagoon diver', 'diver', '#2ba5a4', '#205679', '#ffb378', '#cb8663', '#514050',
       'bubble', 'Bubble Wand', '#9bffe9', 6.5, .96, 200, [24, 18, 14, .94, 1.06]],
     ['saff', 'Saff', 'Storm mage', 'mage', '#7852ad', '#392855', '#f8d880', '#b67451', '#3a2654',
-      'orb', 'Storm Orb', '#e7b9ff', 9.5, 1.01, 260, [18, 17, 12, 1.11, .91]],
+      'lightning', 'Lightning Bolt', '#edbbff', 7, 1.12, 245, [18, 17, 12, 1.11, .91]],
     ['koa', 'Koa', 'Trail explorer', 'scout', '#7c9b3d', '#334b38', '#ffc879', '#9a573d', '#392b33',
       'boom', 'Leaf Boomerang', '#e1f787', 8, 1.01, 175, [19, 15, 12, 1, .96]],
     ['rook', 'Rook', 'Ice warden', 'warden', '#478ab4', '#274667', '#caecfa', '#d8a382', '#514350',
-      'hammer', 'Frost Hammer', '#a7e9ff', 15, .98, 245, [26, 22, 17, 1.04, 1.02]],
+      'ice', 'Ice Shard', '#a7ecff', 12, 1.02, 235, [26, 22, 17, 1.04, 1.02]],
     ['valen', 'Valen', 'Armored sword warrior', 'knight', '#8b8fa8', '#343655', '#f1b652', '#c38561', '#472b45',
       'sword', 'Sunsteel Sword', '#ffe5a1', 13, 1.02, 235, [28, 18, 17, 1.13, .93]],
     ['rowan', 'Rowan', 'Field soldier', 'soldier', '#7d8955', '#3d5249', '#eac77e', '#93604b', '#2f2c39',
-      'cork', 'Signal Cork', '#ffbd75', 8.2, 1.06, 155, [24, 18, 15, 1.01, .98]]
+      'rifle', 'Rifle', '#ffbd75', 6.5, 1.2, 155, [24, 18, 15, 1.01, .98]]
   ].map(([id, name, role, look, coat, shade, trim, skin, hair, weapon, label, color, gravity, speed, releaseMs,
     [shoulders, waist, stance, height, head]]) => ({
     id, name, role, look, coat, shade, trim, skin, hair,
     build: { shoulders, waist, stance, height, head },
     weapon: { id: weapon, name: label, color, gravity, speed, releaseMs }
   }));
+
+  // Earlier practice saves can still contain a shot or an injury from these kits.
+  const legacyWeapons = [
+    ['blaster', 'Paint Popper', '#70f5b0', 7, 1.09, 150],
+    ['pie', 'Custard Pie', '#ffd577', 12.5, .99, 220],
+    ['orb', 'Storm Orb', '#e7b9ff', 9.5, 1.01, 260],
+    ['hammer', 'Frost Hammer', '#a7e9ff', 15, .98, 245],
+    ['cork', 'Signal Cork', '#ffbd75', 8.2, 1.06, 155]
+  ].map(([id, name, color, gravity, speed, releaseMs]) => ({ id, name, color, gravity, speed, releaseMs }));
 
   const byId = id => roster.find(fighter => fighter.id === id);
 
@@ -780,7 +795,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return roster[index % roster.length];
   }
 
-  const api = { roster, byId, assignedTo };
+  const api = { roster, legacyWeapons, byId, assignedTo };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchFighters = api;
 })(globalThis);
@@ -854,7 +869,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   const byRound = (round, legacy = false) => (legacy ? baseArenas : arenas)[Math.max(0, round - 1) % arenas.length];
-  const api = { WIDTH, arenas, byRound, groundAt };
+  const survival = {
+    ...baseArenas[5], name: 'Moonrise Graveyard', theme: 'graveyard',
+    sky: '#c2badc', far: '#635984', near: '#484669', floor: '#303344', line: '#a5bd8b', sun: '#eee4bd',
+    ground: [[0, 298], [750, 298], [1050, 310], [1300, 290], [WIDTH, 303]], cover: []
+  };
+  const api = { WIDTH, arenas, byRound, groundAt, survival };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchArenas = api;
 })(globalThis);
@@ -879,7 +899,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const fighters = typeof module === 'object' && module.exports ? require('./fighters.js') : root.LaunchFighters;
   const arenas = typeof module === 'object' && module.exports ? require('./arenas.js') : root.LaunchArenas;
   const WEAPONS = fighters.roster.map(fighter => fighter.weapon);
-  const weaponFor = id => WEAPONS.find(weapon => weapon.id === id);
+  const weaponFor = id => WEAPONS.find(weapon => weapon.id === id) || fighters.legacyWeapons.find(weapon => weapon.id === id);
 
   function limitPull(x, y) {
     const scale = Math.min(1, MAX_PULL / (Math.hypot(x, y) || 1));
@@ -901,8 +921,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return { x, y };
   }
 
-  function fieldFor(level, mirrored, setback, slot) {
-    const position = fighterPosition(level, mirrored, setback, false, slot);
+  function fieldFor(level, mirrored, setback, slot, position = fighterPosition(level, mirrored, setback, false, slot)) {
     return {
       level, mirrored,
       origin: { x: position.x + ORIGIN.x - FIGHTER_X, y: position.y + ORIGIN.y - FIGHTER_Y },
@@ -911,8 +930,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function targetFor(fighter = fighters.roster[0], field, setback, slot) {
-    const { x, y } = fighterPosition(field?.level, field?.mirrored, setback, true, slot);
-    const { shoulders, waist, stance, height, head } = fighter.build;
+    return targetAt(fighterPosition(field?.level, field?.mirrored, setback, true, slot), fighter.build);
+  }
+
+  function targetAt({ x, y }, { shoulders, waist, stance, height, head }) {
     const body = Math.max(shoulders, waist);
     return { x, y: y - 55 * height, zones: [
       { part: 'head', left: x - 3 - 17 * head, right: x - 3 + 17 * head, top: y - (90 + 17 * head) * height, bottom: y - (90 - 14 * head) * height },
@@ -1064,7 +1085,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const api = {
     WIDTH, VIEW_WIDTH, MAX_VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
-    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, playbackMs, followShot, pointAt, aimReadout
+    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, targetAt, aimFor, preview, flight, mirrorX, playbackMs, followShot, pointAt, aimReadout
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchPhysics = api;
@@ -1478,6 +1499,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const DAMAGE = { head: 50, body: 30, legs: 20 };
   const PUSH = { head: 32, body: 25, legs: 19 };
   const MAX_SETBACK = 54;
+  const HORDE_MS = 1150;
+  const WAVES = [
+    { count: 2, health: 50, pace: 104, damage: 12 },
+    { count: 3, health: 60, pace: 138, damage: 16 },
+    { count: 4, health: 75, pace: 172, damage: 20 }
+  ];
 
   const healthOf = (match, id) => match.health?.[id] ?? MAX_HEALTH;
   const setbackOf = (match, id) => match.setbacks?.[id] ?? 0;
@@ -1488,6 +1515,29 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const duoSlot = (match, player, round) => isDuo(round) ? match[sideOf(match, player)].indexOf(player) : undefined;
   const knockoutsOf = (match, side) => match[side].filter(id => healthOf(match, id) === 0).length;
   const knockoutGoal = match => Math.min(2, match.left.length, match.right.length);
+  const living = (match, ids) => ids.filter(id => healthOf(match, id) > 0);
+  const defenderX = (index, count) => 78 + Math.round(index * Math.min(78, 488 / Math.max(1, count - 1)));
+
+  function zombieDestination(match, id) {
+    const index = match.right.indexOf(id);
+    const line = Math.max(285, defenderX(match.left.length - 1, match.left.length) + 84);
+    return Math.max(line + 31 * index, match.horde.positions[id] - WAVES[match.horde.wave - 1].pace);
+  }
+
+  function startWave(roster, round, previous, now) {
+    const wave = round - 10;
+    const settings = WAVES[wave - 1];
+    const count = settings.count + Math.min(6, Math.floor((roster.length - 1) / 4));
+    const right = Array.from({ length: count }, (_, index) => 'zombie-' + (index + 1));
+    const positions = Object.fromEntries(right.map((id, index) => [id, 965 + index * 67]));
+    const health = Object.fromEntries(right.map(id => [id, settings.health]));
+    for (const id of roster) health[id] = previous?.horde ? healthOf(previous, id) : MAX_HEALTH;
+    return {
+      left: roster, right, order: roster, active: roster.find(id => health[id] > 0),
+      turn: 0, stage: 'answer', deadline: now + ANSWER_MS, since: now,
+      leftPoints: 0, rightPoints: 0, health, horde: { wave, positions, maxHealth: settings.health }
+    };
+  }
 
   function answeringPlayers(match, round) {
     if (match?.stage !== 'answer') return [];
@@ -1536,7 +1586,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function mode(round) {
     if (round <= 5) return '1 vs. 1';
     if (round <= 10) return '2 vs. 2';
-    return 'Class teams';
+    return 'Survival wave ' + (round - 10) + ' / 3';
   }
 
   function key(a, b) {
@@ -1547,7 +1597,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const random = randomFor(seed);
     const size = round <= 5 ? 1 : 2;
     const players = roster.slice();
-    const padding = round <= 10 ? (size * 2 - players.length % (size * 2)) % (size * 2) : Math.max(0, 4 - players.length);
+    const padding = (size * 2 - players.length % (size * 2)) % (size * 2);
     for (let i = 1, added = 0; added < padding; i++) {
       const bot = 'bot-' + i;
       if (!players.includes(bot)) {
@@ -1562,12 +1612,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     for (let attempt = 0; attempt < 90; attempt++) {
       const order = shuffled(players, random);
       const matches = [];
-      if (round > 10) {
-        matches.push([order.slice(0, Math.ceil(order.length / 2)), order.slice(Math.ceil(order.length / 2))]);
-      } else {
-        for (let i = 0; i < order.length; i += size * 2) {
-          matches.push([order.slice(i, i + size), order.slice(i + size, i + size * 2)]);
-        }
+      for (let i = 0; i < order.length; i += size * 2) {
+        matches.push([order.slice(i, i + size), order.slice(i + size, i + size * 2)]);
       }
 
       let cost = 0;
@@ -1578,7 +1624,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
             for (const b of team.slice(index + 1)) {
               if (isBot(a) && isBot(b)) continue;
               const pair = 't' + key(a, b);
-              cost += (history[pair] || 0) * (round <= 10 ? 5 : 1) + (recent[pair] || 0) * (round <= 10 ? 40 : 2);
+              cost += (history[pair] || 0) * 5 + (recent[pair] || 0) * 40;
             }
           });
         }
@@ -1629,6 +1675,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function start(previous, roster, seed, now) {
     const round = (previous.round || 0) + 1;
     if (round > ROUNDS || roster.length < 2 || !['lobby', 'results'].includes(previous.phase)) return previous;
+    if (round > 10) {
+      const match = startWave(roster, round, previous.matches?.[0], now);
+      return { ...previous, round, phase: 'active', roster, seed, matches: [match] };
+    }
     const teams = draw(roster, round, seed, previous.history, previous.matches);
     const matches = teams.map(([left, right], index) => {
       const order = interleave(left, right, (round + index) % 2 === 0);
@@ -1644,16 +1694,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const matches = state.matches.slice();
     matches[index] = next;
     const finished = matches.every(match => match.stage === 'done');
-    const phase = finished ? (state.round === ROUNDS ? 'ended' : 'results') : 'active';
+    const phase = finished ? (state.round === ROUNDS || (next.horde && next.winner === 'right') ? 'ended' : 'results') : 'active';
     return { ...state, ...update, matches, phase };
   }
 
   function nextTurn(state, index, match, now) {
+    if (match.horde && !living(match, match.right).length) {
+      return step(state, index, { ...match, stage: 'done', winner: 'left', deadline: now, since: now });
+    }
     const player = turnPlayer(match);
     const side = sideOf(match, player);
     const opposingSide = otherSide(side);
     const team = match[opposingSide].filter(id => healthOf(match, id) > 0);
-    if (knockoutsOf(match, opposingSide) >= knockoutGoal(match)) {
+    if (!match.horde && knockoutsOf(match, opposingSide) >= knockoutGoal(match)) {
       return step(state, index, { ...match, stage: 'done', winner: side, deadline: now, since: now });
     }
     const { shot, queue, answers, ...rest } = match;
@@ -1661,12 +1714,34 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const [active, ...remaining] = queue;
       return step(state, index, { ...rest, answers, active, queue: remaining, stage: 'aim', deadline: now + AIM_MS, since: now });
     }
+    if (match.horde) return step(state, index, { ...rest, stage: 'horde', deadline: now + HORDE_MS, since: now });
     const turn = match.turn + 1;
     const next = team[Math.floor(turn / 2) % team.length];
     return step(state, index, {
       ...rest, active: next, turn,
       stage: 'answer', deadline: now + ANSWER_MS, since: now
     });
+  }
+
+  function moveHorde(state, index, match, now) {
+    const positions = { ...match.horde.positions };
+    const health = { ...match.health };
+    const defenders = living(match, match.left);
+    const damage = WAVES[match.horde.wave - 1].damage;
+    for (const [index, id] of living(match, match.right).entries()) {
+      positions[id] = zombieDestination(match, id);
+      // Zombies at the defense line attack standing players in rotation.
+      if (positions[id] === match.horde.positions[id] && defenders.length) {
+        const victimAt = (match.turn + index) % defenders.length;
+        const victim = defenders[victimAt];
+        health[victim] = Math.max(0, health[victim] - damage);
+        if (health[victim] === 0) defenders.splice(victimAt, 1);
+      }
+    }
+    const turn = match.turn + 1;
+    const next = { ...match, horde: { ...match.horde, positions }, health, turn, since: now };
+    if (!defenders.length) return step(state, index, { ...next, stage: 'done', winner: 'right', deadline: now });
+    return step(state, index, { ...next, active: defenders[turn % defenders.length], stage: 'answer', deadline: now + ANSWER_MS });
   }
 
   function resumeMatch(match, round = 1, now) {
@@ -1746,7 +1821,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const injuries = hit ? { ...match.injuries, [victim]: {
       ...previous, [location]: [...(previous?.[location] || []), request.weapon]
     } } : match.injuries;
-    const knockback = Math.min(MAX_SETBACK - from, PUSH[part] || 0);
+    const knockback = match.horde ? 0 : Math.min(MAX_SETBACK - from, PUSH[part] || 0);
     const setbacks = knockback ? { ...match.setbacks, [victim]: from + knockback } : match.setbacks;
     const side = match.left.includes(request.player) ? 'leftPoints' : 'rightPoints';
     const points = { ...state.points };
@@ -1784,6 +1859,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
             ...match, feedback: feedback(match, 'timeout', now),
             stage: 'feedback', deadline: now + 1400, since: now
           });
+        } else if (match.stage === 'horde') {
+          current = moveHorde(current, index, match, now);
         } else {
           current = nextTurn(current, index, match, now);
         }
@@ -1805,7 +1882,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, nextRoundAt, healthOf, setbackOf, injuriesOf, opponentFor };
+  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, nextRoundAt, healthOf, setbackOf, injuriesOf, opponentFor, defenderX, zombieDestination };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -1960,6 +2037,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
           dot(ctx,x-9,ground-height*.69,5,'#ffc781');
           dot(ctx,x+22,ground-height*.68,3,'#fce6a0');
           break;
+        case 'graveyard': {
+          if (i % 3 === 0) {
+            const top = ground - height - 32;
+            path(ctx, '#4e4965', [[x-6,ground],[x+2,top+28],[x-3,top],[x+9,top+31],[x+31,top+19],[x+13,top+40],[x+16,ground]]);
+            path(ctx, '#4e4965', [[x+8,top+47],[x-28,top+28],[x-19,top+24],[x+10,top+39]]);
+          }
+          const grave = x + 26;
+          const top = ground - height * .48;
+          box(ctx, grave, top, 27, ground - top, '#66617c', 8);
+          box(ctx, grave + 4, top + 5, 19, 4, '#8a849e', 2);
+          box(ctx, grave - 5, ground - 6, 37, 6, '#504c68', 3);
+          break;
+        }
         case 'dune':
           box(ctx,x,ground-height,54,height,'#a67557',4);
           path(ctx,'#deb089',[[x-7,ground-height+6],[x+26,ground-height-13],[x+61,ground-height+6]]);
@@ -2060,7 +2150,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function ambient(ctx, level, camera, width, skyHeight, time) {
     const { theme } = level;
     const space = theme === 'moon';
-    const sheltered = theme === 'crystal' || theme === 'grove';
+    const sheltered = theme === 'crystal' || theme === 'grove' || theme === 'graveyard';
     const skyTop = -skyHeight;
     const skySpan = Math.max(0, 160 - skyTop);
     const inView = (x, margin) => x >= camera - margin && x <= camera + width + margin;
@@ -2162,6 +2252,62 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         box(ctx, -10, -4, 19, 8, color, 4);
         dot(ctx, 4, -2, 2.8, '#ecfff0');
         break;
+      case 'brush':
+        ctx.rotate(angle + elapsed / 165);
+        box(ctx, -21, -3.5, 31, 7, ink, 3.5);
+        box(ctx, -19, -2, 28, 4, '#f0aa69', 2);
+        box(ctx, 3, -7, 12, 14, ink, 3);
+        box(ctx, 5, -5, 8, 10, '#c6ccd9', 2);
+        box(ctx, 12, -8, 15, 16, ink, 5);
+        box(ctx, 14, -6, 11, 12, '#a96b63', 4);
+        box(ctx, 19, -6, 7, 12, color, 3);
+        dot(ctx, 23, -2, 1.8, '#f0fff6');
+        break;
+      case 'fork':
+        ctx.rotate(angle + Math.sin(elapsed / 108) * .17);
+        box(ctx, -23, -4, 27, 8, ink, 4);
+        box(ctx, -21, -2, 23, 4, color, 2);
+        box(ctx, -2, -7, 13, 14, ink, 4);
+        box(ctx, 0, -5, 12, 10, '#a4bfd5', 2);
+        for (const tine of [-5, 0, 5]) {
+          box(ctx, 8, tine - 1.9, 15, 3.8, ink, 1.9);
+          box(ctx, 8, tine - .9, 13, 1.8, '#f6fbff', .9);
+        }
+        break;
+      case 'ice':
+        ctx.rotate(angle + Math.sin(elapsed / 155) * .21);
+        ctx.beginPath();
+        ctx.moveTo(-19, -3);
+        ctx.lineTo(-8, -11);
+        ctx.lineTo(6, -9);
+        ctx.lineTo(23, 1);
+        ctx.lineTo(4, 11);
+        ctx.lineTo(-13, 8);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#315a88';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-8, -9);
+        ctx.lineTo(20, 1);
+        ctx.lineTo(-7, 4);
+        ctx.closePath();
+        ctx.fillStyle = '#eeffff';
+        ctx.fill();
+        break;
+      case 'lightning':
+        ctx.rotate(angle);
+        electricArc(ctx, elapsed / 38, color);
+        break;
+      case 'rifle':
+        ctx.rotate(angle);
+        box(ctx, -19, -2, 26, 4, '#ffdc8e', 2);
+        box(ctx, -6, -4, 17, 8, ink, 4);
+        box(ctx, -4, -2.5, 14, 5, '#ffd48d', 2.5);
+        dot(ctx, 7, -.8, 1.8, '#fff8cf');
+        break;
       case 'cork':
         ctx.rotate(angle + elapsed / 140);
         box(ctx, -10, -7, 20, 14, '#483043', 5);
@@ -2201,7 +2347,27 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         box(ctx, -3, -14, 6, 6, ink, 2);
         dot(ctx, 1, -14, 2.8, '#ffd56b');
         break;
-      case 'disc':
+      case 'disc': {
+        ctx.rotate(angle * .56 + Math.sin(elapsed / 155) * .08);
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 21, 8, 0, 0, Math.PI * 2);
+        ctx.fillStyle = ink;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, -1, 19, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#50a8ce';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, -2, 16, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        const spin = elapsed / 34;
+        for (let i = 0; i < 3; i++) {
+          const a = spin + i * Math.PI * 2 / 3;
+          dot(ctx, Math.cos(a) * 12, -2 + Math.sin(a) * 2.7, 1.65, '#635cc3');
+        }
+        break;
+      }
       case 'pie': {
         const pie = weapon.id === 'pie';
         ctx.rotate(angle * .56 + (pie ? Math.sin(elapsed / 75) * .43 : 0));
@@ -2244,11 +2410,13 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     bow: [7, 0, 3, 0],
     blaster: [-3, 6, 22, -1],
     bubble: [0, 0, 16, 0],
-    cork: [-4, 7, 23, -1]
+    cork: [-4, 7, 23, -1],
+    rifle: [3, 5, 40, -2]
   };
   const thrownGrips = {
     axe: [0, 10], hammer: [0, 10], sword: [-16, 0], bomb: [-6, 6],
-    disc: [-8, 3], pie: [-8, 3], orb: [-7, 6], boom: [-5, 6]
+    disc: [-13, 3], brush: [-12, 0], fork: [-14, 0], ice: [-9, 3],
+    lightning: [-14, 0], pie: [-8, 3], orb: [-7, 6], boom: [-5, 6]
   };
 
   function weaponMount(hand, angle, weapon, motion) {
@@ -2264,6 +2432,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return {
       x, y, angle, angleScale, launcher, flex,
       exit: launcher ? point(launcher[2], launcher[3]) : [x, y],
+      support: weapon.id === 'rifle' ? point(-13, 4) : null,
       string: weapon.id === 'bow' ? point(-5 - 23 * flex, 0) : null
     };
   }
@@ -2297,6 +2466,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.lineWidth = 1.6;
       ctx.stroke();
       if (motion.after == null) projectile(ctx, 3 - 13 * flex, 0, 0, 0, weapon);
+    } else if (id === 'rifle') {
+      box(ctx, -24, -6, 26, 12, '#29263b', 4);
+      box(ctx, -22, -4, 23, 8, '#ab795c', 3);
+      box(ctx, -8, -7, 25, 13, '#2e3044', 4);
+      box(ctx, -5, -5, 19, 6, '#a5ae9d', 2);
+      box(ctx, 13, -5, 28, 6, '#394458', 2);
+      box(ctx, 19, -4, 15, 2, '#b8bcc1', 1);
+      box(ctx, 34, -6, 7, 8, '#f3ac72', 2);
+      box(ctx, 1, 2, 6, 10, '#514258', 2);
     } else if (id === 'cork') {
       box(ctx, -16, -8, 39, 15, '#362c3f', 6);
       box(ctx, -13, -5, 31, 8, '#ba905e', 4);
@@ -2343,6 +2521,26 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.fill();
   }
 
+  function electricArc(ctx, flicker, color) {
+    ctx.beginPath();
+    ctx.moveTo(-20, 2);
+    ctx.lineTo(-8, -5 + Math.sin(flicker) * 3);
+    ctx.lineTo(-10, 4);
+    ctx.lineTo(6, -5 + Math.cos(flicker) * 3);
+    ctx.lineTo(4, 3);
+    ctx.lineTo(23, -1);
+    ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#7353bb';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.strokeStyle = '#fff8ff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
   function aimDot(ctx, point, index, color) {
     ctx.save();
     ctx.globalAlpha = 1 - index * .052;
@@ -2357,7 +2555,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.globalAlpha = (6 - lag) / 9;
     const { x, y } = point;
     const size = 6 - lag * .6;
-    if (weapon.id === 'orb' || weapon.id === 'hammer' || weapon.id === 'sword') sparkle(ctx, weapon.color, x, y, size * 1.4);
+    if (['orb', 'hammer', 'sword', 'ice', 'lightning'].includes(weapon.id)) sparkle(ctx, weapon.color, x, y, size * 1.4);
+    else if (weapon.id === 'rifle') dot(ctx, x, y, size * .55, '#ffe9a9');
     else if (weapon.id === 'disc' || weapon.id === 'boom') box(ctx, x - size * 2, y - 1, size * 4, 3, weapon.color, 1.5);
     else if (weapon.id === 'bubble') {
       ctx.beginPath();
@@ -2369,11 +2568,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  function release(ctx, origin, pull, progress, color) {
+  function release(ctx, origin, pull, progress, weapon) {
     ctx.save();
     ctx.translate(origin.x, origin.y);
     ctx.rotate(Math.atan2(pull[1], pull[0]));
     ctx.globalAlpha = 1 - progress;
+    const color = weapon.color;
+    if (weapon.id === 'rifle') sparkle(ctx, '#fff1a2', 3 + 8 * progress, 0, 13 * (1 - progress));
+    if (weapon.id === 'lightning') electricArc(ctx, progress * 8, color);
     for (const offset of [-9, 0, 9]) {
       const x = 7 + progress * (offset ? 28 : 42);
       const y = offset * (1 + progress);
@@ -2401,10 +2603,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.save();
     ctx.translate(point.x, point.y);
     ctx.globalAlpha = 1 - p ** .8;
-    if (part || ['bomb', 'bubble', 'orb', 'pie', 'hammer'].includes(weapon.id)) {
+    if (part || ['bomb', 'bubble', 'orb', 'pie', 'hammer', 'brush', 'ice', 'lightning'].includes(weapon.id)) {
       const critical = part === 'head';
       const confetti = weapon.id === 'bomb';
-      const paint = weapon.id === 'blaster' || weapon.id === 'pie';
+      const paint = ['blaster', 'pie', 'brush'].includes(weapon.id);
       const magic = ['orb', 'hammer', 'disc', 'sword'].includes(weapon.id);
       const bubbles = weapon.id === 'bubble';
       if (!paint) {
@@ -2423,7 +2625,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         const y = Math.sin(angle) * distance + 18 * p ** 2;
         const color = confetti ? [weapon.color, '#95edb4', '#ffc75c'][i % 3] : i % 2 ? weapon.color : '#fff5c3';
         if (paint) dot(ctx, x, y, (5 + i % 3) * (1 - p * .6), color);
-        else if (magic || critical) sparkle(ctx, color, x, y, (6 + i % 3) * (1 - p * .5));
+        else if (weapon.id === 'ice' || weapon.id === 'lightning') {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ctx.scale(.18 * (1 - p * .5), .18 * (1 - p * .5));
+          projectile(ctx, 0, 0, 0, p * 80 + i * 12, weapon);
+          ctx.restore();
+        } else if (magic || critical) sparkle(ctx, color, x, y, (6 + i % 3) * (1 - p * .5));
         else if (bubbles) {
           ctx.strokeStyle = color;
           ctx.lineWidth = 2;
@@ -2460,6 +2669,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const embedded = {
     axe: [12, -1.35, .94], sword: [22, Math.PI, .75], bow: [10, Math.PI, .88],
+    brush: [14, -2.8, .82], fork: [14, Math.PI, .82], ice: [8, -2.7, .67],
     hammer: [10, -1.25, .85], boom: [6, 1.1, .85], disc: [5, 1.2, .75], cork: [5, Math.PI, .7]
   };
 
@@ -2493,6 +2703,66 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
+  function defenseDeck(ctx, left, right, y) {
+    for (let x = left + 8; x < right - 8; x += 120) box(ctx, x, y + 3, 8, 40, '#4b4664', 2);
+    box(ctx, left, y, right - left, 12, '#413d57', 3);
+    box(ctx, left + 2, y, right - left - 4, 3, '#a9a3bd', 1);
+  }
+
+  function zombie(ctx, x, ground, time, walking, health, maxHealth, hit, fallen) {
+    ctx.save();
+    ctx.translate(x, ground);
+    const stride = walking * Math.sin(time / 81);
+    const sway = Math.sin(time / 420 + x) * 2 + (hit ? 8 : 0);
+    ctx.globalAlpha = fallen ? .46 : 1;
+    if (fallen) {
+      ctx.translate(-19, -12);
+      ctx.rotate(-Math.PI / 2);
+      ctx.translate(0, 8);
+    }
+    ctx.lineCap = ctx.lineJoin = 'round';
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * 9, -37);
+      ctx.lineTo(side * (9 + 6 * stride), -17);
+      ctx.lineTo(side * (11 + 11 * stride), -5);
+      ctx.strokeStyle = '#26273b';
+      ctx.lineWidth = 13;
+      ctx.stroke();
+      ctx.strokeStyle = '#465476';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      box(ctx, side * (11 + 11 * stride) - 10, -8, 17, 8, '#27273b', 3);
+    }
+    box(ctx, -21 + sway, -73, 41, 41, '#2a2b41', 11);
+    box(ctx, -17 + sway, -70, 33, 33, '#7857a0', 8);
+    box(ctx, -1 + sway, -48, 14, 5, '#bc99bf', 2);
+    ctx.beginPath();
+    ctx.moveTo(11 + sway, -65);
+    ctx.lineTo(-13 + sway, -56 + stride * 3);
+    ctx.lineTo(-41 + sway, -60 + stride * 4);
+    ctx.strokeStyle = '#26273b';
+    ctx.lineWidth = 15;
+    ctx.stroke();
+    ctx.strokeStyle = '#9fd478';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+    box(ctx, -23 + sway, -112, 41, 43, '#2a2b41', 11);
+    box(ctx, -20 + sway, -109, 35, 36, hit ? '#e0eeae' : '#a4d481', 9);
+    box(ctx, -19 + sway, -108, 31, 8, '#557455', 4);
+    box(ctx, -17 + sway, -97, 11, 10, '#31344a', 4);
+    box(ctx, -2 + sway, -98, 11, 10, '#31344a', 4);
+    dot(ctx, -13 + sway, -92, 2.4, '#fff1ae');
+    dot(ctx, 2 + sway, -93, 2.4, '#fff1ae');
+    box(ctx, -12 + sway, -83, 15, 7, '#3d4d4b', 3);
+    box(ctx, -10 + sway, -82, 4, 3, '#e7ecb9', 1);
+    if (!fallen) {
+      box(ctx, -25, -124, 50, 6, '#26283f', 3);
+      box(ctx, -24, -123, 48 * health / maxHealth, 4, '#e7a596', 2);
+    }
+    ctx.restore();
+  }
+
   function skid(ctx, x, ground, progress) {
     ctx.save();
     ctx.globalAlpha = Math.sin(Math.PI * Math.min(1, progress * 1.7)) * .72;
@@ -2504,7 +2774,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  root.LaunchArt = { zone, terrain, ambient, frontCover, projectile, weaponMount, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
+  root.LaunchArt = { zone, terrain, ambient, frontCover, projectile, weaponMount, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid, defenseDeck, zombie };
 })(globalThis);
 
 </script>
@@ -2675,16 +2945,21 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const armStances = {
     bow:     { ready: [30, -64, 0], fire: [42, -64, 0], finish: [35, -53, .12] },
     axe:     { ready: [34, -99, -.88], fire: [46, -66, -.25], finish: [37, -42, .82] },
+    brush:   { ready: [33, -87, -1.32], fire: [51, -68, -.24], finish: [39, -44, .9] },
     blaster: { ready: [34, -63, 0], fire: [41, -63, 0], finish: [33, -67, -.25] },
     bomb:    { ready: [37, -93, -.46], fire: [45, -64, -.17], finish: [39, -48, .62] },
-    disc:    { ready: [35, -49, -.46], fire: [47, -62, .02], finish: [35, -72, -.68] },
+    disc:    { ready: [19, -55, -.72], fire: [51, -65, .02], finish: [46, -59, .48] },
+    fork:    { ready: [28, -83, -1.30], fire: [52, -67, -.10], finish: [41, -53, .50] },
     pie:     { ready: [31, -49, 0], fire: [44, -63, -.20], finish: [38, -69, -.50] },
     bubble:  { ready: [34, -72, -.28], fire: [42, -68, -.12], finish: [36, -55, .50] },
     orb:     { ready: [32, -46, -.42], fire: [42, -77, -.50], finish: [36, -77, -.68] },
+    lightning: { ready: [28, -78, -.72], fire: [50, -78, -.14], finish: [47, -60, .35] },
     boom:    { ready: [34, -94, -.95], fire: [45, -69, -.30], finish: [44, -52, .60] },
     hammer:  { ready: [35, -99, -.75], fire: [46, -67, -.05], finish: [36, -38, 1.02] },
+    ice:     { ready: [33, -82, -.72], fire: [48, -70, -.16], finish: [42, -51, .62] },
     sword:   { ready: [36, -99, -1.18], fire: [46, -71, -.34], finish: [38, -50, .95] },
-    cork:    { ready: [35, -63, -.02], fire: [42, -63, -.02], finish: [33, -69, -.32] }
+    cork:    { ready: [35, -63, -.02], fire: [42, -63, -.02], finish: [33, -69, -.32] },
+    rifle:   { ready: [23, -63, 0], fire: [30, -64, 0], finish: [22, -63, -.23] }
   };
   const trousers = {
     elf: '#315e55', logger: '#495267', artist: '#674572', festival: '#a85b55',
@@ -2799,7 +3074,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const aim = motion.angle || 0;
     const weapon = fighter.weapon;
     const bow = weapon.id === 'bow';
-    const launcher = bow || ['blaster', 'bubble', 'cork'].includes(weapon.id);
+    const rifle = weapon.id === 'rifle';
+    const launcher = bow || rifle || ['blaster', 'bubble', 'cork'].includes(weapon.id);
     const raised = motion.after == null ? Math.max(smooth(charge * 2), motion.snap || 0) : 1 - smooth(motion.after);
     const bowLift = bow ? Math.min(0, Math.sin(aim)) * raised : 0;
     const lead = bendLimb([shoulder, -66], [
@@ -2809,7 +3085,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const restingHand = [-idle[0] - 6 * flinch, idle[1] - 9 * flinch];
     const pull = motion.snap != null ? 1 - smooth(motion.snap / .66) :
       motion.after == null ? smooth(charge * 2.7) : 0;
-    const supportTarget = mount.string && pull ? between(restingHand, mount.string, pull) : restingHand;
+    const supportTarget = mount.string && pull ? between(restingHand, mount.string, pull) :
+      rifle ? mount.support : restingHand;
     const support = bendLimb([-shoulder, -66], supportTarget, 17, 18, 1);
     return {
       drop, lead, support, mount,
@@ -3413,12 +3690,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.translate(0, pose.drop);
     outerwear(ctx, fighter, pose);
     const bow = fighter.weapon.id === 'bow';
+    const rifle = fighter.weapon.id === 'rifle';
+    if (rifle) costume(ctx, fighter, pose);
     ctx.save();
     ctx.scale(attack, 1);
     if (!bow) arm(ctx, fighter, pose.support);
     arm(ctx, fighter, pose.lead, motion.part || motion.down ? null : pose.mount, motion);
     ctx.restore();
-    costume(ctx, fighter, pose);
+    if (!rifle) costume(ctx, fighter, pose);
     if (bow) {
       ctx.save();
       ctx.scale(attack, 1);
@@ -3472,7 +3751,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!config || !config.databaseURL || !root.firebase) throw new Error('Class rooms are unavailable. Offline practice is available.');
     const app = root.firebase.initializeApp(config, 'launch-tournament-' + Date.now());
     const db = app.database();
-    const room = db.ref('rooms/' + code + '/launchTournamentV11');
+    const room = db.ref('rooms/' + code + '/launchTournamentV12');
     const status = db.ref('.info/connected');
     const offset = db.ref('.info/serverTimeOffset');
     const subscriptions = [];
@@ -3567,7 +3846,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const answerPopup = $('answer-popup');
   const answerMessages = { correct: 'Correct answer!', wrong: 'Incorrect answer', timeout: 'Time’s up' };
   const opponentSide = $('opponent-side');
-  const PROTOCOL = 11;
+  const PROTOCOL = 12;
   const SESSION = 'efi-launch-room-v' + PROTOCOL;
   const PRACTICE = 'efi-launch-practice-v3';
   const FAVORITE = 'efi-launch-fighter';
@@ -3648,11 +3927,36 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return Fighters.assignedTo(id, members[id]?.fighter, seed);
   }
 
-  function arenaFor(round) {
+  function arenaFor(round, match) {
+    if (match?.horde) return Arenas.survival;
     return Arenas.byRound(round, round <= (state?.legacyCoverThrough || 0));
   }
 
+  const zombieBuild = { shoulders: 20, waist: 18, stance: 12, height: 1, head: 1 };
+
+  function defenderPosition(match, id, level) {
+    const index = match.left.indexOf(id);
+    const x = T.defenderX(index, match.left.length);
+    const rear = match.left.length > 9 && index % 2;
+    return { x, y: Arenas.groundAt(level, x) - 2 - (rear ? 41 : 0) };
+  }
+
+  function zombiePosition(level, x) {
+    return { x, y: Arenas.groundAt(level, x) - 2 };
+  }
+
+  function shooterField(match, shooter, round, mirrored, level) {
+    const position = match.horde ? defenderPosition(match, shooter, level) : undefined;
+    return P.fieldFor(level, mirrored, T.setbackOf(match, shooter), T.duoSlot(match, shooter, round), position);
+  }
+
   function shotTargets(match, round, seed, field, target, movedBy = 0) {
+    if (match.horde) {
+      const targetFor = id => P.targetAt(zombiePosition(field.level, match.horde.positions[id]), zombieBuild);
+      const zones = match.right.filter(id => id === target || T.healthOf(match, id) > 0)
+        .flatMap(id => targetFor(id).zones.map(zone => ({ ...zone, victim: id })));
+      return { ...targetFor(target), zones };
+    }
     const targetFor = id => P.targetFor(fighterFor(id, seed), field,
       T.setbackOf(match, id) - (id === target ? movedBy : 0), T.duoSlot(match, id, round));
     const aim = targetFor(target);
@@ -3668,14 +3972,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     resolveShot(pull, weaponId, shot) {
       const weapon = P.weaponFor(weaponId);
       const { match, shooter, mirrored, target, round, seed } = shot;
-      const field = P.fieldFor(arenaFor(round), mirrored, T.setbackOf(match, shooter), T.duoSlot(match, shooter, round));
+      const field = shooterField(match, shooter, round, mirrored, arenaFor(round, match));
       const { part, location, points, victim } = P.flight(pull, shotTargets(match, round, seed, field, target), weapon, planck, field);
       return { part, location, victim, flightMs: P.playbackMs(points, weapon) };
     },
     correct: (grade, number, seed) => launchQuestion(grade, number, seed).answer,
     botShot(seed, id, match, round) {
       const victim = T.opponentFor(match, id);
-      const field = P.fieldFor(arenaFor(round), match.right.includes(id), T.setbackOf(match, id), T.duoSlot(match, id, round));
+      const field = shooterField(match, id, round, match.right.includes(id), arenaFor(round, match));
       const target = shotTargets(match, round, seed, field, victim);
       const random = T.randomFor((seed ^ Math.imul(match.turn + 1, 0x9e3779b1)) >>> 0);
       const { weapon } = fighterFor(id, seed);
@@ -3734,9 +4038,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         ? state.round === T.ROUNDS ? 'ended' : 'results' : state.phase;
       state = { ...state, matches, phase };
     }
-    if (state.protocol !== PROTOCOL) {
+    if ((state.protocol || 0) < 11) {
       // A resumed projectile still uses the terrain it was launched against.
-      state = { ...state, protocol: PROTOCOL, legacyCoverThrough: state.round };
+      state = { ...state, legacyCoverThrough: state.round };
+    }
+    if (state.protocol !== PROTOCOL) {
+      if (state.round > 10 && state.phase !== 'ended') {
+        state = T.start({ ...state, round: 10, phase: 'results' }, state.roster, freshSeed(), Date.now());
+      }
+      state = { ...state, protocol: PROTOCOL };
     }
     savePractice();
     showGame();
@@ -3979,17 +4289,17 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function getName(id) {
     if (id === player && practice) return members[id]?.name || 'You';
     if (T.isBot(id)) return 'Bot ' + id.slice(4);
+    if (id.startsWith('zombie-')) return 'Zombie ' + id.slice(7);
     return members[id]?.name || 'Player';
   }
 
-  function renderBoard(match) {
+  function renderBoard() {
     const ids = state.roster || Object.keys(members);
     const ranked = ids.slice().sort((a, b) => (state.points?.[b] || 0) - (state.points?.[a] || 0));
     $('board-title').textContent = state.phase === 'lobby' ? 'Players · ' + ids.length : 'Tournament standings';
     $('players').replaceChildren(...ranked.map(id => {
       const item = document.createElement('li');
-      const team = !match || state.round < 11 ? '' : match.left.includes(id) ? ' · Lime' : ' · Blue';
-      item.textContent = getName(id) + (id === player && !practice ? ' (you)' : '') + team +
+      item.textContent = getName(id) + (id === player && !practice ? ' (you)' : '') +
         (state.phase !== 'lobby' ? ' · ' + (state.points?.[id] || 0) : '');
       return item;
     }));
@@ -4012,8 +4322,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     fieldIndex = assigned >= 0 ? assigned : host && state.matches?.length ? 0 : -1;
     const match = myMatch();
     const duo = !!match && T.isDuo(round);
-    if (document.body.classList.contains('duo') !== duo) viewportDirty = true;
+    const survival = !!match?.horde;
+    if (document.body.classList.contains('duo') !== duo || document.body.classList.contains('survival') !== survival) viewportDirty = true;
     document.body.classList.toggle('duo', duo);
+    document.body.classList.toggle('survival', survival);
     for (const gauge of document.querySelectorAll('[data-partner]')) gauge.hidden = !duo;
     const token = turnToken(match);
     if (pending && token !== pending) {
@@ -4021,22 +4333,23 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       pendingAim = null;
     }
     $('room-label').textContent = practice ? 'OFFLINE PRACTICE  ·  GRADE ' + grade : code + '  ·  GRADE ' + grade;
-    $('heading').textContent = phase === 'lobby' ? 'Class lobby' : phase === 'ended' ? 'Tournament complete' : 'Round ' + round + ' / ' + T.ROUNDS + ' · ' + T.mode(round);
+    $('heading').textContent = phase === 'lobby' ? 'Class lobby' : phase === 'ended' ? 'Tournament complete' :
+      survival ? T.mode(round) : 'Round ' + round + ' / ' + T.ROUNDS + ' · ' + T.mode(round);
     $('advance').hidden = !host || phase !== 'lobby';
     $('advance').disabled = Object.keys(members).length < 2 || (!practice && !remote?.connected);
     $('network').hidden = practice;
     $('field').hidden = !match;
     $('arena-name').hidden = !match;
-    $('arena-name').textContent = match ? Art.zone(round).name + (match.stage === 'done' ? '' : ' · Turn ' + (match.turn + 1)) : '';
+    $('arena-name').textContent = match ? arenaFor(round, match).name + (match.stage === 'done' ? '' : ' · Turn ' + (match.turn + 1)) : '';
     let details = '';
     if (phase === 'lobby') details = host ? 'Share the room code. Start when at least two students have joined.' : 'Waiting for your teacher to start.';
-    else if (phase === 'ended') details = 'Every hit earned one tournament point.';
-    else if (phase === 'results') details = 'Round complete. New matchups start automatically.';
+    else if (phase === 'ended') details = survival ? (match.winner === 'left' ? 'The class survived all three waves.' : 'The horde overran the class.') : 'Every hit earned one tournament point.';
+    else if (phase === 'results') details = round >= 10 ? 'The next zombie wave starts automatically.' : 'Round complete. New matchups start automatically.';
     else if (match?.stage === 'done') details = 'Your match is complete. Waiting for the other matches.';
     else if (assigned >= 0 && match.stage !== 'flight' && T.healthOf(match, player) === 0) details = 'Knocked out. Watch the rest of your match.';
     else if (host && state.matches?.length > 1) details = state.matches.filter(m => m.stage === 'done').length + ' of ' + state.matches.length + ' matches complete';
     $('details').textContent = details;
-    renderBoard(match);
+    renderBoard();
     if (!match) return;
 
     const shooter = T.turnPlayer(match);
@@ -4050,7 +4363,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       respondents.length === 1 ? getName(respondents[0]) + ' is answering' : '';
     const answerStatus = myQuestion ? 'Your question' : answering && myAnswer
       ? (myAnswer.outcome === 'correct' ? 'Shot queued' : 'Shot missed') + ' · ' + waiting : waiting;
-    const clockLabel = phase === 'results' ? 'Next round' : answerStatus;
+    const clockLabel = phase === 'results' ? (round >= 10 ? 'Next wave' : 'Next round') : answerStatus;
     if (answeringLabel.textContent !== clockLabel) answeringLabel.textContent = clockLabel;
     answeringLabel.hidden = !answering && phase !== 'results';
     $('turn-bar').hidden = answering;
@@ -4059,8 +4372,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const winningSide = match.winner || (leftRate === rightRate ? null : leftRate > rightRate ? 'left' : 'right');
     const winningColor = winningSide === 'left' ? 'Lime' : 'Blue';
     const winningName = round > 5 ? 'Team ' + winningColor : winningSide && teamName(match[winningSide], winningColor);
-    const winner = winningSide ? winningName + (match.winner ? ' wins by knockout' : ' wins') : 'Draw';
+    const winner = survival ? (winningSide === 'left' ? 'Wave cleared!' : 'The horde wins') :
+      winningSide ? winningName + (match.winner ? ' wins by knockout' : ' wins') : 'Draw';
     const status = match.stage === 'done' ? winner : match.stage === 'flight' ? getName(shooter) + ' launched' :
+      match.stage === 'horde' ? 'The zombies are advancing!' :
       match.stage === 'feedback' ? 'No shots left this turn' : answering ? answerStatus :
       mine ? 'Your turn · Drag back from your fighter, then release' : getName(shooter) + ' is aiming';
     if (lastStatus !== status) {
@@ -4126,7 +4441,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const background = document.createElement('canvas');
       background.width = P.WIDTH;
       background.height = P.HEIGHT;
-      const level = arenaFor(round);
+      const level = arenaFor(round, match);
       Art.terrain(background.getContext('2d'), level, P.WIDTH, P.HEIGHT, P.GROUND);
       scene = { round, seed: state.seed, level, background };
       trace = null;
@@ -4135,16 +4450,16 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const shot = match.shot;
       const weapon = P.weaponFor(shot.weapon);
       const mirrored = match.right.includes(shot.player);
-      const setback = T.setbackOf(match, shot.player);
-      const slot = T.duoSlot(match, shot.player, round);
-      const field = P.fieldFor(scene.level, mirrored, setback, slot);
+      const field = shooterField(match, shot.player, round, mirrored, scene.level);
       const target = shotTargets(match, round, state.seed, field, shot.victim, shot.knockback);
       const flight = P.flight(shot.pull, target, weapon, planck, field);
       const angle = Math.atan2(shot.pull[1], shot.pull[0]);
-      const launch = Actor.releasePoint(fighterFor(shot.player), angle);
-      const shooterPosition = P.fighterPosition(scene.level, mirrored, setback, false, slot);
+      const shotFighter = { ...fighterFor(shot.player), weapon };
+      const launch = Actor.releasePoint(shotFighter, angle);
+      const shooterPosition = match.horde ? defenderPosition(match, shot.player, scene.level) :
+        P.fighterPosition(scene.level, mirrored, T.setbackOf(match, shot.player), false, T.duoSlot(match, shot.player, round));
       const release = { x: shooterPosition.x + launch.x, y: shooterPosition.y + launch.y, angle: launch.angle };
-      trace = { ...flight, ...shot, weapon, angle, release, offsetX: release.x - field.origin.x, offsetY: release.y - field.origin.y };
+      trace = { ...flight, ...shot, weapon, fighter: shotFighter, angle, release, offsetX: release.x - field.origin.x, offsetY: release.y - field.origin.y };
       launchReport = '';
       shotResult.hidden = true;
     }
@@ -4238,7 +4553,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed) {
     opponentSide.hidden = !canAct('aim');
     if (!opponentSide.hidden) {
-      const text = mirrored ? '← Opponent side' : 'Opponent side →';
+      const text = match.horde ? 'Zombies →' : mirrored ? '← Opponent side' : 'Opponent side →';
       if (opponentSide.textContent !== text) opponentSide.textContent = text;
       opponentSide.dataset.side = mirrored ? 'left' : 'right';
     }
@@ -4256,7 +4571,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const impactPending = match.stage === 'flight' && !showImpact && elapsed < shotEnd && !!part;
     const health = T.healthOf(match, victim) + (impactPending ? trace.damage : 0);
     const duo = T.isDuo(state.round);
-    if (duo) {
+    if (match.horde) {
+      const defender = match.left.includes(player) ? player : active;
+      updateHealth('left', defender, T.healthOf(match, defender));
+      updateHealth('right', victim, health);
+    } else if (duo) {
       for (const side of ['left', 'right']) {
         match[side].forEach((id, slot) => updateHealth(side, id, id === victim ? health : T.healthOf(match, id), slot));
       }
@@ -4269,13 +4588,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const kitLabel = fighter.name + ' · ' + fighter.weapon.name;
     if (kit.textContent !== kitLabel) kit.textContent = kitLabel;
     kit.hidden = match.stage !== 'aim' && match.stage !== 'flight';
-    const leftScore = (duo ? 'Team Lime' : teamName(match.left, 'Lime')) + ' · ' + (match.leftPoints - Number(impactPending && !mirrored));
-    const rightScore = (match.rightPoints - Number(impactPending && mirrored)) + ' · ' + (duo ? 'Team Blue' : teamName(match.right, 'Blue'));
+    const leftScore = match.horde ? 'Class · ' + (match.left.length - T.knockoutsOf(match, 'left')) + '/' + match.left.length + ' standing' :
+      (duo ? 'Team Lime' : teamName(match.left, 'Lime')) + ' · ' + (match.leftPoints - Number(impactPending && !mirrored));
+    const rightScore = match.horde ? 'Horde · ' + (match.right.length - T.knockoutsOf(match, 'right') + Number(impactPending && !T.healthOf(match, victim))) + ' left' :
+      (match.rightPoints - Number(impactPending && mirrored)) + ' · ' + (duo ? 'Team Blue' : teamName(match.right, 'Blue'));
     if ($('left-score').textContent !== leftScore) $('left-score').textContent = leftScore;
     if ($('right-score').textContent !== rightScore) $('right-score').textContent = rightScore;
     for (const side of ['left', 'right']) {
       const tally = $(side + '-ko');
-      tally.hidden = state.round <= 5;
+      tally.hidden = !!match.horde || state.round <= 5;
       if (!tally.hidden) {
         const opponent = side === 'left' ? 'right' : 'left';
         const pending = Number(impactPending && T.healthOf(match, victim) === 0 && T.sideOf(match, victim) === opponent);
@@ -4316,21 +4637,21 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function aimField(match, shooter, mirrored) {
     const back = T.setbackOf(match, shooter);
     const slot = T.duoSlot(match, shooter, state.round);
-    const key = [mirrored, back, slot].join(':');
+    const key = [mirrored, back, slot, match.horde ? shooter : ''].join(':');
     if (scene.fieldKey !== key) {
       scene.fieldKey = key;
-      scene.field = P.fieldFor(scene.level, mirrored, back, slot);
+      scene.field = shooterField(match, shooter, state.round, mirrored, scene.level);
     }
     return scene.field;
   }
 
-  function fitArena(duo) {
+  function fitArena(duo, survival) {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (!width || !height) return;
     viewportDirty = false;
     const pixels = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2000000 / (width * height)));
-    viewWidth = Math.min(P.MAX_VIEW_WIDTH, Math.max(duo ? 350 : 180, P.HEIGHT * width / height) * 1.12);
+    viewWidth = survival ? P.WIDTH : Math.min(P.MAX_VIEW_WIDTH, Math.max(duo ? 350 : 180, P.HEIGHT * width / height) * 1.12);
     canvas.width = Math.round(width * pixels);
     canvas.height = Math.round(height * pixels);
     // One scale for both axes keeps angled faces and limbs in proportion across viewports.
@@ -4352,7 +4673,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const match = myMatch();
     if (!match) return;
     const duo = T.isDuo(state.round);
-    if (viewportDirty) fitArena(duo);
+    const survival = !!match.horde;
+    if (viewportDirty) fitArena(duo, survival);
 
     const now = currentTime();
     const deadline = T.nextRoundAt(state) ?? (['aim', 'answer'].includes(match.stage) ? match.deadline : null);
@@ -4383,7 +4705,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const snapping = inFlight && afterRelease < 0;
     const travelTime = inFlight ? trace.flightMs - release : 1;
     const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime) : null;
-    if (position) {
+    if (position && !survival) {
       if (trackedShot !== trace) {
         camera = mirrored ? P.WIDTH - viewWidth : 0;
         cameraLift = 0;
@@ -4430,14 +4752,18 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const aimedPull = queued || inFlight ? trace.pull : pendingAim?.pull || drawPull;
     const charge = aimedPull ? Math.hypot(...aimedPull) / P.MAX_PULL : 0;
     const angle = inFlight || queued ? trace.angle : aimedPull ? Math.atan2(aimedPull[1], aimedPull[0]) : 0;
-    const actors = duo ? match.order : [active, victim];
+    if (survival && match.left.length > 9) {
+      const last = defenderPosition(match, match.left.at(-1), scene.level);
+      Art.defenseDeck(ctx, 52, last.x + 28, Arenas.groundAt(scene.level, last.x) - 43);
+    }
+    const actors = survival ? [...match.left.filter(id => id !== active), active] : duo ? match.order : [active, victim];
     for (const id of actors) {
       const side = T.sideOf(match, id);
       const isVictim = id === victim;
       // The shot camera reveals fighters as they enter the frame, regardless of the shot's outcome.
       if (side !== home && !position) continue;
       const enemy = side !== T.sideOf(match, active);
-      const { x, y } = isVictim ? victimAt : P.fighterPosition(scene.level, mirrored,
+      const { x, y } = survival ? defenderPosition(match, id, scene.level) : isVictim ? victimAt : P.fighterPosition(scene.level, mirrored,
         T.setbackOf(match, id), enemy, T.duoSlot(match, id, state.round));
       if (!onScreen(x, mirrored)) continue;
       const hit = isVictim && tookHit;
@@ -4460,7 +4786,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         charge: Math.min(1, charge), angle, snap: snapping ? elapsed / release : null,
         after: inFlight && !snapping ? Math.min(1, afterRelease / 540) : null
       });
-      const actor = fighterFor(id);
+      const actor = id === active && inFlight ? trace.fighter : fighterFor(id);
       const caption = Actor.draw(ctx, x, y, 1, actor, enemy, motion);
       if (caption) {
         ctx.save();
@@ -4477,6 +4803,21 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         ctx.restore();
       }
     }
+    if (survival) {
+      const { positions, maxHealth } = match.horde;
+      const moving = match.stage === 'horde';
+      const advance = moving ? Math.max(0, Math.min(1, (now - match.since) / (match.deadline - match.since))) : 0;
+      for (const id of match.right) {
+        const victimHit = id === victim && tookHit;
+        const health = T.healthOf(match, id) + (id === victim && pendingLocation ? trace.damage : 0);
+        const start = positions[id];
+        const destination = moving && health > 0 ? T.zombieDestination(match, id) : start;
+        const lunge = moving && health > 0 && start === destination && !reduced ? 14 * Math.sin(Math.PI * advance) : 0;
+        const x = start + (destination - start) * (reduced && advance < 1 ? 0 : advance) - lunge;
+        Art.zombie(ctx, x, Arenas.groundAt(scene.level, x) - 2, reduced ? 0 : time, destination !== start || lunge > 0 ? 1 : 0,
+          health, maxHealth, victimHit, health === 0 && (!victimHit || impact > .35));
+      }
+    }
     Art.frontCover(ctx, scene.level, mirrored);
 
     if (canAct('aim') && !drawPull) Art.aimGrip(ctx, field.origin, fighter.weapon.color, reduced ? 0 : time);
@@ -4489,7 +4830,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
     if (travelling && onScreen(position.x, mirrored)) {
       if (!reduced && afterRelease < 145) {
-        Art.release(ctx, trace.release, trace.pull, afterRelease / 145, trace.weapon.color);
+        Art.release(ctx, trace.release, trace.pull, afterRelease / 145, trace.weapon);
       }
       for (let lag = 5; lag >= 1; lag--) {
         if (afterRelease > lag * 38) Art.trail(ctx, projectileAt(afterRelease - lag * 38, travelTime), lag, trace.weapon);
