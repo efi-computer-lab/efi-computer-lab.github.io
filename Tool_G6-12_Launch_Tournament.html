@@ -264,23 +264,81 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
 #details { margin: 8px 0 0; }
 #details:empty { display: none; }
 .scoreboard, .turn-bar { padding: 8px clamp(9px, 1.4vw, 26px); }
-.scoreboard { background: linear-gradient(100deg, #364f54, #382f51 42% 58%, #4a3e69); border-bottom: 1px solid #b7a0cb; }
-.side-score { display: grid; gap: 3px; flex: 1; min-width: 0; max-width: 380px; color: #d6f5a5; overflow-wrap: anywhere; }
-.side-score:last-child { color: #e8d7ff; text-align: right; }
-.side-score span { font-size: .84rem; color: #fff5e6; }
-.health { display: grid; min-width: 0; gap: 3px; }
-.duo .side-score { max-width: 440px; }
+.scoreboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(3.75rem, max-content) minmax(0, 1fr);
+  gap: clamp(7px, 2vw, 30px);
+  padding-block: clamp(9px, 1.6vw, 15px);
+  background: radial-gradient(ellipse at 0 0, #2c4e45, transparent 50%), radial-gradient(ellipse at 100% 0, #433564, transparent 50%), #181728;
+  border-bottom: 2px solid #9483a9;
+}
+.side-score {
+  --team-edge: #507c69;
+  --team-accent: #d6f5a5;
+  --health-start: #429c72;
+  --health-end: #d0f37d;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--team-accent);
+  overflow-wrap: anywhere;
+}
+.side-score:last-child {
+  --team-edge: #7561a3;
+  --team-accent: #ede0ff;
+  --health-start: #8568d4;
+  --health-end: #d7b4ff;
+}
+.team-line { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 9px; }
+.team-line strong { font-size: clamp(.83rem, 1.28vw, 1.02rem); line-height: 1.1; }
+.side-score:last-child .team-line { flex-direction: row-reverse; }
+.ko-tally {
+  padding: 3px 8px;
+  border: 1px solid var(--team-edge);
+  border-radius: 5px;
+  color: var(--team-accent);
+  font-size: .75rem;
+  line-height: 1;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.health {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px 10px 9px;
+  border: 1px solid var(--team-edge);
+  border-radius: 8px;
+  background: linear-gradient(165deg, #e3d5ff10, #111522);
+  box-shadow: inset 0 1px #ffffff19, 0 3px 7px #08081536;
+}
+.health-line { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 9px; flex-wrap: wrap; }
+.health-line span { font-size: clamp(.81rem, 1.3vw, 1.04rem); font-weight: 720; color: #fff5e6; }
+.hp-value { font-size: .83rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.health[data-status="low"] .hp-value { color: #ffcc97; }
+.health[data-status="out"] .hp-value { color: #ffc6c8; }
 .duo .health-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .duo .side-score:last-child .health-grid { direction: rtl; }
 .duo .health { direction: ltr; }
-.side-score progress { appearance: none; width: 100%; height: 10px; border: 1px solid #b7aad273; border-radius: 8px; background: #232339; overflow: hidden; }
-.side-score progress::-webkit-progress-bar { background: #232339; }
-.side-score progress::-webkit-progress-value { background: linear-gradient(90deg, #6eb78c, #d8f594); }
-.side-score progress::-moz-progress-bar { background: linear-gradient(90deg, #6eb78c, #d8f594); }
-.side-score:last-child progress::-webkit-progress-value { background: linear-gradient(90deg, #a48ce2, #d8ccff); }
-.side-score:last-child progress::-moz-progress-bar { background: linear-gradient(90deg, #a48ce2, #d8ccff); }
-.side-score progress[data-low="true"]::-webkit-progress-value { background: #ffad7c; }
-.side-score progress[data-low="true"]::-moz-progress-bar { background: #ffad7c; }
+.health progress {
+  appearance: none;
+  width: 100%;
+  height: clamp(16px, 1.75vw, 23px);
+  border: 1px solid #efe9fa5e;
+  border-radius: 6px;
+  background: #0e1221;
+  box-shadow: inset 0 2px 4px #000a;
+  overflow: hidden;
+}
+.health progress::-webkit-progress-bar { background: #0e1221; box-shadow: inset 0 2px 4px #000a; }
+.health progress::-webkit-progress-value {
+  background: linear-gradient(#ffffff50, transparent 52%, #15132642 53%), linear-gradient(90deg, var(--health-start), var(--health-end));
+}
+.health progress::-moz-progress-bar {
+  background: linear-gradient(#ffffff50, transparent 52%, #15132642 53%), linear-gradient(90deg, var(--health-start), var(--health-end));
+}
+.health[data-status="low"] { --health-start: #e16d68; --health-end: #ffd196; }
 .round-clock { display: flex; align-items: center; gap: 8px; text-align: center; }
 #answering-player { font-size: .83rem; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
 #clock { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -299,7 +357,7 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
 #aim-controls label { display: flex; gap: 6px; align-items: center; }
 #aim-controls input { accent-color: var(--gold); }
 
-.target-range, .aim-readout, .shot-result {
+.opponent-side, .aim-readout, .shot-result {
   position: absolute;
   z-index: 1;
   pointer-events: none;
@@ -309,8 +367,8 @@ aside h2 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
   font-weight: 750;
   box-shadow: 0 3px #25192d65;
 }
-.target-range { top: 11px; right: 11px; padding: 6px 10px; border-radius: 8px; font-size: .85rem; }
-.target-range[data-side="left"] { left: 11px; right: auto; }
+.opponent-side { top: 11px; right: 11px; padding: 6px 10px; border-radius: 8px; font-size: .85rem; }
+.opponent-side[data-side="left"] { left: 11px; right: auto; }
 .aim-readout { top: 11px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; padding: 6px 11px; border-radius: 9px; white-space: nowrap; font-size: .84rem; }
 .aim-readout strong { color: var(--gold); font-variant-numeric: tabular-nums; }
 .shot-result { top: 14%; left: 50%; transform: translateX(-50%); padding: 8px 17px; border-radius: 9px; font-size: clamp(.95rem, 2.5vw, 1.4rem); white-space: nowrap; }
@@ -355,6 +413,7 @@ dialog form { float: right; }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 @media (prefers-reduced-motion: no-preference) {
+  .health progress::-webkit-progress-value { transition: width .24s ease; }
   #range { transition: filter .2s ease; }
   .fighter-card, button { transition: background .16s ease, border-color .16s ease; }
   .challenge:not([hidden]), .shot-result:not([hidden]) { animation: pop-in .22s ease-out both; }
@@ -398,11 +457,13 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .arena { height: clamp(320px, 58svh, 520px); }
   .duo .arena { height: clamp(310px, 48svh, 480px); }
   .duo .health-grid { grid-template-columns: 1fr; gap: 5px; }
-  .duo .side-score span { font-size: .75rem; }
-  .round-clock { flex-direction: column; gap: 4px; max-width: 36%; }
+  .health { padding-inline: 6px; }
+  .hp-value { font-size: .73rem; }
+  .scoreboard { grid-template-columns: minmax(0, 1fr) minmax(3.5rem, 22%) minmax(0, 1fr); }
+  .round-clock { flex-direction: column; gap: 4px; }
   #choices button { font-size: .94rem; }
-  .target-range { top: auto; right: 8px; bottom: 8px; padding: 3px 7px; font-size: .73rem; }
-  .target-range[data-side="left"] { left: 8px; }
+  .opponent-side { top: auto; right: 8px; bottom: 8px; padding: 3px 7px; font-size: .73rem; }
+  .opponent-side[data-side="left"] { left: 8px; }
   .aim-readout { top: 6px; gap: 8px; padding: 3px 7px; font-size: .76rem; }
 }
 @media (max-height: 520px) and (orientation: landscape) {
@@ -411,7 +472,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261423',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611261443',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -476,24 +537,24 @@ check(true);document.addEventListener('visibilitychange',function(){if(document.
         <section id="field" aria-label="Launch arena" hidden>
           <div class="scoreboard">
             <div class="side-score">
-              <strong id="left-score"></strong>
+              <div class="team-line"><strong id="left-score"></strong><small id="left-ko" class="ko-tally" hidden></small></div>
               <div class="health-grid">
-                <div class="health"><span id="left-health-label"></span><progress id="left-health" max="100" aria-labelledby="left-health-label"></progress></div>
-                <div class="health" data-partner hidden><span id="left-health-label-2"></span><progress id="left-health-2" max="100" aria-labelledby="left-health-label-2"></progress></div>
+                <div class="health"><div class="health-line"><span id="left-health-label"></span><b id="left-hp" class="hp-value"></b></div><progress id="left-health" max="100" aria-labelledby="left-health-label"></progress></div>
+                <div class="health" data-partner hidden><div class="health-line"><span id="left-health-label-2"></span><b id="left-hp-2" class="hp-value"></b></div><progress id="left-health-2" max="100" aria-labelledby="left-health-label-2"></progress></div>
               </div>
             </div>
             <div class="round-clock"><span id="answering-player" hidden></span><span id="clock"></span></div>
             <div class="side-score">
-              <strong id="right-score"></strong>
+              <div class="team-line"><strong id="right-score"></strong><small id="right-ko" class="ko-tally" hidden></small></div>
               <div class="health-grid">
-                <div class="health"><span id="right-health-label"></span><progress id="right-health" max="100" aria-labelledby="right-health-label"></progress></div>
-                <div class="health" data-partner hidden><span id="right-health-label-2"></span><progress id="right-health-2" max="100" aria-labelledby="right-health-label-2"></progress></div>
+                <div class="health"><div class="health-line"><span id="right-health-label"></span><b id="right-hp" class="hp-value"></b></div><progress id="right-health" max="100" aria-labelledby="right-health-label"></progress></div>
+                <div class="health" data-partner hidden><div class="health-line"><span id="right-health-label-2"></span><b id="right-hp-2" class="hp-value"></b></div><progress id="right-health-2" max="100" aria-labelledby="right-health-label-2"></progress></div>
               </div>
             </div>
           </div>
           <div class="arena">
             <canvas id="range" width="820" height="340" aria-label="Drag back from your fighter to aim, then release to shoot"></canvas>
-            <div id="target-range" class="target-range" hidden></div>
+            <div id="opponent-side" class="opponent-side" hidden></div>
             <div id="aim-readout" class="aim-readout" hidden>
               <span>Angle <strong id="angle-value">—</strong></span>
               <span>Power <strong id="power-value">—</strong></span>
@@ -691,7 +752,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   'use strict';
 
   const WIDTH = 1740;
-  const arenas = [
+  const baseArenas = [
     ['Mossgate Ruins', 'ruins', ['#d5ead7', '#86ab8d', '#4f806f', '#344f44', '#a0cb66', '#fff3bd'],
       [307, 307], [[268,305],[400,274],[530,290],[690,303],[800,303],[910,291],[1080,263],[1220,292],[1400,308]], [[610,42,40],[945,56,30],[58,25,43],[1657,25,43]]],
     ['Copper Rail Yard', 'rail', ['#ffd5a4', '#d09278', '#946176', '#533a54', '#efa470', '#fff0c7'],
@@ -715,12 +776,32 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   ].map(([name, theme, [sky, far, near, floor, line, sun], [left, right], ridges, blocks]) => {
     const ground = [[0,left],[175,left],...ridges,[1565,right],[WIDTH,right]];
     const level = { name, theme, sky, far, near, floor, line, sun, ground };
-    level.cover = blocks.map(([x,width,height]) => {
-      const bottom = Math.max(groundAt(level,x), groundAt(level,x + width));
-      return { left:x, right:x + width, top:bottom - height, bottom };
-    });
+    level.cover = blocks.map(block => cover(level, block));
     return level;
   });
+
+  const extraCover = {
+    ruins: [[375,46,48],[795,72,71],[1248,57,40]],
+    rail: [[419,62,49],[865,74,65],[1254,65,44]],
+    snow: [[445,43,40],[666,62,55],[1220,45,43]],
+    lagoon: [[355,54,48],[772,59,68],[1258,56,45]],
+    lava: [[385,52,40],[681,64,69],[1155,53,40]],
+    grove: [[363,49,50],[733,60,69],[1209,47,40]],
+    dune: [[374,61,50],[853,104,75],[1341,40,44]],
+    moon: [[356,59,48],[938,72,74],[1263,53,45]],
+    wind: [[387,53,48],[833,63,68],[1306,53,43]],
+    crystal: [[388,51,46],[764,67,69],[1304,56,50]]
+  };
+
+  function cover(level, [left, width, height]) {
+    const right = left + width;
+    const bottom = Math.max(groundAt(level,left), groundAt(level,right));
+    return { left, right, top:bottom - height, bottom };
+  }
+
+  const arenas = baseArenas.map(level => ({
+    ...level, cover: [...level.cover, ...extraCover[level.theme].map(block => cover(level, block))]
+  }));
 
   function groundAt(level, x) {
     const points = level.ground;
@@ -733,7 +814,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return points.at(-1)[1];
   }
 
-  const byRound = round => arenas[Math.max(0, round - 1) % arenas.length];
+  const byRound = (round, legacy = false) => (legacy ? baseArenas : arenas)[Math.max(0, round - 1) % arenas.length];
   const api = { WIDTH, arenas, byRound, groundAt };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchArenas = api;
@@ -905,11 +986,6 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return { part, location, landed, points, surfaceKind, victim };
   }
 
-  function cameraAt(x, mirrored, viewWidth = VIEW_WIDTH) {
-    const center = viewWidth * (mirrored ? 0.62 : 0.38);
-    return Math.max(0, Math.min(WIDTH - viewWidth, mirrorX(x, mirrored) - center));
-  }
-
   function playbackMs(points, weapon) {
     return weapon.releaseMs + Math.min(2850, Math.max(580, (points.length - 1) * 27));
   }
@@ -935,7 +1011,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   const api = {
     WIDTH, VIEW_WIDTH, MAX_VIEW_WIDTH, HEIGHT, SCALE, ORIGIN, GROUND, MAX_PULL, FIGHTER_X, FIGHTER_Y, WEAPONS,
-    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, cameraAt, playbackMs, pointAt, aimReadout
+    weaponFor, limitPull, fighterPosition, fieldFor, targetFor, aimFor, preview, flight, mirrorX, playbackMs, pointAt, aimReadout
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchPhysics = api;
@@ -1309,11 +1385,13 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const otherSide = side => side === 'left' ? 'right' : 'left';
   const isDuo = round => round >= 6 && round <= 10;
   const duoSlot = (match, player, round) => isDuo(round) ? match[sideOf(match, player)].indexOf(player) : undefined;
+  const knockoutsOf = (match, side) => match[side].filter(id => healthOf(match, id) === 0).length;
+  const knockoutGoal = match => Math.min(2, match.left.length, match.right.length);
 
   function answeringPlayers(match, round) {
     if (match?.stage !== 'answer') return [];
     const active = turnPlayer(match);
-    return round <= 5 ? [active] : match[sideOf(match, active)].filter(id => !match.answers?.[id]);
+    return round <= 5 ? [active] : match[sideOf(match, active)].filter(id => healthOf(match, id) > 0 && !match.answers?.[id]);
   }
 
   function injuriesOf(match, id, pendingLocation) {
@@ -1368,14 +1446,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const random = randomFor(seed);
     const size = round <= 5 ? 1 : 2;
     const players = roster.slice();
-    if (round <= 10) {
-      const padding = (size * 2 - players.length % (size * 2)) % (size * 2);
-      for (let i = 1, added = 0; added < padding; i++) {
-        const bot = 'bot-' + i;
-        if (!players.includes(bot)) {
-          players.push(bot);
-          added++;
-        }
+    const padding = round <= 10 ? (size * 2 - players.length % (size * 2)) % (size * 2) : Math.max(0, 4 - players.length);
+    for (let i = 1, added = 0; added < padding; i++) {
+      const bot = 'bot-' + i;
+      if (!players.includes(bot)) {
+        players.push(bot);
+        added++;
       }
     }
 
@@ -1475,8 +1551,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const player = turnPlayer(match);
     const side = sideOf(match, player);
     const opposingSide = otherSide(side);
-    const team = match[opposingSide];
-    if (team.some(id => healthOf(match, id) === 0)) {
+    const team = match[opposingSide].filter(id => healthOf(match, id) > 0);
+    if (knockoutsOf(match, opposingSide) >= knockoutGoal(match)) {
       return step(state, index, { ...match, stage: 'done', winner: side, deadline: now, since: now });
     }
     const { shot, queue, answers, ...rest } = match;
@@ -1494,10 +1570,13 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function resumeMatch(match, round = 1, now) {
     if (round > 5 && match.stage !== 'done') {
-      const defeated = match.order.find(id => healthOf(match, id) === 0);
-      const { shot, feedback, last, ...rest } = match;
-      if (defeated) return { ...rest, stage: 'done', winner: otherSide(sideOf(match, defeated)), deadline: now };
-      return { ...rest, active: turnPlayer(match), turn: match.turn + 1, stage: 'answer', deadline: now + ANSWER_MS, since: now };
+      const goal = knockoutGoal(match);
+      const defeated = ['left', 'right'].find(side => knockoutsOf(match, side) >= goal);
+      const { shot, feedback, last, queue, answers, ...rest } = match;
+      if (defeated) return { ...rest, stage: 'done', winner: otherSide(defeated), deadline: now };
+      const lead = turnPlayer(match);
+      const active = healthOf(match, lead) > 0 ? lead : match[sideOf(match, lead)].find(id => healthOf(match, id) > 0);
+      return { ...rest, active, turn: match.turn + 1, stage: 'answer', deadline: now + ANSWER_MS, since: now };
     }
     if (match.active || match.stage === 'done') return match;
     const last = {};
@@ -1511,7 +1590,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const index = request.match;
     if (!Number.isInteger(index) || index < 0) return;
     const match = state.matches[index];
-    if (!match || match.turn !== request.turn || match.stage !== request.stage || now >= match.deadline) return;
+    if (!match || match.turn !== request.turn || match.stage !== request.stage || now >= match.deadline ||
+        healthOf(match, request.player) === 0) return;
     if (match.stage === 'answer' ? answeringPlayers(match, state.round).includes(request.player) : turnPlayer(match) === request.player) return match;
   }
 
@@ -1524,7 +1604,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const team = match[sideOf(match, lead)];
     const first = team.indexOf(lead);
     const order = [...team.slice(first), ...team.slice(0, first)];
-    const [active, ...queue] = order.filter(id => match.answers?.[id]?.outcome === 'correct');
+    const [active, ...queue] = order.filter(id => healthOf(match, id) > 0 && match.answers?.[id]?.outcome === 'correct');
     return active ? { ...match, active, queue, stage: 'aim', deadline: now + AIM_MS, since: now } :
       { ...match, stage: 'feedback', deadline: now + 1400, since: now };
   }
@@ -1617,7 +1697,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, healthOf, setbackOf, injuriesOf, opponentFor };
+  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, healthOf, setbackOf, injuriesOf, opponentFor };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -1810,8 +1890,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     }
   }
 
-  function terrain(ctx, round, width, height, ground) {
-    const level = zone(round);
+  function terrain(ctx, level, width, height, ground) {
     ctx.save();
     ctx.scale(width / Arenas.WIDTH, ground / 307);
     const bottom = height * 307 / ground;
@@ -1851,6 +1930,86 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       box(ctx,x,y+17+(i*13%11),10+(i%4)*5,2,level.near,1);
     }
     for(const block of level.cover) coverBlock(ctx,level,block);
+    ctx.restore();
+  }
+
+  function cloud(ctx, x, y, scale, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.beginPath();
+    ctx.moveTo(-66, 12);
+    ctx.bezierCurveTo(-83, 5, -72, -9, -48, -10);
+    ctx.bezierCurveTo(-48, -30, -11, -37, 4, -17);
+    ctx.bezierCurveTo(27, -27, 46, -18, 52, -3);
+    ctx.bezierCurveTo(76, -3, 84, 10, 64, 15);
+    ctx.quadraticCurveTo(14, 16, -66, 12);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function ambient(ctx, level, camera, width, skyHeight, time) {
+    const { theme } = level;
+    const space = theme === 'moon';
+    const sheltered = theme === 'crystal' || theme === 'grove';
+    const skyTop = -skyHeight;
+    const skySpan = Math.max(0, 160 - skyTop);
+    const inView = (x, margin) => x >= camera - margin && x <= camera + width + margin;
+    ctx.save();
+    ctx.translate(-camera, 0);
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 249 + time * (.008 + i % 2 * .009)) % (Arenas.WIDTH + 240) - 120;
+      if (!inView(x, 115)) continue;
+      const y = skyTop + skySpan * (.28 + (i * 3 % 7) * .072);
+      ctx.globalAlpha = space || sheltered ? .15 : .40;
+      cloud(ctx, x, y + 7, .72 + i % 4 * .17, level.far);
+      cloud(ctx, x, y, .72 + i % 4 * .17, theme === 'lava' ? '#c58394' : '#fff5df');
+    }
+    ctx.globalAlpha = .62;
+    if (space || sheltered || theme === 'snow' || theme === 'lava') {
+      ctx.fillStyle = theme === 'lava' ? '#ffcc83' : theme === 'grove' ? '#ffe6a8' : '#f1f8ff';
+      for (let i = 0; i < 28; i++) {
+        const x = (i * 269 + time * (.012 + i % 3 * .006)) % Arenas.WIDTH;
+        if (!inView(x, 5)) continue;
+        const travel = (i * 41 + time * (theme === 'snow' ? .025 : .009)) % 130;
+        const y = theme === 'snow' || space ? skyTop + skySpan * .24 + travel : 197 + Math.sin(i + time / 930) * 47;
+        ctx.fillRect(x, y, 1.6 + i % 3, 1.6 + i % 3);
+      }
+    } else {
+      ctx.strokeStyle = level.floor;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.8;
+      for (let i = 0; i < 8; i++) {
+        const x = (i * 310 + time * (.035 + i % 2 * .009)) % (Arenas.WIDTH + 90) - 45;
+        if (!inView(x, 20)) continue;
+        const y = skyTop + skySpan * (.43 + i % 4 * .105) + 6 * Math.sin(i + time / 790);
+        const wing = Math.cos(time / 122 + i) * 5 - 3;
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y + wing);
+        ctx.quadraticCurveTo(x - 4, y - 5, x, y);
+        ctx.quadraticCurveTo(x + 4, y - 5, x + 9, y + wing);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = .82;
+    ctx.strokeStyle = level.floor;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let x = Math.max(26, Math.floor(camera / 36) * 36 + 26); x < Math.min(Arenas.WIDTH, camera + width + 18); x += 36) {
+      if (level.cover.some(block => x > block.left - 7 && x < block.right + 7)) continue;
+      const y = Arenas.groundAt(level, x) + 1;
+      const height = 6 + x % 17 * .44;
+      const wind = Math.sin(x * .035 + time / 420) * 3;
+      ctx.moveTo(x - 4, y);
+      ctx.quadraticCurveTo(x - 4, y - height * .38, x - 8 + wind, y - height * .63);
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x + wind * .3, y - height * .62, x + wind, y - height);
+      ctx.moveTo(x + 4, y);
+      ctx.quadraticCurveTo(x + 5, y - height * .35, x + 8 + wind, y - height * .69);
+    }
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -2237,7 +2396,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.restore();
   }
 
-  root.LaunchArt = { zone, terrain, frontCover, projectile, weaponMount, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
+  root.LaunchArt = { zone, terrain, ambient, frontCover, projectile, weaponMount, held, aimGrip, aimDot, trail, release, airborne, impact, injury, skid };
 })(globalThis);
 
 </script>
@@ -3205,7 +3364,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!config || !config.databaseURL || !root.firebase) throw new Error('Class rooms are unavailable. Offline practice is available.');
     const app = root.firebase.initializeApp(config, 'launch-tournament-' + Date.now());
     const db = app.database();
-    const room = db.ref('rooms/' + code + '/launchTournamentV10');
+    const room = db.ref('rooms/' + code + '/launchTournamentV11');
     const status = db.ref('.info/connected');
     const offset = db.ref('.info/serverTimeOffset');
     const subscriptions = [];
@@ -3297,8 +3456,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const aimReadout = $('aim-readout');
   const shotResult = $('shot-result');
-  const targetRange = $('target-range');
-  const PROTOCOL = 10;
+  const opponentSide = $('opponent-side');
+  const PROTOCOL = 11;
   const SESSION = 'efi-launch-room-v' + PROTOCOL;
   const PRACTICE = 'efi-launch-practice-v3';
   const FAVORITE = 'efi-launch-fighter';
@@ -3312,7 +3471,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   let answerPublicKey, answerPrivateKey, openingAnswers = false;
   let pointer = null, pull, pending = '', pendingAim, fieldIndex = -1, trace, scene, shownQuestion = '';
   let lastStatus = '', popupKey = '';
-  let camera = 0, cameraTurn = '', lastFrame = 0;
+  let camera = 0;
   let viewWidth = P.VIEW_WIDTH, worldHeight = 0, skyHeight = 0, viewportDirty = true;
   let questionFrame = '';
   let launchReport = '';
@@ -3378,13 +3537,18 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return Fighters.assignedTo(id, members[id]?.fighter, seed);
   }
 
+  function arenaFor(round) {
+    return Arenas.byRound(round, round <= (state?.legacyCoverThrough || 0));
+  }
+
   function shotTargets(match, round, seed, field, target, movedBy = 0) {
     const targetFor = id => P.targetFor(fighterFor(id, seed), field,
       T.setbackOf(match, id) - (id === target ? movedBy : 0), T.duoSlot(match, id, round));
     const aim = targetFor(target);
     if (!T.isDuo(round)) return aim;
     const opponents = field.mirrored ? match.left : match.right;
-    return { ...aim, zones: opponents.flatMap(id => targetFor(id).zones.map(zone => ({ ...zone, victim: id }))) };
+    return { ...aim, zones: opponents.filter(id => id === target || T.healthOf(match, id) > 0)
+      .flatMap(id => targetFor(id).zones.map(zone => ({ ...zone, victim: id }))) };
   }
 
   const rules = {
@@ -3392,19 +3556,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     resolveShot(pull, weaponId, shot) {
       const weapon = P.weaponFor(weaponId);
       const { match, shooter, mirrored, target, round, seed } = shot;
-      const field = P.fieldFor(Arenas.byRound(round), mirrored, T.setbackOf(match, shooter), T.duoSlot(match, shooter, round));
+      const field = P.fieldFor(arenaFor(round), mirrored, T.setbackOf(match, shooter), T.duoSlot(match, shooter, round));
       const { part, location, points, victim } = P.flight(pull, shotTargets(match, round, seed, field, target), weapon, planck, field);
       return { part, location, victim, flightMs: P.playbackMs(points, weapon) };
     },
     correct: (grade, number, seed) => launchQuestion(grade, number, seed).answer,
     botShot(seed, id, match, round) {
       const victim = T.opponentFor(match, id);
-      const field = P.fieldFor(Arenas.byRound(round), match.right.includes(id), T.setbackOf(match, id), T.duoSlot(match, id, round));
+      const field = P.fieldFor(arenaFor(round), match.right.includes(id), T.setbackOf(match, id), T.duoSlot(match, id, round));
       const target = shotTargets(match, round, seed, field, victim);
       const random = T.randomFor((seed ^ Math.imul(match.turn + 1, 0x9e3779b1)) >>> 0);
       const { weapon } = fighterFor(id, seed);
       const aim = { x: target.x, y: target.y + (random() - .5) * 110 };
-      const candidates = [1.63, 1.84, 2.07, 2.3].map(time => P.aimFor(aim, weapon, time + random() * .12, field.origin));
+      const candidates = [1.63, 1.84, 2.07, 2.3, 2.56, 2.8].map(time => P.aimFor(aim, weapon, time + random() * .12, field.origin));
       const pull = candidates.find(candidate => P.flight(candidate, target, weapon, planck, field).part) || candidates[0];
       return { weapon: weapon.id, pull };
     }
@@ -3448,7 +3612,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     members = saved?.members || { practice: { name }, 'bot-1': { name: 'Practice bot' } };
     if (!Fighters.byId(members.practice.fighter)) members.practice.fighter = selection.id;
     state = saved?.state || T.start(newState(Number($('grade').value)), Object.keys(members), freshSeed(), Date.now());
-    if (state.protocol !== PROTOCOL) {
+    if ((state.protocol || 0) < 10) {
       const now = Date.now();
       const matches = state.matches?.map(match => {
         const { shot, ...rest } = match;
@@ -3456,7 +3620,11 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       });
       const phase = state.phase === 'active' && matches?.every(match => match.stage === 'done')
         ? state.round === T.ROUNDS ? 'ended' : 'results' : state.phase;
-      state = { ...state, protocol: PROTOCOL, matches, phase };
+      state = { ...state, matches, phase };
+    }
+    if (state.protocol !== PROTOCOL) {
+      // A resumed projectile still uses the terrain it was launched against.
+      state = { ...state, protocol: PROTOCOL, legacyCoverThrough: state.round };
     }
     savePractice();
     showGame();
@@ -3553,7 +3721,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     pointer = pull = pendingAim = trace = scene = null;
     pending = shownQuestion = popupKey = lastStatus = '';
     fieldIndex = -1;
-    cameraTurn = launchReport = '';
+    launchReport = questionFrame = '';
     shotResult.hidden = true;
     $('challenge').hidden = true;
     $('game').hidden = true;
@@ -3729,7 +3897,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     fieldIndex = assigned >= 0 ? assigned : host && state.matches?.length ? 0 : -1;
     const match = myMatch();
     const duo = !!match && T.isDuo(round);
-    if (document.body.classList.toggle('duo', duo) !== (viewWidth === P.WIDTH)) viewportDirty = true;
+    if (document.body.classList.contains('duo') !== duo) viewportDirty = true;
+    document.body.classList.toggle('duo', duo);
     for (const gauge of document.querySelectorAll('[data-partner]')) gauge.hidden = !duo;
     const token = turnToken(match);
     if (pending && token !== pending) {
@@ -3774,7 +3943,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const rightRate = match.rightPoints / match.right.length;
     const winningSide = match.winner || (leftRate === rightRate ? null : leftRate > rightRate ? 'left' : 'right');
     const winningColor = winningSide === 'left' ? 'Lime' : 'Blue';
-    const winningName = duo ? 'Team ' + winningColor : winningSide && teamName(match[winningSide], winningColor);
+    const winningName = round > 5 ? 'Team ' + winningColor : winningSide && teamName(match[winningSide], winningColor);
     const winner = winningSide ? winningName + (match.winner ? ' wins by knockout' : ' wins') : 'Draw';
     const status = match.stage === 'done' ? winner : match.stage === 'flight' ? getName(shooter) + ' launched' :
       match.stage === 'feedback' ? 'No shots left this turn' : answering ? answerStatus :
@@ -3831,8 +4000,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       const background = document.createElement('canvas');
       background.width = P.WIDTH;
       background.height = P.HEIGHT;
-      Art.terrain(background.getContext('2d'), round, P.WIDTH, P.HEIGHT, P.GROUND);
-      scene = { round, seed: state.seed, level: Arenas.byRound(round), background };
+      const level = arenaFor(round);
+      Art.terrain(background.getContext('2d'), level, P.WIDTH, P.HEIGHT, P.GROUND);
+      scene = { round, seed: state.seed, level, background };
       trace = null;
     }
     if (match.stage === 'flight' && match.shot && (trace?.at !== match.shot.at || trace?.player !== match.shot.player)) {
@@ -3929,24 +4099,22 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function updateHealth(side, id, health, slot = 0) {
     const suffix = slot ? '-2' : '';
     const label = $(side + '-health-label' + suffix);
-    const text = getName(id) + ' · ' + health + ' HP';
+    const text = getName(id);
     if (label.textContent !== text) label.textContent = text;
     const gauge = $(side + '-health' + suffix);
     if (!gauge.hasAttribute('value') || gauge.value !== health) {
       gauge.value = health;
-      gauge.dataset.low = String(health <= 30);
+      gauge.closest('.health').dataset.status = health === 0 ? 'out' : health <= 30 ? 'low' : 'ready';
+      $(side + '-hp' + suffix).textContent = health === 0 ? 'KO' : health + ' HP';
     }
   }
 
-  function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed, origin, victimX) {
-    const inView = P.mirrorX(victimX, mirrored) - camera;
-    targetRange.hidden = match.stage !== 'aim' || (inView >= 0 && inView <= viewWidth);
-    if (!targetRange.hidden) {
-      const distance = Math.round((victimX - origin.x) / P.SCALE);
-      const label = getName(victim) + ' · ' + distance + ' m';
-      const text = mirrored ? '← ' + label : label + ' →';
-      if (targetRange.textContent !== text) targetRange.textContent = text;
-      targetRange.dataset.side = mirrored ? 'left' : 'right';
+  function updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed) {
+    opponentSide.hidden = !canAct('aim');
+    if (!opponentSide.hidden) {
+      const text = mirrored ? '← Opponent side' : 'Opponent side →';
+      if (opponentSide.textContent !== text) opponentSide.textContent = text;
+      opponentSide.dataset.side = mirrored ? 'left' : 'right';
     }
 
     aimReadout.hidden = !drawPull;
@@ -3979,6 +4147,17 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const rightScore = (match.rightPoints - Number(impactPending && mirrored)) + ' · ' + (duo ? 'Team Blue' : teamName(match.right, 'Blue'));
     if ($('left-score').textContent !== leftScore) $('left-score').textContent = leftScore;
     if ($('right-score').textContent !== rightScore) $('right-score').textContent = rightScore;
+    for (const side of ['left', 'right']) {
+      const tally = $(side + '-ko');
+      tally.hidden = state.round <= 5;
+      if (!tally.hidden) {
+        const opponent = side === 'left' ? 'right' : 'left';
+        const pending = Number(impactPending && T.healthOf(match, victim) === 0 && T.sideOf(match, victim) === opponent);
+        const count = T.knockoutsOf(match, opponent) - pending;
+        const text = count + '/' + T.knockoutGoal(match) + ' KO';
+        if (tally.textContent !== text) tally.textContent = text;
+      }
+    }
     const labels = { head: 'Critical headshot', shoulder: 'Shoulder hit', body: 'Body hit', legs: 'Leg hit' };
     const knockout = showImpact && part && health === 0;
     const outcome = showImpact ? part ? labels[trace.location] + ' · −' + trace.damage + ' HP' + (knockout ? ' · KO' : '') : trace.surfaceKind === 'cover' ? 'Blocked by cover' : 'Miss' : '';
@@ -4025,9 +4204,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!width || !height) return;
     viewportDirty = false;
     const pixels = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2000000 / (width * height)));
-    const previous = viewWidth;
-    viewWidth = duo ? P.WIDTH : Math.min(P.MAX_VIEW_WIDTH, P.HEIGHT * width / height);
-    camera = previous === P.WIDTH ? 0 : camera * (P.WIDTH - viewWidth) / (P.WIDTH - previous);
+    viewWidth = Math.min(P.MAX_VIEW_WIDTH, Math.max(duo ? 350 : 180, P.HEIGHT * width / height));
     canvas.width = Math.round(width * pixels);
     canvas.height = Math.round(height * pixels);
     // One scale for both axes keeps angled faces and limbs in proportion across viewports.
@@ -4038,8 +4215,6 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   }
 
   function frame(time) {
-    const delta = lastFrame ? Math.min(time - lastFrame, 100) : 16;
-    lastFrame = time;
     requestAnimationFrame(frame);
     if (!$('entry').hidden) {
       paintMenu(time);
@@ -4055,36 +4230,25 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const seconds = ['aim', 'answer'].includes(match.stage) ? Math.max(0, Math.ceil((match.deadline - now) / 1000)) + ' s' : '';
     if ($('clock').textContent !== seconds) $('clock').textContent = seconds;
     if (match.stage === 'answer' && now >= match.deadline) $('challenge').hidden = true;
-    // Keep the blurred background still while the private card and clock stay interactive.
+    const reduced = reduceMotion.matches;
     const focusedFrame = $('challenge').hidden ? '' : turnKey(match);
+    // The blurred question backdrop stays still so the timer and answer controls remain responsive.
     if (focusedFrame && focusedFrame === questionFrame) return;
     questionFrame = focusedFrame;
 
     const mirrored = mirrorTurn(match);
-    const turn = [state.round, fieldIndex, match.turn, T.turnPlayer(match)].join('/');
-    const atLauncher = mirrored ? P.WIDTH - viewWidth : 0;
-    if (turn !== cameraTurn) {
-      cameraTurn = turn;
-      camera = atLauncher;
-    }
+    const home = match.left.includes(player) ? 'left' : match.right.includes(player) ? 'right' : mirrored ? 'right' : 'left';
+    camera = home === 'right' ? P.WIDTH - viewWidth : 0;
 
     const elapsed = match.stage === 'flight' && trace ? now - trace.at : -1;
     const inFlight = elapsed >= 0 && elapsed < trace.flightMs + T.IMPACT_MS;
     const queued = match.stage === 'flight' && trace && elapsed < 0;
-    const reduced = reduceMotion.matches;
     const release = reduced ? 0 : trace?.weapon.releaseMs ?? 0;
     const afterRelease = elapsed - release;
     const travelling = inFlight && afterRelease >= 0 && elapsed < trace.flightMs;
     const snapping = inFlight && afterRelease < 0;
     const travelTime = inFlight ? trace.flightMs - release : 1;
     const position = inFlight && !snapping ? projectileAt(afterRelease, travelTime) : null;
-    if (position) {
-      const follow = P.cameraAt(position.x, mirrored, viewWidth);
-      camera += (follow - camera) * (reduced ? 1 : 1 - Math.exp(-delta / 72));
-    } else {
-      camera = atLauncher;
-    }
-
     const drawPull = pointer !== null || !$('aim-controls').hidden ? pull : null;
     const active = T.turnPlayer(match);
     const victim = match.stage === 'flight' && trace ? trace.victim : T.opponentFor(match, active);
@@ -4094,13 +4258,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const remainingPush = match.stage === 'flight' && trace
       ? trace.knockback * Math.max(0, 1 - impact / .7) ** 2 : 0;
     const victimAt = P.fighterPosition(scene.level, mirrored, T.setbackOf(match, victim) - remainingPush, true, T.duoSlot(match, victim, state.round));
-    updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed, field.origin, victimAt.x);
+    updateFieldHUD(match, active, victim, mirrored, drawPull, elapsed);
 
     if (skyHeight > 0) {
       ctx.fillStyle = scene.level.far;
       ctx.fillRect(0, -skyHeight, viewWidth, skyHeight + 1);
     }
     ctx.drawImage(scene.background, camera, 0, viewWidth, P.HEIGHT, 0, 0, viewWidth, P.HEIGHT);
+    Art.ambient(ctx, scene.level, camera, viewWidth, skyHeight, reduced ? 0 : time);
     ctx.save();
     ctx.translate(-camera, 0);
     if (mirrored) {
@@ -4115,7 +4280,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const angle = inFlight || queued ? trace.angle : aimedPull ? Math.atan2(aimedPull[1], aimedPull[0]) : 0;
     const actors = duo ? match.order : [active, victim];
     for (const id of actors) {
-      const enemy = T.sideOf(match, id) !== T.sideOf(match, active);
+      const side = T.sideOf(match, id);
+      if (side !== home) continue;
+      const enemy = side !== T.sideOf(match, active);
       const isVictim = id === victim;
       const { x, y } = isVictim ? victimAt : P.fighterPosition(scene.level, mirrored,
         T.setbackOf(match, id), enemy, T.duoSlot(match, id, state.round));
@@ -4127,7 +4294,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       if (duo) {
         ctx.beginPath();
         ctx.ellipse(x, y + 1, 29, 6, 0, 0, 2 * Math.PI);
-        ctx.fillStyle = T.sideOf(match, id) === 'left' ? '#bded909c' : '#c2a6f7ad';
+        ctx.fillStyle = side === 'left' ? '#bded909c' : '#c2a6f7ad';
         ctx.fill();
       }
       const motion = {
@@ -4167,7 +4334,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       }
     }
 
-    if (travelling) {
+    if (travelling && onScreen(position.x, mirrored)) {
       if (!reduced && afterRelease < 145) {
         Art.release(ctx, trace.release, trace.pull, afterRelease / 145, trace.weapon.color);
       }
@@ -4182,7 +4349,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         const shotAngle = turnAngle(trace.release.angle, angle, Math.min(1, afterRelease / 120));
         Art.projectile(ctx, position.x, position.y, shotAngle, reduced ? 0 : afterRelease, trace.weapon);
       }
-    } else if (position && !snapping && (trace.part || trace.landed)) {
+    } else if (!travelling && position && !snapping && onScreen(position.x, mirrored) && (trace.part || trace.landed)) {
       Art.impact(ctx, position, impact, trace.part, trace.weapon, reduced);
     }
     ctx.restore();
