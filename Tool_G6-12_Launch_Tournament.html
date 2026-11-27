@@ -516,7 +516,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 </style>
 <!--EFI-FRESH--><script>(function(){try{if(!/^https?:$/.test(location.protocol))return;
-var mine='202611261859',page=location.pathname.split('/').pop()||'index.html';
+var mine='202611280139',page=location.pathname.split('/').pop()||'index.html';
 function check(atStart){var x=new XMLHttpRequest();x.open('GET','versions.json?n='+Date.now(),true);x.onload=function(){try{
 var v=JSON.parse(x.responseText)[page];if(!v||v<=mine)return;var k='efi-fresh:'+page+':'+v;
 if(atStart){if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href);return;}
@@ -933,12 +933,13 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return targetAt(fighterPosition(field?.level, field?.mirrored, setback, true, slot), fighter.build);
   }
 
-  function targetAt({ x, y }, { shoulders, waist, stance, height, head }) {
-    const body = Math.max(shoulders, waist);
-    return { x, y: y - 55 * height, zones: [
-      { part: 'head', left: x - 3 - 17 * head, right: x - 3 + 17 * head, top: y - (90 + 17 * head) * height, bottom: y - (90 - 14 * head) * height },
-      { part: 'body', left: x - body, right: x + body, top: y - 78 * height, bottom: y - 34 * height },
-      { part: 'legs', left: x - stance - 10, right: x + stance + 8, top: y - 34 * height, bottom: y }
+  function targetAt({ x, y }, { shoulders, waist, stance, height, head }, scale = 1) {
+    const body = Math.max(shoulders, waist) * scale;
+    const h = height * scale;
+    return { x, y: y - 55 * h, zones: [
+      { part: 'head', left: x - (3 + 17 * head) * scale, right: x + (-3 + 17 * head) * scale, top: y - (90 + 17 * head) * h, bottom: y - (90 - 14 * head) * h },
+      { part: 'body', left: x - body, right: x + body, top: y - 78 * h, bottom: y - 34 * h },
+      { part: 'legs', left: x - (stance + 10) * scale, right: x + (stance + 8) * scale, top: y - 34 * h, bottom: y }
     ] };
   }
 
@@ -1503,8 +1504,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const WAVES = [
     { count: 2, health: 50, pace: 104, damage: 12 },
     { count: 3, health: 60, pace: 138, damage: 16 },
-    { count: 4, health: 75, pace: 172, damage: 20 }
+    { count: 5, health: 75, pace: 172, damage: 20 }
   ];
+  const BOSS = { id: 'zombie-boss', name: 'Grave King', health: 180, pace: 138, damage: 30, scale: 1.65 };
 
   const healthOf = (match, id) => match.health?.[id] ?? MAX_HEALTH;
   const setbackOf = (match, id) => match.setbacks?.[id] ?? 0;
@@ -1517,20 +1519,27 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const knockoutGoal = match => Math.min(2, match.left.length, match.right.length);
   const living = (match, ids) => ids.filter(id => healthOf(match, id) > 0);
   const defenderX = (index, count) => 78 + Math.round(index * Math.min(78, 488 / Math.max(1, count - 1)));
+  const zombieMaxHealth = (match, id) => id === BOSS.id ? BOSS.health : match.horde.maxHealth;
+  const hordeGuarded = match => !!match.horde?.perfect && match.leftPoints > match.horde.volleyStart;
 
   function zombieDestination(match, id) {
     const index = match.right.indexOf(id);
     const line = Math.max(285, defenderX(match.left.length - 1, match.left.length) + 84);
-    return Math.max(line + 31 * index, match.horde.positions[id] - WAVES[match.horde.wave - 1].pace);
+    const boss = match.right.indexOf(BOSS.id);
+    const spacing = boss >= 0 ? 63 : 31;
+    const kingGap = boss < 0 ? 0 : index === boss ? 21 : index > boss ? 42 : 0;
+    const pace = id === BOSS.id ? BOSS.pace : WAVES[match.horde.wave - 1].pace;
+    return Math.max(line + spacing * index + kingGap, match.horde.positions[id] - pace);
   }
 
   function startWave(roster, round, previous, now) {
     const wave = round - 10;
     const settings = WAVES[wave - 1];
-    const count = settings.count + Math.min(6, Math.floor((roster.length - 1) / 4));
+    const count = wave === 3 ? settings.count : settings.count + Math.min(2, Math.floor((roster.length - 1) / 4));
     const right = Array.from({ length: count }, (_, index) => 'zombie-' + (index + 1));
-    const positions = Object.fromEntries(right.map((id, index) => [id, 965 + index * 67]));
-    const health = Object.fromEntries(right.map(id => [id, settings.health]));
+    if (wave === 3) right.splice(3, 0, BOSS.id);
+    const positions = Object.fromEntries(right.map((id, index) => [id, wave === 3 ? 890 + index * 130 : 965 + index * 67]));
+    const health = Object.fromEntries(right.map(id => [id, id === BOSS.id ? BOSS.health : settings.health]));
     for (const id of roster) health[id] = previous?.horde ? healthOf(previous, id) : MAX_HEALTH;
     return {
       left: roster, right, order: roster, active: roster.find(id => health[id] > 0),
@@ -1728,13 +1737,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const health = { ...match.health };
     const defenders = living(match, match.left);
     const damage = WAVES[match.horde.wave - 1].damage;
+    const guarded = hordeGuarded(match);
     for (const [index, id] of living(match, match.right).entries()) {
       positions[id] = zombieDestination(match, id);
       // Zombies at the defense line attack standing players in rotation.
-      if (positions[id] === match.horde.positions[id] && defenders.length) {
+      if (positions[id] === match.horde.positions[id] && defenders.length && !guarded) {
         const victimAt = (match.turn + index) % defenders.length;
         const victim = defenders[victimAt];
-        health[victim] = Math.max(0, health[victim] - damage);
+        health[victim] = Math.max(0, health[victim] - (id === BOSS.id ? BOSS.damage : damage));
         if (health[victim] === 0) defenders.splice(victimAt, 1);
       }
     }
@@ -1780,7 +1790,12 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const team = match[sideOf(match, lead)];
     const first = team.indexOf(lead);
     const order = [...team.slice(first), ...team.slice(0, first)];
-    const [active, ...queue] = order.filter(id => healthOf(match, id) > 0 && match.answers?.[id]?.outcome === 'correct');
+    const eligible = living(match, order);
+    const correct = eligible.filter(id => match.answers?.[id]?.outcome === 'correct');
+    const [active, ...queue] = correct;
+    if (match.horde) {
+      match = { ...match, horde: { ...match.horde, perfect: correct.length === eligible.length, volleyStart: match.leftPoints } };
+    }
     return active ? { ...match, active, queue, stage: 'aim', deadline: now + AIM_MS, since: now } :
       { ...match, stage: 'feedback', deadline: now + 1400, since: now };
   }
@@ -1882,7 +1897,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return current;
   }
 
-  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, nextRoundAt, healthOf, setbackOf, injuriesOf, opponentFor, defenderX, zombieDestination };
+  const api = { ROUNDS, ANSWER_MS, IMPACT_MS, LAUNCH_DELAY_MS, MAX_HEALTH, BOSS, randomFor, mode, isBot, isDuo, duoSlot, sideOf, knockoutsOf, knockoutGoal, answeringPlayers, draw, start, resumeMatch, turnPlayer, currentTurn, action, tick, nextRoundAt, healthOf, setbackOf, injuriesOf, opponentFor, defenderX, zombieDestination, zombieMaxHealth, hordeGuarded };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.LaunchTournament = api;
 })(globalThis);
@@ -2709,11 +2724,22 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     box(ctx, left + 2, y, right - left - 4, 3, '#a9a3bd', 1);
   }
 
-  function zombie(ctx, x, ground, time, walking, health, maxHealth, hit, fallen) {
+  const zombieColors = [
+    { skin: '#a4d481', arm: '#9fd478', brow: '#557455', coat: '#7857a0', pants: '#465476', eyes: '#fff1ae' },
+    { skin: '#8fb5a4', arm: '#80a994', brow: '#435e57', coat: '#52646a', pants: '#3c475f', eyes: '#ffb87e' },
+    { skin: '#a89ec2', arm: '#9187ac', brow: '#514668', coat: '#554367', pants: '#38364e', eyes: '#ff9eb0' },
+    { skin: '#90a789', arm: '#81967c', brow: '#46584b', coat: '#45324f', pants: '#3b3a50', eyes: '#ff784c' }
+  ];
+
+  function zombie(ctx, x, ground, time, walking, health, maxHealth, hit, fallen, wave, scale) {
+    const boss = scale > 1;
+    const colors = zombieColors[boss ? 3 : wave - 1];
     ctx.save();
     ctx.translate(x, ground);
+    ctx.scale(scale, scale);
+    if (wave === 2) ctx.rotate(-.085);
     const stride = walking * Math.sin(time / 81);
-    const sway = Math.sin(time / 420 + x) * 2 + (hit ? 8 : 0);
+    const sway = Math.sin(time / 420 + x) * (wave === 2 ? 4 : 2) + (hit ? 8 : 0);
     ctx.globalAlpha = fallen ? .46 : 1;
     if (fallen) {
       ctx.translate(-19, -12);
@@ -2721,6 +2747,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.translate(0, 8);
     }
     ctx.lineCap = ctx.lineJoin = 'round';
+    if (boss) {
+      path(ctx, '#292336', [[-20 + sway,-72],[18 + sway,-74],[29,-16],[16,-23],[5,-12],[-5,-22],[-27,-14]]);
+      path(ctx, '#60415b', [[-17+sway,-72],[-11+sway,-68],[-22,-21],[-25,-21]]);
+    }
     for (const side of [-1, 1]) {
       ctx.beginPath();
       ctx.moveTo(side * 9, -37);
@@ -2729,14 +2759,19 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       ctx.strokeStyle = '#26273b';
       ctx.lineWidth = 13;
       ctx.stroke();
-      ctx.strokeStyle = '#465476';
+      ctx.strokeStyle = colors.pants;
       ctx.lineWidth = 8;
       ctx.stroke();
       box(ctx, side * (11 + 11 * stride) - 10, -8, 17, 8, '#27273b', 3);
     }
     box(ctx, -21 + sway, -73, 41, 41, '#2a2b41', 11);
-    box(ctx, -17 + sway, -70, 33, 33, '#7857a0', 8);
-    box(ctx, -1 + sway, -48, 14, 5, '#bc99bf', 2);
+    box(ctx, -17 + sway, -70, 33, 33, colors.coat, 8);
+    if (wave === 1) box(ctx, -1 + sway, -48, 14, 5, '#bc99bf', 2);
+    if (wave === 2) {
+      path(ctx, '#bd795a', [[-17+sway,-72],[17+sway,-67],[15+sway,-59],[-3+sway,-62],[-13+sway,-42],[-19+sway,-47]]);
+      box(ctx, -1 + sway, -45, 13, 4, '#9bad9e', 1);
+      path(ctx, '#405354', [[6+sway,-69],[21+sway,-73],[24+sway,-53],[20+sway,-45],[18+sway,-59],[12+sway,-51]]);
+    }
     ctx.beginPath();
     ctx.moveTo(11 + sway, -65);
     ctx.lineTo(-13 + sway, -56 + stride * 3);
@@ -2744,21 +2779,39 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     ctx.strokeStyle = '#26273b';
     ctx.lineWidth = 15;
     ctx.stroke();
-    ctx.strokeStyle = '#9fd478';
+    ctx.strokeStyle = colors.arm;
     ctx.lineWidth = 10;
     ctx.stroke();
-    box(ctx, -23 + sway, -112, 41, 43, '#2a2b41', 11);
-    box(ctx, -20 + sway, -109, 35, 36, hit ? '#e0eeae' : '#a4d481', 9);
-    box(ctx, -19 + sway, -108, 31, 8, '#557455', 4);
+    if (wave === 3) {
+      box(ctx, -18 + sway, -69, 35, 19, '#342f45', 4);
+      path(ctx, boss ? '#af935f' : '#83789b', [[-22+sway,-60],[-19+sway,-76],[-12+sway,-68],[8+sway,-70],[19+sway,-78],[22+sway,-61],[8+sway,-56]]);
+      box(ctx, -8 + sway, -50, 17, 5, boss ? '#e5b975' : '#a295b6', 2);
+      if (boss) {
+        for (const offset of [0, 4, 8]) box(ctx, -47 + sway, -65 + offset + stride * 4, 9, 2, '#dfcca1', 1);
+      } else {
+        path(ctx, '#49425f', [[-14+sway,-67],[3+sway,-67],[9+sway,-59],[0+sway,-49],[-14+sway,-54]]);
+        path(ctx, '#a39abb', [[-11+sway,-63],[2+sway,-63],[5+sway,-59],[-1+sway,-53],[-11+sway,-56]]);
+      }
+    }
+    box(ctx, -23 + sway, -112, 41, 43, '#2a2b41', wave === 1 ? 11 : 7);
+    box(ctx, -20 + sway, -109, 35, 36, hit ? '#e0eeae' : colors.skin, wave === 1 ? 9 : 5);
+    box(ctx, -19 + sway, -108, 31, 8, colors.brow, 4);
+    if (wave === 3) {
+      path(ctx, boss ? '#e7b975' : '#867b9e', [[-22+sway,-103],[-26+sway,-119],[-15+sway,-113],[-6+sway,boss ? -126 : -116],[1+sway,-113],[16+sway,-120],[16+sway,-103]]);
+      path(ctx, boss ? '#8b633d' : '#4c455f', [[-22+sway,-106],[-5+sway,-110],[16+sway,-107],[15+sway,-101],[-21+sway,-101]]);
+      if (boss) dot(ctx, -5 + sway, -108, 3.3, '#ff865a');
+    }
     box(ctx, -17 + sway, -97, 11, 10, '#31344a', 4);
-    box(ctx, -2 + sway, -98, 11, 10, '#31344a', 4);
-    dot(ctx, -13 + sway, -92, 2.4, '#fff1ae');
-    dot(ctx, 2 + sway, -93, 2.4, '#fff1ae');
-    box(ctx, -12 + sway, -83, 15, 7, '#3d4d4b', 3);
-    box(ctx, -10 + sway, -82, 4, 3, '#e7ecb9', 1);
+    box(ctx, -2 + sway, wave === 2 ? -100 : -98, 11, wave === 2 ? 13 : 10, '#31344a', 4);
+    dot(ctx, -13 + sway, -92, boss ? 3.1 : 2.4, colors.eyes);
+    if (wave !== 2) dot(ctx, 2 + sway, -93, boss ? 3.1 : 2.4, colors.eyes);
+    box(ctx, -13 + sway, -83, wave === 1 ? 16 : 22, wave === 1 ? 7 : 8, '#353343', 3);
+    box(ctx, -11 + sway, -82, 4, 3, '#e7ecb9', 1);
+    if (wave > 1) box(ctx, 3 + sway, -82, 4, 3, '#e7ecb9', 1);
     if (!fallen) {
-      box(ctx, -25, -124, 50, 6, '#26283f', 3);
-      box(ctx, -24, -123, 48 * health / maxHealth, 4, '#e7a596', 2);
+      const barY = boss ? -138 : -130;
+      box(ctx, -25, barY, 50, 6, '#26283f', 3);
+      box(ctx, -24, barY + 1, 48 * health / maxHealth, 4, boss ? '#ffc079' : '#e7a596', 2);
     }
     ctx.restore();
   }
@@ -3751,7 +3804,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     if (!config || !config.databaseURL || !root.firebase) throw new Error('Class rooms are unavailable. Offline practice is available.');
     const app = root.firebase.initializeApp(config, 'launch-tournament-' + Date.now());
     const db = app.database();
-    const room = db.ref('rooms/' + code + '/launchTournamentV12');
+    const room = db.ref('rooms/' + code + '/launchTournamentV13');
     const status = db.ref('.info/connected');
     const offset = db.ref('.info/serverTimeOffset');
     const subscriptions = [];
@@ -3846,7 +3899,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   const answerPopup = $('answer-popup');
   const answerMessages = { correct: 'Correct answer!', wrong: 'Incorrect answer', timeout: 'Time’s up' };
   const opponentSide = $('opponent-side');
-  const PROTOCOL = 12;
+  const PROTOCOL = 13;
   const SESSION = 'efi-launch-room-v' + PROTOCOL;
   const PRACTICE = 'efi-launch-practice-v3';
   const FAVORITE = 'efi-launch-fighter';
@@ -3952,7 +4005,8 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
 
   function shotTargets(match, round, seed, field, target, movedBy = 0) {
     if (match.horde) {
-      const targetFor = id => P.targetAt(zombiePosition(field.level, match.horde.positions[id]), zombieBuild);
+      const targetFor = id => P.targetAt(zombiePosition(field.level, match.horde.positions[id]), zombieBuild,
+        id === T.BOSS.id ? T.BOSS.scale : 1);
       const zones = match.right.filter(id => id === target || T.healthOf(match, id) > 0)
         .flatMap(id => targetFor(id).zones.map(zone => ({ ...zone, victim: id })));
       return { ...targetFor(target), zones };
@@ -4043,8 +4097,10 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       state = { ...state, legacyCoverThrough: state.round };
     }
     if (state.protocol !== PROTOCOL) {
-      if (state.round > 10 && state.phase !== 'ended') {
+      if (state.round > 10 && state.phase !== 'ended' && !state.matches[0].horde) {
         state = T.start({ ...state, round: 10, phase: 'results' }, state.roster, freshSeed(), Date.now());
+      } else if (state.protocol === 12 && state.round === 13 && state.phase === 'active') {
+        state = T.start({ ...state, round: 12, phase: 'results' }, state.roster, state.seed, Date.now());
       }
       state = { ...state, protocol: PROTOCOL };
     }
@@ -4289,6 +4345,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
   function getName(id) {
     if (id === player && practice) return members[id]?.name || 'You';
     if (T.isBot(id)) return 'Bot ' + id.slice(4);
+    if (id === T.BOSS.id) return T.BOSS.name;
     if (id.startsWith('zombie-')) return 'Zombie ' + id.slice(7);
     return members[id]?.name || 'Player';
   }
@@ -4340,13 +4397,15 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     $('network').hidden = practice;
     $('field').hidden = !match;
     $('arena-name').hidden = !match;
-    $('arena-name').textContent = match ? arenaFor(round, match).name + (match.stage === 'done' ? '' : ' · Turn ' + (match.turn + 1)) : '';
+    const arenaName = match?.right.includes(T.BOSS.id) ? 'Grave King and his guards' : arenaFor(round, match).name;
+    $('arena-name').textContent = match ? arenaName + (match.stage === 'done' ? '' : ' · Turn ' + (match.turn + 1)) : '';
     let details = '';
     if (phase === 'lobby') details = host ? 'Share the room code. Start when at least two students have joined.' : 'Waiting for your teacher to start.';
     else if (phase === 'ended') details = survival ? (match.winner === 'left' ? 'The class survived all three waves.' : 'The horde overran the class.') : 'Every hit earned one tournament point.';
     else if (phase === 'results') details = round >= 10 ? 'The next zombie wave starts automatically.' : 'Round complete. New matchups start automatically.';
     else if (match?.stage === 'done') details = 'Your match is complete. Waiting for the other matches.';
     else if (assigned >= 0 && match.stage !== 'flight' && T.healthOf(match, player) === 0) details = 'Knocked out. Watch the rest of your match.';
+    else if (survival) details = 'When everyone answers correctly, land a hit to block the horde’s next attack.';
     else if (host && state.matches?.length > 1) details = state.matches.filter(m => m.stage === 'done').length + ' of ' + state.matches.length + ' matches complete';
     $('details').textContent = details;
     renderBoard();
@@ -4375,7 +4434,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const winner = survival ? (winningSide === 'left' ? 'Wave cleared!' : 'The horde wins') :
       winningSide ? winningName + (match.winner ? ' wins by knockout' : ' wins') : 'Draw';
     const status = match.stage === 'done' ? winner : match.stage === 'flight' ? getName(shooter) + ' launched' :
-      match.stage === 'horde' ? 'The zombies are advancing!' :
+      match.stage === 'horde' ? (T.hordeGuarded(match) ? 'Perfect volley · Class shield up!' : 'The zombies are advancing!') :
       match.stage === 'feedback' ? 'No shots left this turn' : answering ? answerStatus :
       mine ? 'Your turn · Drag back from your fighter, then release' : getName(shooter) + ' is aiming';
     if (lastStatus !== status) {
@@ -4537,13 +4596,14 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     return match.right.includes(T.turnPlayer(match));
   }
 
-  function updateHealth(side, id, health, slot = 0) {
+  function updateHealth(side, id, health, slot = 0, max = T.MAX_HEALTH) {
     const suffix = slot ? '-2' : '';
     const label = $(side + '-health-label' + suffix);
     const text = getName(id);
     if (label.textContent !== text) label.textContent = text;
     const gauge = $(side + '-health' + suffix);
-    if (!gauge.hasAttribute('value') || gauge.value !== health) {
+    if (!gauge.hasAttribute('value') || gauge.value !== health || gauge.max !== max) {
+      if (gauge.max !== max) gauge.max = max;
       gauge.value = health;
       gauge.closest('.health').dataset.status = health === 0 ? 'out' : health <= 30 ? 'low' : 'ready';
       $(side + '-hp' + suffix).textContent = health === 0 ? 'KO' : health + ' HP';
@@ -4573,8 +4633,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
     const duo = T.isDuo(state.round);
     if (match.horde) {
       const defender = match.left.includes(player) ? player : active;
+      const target = match.right.includes(T.BOSS.id) ? T.BOSS.id : victim;
       updateHealth('left', defender, T.healthOf(match, defender));
-      updateHealth('right', victim, health);
+      updateHealth('right', target, target === victim ? health : T.healthOf(match, target), 0, T.zombieMaxHealth(match, target));
     } else if (duo) {
       for (const side of ['left', 'right']) {
         match[side].forEach((id, slot) => updateHealth(side, id, id === victim ? health : T.healthOf(match, id), slot));
@@ -4804,7 +4865,7 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
       }
     }
     if (survival) {
-      const { positions, maxHealth } = match.horde;
+      const { positions, wave } = match.horde;
       const moving = match.stage === 'horde';
       const advance = moving ? Math.max(0, Math.min(1, (now - match.since) / (match.deadline - match.since))) : 0;
       for (const id of match.right) {
@@ -4814,8 +4875,9 @@ var planck=function(t){var i={};function e(s){if(i[s])return i[s].exports;var o=
         const destination = moving && health > 0 ? T.zombieDestination(match, id) : start;
         const lunge = moving && health > 0 && start === destination && !reduced ? 14 * Math.sin(Math.PI * advance) : 0;
         const x = start + (destination - start) * (reduced && advance < 1 ? 0 : advance) - lunge;
+        const boss = id === T.BOSS.id;
         Art.zombie(ctx, x, Arenas.groundAt(scene.level, x) - 2, reduced ? 0 : time, destination !== start || lunge > 0 ? 1 : 0,
-          health, maxHealth, victimHit, health === 0 && (!victimHit || impact > .35));
+          health, T.zombieMaxHealth(match, id), victimHit, health === 0 && (!victimHit || impact > .35), wave, boss ? T.BOSS.scale : 1);
       }
     }
     Art.frontCover(ctx, scene.level, mirrored);
